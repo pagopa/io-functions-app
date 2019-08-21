@@ -7,8 +7,7 @@
       "name": "req",
       "route": "v1/services/{serviceid}",
       "methods": [
-        "get",
-        "post"
+        "get"
       ]
     },
     {
