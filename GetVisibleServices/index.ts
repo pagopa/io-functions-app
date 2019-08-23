@@ -1,7 +1,6 @@
 import { Context } from "@azure/functions";
 import { createBlobService } from "azure-storage";
 
-import * as cors from "cors";
 import * as express from "express";
 import * as winston from "winston";
 
@@ -17,9 +16,6 @@ import { GetVisibleServices } from "./handler";
 // Setup Express
 const app = express();
 secureExpressApp(app);
-
-// Set up CORS (free access to the API from browser clients)
-app.use(cors());
 
 const storageConnectionString = getRequiredStringEnv("QueueStorageConnection");
 const blobService = createBlobService(storageConnectionString);
