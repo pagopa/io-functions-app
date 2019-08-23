@@ -10,7 +10,7 @@ import {
 
 import { RetrievedProfile } from "io-functions-commons/dist/src/models/profile";
 
-import { handler } from "../index";
+import { handler } from "../handler";
 
 const fakeContext = {
   df: {
