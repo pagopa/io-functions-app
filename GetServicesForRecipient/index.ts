@@ -1,6 +1,5 @@
 import { Context } from "@azure/functions";
 
-import * as cors from "cors";
 import * as express from "express";
 import * as winston from "winston";
 
@@ -23,9 +22,6 @@ import { GetServicesForRecipient } from "./handler";
 // Setup Express
 const app = express();
 secureExpressApp(app);
-
-// Set up CORS (free access to the API from browser clients)
-app.use(cors());
 
 const cosmosDbUri = getRequiredStringEnv("CUSTOMCONNSTR_COSMOSDB_URI");
 const cosmosDbKey = getRequiredStringEnv("CUSTOMCONNSTR_COSMOSDB_KEY");
