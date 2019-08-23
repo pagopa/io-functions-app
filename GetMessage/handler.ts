@@ -19,10 +19,7 @@ import {
 import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import { withoutUndefinedValues } from "italia-ts-commons/lib/types";
 
-import {
-  getMessageNotificationStatuses,
-  retrievedMessageToPublic
-} from "io-functions-commons/dist/src/utils/messages";
+import { retrievedMessageToPublic } from "io-functions-commons/dist/src/utils/messages";
 import { FiscalCodeMiddleware } from "io-functions-commons/dist/src/utils/middlewares/fiscalcode";
 import { RequiredParamMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_param";
 import {
@@ -35,16 +32,11 @@ import {
 } from "io-functions-commons/dist/src/utils/response";
 
 import { MessageModel } from "io-functions-commons/dist/src/models/message";
-import { NotificationModel } from "io-functions-commons/dist/src/models/notification";
-
-import { MessageStatusModel } from "io-functions-commons/dist/src/models/message_status";
-import { NotificationStatusModel } from "io-functions-commons/dist/src/models/notification_status";
 
 import { CreatedMessageWithContent } from "io-functions-commons/dist/generated/definitions/CreatedMessageWithContent";
 import { CreatedMessageWithoutContent } from "io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
 import { MessageResponseWithContent } from "io-functions-commons/dist/generated/definitions/MessageResponseWithContent";
 import { MessageResponseWithoutContent } from "io-functions-commons/dist/generated/definitions/MessageResponseWithoutContent";
-import { MessageStatusValueEnum } from "io-functions-commons/dist/generated/definitions/MessageStatusValue";
 
 /**
  * Type of a GetMessage handler.
@@ -76,10 +68,10 @@ export function GetMessageHandler(
   blobService: BlobService
 ): IGetMessageHandler {
   return async (fiscalCode, messageId) => {
-    const errorOrMaybeDocument = await messageModel.findMessageForRecipient(
-      fiscalCode,
-      messageId
-    );
+    const [errorOrMaybeDocument, errorOrMaybeContent] = await Promise.all([
+      messageModel.findMessageForRecipient(fiscalCode, messageId),
+      messageModel.getStoredContent(blobService, messageId, fiscalCode)
+    ]);
 
     if (isLeft(errorOrMaybeDocument)) {
       // the query failed
@@ -99,13 +91,6 @@ export function GetMessageHandler(
     }
 
     const retrievedMessage = maybeDocument.value;
-
-    // fetch the content of the message from the blob storage
-    const errorOrMaybeContent = await messageModel.getStoredContent(
-      blobService,
-      messageId,
-      fiscalCode
-    );
 
     if (isLeft(errorOrMaybeContent)) {
       winston.error(
