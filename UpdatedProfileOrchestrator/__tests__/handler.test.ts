@@ -32,6 +32,7 @@ const aRetrievedProfile: RetrievedProfile = {
   email: "x@example.com" as EmailString,
   fiscalCode: aFiscalCode,
   id: "123" as NonEmptyString,
+  isEmailEnabled: true,
   isInboxEnabled: false,
   isWebhookEnabled: false,
   kind: "IRetrievedProfile",
