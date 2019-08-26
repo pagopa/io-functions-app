@@ -11,7 +11,8 @@
     "start": "npm-run-all --parallel start:host watch",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "lint": "tslint -p ."
+    "lint": "tslint -p .",
+    "deploy": "npm run build && func azure functionapp publish agid-functions-app-test"
   },
   "description": "",
   "devDependencies": {
