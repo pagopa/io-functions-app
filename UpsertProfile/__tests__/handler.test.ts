@@ -94,7 +94,7 @@ describe("UpsertProfile", () => {
     expect((df as any).mockStartNew).toHaveBeenCalledWith(
       "UpdatedProfileOrchestrator",
       undefined,
-      { newProfile: aRetrievedProfile }
+      { newProfile: aRetrievedProfile, updatedAt: expect.any(Number) }
     );
   });
 
@@ -160,7 +160,8 @@ describe("UpsertProfile", () => {
           version: ((aRetrievedProfile.version as number) +
             1) as NonNegativeNumber
         },
-        oldProfile: aRetrievedProfile
+        oldProfile: aRetrievedProfile,
+        updatedAt: expect.any(Number)
       }
     );
   });

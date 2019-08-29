@@ -10,7 +10,8 @@ import { RetrievedProfile } from "io-functions-commons/dist/src/models/profile";
  */
 export const UpdatedProfileEvent = t.intersection([
   t.interface({
-    newProfile: RetrievedProfile
+    newProfile: RetrievedProfile,
+    updatedAt: t.number
   }),
   t.partial({
     oldProfile: RetrievedProfile

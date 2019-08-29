@@ -112,7 +112,8 @@ async function createNewProfileFromPayload(
   // broadcast a profile-created event
 
   const event: UpdatedProfileEvent = {
-    newProfile
+    newProfile,
+    updatedAt: new Date().getTime()
   };
 
   const dfClient = df.getClient(context);
@@ -180,7 +181,8 @@ async function updateExistingProfileFromPayload(
   // broadcast a profile-updated event
   const event: UpdatedProfileEvent = {
     newProfile,
-    oldProfile: existingProfile
+    oldProfile: existingProfile,
+    updatedAt: new Date().getTime()
   };
 
   const dfClient = df.getClient(context);

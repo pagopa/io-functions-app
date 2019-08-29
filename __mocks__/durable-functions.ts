@@ -5,3 +5,5 @@ export const getClient = jest.fn(() => ({
 }));
 
 export const orchestrator = jest.fn();
+
+export const RetryOptions = jest.fn(() => ({}));

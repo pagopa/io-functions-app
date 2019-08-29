@@ -29,6 +29,7 @@ const aRetrievedProfile: RetrievedProfile = {
   _self: "123",
   _ts: 123,
   acceptedTosVersion: 1 as NonNegativeNumber,
+  blockedInboxOrChannels: {},
   email: "x@example.com" as EmailString,
   fiscalCode: aFiscalCode,
   id: "123" as NonEmptyString,
@@ -58,13 +59,21 @@ describe("UpdatedProfileOrchestrator", () => {
     const c = {
       ...fakeContext,
       df: {
-        callActivity: jest.fn(),
+        callActivity: jest.fn(() => undefined),
+        callActivityWithRetry: jest.fn(() => undefined),
         getInput: () => ({
-          newProfile
+          newProfile,
+          updatedAt: 0
         })
       }
     };
     const h = handler(c);
+    // update profile activity
+    expect(h.next()).toEqual({
+      done: false,
+      value: undefined
+    });
+    // welcome message activity
     expect(h.next()).toEqual({
       done: false,
       value: undefined
@@ -90,7 +99,8 @@ describe("UpdatedProfileOrchestrator", () => {
           oldProfile: {
             ...newProfile,
             isInboxEnabled: false
-          }
+          },
+          updatedAt: 0
         })
       }
     };
