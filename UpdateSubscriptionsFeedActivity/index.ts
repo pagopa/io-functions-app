@@ -138,9 +138,12 @@ const activityFunction: AzureFunction = async (
   // The date part of the key will be in UTC time zone, with format: YYYY-MM-DD
   const utcTodayPrefix = new Date(updatedAt).toISOString().substring(0, 10);
 
-  const hash = crypto.createHash("sha256");
-  hash.push(fiscalCode);
-  const fiscalCodeHash = hash.digest("hex");
+  // Create a SHA256 hash of the fiscal code
+  // see https://nodejs.org/api/crypto.html#crypto_crypto_createhash_algorithm_options
+  const fiscalCodeHash = crypto
+    .createHash("sha256")
+    .update(fiscalCode)
+    .digest("hex");
 
   const logPrefix = `UpdateSubscriptionFeedActivity|PROFILE=${fiscalCode}|OPERATION=${operation}|PROFILE=${fiscalCode}`;
 
