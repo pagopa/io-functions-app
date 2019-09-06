@@ -37,7 +37,8 @@ following contents:
     "CUSTOMCONNSTR_COSMOSDB_KEY": "<COSMOSDB_KEY>",
     "CUSTOMCONNSTR_COSMOSDB_URI": "<COSMOSDB_URI>",
     "WEBHOOK_CHANNEL_URL": "<WEBHOOK_URL>",
-    "QueueStorageConnection": "<QUEUES_STORAGE_CONNECTION_STRING>"
+    "QueueStorageConnection": "<QUEUES_STORAGE_CONNECTION_STRING>",
+    "SUBSCRIPTIONS_FEED_TABLE": "SubscriptionsFeedByDay"
   },
   "ConnectionStrings": {}
 }
