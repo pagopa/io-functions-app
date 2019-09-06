@@ -14,13 +14,13 @@ import { ServiceId } from "io-functions-commons/dist/generated/definitions/Servi
 
 import { deleteTableEntity, insertTableEntity } from "../utils/storage";
 
-// TODO: move to commons (along with entity)
-const TABLE_NAME = "SubscriptionsFeedByDay";
-
 const storageConnectionString = getRequiredStringEnv("QueueStorageConnection");
 const tableService = createTableService(storageConnectionString);
-const insertEntity = insertTableEntity(tableService, TABLE_NAME);
-const deleteEntity = deleteTableEntity(tableService, TABLE_NAME);
+
+const subscriptionsFeedTable = getRequiredStringEnv("SUBSCRIPTIONS_FEED_TABLE");
+
+const insertEntity = insertTableEntity(tableService, subscriptionsFeedTable);
+const deleteEntity = deleteTableEntity(tableService, subscriptionsFeedTable);
 
 const eg = TableUtilities.entityGenerator;
 
@@ -57,7 +57,7 @@ export type Input = t.TypeOf<typeof Input>;
 
 // When the function starts, attempt to create the table if it does not exist
 // Note that we cannot log anything just yet since we don't have a Context
-tableService.createTableIfNotExists(TABLE_NAME, () => 0);
+tableService.createTableIfNotExists(subscriptionsFeedTable, () => 0);
 
 /**
  * Updates the subscrption status of a user.
