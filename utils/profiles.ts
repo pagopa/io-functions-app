@@ -7,6 +7,7 @@ import {
 
 import { BlockedInboxOrChannelEnum } from "io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
 import { ExtendedProfile } from "io-functions-commons/dist/generated/definitions/ExtendedProfile";
+import { isObject } from "util";
 
 export function toExtendedProfile(profile: RetrievedProfile): ExtendedProfile {
   return {
@@ -24,7 +25,7 @@ export function toExtendedProfile(profile: RetrievedProfile): ExtendedProfile {
  * Extracts the services that have inbox blocked
  */
 const getInboxBlockedServices = (
-  blocked: Profile["blockedInboxOrChannels"]
+  blocked: Profile["blockedInboxOrChannels"] | undefined | null
 ): ReadonlyArray<string> =>
   Object.keys(blocked)
     .map(k =>
@@ -59,13 +60,17 @@ const removedServices = (
  * that have been unblocked (2nd element) by this profile update
  */
 export const diffBlockedServices = (
-  oldBlocked: Profile["blockedInboxOrChannels"],
-  newBlocked: Profile["blockedInboxOrChannels"]
+  oldBlocked: Profile["blockedInboxOrChannels"] | undefined | null,
+  newBlocked: Profile["blockedInboxOrChannels"] | undefined | null
 ): ITuple2<ReadonlyArray<string>, ReadonlyArray<string>> => {
   // we extract the services that have the inbox blocked from the old and the
   // new profile
-  const oldInboxBlocked = getInboxBlockedServices(oldBlocked);
-  const newInboxBlocked = getInboxBlockedServices(newBlocked);
+  const oldInboxBlocked = isObject(oldBlocked)
+    ? getInboxBlockedServices(oldBlocked)
+    : [];
+  const newInboxBlocked = isObject(oldBlocked)
+    ? getInboxBlockedServices(newBlocked)
+    : [];
 
   // we take all the services that have inbox blocked in the new profile but
   // not in the old profile
