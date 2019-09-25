@@ -4,5 +4,10 @@
     "logLevel": {
       "default": "Trace"
     }
+  },
+  "extensions": {
+    "durableTask": {
+      "hubName": "FunctionsAppHub"
+    }
   }
 }
