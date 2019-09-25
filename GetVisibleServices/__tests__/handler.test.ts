@@ -71,7 +71,7 @@ const aVisibleService: VisibleService = {
 describe("GetVisibleServicesHandler", () => {
   it("should get all visible services", async () => {
     const blobStorageMock = {
-      getBlobToText: jest.fn().mockImplementation((_, __, cb) => {
+      getBlobToText: jest.fn().mockImplementation((_, __, ___, cb) => {
         cb(
           undefined,
           JSON.stringify({
@@ -91,6 +91,7 @@ describe("GetVisibleServicesHandler", () => {
     expect(blobStorageMock.getBlobToText).toHaveBeenCalledWith(
       VISIBLE_SERVICE_CONTAINER,
       VISIBLE_SERVICE_BLOB_ID,
+      {},
       expect.any(Function)
     );
     expect(response.kind).toEqual("IResponseSuccessJson");
