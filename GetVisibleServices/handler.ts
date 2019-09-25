@@ -38,19 +38,21 @@ export function GetVisibleServicesHandler(
   blobService: BlobService
 ): IGetVisibleServicesHandler {
   return async () => {
-    const errorOrVisibleServicesJson = await getBlobAsObject(
+    const errorOrMaybeVisibleServicesJson = await getBlobAsObject(
       t.dictionary(ServiceId, VisibleService),
       blobService,
       VISIBLE_SERVICE_CONTAINER,
       VISIBLE_SERVICE_BLOB_ID
     );
-    return errorOrVisibleServicesJson.fold<IGetVisibleServicesHandlerRet>(
+    return errorOrMaybeVisibleServicesJson.fold<IGetVisibleServicesHandlerRet>(
       error =>
         ResponseErrorInternal(
           `Error getting visible services list: ${error.message}`
         ),
-      visibleServicesJson => {
-        const servicesTuples = toServicesTuple(new StrMap(visibleServicesJson));
+      maybeVisibleServicesJson => {
+        const servicesTuples = toServicesTuple(
+          new StrMap(maybeVisibleServicesJson.getOrElse({}))
+        );
         return ResponseSuccessJson({
           items: servicesTuples,
           page_size: servicesTuples.length
