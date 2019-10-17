@@ -375,3 +375,49 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/Profile"
   ServicePublic:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/ServicePublic"
+  EmailAddress:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/EmailAddress"
+  BlockedInboxOrChannel:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/BlockedInboxOrChannel"
+  BlockedInboxOrChannels:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/BlockedInboxOrChannels"
+  PreferredLanguage:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/PreferredLanguage"
+  PreferredLanguages:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/PreferredLanguages"
+  IsInboxEnabled:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/IsInboxEnabled"
+  IsEmailEnabled:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/IsEmailEnabled"
+  AcceptedTosVersion:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/AcceptedTosVersion"
+  IsWebhookEnabled:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/IsWebhookEnabled"
+  IsEmailValidated:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/IsEmailValidated"
+  FiscalCode:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/FiscalCode"
+  TimeToLiveSeconds:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/TimeToLiveSeconds"
+  Timestamp:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/Timestamp"
+  MessageContent:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/MessageContent"
+  MessageSubject:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/MessageSubject"
+  MessageBodyMarkdown:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/MessageBodyMarkdown"
+  PaymentData:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/PaymentData"
+  CreatedMessageWithContent:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/CreatedMessageWithContent"
+  MessageResponseNotificationStatus:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/MessageResponseNotificationStatus"
+  MessageStatusValue:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/MessageStatusValue"
+  ServiceTupleCollection:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/ServiceTupleCollection"
+  PaginationResponse:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/PaginationResponse"
+  NotificationChannelStatusValue:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/NotificationChannelStatusValue"
