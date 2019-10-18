@@ -13,8 +13,8 @@ import {
 } from "italia-ts-commons/lib/responses";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 
+import { ExtendedProfile } from "io-functions-commons/dist/generated/definitions/ExtendedProfile";
 import { NewProfile } from "io-functions-commons/dist/generated/definitions/NewProfile";
-import { Profile as ApiProfile } from "io-functions-commons/dist/generated/definitions/Profile";
 import {
   Profile,
   ProfileModel
@@ -43,7 +43,7 @@ type ICreateProfileHandler = (
   fiscalCode: FiscalCode,
   NewProfile: NewProfile
 ) => Promise<
-  | IResponseSuccessJson<ApiProfile>
+  | IResponseSuccessJson<ExtendedProfile>
   | IResponseErrorQuery
   | IResponseErrorConflict
 >;
