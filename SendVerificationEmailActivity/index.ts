@@ -14,7 +14,12 @@ const mailupUsername = getRequiredStringEnv("MAILUP_USERNAME");
 const mailupSecret = getRequiredStringEnv("MAILUP_SECRET");
 
 // Email data
-const mailFrom = getRequiredStringEnv("MAIL_FROM_DEFAULT");
+const mailFrom = getRequiredStringEnv("MAIL_FROM");
+const mailOrganizationFiscalCode = getRequiredStringEnv(
+  "MAIL_ORGANIZATION_FISCALCODE"
+);
+const mailOrganizationName = getRequiredStringEnv("MAIL_ORGANIZATION_NAME");
+const mailSenderService = getRequiredStringEnv("MAIL_SENDER_SERVICE");
 
 // Needed to construct the email verification url
 const functionsPublicApiUrl = getRequiredStringEnv("FUNCTIONS_PUBLIC_API_URL");
@@ -29,10 +34,9 @@ const EMAIL_TITLE = "Email verification";
 const emailDefaults = {
   from: mailFrom,
   htmlToTextOptions: HTML_TO_TEXT_OPTIONS,
-  // TODO: Find a better way to get the sender service information (from ENV).
-  organizationFiscalCode: "80188230587",
-  senderOrganizationName: "Presidenza del Consiglio dei Ministri",
-  senderService: "Team per la Trasformazione Digitale<br />Progetto IO",
+  organizationFiscalCode: mailOrganizationFiscalCode,
+  senderOrganizationName: mailOrganizationName,
+  senderService: mailSenderService,
   title: EMAIL_TITLE
 };
 

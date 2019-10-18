@@ -22,9 +22,9 @@ describe("SendVerificationEmailActivityHandler", () => {
     const emailDefaults: EmailDefaults = {
       from: "from@example.com" as any,
       htmlToTextOptions: {},
-      organizationFiscalCode: "80188230587",
-      senderOrganizationName: "Presidenza del Consiglio dei Ministri",
-      senderService: "Team per la Trasformazione Digitale<br />Progetto IO",
+      organizationFiscalCode: "organizationFiscalCode" as any,
+      senderOrganizationName: "senderOrganizationName" as any,
+      senderService: "senderService" as any,
       title: "Email title"
     };
     const mailerTransporterMock = {
