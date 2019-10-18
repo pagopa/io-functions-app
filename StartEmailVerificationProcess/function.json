@@ -5,7 +5,7 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "route": "v1/profiles/{fiscalcode}",
+      "route": "v1/start-email-verification-process/{fiscalcode}",
       "methods": [
         "post"
       ]
@@ -21,5 +21,5 @@
       "direction": "in"
     }
   ],
-  "scriptFile": "../dist/UpsertProfile/index.js"
+  "scriptFile": "../dist/StartEmailVerificationProcess/index.js"
 }

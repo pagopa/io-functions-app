@@ -18,7 +18,7 @@ import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/c
 
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
-import { UpsertProfile } from "./handler";
+import { StartEmailVerificationProcess } from "./handler";
 
 // Setup Express
 const app = express();
@@ -40,7 +40,10 @@ const documentClient = new DocumentDBClient(cosmosDbUri, {
 
 const profileModel = new ProfileModel(documentClient, profilesCollectionUrl);
 
-app.post("/api/v1/profiles/:fiscalcode", UpsertProfile(profileModel));
+app.post(
+  "/api/v1/start-email-verification-process/:fiscalcode",
+  StartEmailVerificationProcess(profileModel)
+);
 
 const azureFunctionHandler = createAzureFunctionHandler(app);
 

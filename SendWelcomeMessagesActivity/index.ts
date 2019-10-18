@@ -143,7 +143,7 @@ const activityFunction: AzureFunction = async (
 
   const profile = profileOrError.value;
 
-  const logPrefix = `WelcomeMessageActivity|PROFILE=${profile.fiscalCode}|VERSION=${profile.version}`;
+  const logPrefix = `SendWelcomeMessageActivity|PROFILE=${profile.fiscalCode}|VERSION=${profile.version}`;
 
   context.log.verbose(`${logPrefix}|Sending welcome messages`);
 

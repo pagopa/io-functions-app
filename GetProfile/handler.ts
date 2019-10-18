@@ -13,6 +13,7 @@ import { FiscalCode } from "italia-ts-commons/lib/strings";
 
 import { ProfileModel } from "io-functions-commons/dist/src/models/profile";
 
+import { ExtendedProfile } from "io-functions-commons/dist/generated/definitions/ExtendedProfile";
 import { FiscalCodeMiddleware } from "io-functions-commons/dist/src/utils/middlewares/fiscalcode";
 import {
   withRequestMiddlewares,
@@ -23,9 +24,7 @@ import {
   ResponseErrorQuery
 } from "io-functions-commons/dist/src/utils/response";
 
-import { ExtendedProfile } from "io-functions-commons/dist/generated/definitions/ExtendedProfile";
-
-import { toExtendedProfile } from "../utils/profiles";
+import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 
 /**
  * Type of a GetProfile handler.
@@ -57,7 +56,7 @@ export function GetProfileHandler(
         const profile = maybeProfile.value;
         // if the client is a trusted application we return the
         // extended profile
-        return ResponseSuccessJson(toExtendedProfile(profile));
+        return ResponseSuccessJson(retrievedProfileToExtendedProfile(profile));
       } else {
         return ResponseErrorNotFound(
           "Profile not found",
