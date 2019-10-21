@@ -360,6 +360,10 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/MessageBodyMarkdown"
   PaymentData:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/PaymentData"
+  CreatedMessageWithoutContentCollection:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/CreatedMessageWithoutContentCollection"
+  CreatedMessageWithoutContent:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/CreatedMessageWithoutContent"
   CreatedMessageWithContent:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/168821506-profile-email-validation/openapi/definitions.yaml#/CreatedMessageWithContent"
   MessageResponseNotificationStatus:
