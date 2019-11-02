@@ -1,57 +1,91 @@
-import * as df from "durable-functions";
+import * as t from "io-ts";
 
+import { isLeft } from "fp-ts/lib/Either";
+
+import * as df from "durable-functions";
 import { IFunctionContext } from "durable-functions/lib/src/classes";
 
-import { ReadableReporter } from "italia-ts-commons/lib/reporters";
+import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
+import { readableReport } from "italia-ts-commons/lib/reporters";
 
 import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
-
-import { diffBlockedServices } from "../utils/profiles";
-import { UpdatedProfileEvent } from "../utils/UpdatedProfileEvent";
-
+import { RetrievedProfile } from "io-functions-commons/dist/src/models/profile";
 import { Input as UpdateServiceSubscriptionFeedActivityInput } from "../UpdateSubscriptionsFeedActivity/index";
+import { diffBlockedServices } from "../utils/profiles";
+
+/**
+ * Carries information about created or updated profile.
+ *
+ * When oldProfile is defined, the profile has been updated, or it has been
+ * created otherwise.
+ */
+export const OrchestratorInput = t.intersection([
+  t.interface({
+    newProfile: RetrievedProfile,
+    updatedAt: UTCISODateFromString
+  }),
+  t.partial({
+    oldProfile: RetrievedProfile
+  })
+]);
+
+export type OrchestratorInput = t.TypeOf<typeof OrchestratorInput>;
 
 export const handler = function*(
   context: IFunctionContext
 ): IterableIterator<unknown> {
-  const input = context.df.getInput();
+  const logPrefix = `UpsertedProfileOrchestrator`;
 
-  // decode input CreatedMessageEvent
-  const errorOrUpdatedProfileEvent = UpdatedProfileEvent.decode(input);
-  if (errorOrUpdatedProfileEvent.isLeft()) {
+  const retryOptions = new df.RetryOptions(5000, 10);
+  // tslint:disable-next-line: no-object-mutation
+  retryOptions.backoffCoefficient = 1.5;
+
+  // Get and decode orchestrator input
+  const input = context.df.getInput();
+  const errorOrUpsertedProfileOrchestratorInput = OrchestratorInput.decode(
+    input
+  );
+
+  if (isLeft(errorOrUpsertedProfileOrchestratorInput)) {
     context.log.error(
-      `UpdatedProfileOrchestrator|Invalid UpdatedProfileEvent received|ORCHESTRATOR_ID=${
-        context.df.instanceId
-      }|ERRORS=${ReadableReporter.report(errorOrUpdatedProfileEvent).join(
-        " / "
+      `${logPrefix}|Error decoding input|ERROR=${readableReport(
+        errorOrUpsertedProfileOrchestratorInput.value
       )}`
     );
-    // we will never be able to recover from this, so don't trigger a retry
-    return [];
+    return false;
   }
 
-  // TODO: customize + backoff
-  // see https://docs.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-error-handling#javascript-functions-2x-only-1
-  const retryOptions = new df.RetryOptions(5000, 10);
+  const upsertedProfileOrchestratorInput =
+    errorOrUpsertedProfileOrchestratorInput.value;
 
   const {
     newProfile,
     oldProfile,
     updatedAt
-  } = errorOrUpdatedProfileEvent.value;
+  } = upsertedProfileOrchestratorInput;
 
-  const updatedAtIso = new Date(updatedAt).toISOString();
-
-  const logPrefix = `UpdatedProfileOrchestrator|PROFILE=${newProfile.fiscalCode}|VERSION=${newProfile.version}|UPDATED_AT=${updatedAtIso}`;
-
-  // if we have an old profile and a new one, the profile has been updated, or
-  // else it has been created for the first time
   const profileOperation = oldProfile !== undefined ? "UPDATED" : "CREATED";
 
-  //
-  // Update the subscription feed
-  //
+  // Send welcome messages to the user
+  const isInboxEnabled = newProfile.isInboxEnabled === true;
+  const hasOldProfileWithInboxDisabled =
+    profileOperation === "UPDATED" && oldProfile.isInboxEnabled === false;
 
+  const hasJustEnabledInbox =
+    isInboxEnabled &&
+    (profileOperation === "CREATED" || hasOldProfileWithInboxDisabled);
+
+  context.log.verbose(
+    `${logPrefix}|OPERATION=${profileOperation}|INBOX_ENABLED=${isInboxEnabled}|INBOX_JUST_ENABLED=${hasJustEnabledInbox}`
+  );
+
+  if (hasJustEnabledInbox) {
+    yield context.df.callActivity("SendWelcomeMessagesActivity", {
+      profile: newProfile
+    });
+  }
+
+  // Update subscriptions feed
   if (profileOperation === "CREATED") {
     // When a profile get created we add an entry to the profile subscriptions
     context.log.verbose(
@@ -64,11 +98,11 @@ export const handler = function*(
         fiscalCode: newProfile.fiscalCode,
         operation: "SUBSCRIBED",
         subscriptionKind: "PROFILE",
-        updatedAt,
+        updatedAt: updatedAt.getTime(),
         version: newProfile.version
       } as UpdateServiceSubscriptionFeedActivityInput
     );
-  } else if (profileOperation === "UPDATED") {
+  } else {
     // When the profile gets updates, we extract the services that have been
     // blocked and unblocked during this profile update.
     // Blocked services get mapped to unsubscribe events, while unblocked ones
@@ -93,7 +127,7 @@ export const handler = function*(
           operation: "SUBSCRIBED",
           serviceId: s as ServiceId,
           subscriptionKind: "SERVICE",
-          updatedAt,
+          updatedAt: updatedAt.getTime(),
           version: newProfile.version
         } as UpdateServiceSubscriptionFeedActivityInput
       );
@@ -111,34 +145,12 @@ export const handler = function*(
           operation: "UNSUBSCRIBED",
           serviceId: s as ServiceId,
           subscriptionKind: "SERVICE",
-          updatedAt,
+          updatedAt: updatedAt.getTime(),
           version: newProfile.version
         } as UpdateServiceSubscriptionFeedActivityInput
       );
     }
   }
 
-  //
-  // Send welcome messages
-  //
-
-  const isInboxEnabled = newProfile.isInboxEnabled === true;
-  const hasOldProfileWithInboxDisabled =
-    profileOperation === "UPDATED" && oldProfile.isInboxEnabled === false;
-
-  const hasJustEnabledInbox =
-    isInboxEnabled &&
-    (profileOperation === "CREATED" || hasOldProfileWithInboxDisabled);
-
-  context.log.verbose(
-    `${logPrefix}|OPERATION=${profileOperation}|INBOX_ENABLED=${isInboxEnabled}|INBOX_JUST_ENABLED=${hasJustEnabledInbox}`
-  );
-
-  if (hasJustEnabledInbox) {
-    yield context.df.callActivity("WelcomeMessagesActivity", {
-      profile: newProfile
-    });
-  }
-
-  return [];
+  return true;
 };

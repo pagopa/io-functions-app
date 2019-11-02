@@ -134,7 +134,7 @@ const activityFunction: AzureFunction = async (
 
   if (profileOrError.isLeft()) {
     context.log.error(
-      `WelcomeMessageActivity|Cannot decode input profile|ERROR=${readableReport(
+      `SendWelcomeMessageActivity|Cannot decode input profile|ERROR=${readableReport(
         profileOrError.value
       )}|INPUT=${JSON.stringify(input.profile)}`
     );
@@ -143,7 +143,7 @@ const activityFunction: AzureFunction = async (
 
   const profile = profileOrError.value;
 
-  const logPrefix = `WelcomeMessageActivity|PROFILE=${profile.fiscalCode}|VERSION=${profile.version}`;
+  const logPrefix = `SendWelcomeMessageActivity|PROFILE=${profile.fiscalCode}|VERSION=${profile.version}`;
 
   context.log.verbose(`${logPrefix}|Sending welcome messages`);
 

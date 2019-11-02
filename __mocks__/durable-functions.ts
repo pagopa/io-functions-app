@@ -7,3 +7,11 @@ export const getClient = jest.fn(() => ({
 export const orchestrator = jest.fn();
 
 export const RetryOptions = jest.fn(() => ({}));
+
+export const context = {
+  log: {
+    error: jest.fn(),
+    verbose: jest.fn(),
+    warn: jest.fn()
+  }
+};

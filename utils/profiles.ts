@@ -1,19 +1,51 @@
 import { ITuple2, Tuple2 } from "italia-ts-commons/lib/tuples";
 
+import { BlockedInboxOrChannelEnum } from "io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
+import { ExtendedProfile } from "io-functions-commons/dist/generated/definitions/ExtendedProfile";
+import { IsEmailValidated } from "io-functions-commons/dist/generated/definitions/IsEmailValidated";
+import { Profile as ApiProfile } from "io-functions-commons/dist/generated/definitions/Profile";
 import {
   Profile,
   RetrievedProfile
 } from "io-functions-commons/dist/src/models/profile";
 
-import { BlockedInboxOrChannelEnum } from "io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
-import { ExtendedProfile } from "io-functions-commons/dist/generated/definitions/ExtendedProfile";
 import { isObject } from "util";
 
-export function toExtendedProfile(profile: RetrievedProfile): ExtendedProfile {
+import { FiscalCode } from "io-functions-commons/dist/generated/definitions/FiscalCode";
+
+/**
+ * Converts a ApiProfile in a Profile model
+ */
+export function apiProfileToProfile(
+  apiProfile: ApiProfile,
+  fiscalCode: FiscalCode,
+  isEmailValidated: IsEmailValidated
+): Profile {
+  return {
+    acceptedTosVersion: apiProfile.accepted_tos_version,
+    blockedInboxOrChannels: apiProfile.blocked_inbox_or_channels,
+    email: apiProfile.email,
+    fiscalCode,
+    isEmailEnabled: apiProfile.is_email_enabled,
+    isEmailValidated,
+    isInboxEnabled: apiProfile.is_inbox_enabled,
+    isWebhookEnabled: apiProfile.is_webhook_enabled,
+    preferredLanguages: apiProfile.preferred_languages
+  };
+}
+
+/**
+ * Converts a RetrievedProfile model to an ExtendedProfile
+ */
+export function retrievedProfileToExtendedProfile(
+  profile: RetrievedProfile
+): ExtendedProfile {
   return {
     accepted_tos_version: profile.acceptedTosVersion,
     blocked_inbox_or_channels: profile.blockedInboxOrChannels,
     email: profile.email,
+    is_email_enabled: profile.isEmailEnabled === true,
+    is_email_validated: profile.isEmailValidated === true,
     is_inbox_enabled: profile.isInboxEnabled === true,
     is_webhook_enabled: profile.isWebhookEnabled === true,
     preferred_languages: profile.preferredLanguages,
