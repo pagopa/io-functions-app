@@ -448,6 +448,11 @@
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.134.tgz#9032b440122db3a2a56200e91191996161dde5b9"
   integrity sha512-2/O0khFUCFeDlbi7sZ7ZFRCcT812fAeOLm7Ev4KbwASkZ575TDrDcY7YyaoHdTOzKcNbfiwLYZqPmoC4wadrsw==
 
+"@types/lolex@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@types/lolex/-/lolex-3.1.1.tgz#d40895223e5c8f8aa64f5500c6ca4eeab067d432"
+  integrity sha512-NU2qVtKxbt4IBvjEOW1QeUnV6KGUF6hpgJyvwZt3JrXe2qmwQF0+BiazQw+iFy9qL5ie+QHOxTzXkcvJUEh76g==
+
 "@types/mime@*":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/mime/-/mime-2.0.1.tgz#dc488842312a7f075149312905b5e3c0b054c79d"
@@ -3014,10 +3019,10 @@ invert-kv@^2.0.0:
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-2.0.0.tgz#7393f5afa59ec9ff5f67a27620d11c226e3eec02"
   integrity sha512-wPVv/y/QQ/Uiirj/vh3oP+1Ww+AWehmi1g5fFWGPF6IpCBCDVrhgHRMvrLfdYcwDh3QJbGXDW4JAuzxElLSqKA==
 
-io-functions-commons@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/io-functions-commons/-/io-functions-commons-1.1.0.tgz#0d5eb093700c9d8f8d4799cfb4afdac5e3782ba9"
-  integrity sha512-cngfKMqsUFNHA2JUde/HERAcLo6Cm9SqgvnebFQGCLAQbB0UVQ8NV02Z+L8MNAoOFrB9ZXwy31rOqNcPzZ0Q5w==
+io-functions-commons@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/io-functions-commons/-/io-functions-commons-1.4.0.tgz#0069fd39a02a4ed0fb026840a5fd3238c1453d6d"
+  integrity sha512-3/ZV/Bj4hW8qs+AFWbjJYoUwPaEyynOBoRcEZIickwrb8LX4OiSXKJJtLw40nUQmbIOhumi//BOc9j/w6U4CKg==
   dependencies:
     applicationinsights "^1.0.3"
     azure-storage "^2.10.3"
@@ -3477,10 +3482,10 @@ istanbul-reports@^2.1.1:
   dependencies:
     handlebars "^4.1.2"
 
-italia-ts-commons@^5.1.5:
-  version "5.1.5"
-  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-5.1.5.tgz#062d70e91ad35e413405cb0c679f8210c97cc47d"
-  integrity sha512-uAUe3Q8EXPCI8Iy6El8ff0PmUM+CG3X7iscjLr90+7sXCpyucMl6Mwz0TREKtQ0tKc/uAP/1yWw7QgaLCvDflg==
+italia-ts-commons@^5.1.12:
+  version "5.1.12"
+  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-5.1.12.tgz#7af568872914469a1292f6594c93af63f94d5abf"
+  integrity sha512-ssYne0ypD1FxJsKe5kd/6nKQe077RVdG3pRtbQvpruVep1vRRdAJWWyvzN398MICct2K4fjfI2mkWIDOqkVh7g==
   dependencies:
     fp-ts "1.12.0"
     io-ts "1.8.5"
@@ -4549,6 +4554,11 @@ lokijs@^1.5.6:
   version "1.5.6"
   resolved "https://registry.yarnpkg.com/lokijs/-/lokijs-1.5.6.tgz#6de6b8c3ff7a972fd0104169f81e7ddc244c029f"
   integrity sha512-xJoDXy8TASTjmXMKr4F8vvNUCu4dqlwY5gmn0g5BajGt1GM3goDCafNiGAh/sfrWgkfWu1J4OfsxWm8yrWweJA==
+
+lolex@^5.1.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/lolex/-/lolex-5.1.1.tgz#9587144854511d27940ee5e113dcb7de9b0fd666"
+  integrity sha512-dEwHz1CJ8DsdgfpiimgQQEhEJYOEiJ69a0s4aJDNHajaTqOJuF34vBAWVa/sS0V8aQvt72p+KgQ3pRmEVJM+iA==
 
 loose-envify@^1.0.0:
   version "1.4.0"

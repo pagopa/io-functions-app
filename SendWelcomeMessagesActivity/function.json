@@ -6,5 +6,5 @@
       "direction": "in"
     }
   ],
-  "scriptFile": "../dist/WelcomeMessagesActivity/index.js"
+  "scriptFile": "../dist/SendWelcomeMessagesActivity/index.js"
 }
