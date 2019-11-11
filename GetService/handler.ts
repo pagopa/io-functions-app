@@ -28,6 +28,10 @@ import {
   ServiceModel
 } from "io-functions-commons/dist/src/models/service";
 
+import {
+  NotificationChannel,
+  NotificationChannelEnum
+} from "io-functions-commons/dist/generated/definitions/NotificationChannel";
 import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
 
@@ -40,6 +44,15 @@ type IGetServiceHandler = (
   serviceId: ServiceId
 ) => Promise<IGetServiceHandlerRet>;
 
+export function serviceAvailableNotificationChannels(
+  retrievedService: RetrievedService
+): ReadonlyArray<NotificationChannel> {
+  if (retrievedService.requireSecureChannels) {
+    return [NotificationChannelEnum.WEBHOOK];
+  }
+  return [NotificationChannelEnum.EMAIL, NotificationChannelEnum.WEBHOOK];
+}
+
 /**
  * Converts a retrieved service to a service that can be shared via API
  */
@@ -47,6 +60,9 @@ function retrievedServiceToPublic(
   retrievedService: RetrievedService
 ): ServicePublic {
   return {
+    available_notification_channels: serviceAvailableNotificationChannels(
+      retrievedService
+    ),
     department_name: retrievedService.departmentName,
     organization_fiscal_code: retrievedService.organizationFiscalCode,
     organization_name: retrievedService.organizationName,

@@ -20,7 +20,11 @@ import {
 import { MaxAllowedPaymentAmount } from "io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
 import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
 
-import { GetServiceHandler } from "../handler";
+import { NotificationChannelEnum } from "io-functions-commons/dist/generated/definitions/NotificationChannel";
+import {
+  GetServiceHandler,
+  serviceAvailableNotificationChannels
+} from "../handler";
 
 afterEach(() => {
   jest.resetAllMocks();
@@ -67,8 +71,28 @@ const aRetrievedService: RetrievedService = {
 
 const aSeralizedService: ServicePublic = {
   ...aServicePayload,
+  available_notification_channels: [
+    NotificationChannelEnum.EMAIL,
+    NotificationChannelEnum.WEBHOOK
+  ],
   version: 1 as NonNegativeNumber
 };
+
+describe("serviceAvailableNotificationChannels", () => {
+  it("should return an array with the right notification channels", () => {
+    expect(serviceAvailableNotificationChannels(aRetrievedService)).toEqual([
+      NotificationChannelEnum.EMAIL,
+      NotificationChannelEnum.WEBHOOK
+    ]);
+
+    expect(
+      serviceAvailableNotificationChannels({
+        ...aRetrievedService,
+        requireSecureChannels: true
+      })
+    ).toEqual([NotificationChannelEnum.WEBHOOK]);
+  });
+});
 
 describe("GetServiceHandler", () => {
   it("should get an existing service", async () => {
