@@ -94,7 +94,9 @@ export function UpdateProfileHandler(
     }
 
     // Check if the email has been changed
-    const emailChanged = profilePayload.email !== existingProfile.email;
+    const emailChanged =
+      profilePayload.email !== undefined &&
+      profilePayload.email !== existingProfile.email;
 
     const profile = apiProfileToProfile(
       profilePayload,
