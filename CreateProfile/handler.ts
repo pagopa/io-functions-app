@@ -57,7 +57,10 @@ export function CreateProfileHandler(
     const profile: Profile = {
       email: createProfilePayload.email,
       fiscalCode,
-      isEmailValidated: createProfilePayload.is_email_validated
+      isEmailEnabled: true,
+      isEmailValidated: createProfilePayload.is_email_validated,
+      isInboxEnabled: false,
+      isWebhookEnabled: false
     };
 
     const errorOrCreatedProfile = await profileModel.create(
