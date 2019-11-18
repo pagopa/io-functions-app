@@ -275,10 +275,10 @@ paths:
           description: Found.
           schema:
             $ref: "#/definitions/PaginatedServiceTupleCollection"
-        "400":
-          description: Invalid request.
-          schema:
-            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Unauthorized
+        "429":
+          description: Too many requests
   "/email-validation-process/{fiscal_code}":
     post:
       operationId: startEmailValidationProcess
