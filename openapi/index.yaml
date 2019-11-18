@@ -275,8 +275,32 @@ paths:
           description: Found.
           schema:
             $ref: "#/definitions/PaginatedServiceTupleCollection"
+        "400":
+          description: Invalid request.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+  "/start-email-validation-process/{fiscal_code}":
+    post:
+      operationId: startEmailValidationProcess
+      summary: StartEmailValidationProcess
+      description: |-
+        Start the email validation process that create the validation token
+        and send the validation email
+      tags:
+        - restricted
+      parameters:
+        - $ref: "#/parameters/FiscalCode"
+      responses:
+        "202":
+          description: Request accepted
+        "400":
+          description: Invalid request.
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "401":
           description: Unauthorized
+        "404":
+          description: Not found
         "429":
           description: Too many requests
 consumes:
