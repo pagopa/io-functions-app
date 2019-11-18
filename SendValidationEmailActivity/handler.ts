@@ -19,6 +19,8 @@ export function generateValidationEmailContentHtml(
   emailValidationFunctionUrl: string,
   token: string
 ): string {
+  // TODO: Add a better validation email content
+  // https://www.pivotaltracker.com/story/show/169808317
   return `
   <p>Click <a href="${emailValidationFunctionUrl}?token=${token}">here</a> to validate your email.</p>
   `;
