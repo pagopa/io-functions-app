@@ -279,7 +279,7 @@ paths:
           description: Invalid request.
           schema:
             $ref: "#/definitions/ProblemJson"
-  "/start-email-validation-process/{fiscal_code}":
+  "/email-validation-process/{fiscal_code}":
     post:
       operationId: startEmailValidationProcess
       summary: StartEmailValidationProcess
