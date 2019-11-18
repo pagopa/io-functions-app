@@ -41,7 +41,7 @@ const documentClient = new DocumentDBClient(cosmosDbUri, {
 const profileModel = new ProfileModel(documentClient, profilesCollectionUrl);
 
 app.post(
-  "/api/v1/start-email-validation-process/:fiscalcode",
+  "/api/v1/email-validation-process/:fiscalcode",
   StartEmailValidationProcess(profileModel)
 );
 

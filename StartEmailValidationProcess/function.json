@@ -5,7 +5,7 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "route": "v1/start-email-validation-process/{fiscalcode}",
+      "route": "v1/email-validation-process/{fiscalcode}",
       "methods": [
         "post"
       ]
