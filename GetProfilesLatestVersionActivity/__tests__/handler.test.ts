@@ -15,9 +15,9 @@ import {
   getProfilesLatestVersionActivityHandler
 } from "../handler";
 
-const fiscalCode1 = "PRSFNC81D23M208A" as FiscalCode;
-const fiscalCode2 = "PRSFNC81D23M208B" as FiscalCode;
-const fiscalCode3 = "PRSFNC81D23M208C" as FiscalCode;
+const fiscalCode1 = "DDDDDD80D80D800A" as FiscalCode;
+const fiscalCode2 = "DDDDDD80D80D800B" as FiscalCode;
+const fiscalCode3 = "DDDDDD80D80D800C" as FiscalCode;
 
 const profile1v0: RetrievedProfile = {
   ...aRetrievedProfile,
