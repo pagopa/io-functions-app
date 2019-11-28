@@ -17,7 +17,7 @@ import { IFunctionContext, Task } from "durable-functions/lib/src/classes";
 import { SandboxFiscalCode } from "italia-ts-commons/lib/strings";
 
 import { BlockedInboxOrChannelEnum } from "io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
-import { BlockedInboxOrChannels } from "io-functions-commons/dist/generated/definitions/BlockedInboxOrChannelS";
+import { BlockedInboxOrChannels } from "io-functions-commons/dist/generated/definitions/BlockedInboxOrChannels";
 import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
 
 import { ActivityResult as GetProfilesLatestVersionActivityResult } from "../GetProfilesLatestVersionActivity/handler";
