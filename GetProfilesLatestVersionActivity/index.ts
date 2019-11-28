@@ -7,7 +7,7 @@ import {
 import * as documentDbUtils from "io-functions-commons/dist/src/utils/documentdb";
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 
-import { handler } from "./handler";
+import { getProfilesLatestVersionActivityHandler } from "./handler";
 
 const cosmosDbUri = getRequiredStringEnv("CUSTOMCONNSTR_COSMOSDB_URI");
 const cosmosDbKey = getRequiredStringEnv("CUSTOMCONNSTR_COSMOSDB_KEY");
@@ -25,6 +25,8 @@ const documentClient = new DocumentDBClient(cosmosDbUri, {
 
 const profileModel = new ProfileModel(documentClient, profilesCollectionUrl);
 
-const activityFunctionHandler = handler(profileModel);
+const activityFunctionHandler = getProfilesLatestVersionActivityHandler(
+  profileModel
+);
 
 export default activityFunctionHandler;

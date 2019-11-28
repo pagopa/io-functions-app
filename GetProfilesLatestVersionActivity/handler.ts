@@ -35,10 +35,12 @@ export const ActivityResult = t.taggedUnion("kind", [
 
 export type ActivityResult = t.TypeOf<typeof ActivityResult>;
 
-export const handler = (profileModel: ProfileModel) => async (
-  context: Context,
-  __: unknown
-): Promise<unknown> => {
+/**
+ * Returns the latest version of each profile
+ */
+export const getProfilesLatestVersionActivityHandler = (
+  profileModel: ProfileModel
+) => async (context: Context, __: unknown): Promise<unknown> => {
   const logPrefix = "GetProfilesLatestVersionActivity";
   try {
     const profilesInterator = await profileModel.getCollectionIterator();
@@ -80,7 +82,7 @@ export const handler = (profileModel: ProfileModel) => async (
       },
       {}
     );
-    return ActivityResult.encode({
+    return ActivityResultSuccess.encode({
       kind: "SUCCESS",
       value: {
         profilesLatestVersion
