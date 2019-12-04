@@ -14,13 +14,8 @@ const mailupUsername = getRequiredStringEnv("MAILUP_USERNAME");
 const mailupSecret = getRequiredStringEnv("MAILUP_SECRET");
 
 // Email data
-const EMAIL_TITLE = "Email validation";
+const EMAIL_TITLE = "Valida l’indirizzo email che usi su IO";
 const mailFrom = getRequiredStringEnv("MAIL_FROM");
-const mailOrganizationFiscalCode = getRequiredStringEnv(
-  "MAIL_ORGANIZATION_FISCALCODE"
-);
-const mailOrganizationName = getRequiredStringEnv("MAIL_ORGANIZATION_NAME");
-const mailSenderService = getRequiredStringEnv("MAIL_SENDER_SERVICE");
 
 // Needed to construct the email validation url
 const functionsPublicUrl = getRequiredStringEnv("FUNCTIONS_PUBLIC_URL");
@@ -33,9 +28,6 @@ const HTML_TO_TEXT_OPTIONS: HtmlToTextOptions = {
 const emailDefaults = {
   from: mailFrom,
   htmlToTextOptions: HTML_TO_TEXT_OPTIONS,
-  organizationFiscalCode: mailOrganizationFiscalCode,
-  senderOrganizationName: mailOrganizationName,
-  senderService: mailSenderService,
   title: EMAIL_TITLE
 };
 

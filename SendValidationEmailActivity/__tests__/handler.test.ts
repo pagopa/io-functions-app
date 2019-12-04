@@ -11,9 +11,9 @@ import {
 
 const htmlAndTextContent = "CONTENT";
 
-jest.mock("io-functions-commons/dist/src/templates/html/default", () => ({
+jest.mock("../template", () => ({
   __esModule: true,
-  default: () => htmlAndTextContent
+  getEmailHtmlFromTemplate: () => htmlAndTextContent
 }));
 
 describe("SendValidationEmailActivityHandler", () => {
@@ -22,9 +22,6 @@ describe("SendValidationEmailActivityHandler", () => {
     const emailDefaults: EmailDefaults = {
       from: "from@example.com" as any,
       htmlToTextOptions: {},
-      organizationFiscalCode: "organizationFiscalCode" as any,
-      senderOrganizationName: "senderOrganizationName" as any,
-      senderService: "senderService" as any,
       title: "Email title"
     };
     const mailerTransporterMock = {
