@@ -14,7 +14,7 @@ const mailupUsername = getRequiredStringEnv("MAILUP_USERNAME");
 const mailupSecret = getRequiredStringEnv("MAILUP_SECRET");
 
 // Email data
-const EMAIL_TITLE = "Email validation";
+const EMAIL_TITLE = "Valida l’indirizzo email che usi su IO";
 const mailFrom = getRequiredStringEnv("MAIL_FROM");
 
 // Needed to construct the email validation url
