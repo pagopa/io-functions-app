@@ -10,21 +10,10 @@ import { Context } from "@azure/functions";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { EmailString } from "italia-ts-commons/lib/strings";
 
-import defaultHtmlTemplate from "io-functions-commons/dist/src/templates/html/default";
 import { sendMail } from "io-functions-commons/dist/src/utils/email";
 
 import { EmailDefaults } from "./";
-
-export function generateValidationEmailContentHtml(
-  emailValidationFunctionUrl: string,
-  token: string
-): string {
-  // TODO: Add a better validation email content
-  // https://www.pivotaltracker.com/story/show/169808317
-  return `
-  <p>Click <a href="${emailValidationFunctionUrl}?token=${token}">here</a> to validate your email.</p>
-  `;
-}
+import { getEmailHtmlFromTemplate } from "./template";
 
 // Activity input
 export const ActivityInput = t.interface({
@@ -76,27 +65,11 @@ export const getSendValidationEmailActivityHandler = (
   const { email, token } = activityInput;
 
   // Generate the email html from the template
-  const {
-    from,
-    title,
-    senderOrganizationName,
-    senderService,
-    organizationFiscalCode,
-    htmlToTextOptions
-  } = emailDefaults;
+  const { from, title, htmlToTextOptions } = emailDefaults;
 
-  const emailHtml = defaultHtmlTemplate(
+  const emailHtml = getEmailHtmlFromTemplate(
     title,
-    "",
-    senderOrganizationName,
-    senderService,
-    organizationFiscalCode,
-    title,
-    generateValidationEmailContentHtml(
-      `${functionsPublicUrl}/validate-profile-email`,
-      token
-    ),
-    ""
+    `${functionsPublicUrl}/validate-profile-email?token=${token}`
   );
 
   // converts the HTML to pure text to generate the text version of the message
