@@ -1,7 +1,7 @@
 <!--
   Use this template to generate the html content of the template.ts file.
   mjml email_validation.mjml -o email_validation.html
-  TODO: Create and script that converts this template to the function inside template.ts
+  TODO: Create a script that converts this template to the function inside template.ts
 -->
 <mjml owa="desktop" version="4.5.1">
   <mj-head>
