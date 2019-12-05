@@ -27,6 +27,10 @@ const hashCreator = (value: string) =>
     .update(value)
     .digest("hex");
 
+// When the function starts, attempt to create the table if it does not exist
+// Note that we cannot log anything just yet since we don't have a Context
+tableService.createTableIfNotExists(VALIDATION_TOKEN_TABLE_NAME, () => 0);
+
 const activityFunctionHandler = getCreateValidationTokenActivityHandler(
   ulidGenerator,
   tableService,
