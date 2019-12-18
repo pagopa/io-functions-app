@@ -61,13 +61,7 @@ const getInboxBlockedServices = (
 ): ReadonlyArray<string> =>
   Object.keys(blocked)
     .map(k =>
-      // we need to cast to ReadonlySet because the type is {}
-      // TODO: can we fix it? perhaps by moving this function to commons
-      (blocked[k] as ReadonlySet<BlockedInboxOrChannelEnum>).has(
-        BlockedInboxOrChannelEnum.INBOX
-      )
-        ? k
-        : undefined
+      blocked[k].includes(BlockedInboxOrChannelEnum.INBOX) ? k : undefined
     )
     .filter(k => k !== undefined);
 
