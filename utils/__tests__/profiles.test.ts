@@ -9,11 +9,11 @@ describe("diffBlockedServices", () => {
 
   it("should return an added service when has been just blocked", () => {
     const oldPrefs = {
-      [service1]: new Set()
+      [service1]: []
     };
 
     const newPrefs = {
-      [service1]: new Set([BlockedInboxOrChannelEnum.INBOX])
+      [service1]: [BlockedInboxOrChannelEnum.INBOX]
     };
 
     const res = diffBlockedServices(oldPrefs, newPrefs);
@@ -22,11 +22,11 @@ describe("diffBlockedServices", () => {
 
   it("should return nothing when the service is still blocked", () => {
     const oldPrefs = {
-      [service1]: new Set([BlockedInboxOrChannelEnum.INBOX])
+      [service1]: [BlockedInboxOrChannelEnum.INBOX]
     };
 
     const newPrefs = {
-      [service1]: new Set([BlockedInboxOrChannelEnum.INBOX])
+      [service1]: [BlockedInboxOrChannelEnum.INBOX]
     };
 
     const res = diffBlockedServices(oldPrefs, newPrefs);
@@ -35,11 +35,11 @@ describe("diffBlockedServices", () => {
 
   it("should return a removed service when has been just unblocked", () => {
     const oldPrefs = {
-      [service1]: new Set([BlockedInboxOrChannelEnum.INBOX])
+      [service1]: [BlockedInboxOrChannelEnum.INBOX]
     };
 
     const newPrefs = {
-      [service1]: new Set()
+      [service1]: []
     };
 
     const res = diffBlockedServices(oldPrefs, newPrefs);
@@ -50,26 +50,26 @@ describe("diffBlockedServices", () => {
     expect(
       diffBlockedServices(
         {
-          [service1]: new Set([
+          [service1]: [
             BlockedInboxOrChannelEnum.INBOX,
             BlockedInboxOrChannelEnum.EMAIL
-          ])
+          ]
         },
         {
-          [service1]: new Set([BlockedInboxOrChannelEnum.INBOX])
+          [service1]: [BlockedInboxOrChannelEnum.INBOX]
         }
       )
     ).toEqual(Tuple2([], []));
     expect(
       diffBlockedServices(
         {
-          [service1]: new Set([BlockedInboxOrChannelEnum.INBOX])
+          [service1]: [BlockedInboxOrChannelEnum.INBOX]
         },
         {
-          [service1]: new Set([
+          [service1]: [
             BlockedInboxOrChannelEnum.INBOX,
             BlockedInboxOrChannelEnum.EMAIL
-          ])
+          ]
         }
       )
     ).toEqual(Tuple2([], []));
