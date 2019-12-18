@@ -70,7 +70,7 @@ export function GetMessageHandler(
   return async (fiscalCode, messageId) => {
     const [errorOrMaybeDocument, errorOrMaybeContent] = await Promise.all([
       messageModel.findMessageForRecipient(fiscalCode, messageId),
-      messageModel.getStoredContent(blobService, messageId, fiscalCode)
+      messageModel.getContentFromBlob(blobService, messageId)
     ]);
 
     if (isLeft(errorOrMaybeDocument)) {

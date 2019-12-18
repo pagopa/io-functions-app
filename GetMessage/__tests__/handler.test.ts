@@ -57,7 +57,7 @@ describe("GetMessageHandler", () => {
       findMessageForRecipient: jest.fn(() =>
         right(some(aRetrievedMessageWithoutContent))
       ),
-      getStoredContent: jest.fn(() => left(new Error()))
+      getContentFromBlob: jest.fn(() => left(new Error()))
     };
 
     const getMessageHandler = GetMessageHandler(
@@ -70,7 +70,7 @@ describe("GetMessageHandler", () => {
       aRetrievedMessageWithoutContent.id
     );
 
-    expect(mockMessageModel.getStoredContent).toHaveBeenCalledTimes(1);
+    expect(mockMessageModel.getContentFromBlob).toHaveBeenCalledTimes(1);
     expect(mockMessageModel.findMessageForRecipient).toHaveBeenCalledTimes(1);
     expect(mockMessageModel.findMessageForRecipient).toHaveBeenCalledWith(
       aRetrievedMessageWithoutContent.fiscalCode,
@@ -85,7 +85,7 @@ describe("GetMessageHandler", () => {
       findMessageForRecipient: jest.fn(() =>
         right(some(aRetrievedMessageWithoutContent))
       ),
-      getStoredContent: jest.fn(() => right(none))
+      getContentFromBlob: jest.fn(() => right(none))
     };
 
     const getMessageHandler = GetMessageHandler(
@@ -98,7 +98,7 @@ describe("GetMessageHandler", () => {
       aRetrievedMessageWithoutContent.id
     );
 
-    expect(mockMessageModel.getStoredContent).toHaveBeenCalledTimes(1);
+    expect(mockMessageModel.getContentFromBlob).toHaveBeenCalledTimes(1);
     expect(mockMessageModel.findMessageForRecipient).toHaveBeenCalledTimes(1);
     expect(mockMessageModel.findMessageForRecipient).toHaveBeenCalledWith(
       aRetrievedMessageWithoutContent.fiscalCode,
@@ -114,7 +114,7 @@ describe("GetMessageHandler", () => {
   it("should respond with not found a message doesn not exist", async () => {
     const mockMessageModel = {
       findMessageForRecipient: jest.fn(() => right(none)),
-      getStoredContent: jest.fn(() => right(none))
+      getContentFromBlob: jest.fn(() => right(none))
     };
 
     const getMessageHandler = GetMessageHandler(
