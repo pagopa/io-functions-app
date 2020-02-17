@@ -67,6 +67,7 @@ function retrievedServiceToPublic(
     organization_fiscal_code: retrievedService.organizationFiscalCode,
     organization_name: retrievedService.organizationName,
     service_id: retrievedService.serviceId,
+    service_metadata: retrievedService.serviceMetadata,
     service_name: retrievedService.serviceName,
     version: retrievedService.version
   };
