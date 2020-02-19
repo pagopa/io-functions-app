@@ -303,6 +303,65 @@ paths:
           description: Not found
         "429":
           description: Too many requests
+  "/user-data-processing/{fiscalCode}":
+    post:
+      operationId: createUserDataProcessing
+      summary: CreateUserDataProcessing
+      description: |-
+        Create a new user data processing
+      tags:
+        - restricted
+      parameters:
+        - $ref: "#/parameters/FiscalCode"
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/UserDataProcessingChoice"
+      responses:
+        "200":
+          description: UserDataProcessing created
+          schema:
+            $ref: "#/definitions/UserDataProcessing"
+        "400":
+          description: Invalid request.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Unauthorized
+        "429":
+          description: Too many requests
+  "/user-data-processing/{fiscalCode}/{choice}":  
+    get:
+      operationId: getUserDataProcessing
+      summary: GetUserDataProcessing
+      description: Retrieve user data processing
+      tags:
+        - restricted
+      parameters:
+        - $ref: "#/parameters/FiscalCode"
+        - name: choice
+          in: path
+          schema: 
+            $ref: "#/definitions/UserDataProcessingChoice"
+          required: true
+          description: The user data processing choice.
+      responses:
+        "200":
+          description: User data processing retrieved
+          schema:
+            $ref: "#/definitions/UserDataProcessing"
+        "400":
+          description: Invalid request.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Unauthorized
+        "404":
+          description: No message found.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "429":
+          description: Too many requests
 consumes:
   - application/json
 produces:
@@ -402,3 +461,49 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/NotificationChannel"
   NotificationChannelStatusValue:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/NotificationChannelStatusValue"
+  #UserDataProcessing:
+  #  $ref: "../../io-functions-commons/openapi/definitions.yaml#/UserDataProcessing"
+  UserDataProcessingStatus:
+    type: string
+    description: |-
+      The status of a requested user data processing request
+    enum:
+      - PENDING
+      - WIP
+      - CLOSED
+    example: PENDING
+  UserDataProcessingChoice:
+    type: string
+    description: |-
+      User's choice to delete or download its own data.
+    enum:
+      - DOWNLOAD
+      - DELETE
+    example: DOWNLOAD
+  UserDataProcessing:
+    type: object
+    description: |-
+      A representation of a single user data processing request
+    properties:
+      id:
+        type: string
+        minLength: 1
+      fiscalCode:
+        $ref: "#/definitions/FiscalCode"
+      choice:
+        $ref: "#/definitions/UserDataProcessingChoice"
+      status:
+        $ref: "#/definitions/UserDataProcessingStatus"
+      createdAt:
+        $ref: "#/definitions/Timestamp"
+      updatedAt:
+        $ref: "#/definitions/Timestamp"
+      version:
+        type: integer
+    required:
+      - id
+      - fiscalCode
+      - choice
+      - status
+      - createdAt
+      - version 
