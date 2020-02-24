@@ -26,10 +26,6 @@ import {
   wrapRequestHandler
 } from "io-functions-commons/dist/src/utils/request_middleware";
 
-import {
-  UserDataProcessingChoice,
-  UserDataProcessingChoiceEnum
-} from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
 import { UserDataProcessingChoiceRequest } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoiceRequest";
 import { UserDataProcessingStatusEnum } from "io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
 import {

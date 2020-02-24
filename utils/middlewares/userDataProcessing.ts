@@ -1,13 +1,11 @@
 import { ResponseErrorFromValidationErrors } from "italia-ts-commons/lib/responses";
 
-import { UserDataProcessingChoice } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
 import { UserDataProcessingChoiceRequest } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoiceRequest";
 import {
   NewUserDataProcessing,
   UserDataProcessing
 } from "io-functions-commons/dist/src/models/user_data_processing";
 import { IRequestMiddleware } from "io-functions-commons/dist/src/utils/request_middleware";
-import winston = require("winston");
 
 /**
  * A middleware that extracts a NewUserDataProcessing payload from a request.
