@@ -8,7 +8,8 @@ import {
   IResponseErrorConflict,
   IResponseErrorNotFound,
   IResponseSuccessJson,
-  ResponseErrorNotFound
+  ResponseErrorNotFound,
+  ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 
@@ -27,6 +28,7 @@ import {
 import { isSome } from "fp-ts/lib/Option";
 import { UserDataProcessingChoice } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
 import {
+  makeUserDataProcessingId,
   UserDataProcessing,
   UserDataProcessingModel
 } from "io-functions-commons/dist/src/models/user_data_processing";
@@ -52,14 +54,10 @@ export function GetUserDataProcessingHandler(
 ): IGetUserDataProcessingHandler {
   return async (context, fiscalCode, choice) => {
     const logPrefix = `GetUserDataProcessingHandler|FISCAL_CODE=${fiscalCode}`;
-
-    context.log.info(`fiscalCode = ${fiscalCode}`);
-    context.log.info(`choice = ${choice}`);
-    context.log.info("prima di query GetUserDataProcessing");
-
-    const maybeResultOrError = await userDataProcessingModel.findAllByFiscalCodeAndChoice(
+    const id = makeUserDataProcessingId(choice, fiscalCode);
+    const maybeResultOrError = await userDataProcessingModel.findOneUserDataProcessingById(
       fiscalCode,
-      choice
+      id
     );
 
     if (isLeft(maybeResultOrError)) {
@@ -82,10 +80,7 @@ export function GetUserDataProcessingHandler(
     const maybeUserDataProcessing = maybeResultOrError.value;
     if (isSome(maybeUserDataProcessing)) {
       const userDataProc = maybeUserDataProcessing.value;
-      return ResponseErrorNotFound(
-        "found",
-        `userDataProc = ${userDataProc.id}`
-      );
+      return ResponseSuccessJson(userDataProc);
     } else {
       return ResponseErrorNotFound(
         "Error while retrieving user data processing",

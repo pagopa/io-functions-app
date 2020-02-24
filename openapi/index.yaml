@@ -316,7 +316,7 @@ paths:
         - in: body
           name: body
           schema:
-            $ref: "#/definitions/UserDataProcessingChoice"
+            $ref: "#/definitions/UserDataProcessingChoiceRequest"
       responses:
         "200":
           description: UserDataProcessing created
@@ -344,7 +344,7 @@ paths:
           schema: 
             $ref: "#/definitions/UserDataProcessingChoice"
           required: true
-          description: The user data processing choice.
+          description: The request wrapper of a user data processing choice.
       responses:
         "200":
           description: User data processing retrieved
@@ -461,49 +461,11 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/NotificationChannel"
   NotificationChannelStatusValue:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/NotificationChannelStatusValue"
-  #UserDataProcessing:
-  #  $ref: "../../io-functions-commons/openapi/definitions.yaml#/UserDataProcessing"
-  UserDataProcessingStatus:
-    type: string
-    description: |-
-      The status of a requested user data processing request
-    enum:
-      - PENDING
-      - WIP
-      - CLOSED
-    example: PENDING
-  UserDataProcessingChoice:
-    type: string
-    description: |-
-      User's choice to delete or download its own data.
-    enum:
-      - DOWNLOAD
-      - DELETE
-    example: DOWNLOAD
   UserDataProcessing:
-    type: object
-    description: |-
-      A representation of a single user data processing request
-    properties:
-      id:
-        type: string
-        minLength: 1
-      fiscalCode:
-        $ref: "#/definitions/FiscalCode"
-      choice:
-        $ref: "#/definitions/UserDataProcessingChoice"
-      status:
-        $ref: "#/definitions/UserDataProcessingStatus"
-      createdAt:
-        $ref: "#/definitions/Timestamp"
-      updatedAt:
-        $ref: "#/definitions/Timestamp"
-      version:
-        type: integer
-    required:
-      - id
-      - fiscalCode
-      - choice
-      - status
-      - createdAt
-      - version 
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.10.0/openapi/definitions.yaml#/UserDataProcessing"
+  UserDataProcessingStatus:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.10.0/openapi/definitions.yaml#/UserDataProcessingStatus"
+  UserDataProcessingChoice:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.10.0/openapi/definitions.yaml#/UserDataProcessingChoice"
+  UserDataProcessingChoiceRequest:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.10.0/openapi/definitions.yaml#/UserDataProcessingChoiceRequest"

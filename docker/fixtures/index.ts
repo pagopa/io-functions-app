@@ -7,7 +7,7 @@ import {
   UriFactory
 } from "documentdb";
 import { Either, left, right } from "fp-ts/lib/Either";
-import { UserDataProcessing } from "io-functions-commons/dist/generated/definitions/UserDataProcessing";
+import { FiscalCode } from "io-functions-commons/dist/generated/definitions/FiscalCode";
 import { UserDataProcessingChoiceEnum } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
 import { UserDataProcessingStatusEnum } from "io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
 import {
@@ -16,18 +16,22 @@ import {
   ServiceModel
 } from "io-functions-commons/dist/src/models/service";
 import {
+  makeUserDataProcessingId,
   USER_DATA_PROCESSING_COLLECTION_NAME,
+  UserDataProcessing,
   UserDataProcessingModel
 } from "io-functions-commons/dist/src/models/user_data_processing";
 import * as documentDbUtils from "io-functions-commons/dist/src/utils/documentdb";
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { ulidGenerator } from "io-functions-commons/dist/src/utils/strings";
-import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
-import { aFiscalCode } from "../../__mocks__/mocks";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
-const cosmosDbKey = getRequiredStringEnv("CUSTOMCONNSTR_COSMOSDB_KEY");
-const cosmosDbUri = getRequiredStringEnv("CUSTOMCONNSTR_COSMOSDB_URI");
-const cosmosDbName = getRequiredStringEnv("COSMOSDB_NAME");
+const cosmosDbKey = "dummykey";
+const cosmosDbUri = "https://localhost:3000";
+const cosmosDbName = "testdb" as NonEmptyString;
+
+// tslint:disable-next-line: no-object-mutation
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 const documentDbDatabaseUrl = documentDbUtils.getDatabaseUri(cosmosDbName);
 const servicesCollectionUrl = documentDbUtils.getCollectionUri(
@@ -91,11 +95,13 @@ const aService: Service = Service.decode({
   organizationFiscalCode: "01234567890",
   organizationName: "Organization name",
   requireSecureChannels: false,
-  serviceId: process.env.REQ_SERVICE_ID,
+  serviceId: "MyServiceId",
   serviceName: "MyServiceName"
 }).getOrElseL(() => {
   throw new Error("Cannot decode service payload.");
 });
+
+export const aFiscalCode = "SPNDNL80A13Y555X" as FiscalCode;
 
 const userDataProcessingModel = new UserDataProcessingModel(
   documentClient,
@@ -103,13 +109,15 @@ const userDataProcessingModel = new UserDataProcessingModel(
 );
 
 const aUserDataProcessing: UserDataProcessing = UserDataProcessing.decode({
-  id: ulidGenerator(),
+  userDataProcessingId: makeUserDataProcessingId(
+    UserDataProcessingChoiceEnum.DOWNLOAD,
+    aFiscalCode
+  ),
   // tslint:disable-next-line: object-literal-sort-keys
   fiscalCode: aFiscalCode,
   choice: UserDataProcessingChoiceEnum.DOWNLOAD,
   status: UserDataProcessingStatusEnum.PENDING,
-  createdAt: new Date(),
-  version: 0 as NonNegativeNumber
+  createdAt: new Date()
 }).getOrElseL(() => {
   throw new Error("Cannot decode user data processing payload.");
 });

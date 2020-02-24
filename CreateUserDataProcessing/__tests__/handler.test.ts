@@ -10,8 +10,7 @@ import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aFiscalCode,
   aUserDataProcessing,
-  aUserDataProcessingChoice,
-  aUserDataProcessingStatus
+  aUserDataProcessingChoiceRequest
 } from "../../__mocks__/mocks";
 import { CreateUserDataProcessingHandler } from "../handler";
 
@@ -42,7 +41,7 @@ describe("CreateUserDataProcessingHandler", () => {
       {} as any
     );
 
-    expect(result.kind).toBe("IResponseErrorQuery");
+    expect(result.kind).toBe("IResponseErrorGeneric");
   });
 
   it("should return the created user data processing", async () => {
@@ -57,7 +56,7 @@ describe("CreateUserDataProcessingHandler", () => {
     const result = await createUserDataProcessingHandler(
       contextMock as any,
       aFiscalCode,
-      aUserDataProcessingChoice
+      aUserDataProcessingChoiceRequest
     );
 
     expect(result.kind).toBe("IResponseSuccessJson");

@@ -12,11 +12,16 @@ import {
   UserDataProcessingChoice,
   UserDataProcessingChoiceEnum
 } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
+import { UserDataProcessingChoiceRequest } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoiceRequest";
 import {
   UserDataProcessingStatus,
   UserDataProcessingStatusEnum
 } from "io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
 import { RetrievedProfile } from "io-functions-commons/dist/src/models/profile";
+import {
+  makeUserDataProcessingId,
+  UserDataProcessingId
+} from "io-functions-commons/dist/src/models/user_data_processing";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 
 export const aEmail = "email@example.com" as EmailString;
@@ -61,15 +66,22 @@ export const aValidatorHash =
 export const aUserDataProcessingChoice: UserDataProcessingChoice =
   UserDataProcessingChoiceEnum.DOWNLOAD;
 
+export const aUserDataProcessingChoiceRequest: UserDataProcessingChoiceRequest = {
+  choice: aUserDataProcessingChoice
+};
+
+export const aUserDataProcessingId: UserDataProcessingId = makeUserDataProcessingId(
+  aUserDataProcessingChoice,
+  aFiscalCode
+);
+
 export const aUserDataProcessingStatus: UserDataProcessingStatus =
   UserDataProcessingStatusEnum.PENDING;
 
 export const aUserDataProcessing: UserDataProcessing = {
-  id: "123" as NonEmptyString,
-  // tslint:disable-next-line: object-literal-sort-keys
-  fiscalCode: aFiscalCode,
-  createdAt: new Date(),
   choice: aUserDataProcessingChoice,
+  created_at: new Date(),
+  fiscal_code: aFiscalCode,
   status: aUserDataProcessingStatus,
   version: 0 as NonNegativeNumber
 };
