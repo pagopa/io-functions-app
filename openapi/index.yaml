@@ -303,7 +303,7 @@ paths:
           description: Not found
         "429":
           description: Too many requests
-  "/user-data-processing/{fiscalCode}":
+  "/user-data-processing/{fiscal_code}":
     post:
       operationId: createUserDataProcessing
       summary: CreateUserDataProcessing
@@ -317,6 +317,7 @@ paths:
           name: body
           schema:
             $ref: "#/definitions/UserDataProcessingChoiceRequest"
+          description: The request wrapper of a user data processing choice.
       responses:
         "200":
           description: UserDataProcessing created
@@ -330,7 +331,7 @@ paths:
           description: Unauthorized
         "429":
           description: Too many requests
-  "/user-data-processing/{fiscalCode}/{choice}":  
+  "/user-data-processing/{fiscal_code}/{choice}":  
     get:
       operationId: getUserDataProcessing
       summary: GetUserDataProcessing
@@ -341,10 +342,9 @@ paths:
         - $ref: "#/parameters/FiscalCode"
         - name: choice
           in: path
-          schema: 
-            $ref: "#/definitions/UserDataProcessingChoice"
+          type: string
+          enum: [DOWNLOAD, DELETE]
           required: true
-          description: The request wrapper of a user data processing choice.
       responses:
         "200":
           description: User data processing retrieved
