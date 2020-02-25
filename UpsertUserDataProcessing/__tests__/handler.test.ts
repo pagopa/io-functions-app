@@ -12,7 +12,7 @@ import {
   aUserDataProcessing,
   aUserDataProcessingChoiceRequest
 } from "../../__mocks__/mocks";
-import { CreateUserDataProcessingHandler } from "../handler";
+import { UpsertUserDataProcessingHandler } from "../handler";
 
 // tslint:disable-next-line: no-let
 let clock: any;
@@ -25,17 +25,17 @@ afterEach(() => {
   clock = clock.uninstall();
 });
 
-describe("CreateUserDataProcessingHandler", () => {
+describe("UpsertUserDataProcessingHandler", () => {
   it("should return a query error when an error occurs creating the new User data processing", async () => {
     const userDataProcessingModelMock = {
       createOrUpdateByNewOne: jest.fn(() => left({}))
     };
 
-    const createUserDataProcessingHandler = CreateUserDataProcessingHandler(
+    const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
       userDataProcessingModelMock as any
     );
 
-    const result = await createUserDataProcessingHandler(
+    const result = await upsertUserDataProcessingHandler(
       contextMock as any,
       undefined as any,
       {} as any
@@ -44,16 +44,16 @@ describe("CreateUserDataProcessingHandler", () => {
     expect(result.kind).toBe("IResponseErrorValidation");
   });
 
-  it("should return the created user data processing", async () => {
+  it("should return the upserted user data processing", async () => {
     const userDataProcessingModelMock = {
       createOrUpdateByNewOne: jest.fn(() => right(aUserDataProcessing))
     };
 
-    const createUserDataProcessingHandler = CreateUserDataProcessingHandler(
+    const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
       userDataProcessingModelMock as any
     );
 
-    const result = await createUserDataProcessingHandler(
+    const result = await upsertUserDataProcessingHandler(
       contextMock as any,
       aFiscalCode,
       aUserDataProcessingChoiceRequest

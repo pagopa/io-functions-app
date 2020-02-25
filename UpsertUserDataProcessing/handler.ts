@@ -32,12 +32,12 @@ import {
   UserDataProcessing,
   UserDataProcessingModel
 } from "io-functions-commons/dist/src/models/user_data_processing";
-import { UserDataProcessingChoiceMiddleware } from "../utils/middlewares/userDataProcessing";
+import { RequiredBodyPayloadMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_body_payload";
 
 /**
- * Type of an CreateProfile handler.
+ * Type of an UpsertUserDataProcessing handler.
  */
-type ICreateUserDataProcessingHandler = (
+type IUpsertUserDataProcessingHandler = (
   context: Context,
   fiscalCode: FiscalCode,
   userDataProcessingChoiceRequest: UserDataProcessingChoiceRequest
@@ -49,17 +49,19 @@ type ICreateUserDataProcessingHandler = (
   | IResponseErrorConflict
 >;
 
-export function CreateUserDataProcessingHandler(
+export function UpsertUserDataProcessingHandler(
   userDataProcessingModel: UserDataProcessingModel
-): ICreateUserDataProcessingHandler {
-  return async (context, fiscalCode, createUserDataProcessingPayload) => {
-    const logPrefix = `CreateUserDataProcessingHandler|FISCAL_CODE=${fiscalCode}`;
+): IUpsertUserDataProcessingHandler {
+  return async (context, fiscalCode, upsertUserDataProcessingPayload) => {
+    const logPrefix = `UpsertUserDataProcessingHandler|FISCAL_CODE=${
+      fiscalCode === undefined ? undefined : fiscalCode.substring(0, 5)
+    }`;
     const id = makeUserDataProcessingId(
-      createUserDataProcessingPayload.choice,
+      upsertUserDataProcessingPayload.choice,
       fiscalCode
     );
     const userDataProcessing = UserDataProcessing.decode({
-      choice: createUserDataProcessingPayload.choice,
+      choice: upsertUserDataProcessingPayload.choice,
       createdAt: new Date(),
       fiscalCode,
       status: UserDataProcessingStatusEnum.PENDING,
@@ -70,43 +72,43 @@ export function CreateUserDataProcessingHandler(
       const error = userDataProcessing.value;
       return ResponseErrorFromValidationErrors(UserDataProcessing)(error);
     } else {
-      const errorOrCreatedUserDataProcessing = await userDataProcessingModel.createOrUpdateByNewOne(
+      const errorOrUpsertedUserDataProcessing = await userDataProcessingModel.createOrUpdateByNewOne(
         userDataProcessing.value
       );
 
       context.log.error(
-        `errorOrCreatedUserDataProcessing ${errorOrCreatedUserDataProcessing}`
+        `errorOrUpsertedUserDataProcessing ${errorOrUpsertedUserDataProcessing}`
       );
-      if (isLeft(errorOrCreatedUserDataProcessing)) {
-        const { body } = errorOrCreatedUserDataProcessing.value;
+      if (isLeft(errorOrUpsertedUserDataProcessing)) {
+        const { body } = errorOrUpsertedUserDataProcessing.value;
 
         context.log.error(`${logPrefix}|ERROR=${body}`);
 
         return ResponseErrorQuery(
           "Error while creating a new user data processing",
-          errorOrCreatedUserDataProcessing.value
+          errorOrUpsertedUserDataProcessing.value
         );
       }
 
       const createdOrUpdatedUserDataProcessing =
-        errorOrCreatedUserDataProcessing.value;
+        errorOrUpsertedUserDataProcessing.value;
       return ResponseSuccessJson(createdOrUpdatedUserDataProcessing);
     }
   };
 }
 
 /**
- * Wraps an CreateProfile handler inside an Express request handler.
+ * Wraps an UpsertUserDataProcessing handler inside an Express request handler.
  */
-export function CreateUserDataProcessing(
+export function UpsertUserDataProcessing(
   userDataProcessingModel: UserDataProcessingModel
 ): express.RequestHandler {
-  const handler = CreateUserDataProcessingHandler(userDataProcessingModel);
+  const handler = UpsertUserDataProcessingHandler(userDataProcessingModel);
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
     FiscalCodeMiddleware,
-    UserDataProcessingChoiceMiddleware
+    RequiredBodyPayloadMiddleware(UserDataProcessingChoiceRequest)
   );
   return wrapRequestHandler(middlewaresWrap(handler));
 }

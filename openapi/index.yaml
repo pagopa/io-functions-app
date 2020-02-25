@@ -305,10 +305,10 @@ paths:
           description: Too many requests
   "/user-data-processing/{fiscal_code}":
     post:
-      operationId: createUserDataProcessing
-      summary: CreateUserDataProcessing
+      operationId: upsertUserDataProcessing
+      summary: UpsertUserDataProcessing
       description: |-
-        Create a new user data processing
+        Upsert a user data processing
       tags:
         - restricted
       parameters:

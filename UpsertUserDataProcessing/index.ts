@@ -18,7 +18,7 @@ import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/c
 
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
-import { CreateUserDataProcessing } from "./handler";
+import { UpsertUserDataProcessing } from "./handler";
 
 const cosmosDbUri = getRequiredStringEnv("CUSTOMCONNSTR_COSMOSDB_URI");
 const cosmosDbKey = getRequiredStringEnv("CUSTOMCONNSTR_COSMOSDB_KEY");
@@ -45,7 +45,7 @@ secureExpressApp(app);
 
 app.post(
   "/api/v1/user-data-processing/:fiscalcode",
-  CreateUserDataProcessing(userDataProcessingModel)
+  UpsertUserDataProcessing(userDataProcessingModel)
 );
 
 const azureFunctionHandler = createAzureFunctionHandler(app);

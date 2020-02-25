@@ -38,7 +38,7 @@ describe("GetUserDataProcessingHandler", () => {
     }
   });
 
-  it("should respond with NotFound if profile does not exist", async () => {
+  it("should respond with NotFound if userDataProcessing does not exist", async () => {
     const userDataProcessingModelMock = {
       findOneUserDataProcessingById: jest.fn(() => {
         return Promise.resolve(right(none));
