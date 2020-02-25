@@ -35,7 +35,7 @@ import {
 import { RequiredParamMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_param";
 
 /**
- * Type of an GetUserDataProcessing handler.
+ * Type of a GetUserDataProcessing handler.
  */
 type IGetUserDataProcessingHandler = (
   context: Context,

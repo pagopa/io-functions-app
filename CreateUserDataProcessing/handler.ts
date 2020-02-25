@@ -5,11 +5,10 @@ import { Context } from "@azure/functions";
 import { isLeft } from "fp-ts/lib/Either";
 
 import {
-  HttpStatusCodeEnum,
   IResponseErrorConflict,
-  IResponseErrorGeneric,
+  IResponseErrorValidation,
   IResponseSuccessJson,
-  ResponseErrorGeneric,
+  ResponseErrorFromValidationErrors,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
@@ -45,7 +44,7 @@ type ICreateUserDataProcessingHandler = (
 ) => Promise<
   // tslint:disable-next-line: max-union-size
   | IResponseSuccessJson<UserDataProcessing>
-  | IResponseErrorGeneric
+  | IResponseErrorValidation
   | IResponseErrorQuery
   | IResponseErrorConflict
 >;
@@ -60,19 +59,16 @@ export function CreateUserDataProcessingHandler(
       fiscalCode
     );
     const userDataProcessing = UserDataProcessing.decode({
-      userDataProcessingId: id,
-      // tslint:disable-next-line: object-literal-sort-keys
-      fiscalCode,
       choice: createUserDataProcessingPayload.choice,
+      createdAt: new Date(),
+      fiscalCode,
       status: UserDataProcessingStatusEnum.PENDING,
-      createdAt: new Date()
+      userDataProcessingId: id
     });
+
     if (isLeft(userDataProcessing)) {
-      return ResponseErrorGeneric(
-        HttpStatusCodeEnum.HTTP_STATUS_401,
-        "Could not complete operation",
-        "missing required parameters"
-      );
+      const error = userDataProcessing.value;
+      return ResponseErrorFromValidationErrors(UserDataProcessing)(error);
     } else {
       const errorOrCreatedUserDataProcessing = await userDataProcessingModel.createOrUpdateByNewOne(
         userDataProcessing.value

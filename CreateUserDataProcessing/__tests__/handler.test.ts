@@ -41,7 +41,7 @@ describe("CreateUserDataProcessingHandler", () => {
       {} as any
     );
 
-    expect(result.kind).toBe("IResponseErrorGeneric");
+    expect(result.kind).toBe("IResponseErrorValidation");
   });
 
   it("should return the created user data processing", async () => {

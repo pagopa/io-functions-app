@@ -340,11 +340,7 @@ paths:
         - restricted
       parameters:
         - $ref: "#/parameters/FiscalCode"
-        - name: choice
-          in: path
-          type: string
-          enum: [DOWNLOAD, DELETE]
-          required: true
+        - $ref: "#/parameters/UserDataProcessingChoiceParam"
       responses:
         "200":
           description: User data processing retrieved
@@ -390,6 +386,14 @@ parameters:
     minimum: 1
     description: An opaque identifier that points to the next item in the collection.
     x-example: 01BX9NSMKVXXS5PSP2FATZM123
+  UserDataProcessingChoiceParam:
+    name: choice
+    in: path
+    type: string
+    enum: [DOWNLOAD, DELETE]
+    description: A representation of a user data processing choice
+    required: true
+    x-example: DOWNLOAD
 definitions:
   ExtendedProfile:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/ExtendedProfile"
