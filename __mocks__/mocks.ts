@@ -7,7 +7,21 @@ import {
 
 import { NewProfile } from "io-functions-commons/dist/generated/definitions/NewProfile";
 import { Profile } from "io-functions-commons/dist/generated/definitions/Profile";
+import { UserDataProcessing } from "io-functions-commons/dist/generated/definitions/UserDataProcessing";
+import {
+  UserDataProcessingChoice,
+  UserDataProcessingChoiceEnum
+} from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
+import { UserDataProcessingChoiceRequest } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoiceRequest";
+import {
+  UserDataProcessingStatus,
+  UserDataProcessingStatusEnum
+} from "io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
 import { RetrievedProfile } from "io-functions-commons/dist/src/models/profile";
+import {
+  makeUserDataProcessingId,
+  UserDataProcessingId
+} from "io-functions-commons/dist/src/models/user_data_processing";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 
 export const aEmail = "email@example.com" as EmailString;
@@ -48,3 +62,26 @@ export const aTokenId = "01DQ79RZ0EQ0S7RTA3SMCKRCCA";
 export const aValidator = "d6e57ed8d3c3eb4583d671c7";
 export const aValidatorHash =
   "35aef908716592e5dd48ccc4f58ef1a286de8dfd58d9a7a050cf47c60b662154";
+
+export const aUserDataProcessingChoice: UserDataProcessingChoice =
+  UserDataProcessingChoiceEnum.DOWNLOAD;
+
+export const aUserDataProcessingChoiceRequest: UserDataProcessingChoiceRequest = {
+  choice: aUserDataProcessingChoice
+};
+
+export const aUserDataProcessingId: UserDataProcessingId = makeUserDataProcessingId(
+  aUserDataProcessingChoice,
+  aFiscalCode
+);
+
+export const aUserDataProcessingStatus: UserDataProcessingStatus =
+  UserDataProcessingStatusEnum.PENDING;
+
+export const aUserDataProcessing: UserDataProcessing = {
+  choice: aUserDataProcessingChoice,
+  created_at: new Date(),
+  fiscal_code: aFiscalCode,
+  status: aUserDataProcessingStatus,
+  version: 0 as NonNegativeNumber
+};
