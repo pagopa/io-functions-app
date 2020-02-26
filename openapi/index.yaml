@@ -396,80 +396,80 @@ parameters:
     x-example: DOWNLOAD
 definitions:
   ExtendedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/ExtendedProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/ExtendedProfile"
   MessageResponseWithContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/MessageResponseWithContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/MessageResponseWithContent"
   NewMessage:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/NewMessage"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/NewMessage"
   NewProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/NewProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/NewProfile"
   PaginatedCreatedMessageWithoutContentCollection:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/PaginatedCreatedMessageWithoutContentCollection"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/PaginatedCreatedMessageWithoutContentCollection"
   PaginatedServiceTupleCollection:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/ProblemJson"
   Profile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/Profile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/Profile"
   ServicePublic:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/ServicePublic"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/ServicePublic"
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/EmailAddress"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/EmailAddress"
   BlockedInboxOrChannel:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/BlockedInboxOrChannel"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/BlockedInboxOrChannel"
   BlockedInboxOrChannels:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/BlockedInboxOrChannels"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/BlockedInboxOrChannels"
   PreferredLanguage:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/PreferredLanguage"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/PreferredLanguage"
   PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/PreferredLanguages"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/PreferredLanguages"
   IsInboxEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/IsInboxEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/IsInboxEnabled"
   IsEmailEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/IsEmailEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/IsEmailEnabled"
   AcceptedTosVersion:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/AcceptedTosVersion"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/AcceptedTosVersion"
   IsWebhookEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/IsWebhookEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/IsWebhookEnabled"
   IsEmailValidated:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/IsEmailValidated"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/IsEmailValidated"
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/FiscalCode"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/FiscalCode"
   TimeToLiveSeconds:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/TimeToLiveSeconds"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/TimeToLiveSeconds"
   Timestamp:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/Timestamp"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/Timestamp"
   MessageContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/MessageContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/MessageContent"
   MessageSubject:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/MessageSubject"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/MessageSubject"
   MessageBodyMarkdown:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/MessageBodyMarkdown"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/MessageBodyMarkdown"
   PaymentData:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/PaymentData"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/PaymentData"
   CreatedMessageWithoutContentCollection:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/CreatedMessageWithoutContentCollection"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/CreatedMessageWithoutContentCollection"
   CreatedMessageWithoutContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/CreatedMessageWithoutContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/CreatedMessageWithoutContent"
   CreatedMessageWithContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/CreatedMessageWithContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/CreatedMessageWithContent"
   MessageResponseNotificationStatus:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/MessageResponseNotificationStatus"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/MessageResponseNotificationStatus"
   MessageStatusValue:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/MessageStatusValue"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/MessageStatusValue"
   ServiceTupleCollection:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/ServiceTupleCollection"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/ServiceTupleCollection"
   PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/PaginationResponse"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/PaginationResponse"
   NotificationChannel:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/NotificationChannel"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/NotificationChannel"
   NotificationChannelStatusValue:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/NotificationChannelStatusValue"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/NotificationChannelStatusValue"
   UserDataProcessing:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.10.0/openapi/definitions.yaml#/UserDataProcessing"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/UserDataProcessing"
   UserDataProcessingStatus:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.10.0/openapi/definitions.yaml#/UserDataProcessingStatus"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/UserDataProcessingStatus"
   UserDataProcessingChoice:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.10.0/openapi/definitions.yaml#/UserDataProcessingChoice"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/UserDataProcessingChoice"
   UserDataProcessingChoiceRequest:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.10.0/openapi/definitions.yaml#/UserDataProcessingChoiceRequest"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.12.0/openapi/definitions.yaml#/UserDataProcessingChoiceRequest"
