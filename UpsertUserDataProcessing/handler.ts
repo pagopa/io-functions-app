@@ -25,6 +25,7 @@ import {
   wrapRequestHandler
 } from "io-functions-commons/dist/src/utils/request_middleware";
 
+import { UserDataProcessing as UserDataProcessingApi } from "io-functions-commons/dist/generated/definitions/UserDataProcessing";
 import { UserDataProcessingChoiceRequest } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoiceRequest";
 import { UserDataProcessingStatusEnum } from "io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
 import {
@@ -33,6 +34,7 @@ import {
   UserDataProcessingModel
 } from "io-functions-commons/dist/src/models/user_data_processing";
 import { RequiredBodyPayloadMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_body_payload";
+import { retrievedUserDataProcessingToUserDataProcessingApi } from "../utils/user_data_processings";
 
 /**
  * Type of an UpsertUserDataProcessing handler.
@@ -43,7 +45,7 @@ type IUpsertUserDataProcessingHandler = (
   userDataProcessingChoiceRequest: UserDataProcessingChoiceRequest
 ) => Promise<
   // tslint:disable-next-line: max-union-size
-  | IResponseSuccessJson<UserDataProcessing>
+  | IResponseSuccessJson<UserDataProcessingApi>
   | IResponseErrorValidation
   | IResponseErrorQuery
   | IResponseErrorConflict
@@ -92,7 +94,11 @@ export function UpsertUserDataProcessingHandler(
 
       const createdOrUpdatedUserDataProcessing =
         errorOrUpsertedUserDataProcessing.value;
-      return ResponseSuccessJson(createdOrUpdatedUserDataProcessing);
+      return ResponseSuccessJson(
+        retrievedUserDataProcessingToUserDataProcessingApi(
+          createdOrUpdatedUserDataProcessing
+        )
+      );
     }
   };
 }

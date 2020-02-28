@@ -5,17 +5,19 @@ import { none, some } from "fp-ts/lib/Option";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aFiscalCode,
-  aUserDataProcessing,
+  aRetrievedUserDataProcessing,
+  aUserDataProcessingApi,
   aUserDataProcessingChoice,
   aUserDataProcessingId
 } from "../../__mocks__/mocks";
+import { retrievedUserDataProcessingToUserDataProcessingApi } from "../../utils/user_data_processings";
 import { GetUserDataProcessingHandler } from "../handler";
 
 describe("GetUserDataProcessingHandler", () => {
   it("should find an existing User data processing", async () => {
     const userDataProcessingModelMock = {
       findOneUserDataProcessingById: jest.fn(() => {
-        return Promise.resolve(right(some(aUserDataProcessing)));
+        return Promise.resolve(right(some(aRetrievedUserDataProcessing)));
       })
     };
 
@@ -34,7 +36,7 @@ describe("GetUserDataProcessingHandler", () => {
     ).toHaveBeenCalledWith(aFiscalCode, aUserDataProcessingId);
     expect(response.kind).toBe("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
-      expect(response.value).toEqual(aUserDataProcessing);
+      expect(response.value).toEqual(aUserDataProcessingApi);
     }
   });
 

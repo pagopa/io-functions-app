@@ -26,13 +26,14 @@ import {
 } from "io-functions-commons/dist/src/utils/request_middleware";
 
 import { isSome } from "fp-ts/lib/Option";
+import { UserDataProcessing as UserDataProcessingApi } from "io-functions-commons/dist/generated/definitions/UserDataProcessing";
 import { UserDataProcessingChoice } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
 import {
   makeUserDataProcessingId,
-  UserDataProcessing,
   UserDataProcessingModel
 } from "io-functions-commons/dist/src/models/user_data_processing";
 import { RequiredParamMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_param";
+import { retrievedUserDataProcessingToUserDataProcessingApi } from "../utils/user_data_processings";
 
 /**
  * Type of a GetUserDataProcessing handler.
@@ -43,7 +44,7 @@ type IGetUserDataProcessingHandler = (
   userDataProcessingChoice: UserDataProcessingChoice
 ) => Promise<
   // tslint:disable-next-line: max-union-size
-  | IResponseSuccessJson<UserDataProcessing>
+  | IResponseSuccessJson<UserDataProcessingApi>
   | IResponseErrorQuery
   | IResponseErrorNotFound
   | IResponseErrorConflict
@@ -80,7 +81,9 @@ export function GetUserDataProcessingHandler(
     const maybeUserDataProcessing = maybeResultOrError.value;
     if (isSome(maybeUserDataProcessing)) {
       const userDataProc = maybeUserDataProcessing.value;
-      return ResponseSuccessJson(userDataProc);
+      return ResponseSuccessJson(
+        retrievedUserDataProcessingToUserDataProcessingApi(userDataProc)
+      );
     } else {
       return ResponseErrorNotFound(
         "Error while retrieving user data processing",
