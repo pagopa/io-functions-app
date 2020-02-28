@@ -10,7 +10,6 @@ import {
   aUserDataProcessingChoice,
   aUserDataProcessingId
 } from "../../__mocks__/mocks";
-import { retrievedUserDataProcessingToUserDataProcessingApi } from "../../utils/user_data_processings";
 import { GetUserDataProcessingHandler } from "../handler";
 
 describe("GetUserDataProcessingHandler", () => {
