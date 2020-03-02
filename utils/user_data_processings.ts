@@ -2,7 +2,7 @@ import { UserDataProcessing } from "io-functions-commons/dist/generated/definiti
 import { RetrievedUserDataProcessing } from "io-functions-commons/dist/src/models/user_data_processing";
 
 /**
- * Converts a RetrievedProfile model to an ExtendedProfile
+ * Converts a UserDataProcessingProfile model to an UserDataProcessing
  */
 export function toUserDataProcessingApi(
   userDataProcessing: RetrievedUserDataProcessing
