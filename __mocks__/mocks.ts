@@ -7,11 +7,7 @@ import {
 
 import { NewProfile } from "io-functions-commons/dist/generated/definitions/NewProfile";
 import { Profile } from "io-functions-commons/dist/generated/definitions/Profile";
-<<<<<<< HEAD
 import { UserDataProcessing as UserDataProcessingApi } from "io-functions-commons/dist/generated/definitions/UserDataProcessing";
-=======
-import { UserDataProcessing } from "io-functions-commons/dist/generated/definitions/UserDataProcessing";
->>>>>>> master
 import {
   UserDataProcessingChoice,
   UserDataProcessingChoiceEnum
@@ -24,10 +20,7 @@ import {
 import { RetrievedProfile } from "io-functions-commons/dist/src/models/profile";
 import {
   makeUserDataProcessingId,
-<<<<<<< HEAD
   RetrievedUserDataProcessing,
-=======
->>>>>>> master
   UserDataProcessingId
 } from "io-functions-commons/dist/src/models/user_data_processing";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";

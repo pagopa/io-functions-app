@@ -20,9 +20,10 @@ import { TimeToLiveSeconds } from "io-functions-commons/dist/generated/definitio
 import { GetMessageHandler } from "../handler";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
+const aDate = new Date();
 
 const aNewMessageWithoutContent: NewMessageWithoutContent = {
-  createdAt: new Date(),
+  createdAt: aDate,
   fiscalCode: aFiscalCode,
   id: "A_MESSAGE_ID" as NonEmptyString,
   indexedId: "A_MESSAGE_ID" as NonEmptyString,
@@ -41,7 +42,7 @@ const aRetrievedMessageWithoutContent: RetrievedMessageWithoutContent = {
 };
 
 const aPublicExtendedMessage: CreatedMessageWithoutContent = {
-  created_at: new Date(),
+  created_at: aDate,
   fiscal_code: aNewMessageWithoutContent.fiscalCode,
   id: "A_MESSAGE_ID",
   sender_service_id: aNewMessageWithoutContent.senderServiceId
