@@ -9,8 +9,12 @@ import * as df from "durable-functions";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aFiscalCode,
+<<<<<<< HEAD
   aRetrievedUserDataProcessing,
   aUserDataProcessingApi,
+=======
+  aUserDataProcessing,
+>>>>>>> master
   aUserDataProcessingChoiceRequest
 } from "../../__mocks__/mocks";
 import { UpsertUserDataProcessingHandler } from "../handler";
