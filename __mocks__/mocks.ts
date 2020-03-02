@@ -24,7 +24,7 @@ import {
   UserDataProcessingId
 } from "io-functions-commons/dist/src/models/user_data_processing";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
-import { retrievedUserDataProcessingToUserDataProcessingApi } from "../utils/user_data_processings";
+import { toUserDataProcessingApi } from "../utils/user_data_processings";
 
 export const aEmail = "email@example.com" as EmailString;
 export const aEmailChanged = "email.changed@example.com" as EmailString;
@@ -98,6 +98,6 @@ export const aRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
   version: 0 as NonNegativeNumber
 };
 
-export const aUserDataProcessingApi: UserDataProcessingApi = retrievedUserDataProcessingToUserDataProcessingApi(
+export const aUserDataProcessingApi: UserDataProcessingApi = toUserDataProcessingApi(
   aRetrievedUserDataProcessing
 );

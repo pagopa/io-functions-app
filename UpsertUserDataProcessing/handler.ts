@@ -34,7 +34,7 @@ import {
   UserDataProcessingModel
 } from "io-functions-commons/dist/src/models/user_data_processing";
 import { RequiredBodyPayloadMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_body_payload";
-import { retrievedUserDataProcessingToUserDataProcessingApi } from "../utils/user_data_processings";
+import { toUserDataProcessingApi } from "../utils/user_data_processings";
 
 /**
  * Type of an UpsertUserDataProcessing handler.
@@ -95,9 +95,7 @@ export function UpsertUserDataProcessingHandler(
       const createdOrUpdatedUserDataProcessing =
         errorOrUpsertedUserDataProcessing.value;
       return ResponseSuccessJson(
-        retrievedUserDataProcessingToUserDataProcessingApi(
-          createdOrUpdatedUserDataProcessing
-        )
+        toUserDataProcessingApi(createdOrUpdatedUserDataProcessing)
       );
     }
   };

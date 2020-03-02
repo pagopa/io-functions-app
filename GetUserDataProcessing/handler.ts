@@ -33,7 +33,7 @@ import {
   UserDataProcessingModel
 } from "io-functions-commons/dist/src/models/user_data_processing";
 import { RequiredParamMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_param";
-import { retrievedUserDataProcessingToUserDataProcessingApi } from "../utils/user_data_processings";
+import { toUserDataProcessingApi } from "../utils/user_data_processings";
 
 /**
  * Type of a GetUserDataProcessing handler.
@@ -81,9 +81,7 @@ export function GetUserDataProcessingHandler(
     const maybeUserDataProcessing = maybeResultOrError.value;
     if (isSome(maybeUserDataProcessing)) {
       const userDataProc = maybeUserDataProcessing.value;
-      return ResponseSuccessJson(
-        retrievedUserDataProcessingToUserDataProcessingApi(userDataProc)
-      );
+      return ResponseSuccessJson(toUserDataProcessingApi(userDataProc));
     } else {
       return ResponseErrorNotFound(
         "Error while retrieving user data processing",

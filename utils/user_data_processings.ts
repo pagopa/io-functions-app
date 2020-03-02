@@ -4,7 +4,7 @@ import { RetrievedUserDataProcessing } from "io-functions-commons/dist/src/model
 /**
  * Converts a RetrievedProfile model to an ExtendedProfile
  */
-export function retrievedUserDataProcessingToUserDataProcessingApi(
+export function toUserDataProcessingApi(
   userDataProcessing: RetrievedUserDataProcessing
 ): UserDataProcessing {
   return {
