@@ -9,7 +9,8 @@ import * as df from "durable-functions";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aFiscalCode,
-  aUserDataProcessing,
+  aRetrievedUserDataProcessing,
+  aUserDataProcessingApi,
   aUserDataProcessingChoiceRequest
 } from "../../__mocks__/mocks";
 import { UpsertUserDataProcessingHandler } from "../handler";
@@ -46,7 +47,7 @@ describe("UpsertUserDataProcessingHandler", () => {
 
   it("should return the upserted user data processing", async () => {
     const userDataProcessingModelMock = {
-      createOrUpdateByNewOne: jest.fn(() => right(aUserDataProcessing))
+      createOrUpdateByNewOne: jest.fn(() => right(aRetrievedUserDataProcessing))
     };
 
     const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
@@ -61,7 +62,7 @@ describe("UpsertUserDataProcessingHandler", () => {
 
     expect(result.kind).toBe("IResponseSuccessJson");
     if (result.kind === "IResponseSuccessJson") {
-      expect(result.value).toEqual(aUserDataProcessing);
+      expect(result.value).toEqual(aUserDataProcessingApi);
     }
   });
 });

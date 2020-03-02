@@ -7,7 +7,7 @@ import {
 
 import { NewProfile } from "io-functions-commons/dist/generated/definitions/NewProfile";
 import { Profile } from "io-functions-commons/dist/generated/definitions/Profile";
-import { UserDataProcessing } from "io-functions-commons/dist/generated/definitions/UserDataProcessing";
+import { UserDataProcessing as UserDataProcessingApi } from "io-functions-commons/dist/generated/definitions/UserDataProcessing";
 import {
   UserDataProcessingChoice,
   UserDataProcessingChoiceEnum
@@ -20,9 +20,11 @@ import {
 import { RetrievedProfile } from "io-functions-commons/dist/src/models/profile";
 import {
   makeUserDataProcessingId,
+  RetrievedUserDataProcessing,
   UserDataProcessingId
 } from "io-functions-commons/dist/src/models/user_data_processing";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
+import { toUserDataProcessingApi } from "../utils/user_data_processings";
 
 export const aEmail = "email@example.com" as EmailString;
 export const aEmailChanged = "email.changed@example.com" as EmailString;
@@ -54,6 +56,8 @@ export const aRetrievedProfile: RetrievedProfile = {
   version: 0 as NonNegativeNumber
 };
 
+export const aNewDate = new Date();
+
 export const aExtendedProfile = retrievedProfileToExtendedProfile(
   aRetrievedProfile
 );
@@ -78,10 +82,22 @@ export const aUserDataProcessingId: UserDataProcessingId = makeUserDataProcessin
 export const aUserDataProcessingStatus: UserDataProcessingStatus =
   UserDataProcessingStatusEnum.PENDING;
 
-export const aUserDataProcessing: UserDataProcessing = {
+export const aRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
+  _etag: "xyz",
+  _rid: "xyz",
+  _self: "aaa",
+  _ts: 111,
   choice: aUserDataProcessingChoice,
-  created_at: new Date(),
-  fiscal_code: aFiscalCode,
+  createdAt: aNewDate,
+  fiscalCode: aFiscalCode,
+  id: "xyz" as NonEmptyString,
+  kind: "IRetrievedUserDataProcessing",
   status: aUserDataProcessingStatus,
+  updatedAt: aNewDate,
+  userDataProcessingId: aUserDataProcessingId,
   version: 0 as NonNegativeNumber
 };
+
+export const aUserDataProcessingApi: UserDataProcessingApi = toUserDataProcessingApi(
+  aRetrievedUserDataProcessing
+);

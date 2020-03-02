@@ -25,6 +25,8 @@ local.settings.json
 node_modules
 dist
 
+azure-functions-core-tools
+
 # Local python packages
 .python_packages/
 
