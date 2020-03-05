@@ -7,6 +7,28 @@ import { diffBlockedServices } from "../profiles";
 describe("diffBlockedServices", () => {
   const service1 = "service1";
 
+  it("should return an added service when old blocked is null", () => {
+    const oldPrefs = null;
+
+    const newPrefs = {
+      [service1]: [BlockedInboxOrChannelEnum.INBOX]
+    };
+
+    const res = diffBlockedServices(oldPrefs, newPrefs);
+    expect(res).toEqual(Tuple2([service1], []));
+  });
+
+  it("should return an added service when old blocked is undefined", () => {
+    const oldPrefs = undefined;
+
+    const newPrefs = {
+      [service1]: [BlockedInboxOrChannelEnum.INBOX]
+    };
+
+    const res = diffBlockedServices(oldPrefs, newPrefs);
+    expect(res).toEqual(Tuple2([service1], []));
+  });
+
   it("should return an added service when has been just blocked", () => {
     const oldPrefs = {
       [service1]: []
