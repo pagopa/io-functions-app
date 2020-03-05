@@ -94,7 +94,7 @@ export const diffBlockedServices = (
   const oldInboxBlocked = isObject(oldBlocked)
     ? getInboxBlockedServices(oldBlocked)
     : [];
-  const newInboxBlocked = isObject(oldBlocked)
+  const newInboxBlocked = isObject(newBlocked)
     ? getInboxBlockedServices(newBlocked)
     : [];
 
