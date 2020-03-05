@@ -10,7 +10,6 @@ export function toUserDataProcessingApi(
   return {
     choice: userDataProcessing.choice,
     created_at: userDataProcessing.createdAt,
-    fiscal_code: userDataProcessing.fiscalCode,
     status: userDataProcessing.status,
     updated_at: userDataProcessing.updatedAt,
     version: userDataProcessing.version
