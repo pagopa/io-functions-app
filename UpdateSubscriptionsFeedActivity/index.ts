@@ -12,6 +12,7 @@ import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 
 import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
 
+import { isNone } from "fp-ts/lib/Option";
 import { deleteTableEntity, insertTableEntity } from "../utils/storage";
 
 const storageConnectionString = getRequiredStringEnv("QueueStorageConnection");
@@ -89,19 +90,30 @@ async function updateSubscriptionStatus(
   insPartitionKey: string,
   insKey: string
 ): Promise<true> {
-  // first we delete the entry from the unsubscriptions
+  // First we try to delete a previous (un)subscriptions operation
+  // from the subscription feed entries for the current day
   context.log.verbose(`${logPrefix}|KEY=${delKey}|Deleting entity`);
   const { e1: maybeError, e2: uResponse } = await deleteEntity({
     PartitionKey: eg.String(delPartitionKey),
     RowKey: eg.String(delKey)
   });
+
+  // If deleteEntity is successful it means the user
+  // previously made an opposite choice (in the same day).
+  // Since we're going to expose only the delta for this day,
+  // and we've just deleted the opposite operation, we go on here.
+  if (isNone(maybeError)) {
+    return true;
+  }
+
   if (maybeError.isSome() && uResponse.statusCode !== 404) {
     // retry
     context.log.error(`${logPrefix}|ERROR=${maybeError.value.message}`);
     throw maybeError.value;
   }
 
-  // then we insert the entry into the subscriptions
+  // If deleteEntity did not found any entry,
+  // we insert the new (un)subscription entry into the feed
   context.log.verbose(`${logPrefix}|KEY=${insKey}|Inserting entity`);
   const { e1: resultOrError, e2: sResponse } = await insertEntity({
     PartitionKey: eg.String(insPartitionKey),
