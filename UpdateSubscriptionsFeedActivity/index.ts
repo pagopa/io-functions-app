@@ -112,7 +112,7 @@ async function updateSubscriptionStatus(
     throw maybeError.value;
   }
 
-  // If deleteEntity did not found any entry,
+  // If deleteEntity has not found any entry,
   // we insert the new (un)subscription entry into the feed
   context.log.verbose(`${logPrefix}|KEY=${insKey}|Inserting entity`);
   const { e1: resultOrError, e2: sResponse } = await insertEntity({
