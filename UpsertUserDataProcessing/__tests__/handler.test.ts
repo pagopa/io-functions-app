@@ -6,7 +6,7 @@ import { left, right } from "fp-ts/lib/Either";
 
 import * as df from "durable-functions";
 
-import { none, some } from "fp-ts/lib/Option";
+import { some } from "fp-ts/lib/Option";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aFiscalCode,

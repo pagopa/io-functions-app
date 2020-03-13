@@ -2,7 +2,7 @@ import * as express from "express";
 
 import { Context } from "@azure/functions";
 
-import { isLeft, isRight } from "fp-ts/lib/Either";
+import { isLeft } from "fp-ts/lib/Either";
 
 import {
   IResponseErrorConflict,
