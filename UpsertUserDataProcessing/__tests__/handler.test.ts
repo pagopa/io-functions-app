@@ -51,7 +51,7 @@ describe("UpsertUserDataProcessingHandler", () => {
     expect(result.kind).toBe("IResponseErrorValidation");
   });
 
-  it("should return the upserted user data processing with status equal to WIP", async () => {
+  it("should keep the status WIP when a new request is upserted and it was already WIP", async () => {
     const userDataProcessingModelMock = {
       createOrUpdateByNewOne: jest.fn(() =>
         right(aWipRetrievedUserDataProcessing)
