@@ -2,7 +2,7 @@ import * as express from "express";
 
 import { Context } from "@azure/functions";
 
-import { isLeft } from "fp-ts/lib/Either";
+import { isLeft, isRight } from "fp-ts/lib/Either";
 
 import {
   IResponseErrorConflict,
@@ -62,11 +62,40 @@ export function UpsertUserDataProcessingHandler(
       upsertUserDataProcessingPayload.choice,
       fiscalCode
     );
+
+    const errorOrMaybeRetrievedUserDataProcessing = await userDataProcessingModel.findOneUserDataProcessingById(
+      fiscalCode,
+      id
+    );
+
+    // calculate status based on previous (if existing) version of user data processing already chosen by user
+    // This is the machine state table implemented by following code:
+    // |current	         |  POST
+    // |undefined / none |	PENDING
+    // |PENDING	         |  PENDING
+    // |WIP	             |  WIP
+    // |CLOSED	         |  PENDING
+    if (isLeft(errorOrMaybeRetrievedUserDataProcessing)) {
+      return ResponseErrorQuery(
+        "Error while retrieving a previous version of user data processing",
+        errorOrMaybeRetrievedUserDataProcessing.value
+      );
+    }
+    const maybeRetrievedUserDataProcessing =
+      errorOrMaybeRetrievedUserDataProcessing.value;
+    const computedStatus = maybeRetrievedUserDataProcessing.fold(
+      UserDataProcessingStatusEnum.PENDING,
+      retrieved => {
+        return retrieved.status === UserDataProcessingStatusEnum.WIP
+          ? retrieved.status
+          : UserDataProcessingStatusEnum.PENDING;
+      }
+    );
     const userDataProcessing = UserDataProcessing.decode({
       choice: upsertUserDataProcessingPayload.choice,
       createdAt: new Date(),
       fiscalCode,
-      status: UserDataProcessingStatusEnum.PENDING,
+      status: computedStatus,
       userDataProcessingId: id
     });
 

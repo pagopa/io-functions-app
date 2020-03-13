@@ -6,12 +6,15 @@ import { left, right } from "fp-ts/lib/Either";
 
 import * as df from "durable-functions";
 
+import { none, some } from "fp-ts/lib/Option";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aFiscalCode,
   aRetrievedUserDataProcessing,
   aUserDataProcessingApi,
-  aUserDataProcessingChoiceRequest
+  aUserDataProcessingChoiceRequest,
+  aWipRetrievedUserDataProcessing,
+  aWipUserDataProcessingApi
 } from "../../__mocks__/mocks";
 import { UpsertUserDataProcessingHandler } from "../handler";
 
@@ -29,7 +32,10 @@ afterEach(() => {
 describe("UpsertUserDataProcessingHandler", () => {
   it("should return a query error when an error occurs creating the new User data processing", async () => {
     const userDataProcessingModelMock = {
-      createOrUpdateByNewOne: jest.fn(() => left({}))
+      createOrUpdateByNewOne: jest.fn(() => left({})),
+      findOneUserDataProcessingById: jest.fn(() =>
+        right(some(aWipRetrievedUserDataProcessing))
+      )
     };
 
     const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
@@ -45,9 +51,40 @@ describe("UpsertUserDataProcessingHandler", () => {
     expect(result.kind).toBe("IResponseErrorValidation");
   });
 
+  it("should return the upserted user data processing with status equal to WIP", async () => {
+    const userDataProcessingModelMock = {
+      createOrUpdateByNewOne: jest.fn(() =>
+        right(aWipRetrievedUserDataProcessing)
+      ),
+      findOneUserDataProcessingById: jest.fn(() =>
+        right(some(aWipRetrievedUserDataProcessing))
+      )
+    };
+
+    const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
+      userDataProcessingModelMock as any
+    );
+
+    const result = await upsertUserDataProcessingHandler(
+      contextMock as any,
+      aFiscalCode,
+      aUserDataProcessingChoiceRequest
+    );
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual(aWipUserDataProcessingApi);
+    }
+  });
+
   it("should return the upserted user data processing", async () => {
     const userDataProcessingModelMock = {
-      createOrUpdateByNewOne: jest.fn(() => right(aRetrievedUserDataProcessing))
+      createOrUpdateByNewOne: jest.fn(() =>
+        right(aRetrievedUserDataProcessing)
+      ),
+      findOneUserDataProcessingById: jest.fn(() =>
+        right(some(aRetrievedUserDataProcessing))
+      )
     };
 
     const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
