@@ -82,6 +82,9 @@ export const aUserDataProcessingId: UserDataProcessingId = makeUserDataProcessin
 export const aUserDataProcessingStatus: UserDataProcessingStatus =
   UserDataProcessingStatusEnum.PENDING;
 
+export const aWipUserDataProcessingStatus: UserDataProcessingStatus =
+  UserDataProcessingStatusEnum.WIP;
+
 export const aRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
   _etag: "xyz",
   _rid: "xyz",
@@ -98,6 +101,26 @@ export const aRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
   version: 0 as NonNegativeNumber
 };
 
+export const aWipRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
+  _etag: "xyz",
+  _rid: "xyz",
+  _self: "aaa",
+  _ts: 111,
+  choice: aUserDataProcessingChoice,
+  createdAt: aNewDate,
+  fiscalCode: aFiscalCode,
+  id: "xyz" as NonEmptyString,
+  kind: "IRetrievedUserDataProcessing",
+  status: aWipUserDataProcessingStatus,
+  updatedAt: aNewDate,
+  userDataProcessingId: aUserDataProcessingId,
+  version: 0 as NonNegativeNumber
+};
+
 export const aUserDataProcessingApi: UserDataProcessingApi = toUserDataProcessingApi(
   aRetrievedUserDataProcessing
+);
+
+export const aWipUserDataProcessingApi: UserDataProcessingApi = toUserDataProcessingApi(
+  aWipRetrievedUserDataProcessing
 );
