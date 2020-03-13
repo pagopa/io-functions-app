@@ -68,7 +68,7 @@ export function UpsertUserDataProcessingHandler(
       id
     );
 
-    // calculate status based on previous (if existing) version of user data processing already chosen by user
+    // compute the request status according to its previous value (when found)
     // This is the machine state table implemented by following code:
     // |current	         |  POST
     // |undefined / none |	PENDING
