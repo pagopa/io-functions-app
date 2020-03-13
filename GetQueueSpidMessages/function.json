@@ -2,17 +2,10 @@
   "bindings": [
     {
       "queueName": "spid-msg-items",
-      "connection": "AzureWebJobsMyStorage",
+      "connection": "AzureWebJobsStorage",
       "name": "spidMsgItem",
       "type": "queueTrigger",
       "direction": "in"
-    },
-    {
-      "name": "spidBlob",
-      "type": "blob",
-      "path": "spidaudit/{queueTrigger}",
-      "connection": "AzureWebJobsMyStorage",
-      "direction": "out"
     }
   ],
   "disabled": false,
