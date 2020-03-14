@@ -26,8 +26,8 @@ import { GetMessage } from "./handler";
 const app = express();
 secureExpressApp(app);
 
-const cosmosDbUri = getRequiredStringEnv("CUSTOMCONNSTR_COSMOSDB_URI");
-const cosmosDbKey = getRequiredStringEnv("CUSTOMCONNSTR_COSMOSDB_KEY");
+const cosmosDbUri = getRequiredStringEnv("COSMOSDB_URI");
+const cosmosDbKey = getRequiredStringEnv("COSMOSDB_KEY");
 const cosmosDbName = getRequiredStringEnv("COSMOSDB_NAME");
 const messageContainerName = getRequiredStringEnv("MESSAGE_CONTAINER_NAME");
 
