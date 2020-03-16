@@ -38,6 +38,9 @@ following contents:
     "COSMOSDB_URI": "<COSMOSDB_URI>",
     "WEBHOOK_CHANNEL_URL": "<WEBHOOK_URL>",
     "QueueStorageConnection": "<QUEUES_STORAGE_CONNECTION_STRING>",
+    "AssetsStorageConnection": "<ASSETS_STORAGE_CONNECTION_STRING>",
+    "STATUS_ENDPOINT_URL": "<APP_BACKEND_INFO_ENDPOINT>",
+    "STATUS_REFRESH_INTERVAL_MS": "<STATUS_REFRESH_INTERVAL_MS>",
     "SUBSCRIPTIONS_FEED_TABLE": "SubscriptionsFeedByDay"
   },
   "ConnectionStrings": {}

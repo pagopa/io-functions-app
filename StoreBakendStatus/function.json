@@ -1,0 +1,18 @@
+{
+  "bindings": [
+    {
+      "schedule": "0 */5 * * * *",
+      "name": "storeBackendStatusTimer",
+      "type": "timerTrigger",
+      "direction": "in"
+    },
+    {
+      "type": "blob",
+      "name": "backendStatus",
+      "path": "status/backend.json",
+      "connection": "AssetsStorageConnection",
+      "direction": "out"
+    }
+  ],
+  "scriptFile": "../dist/StoreBackendStatus/index.js"
+}
