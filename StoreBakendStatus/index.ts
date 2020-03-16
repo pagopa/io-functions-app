@@ -1,3 +1,8 @@
+/**
+ * Store backend uptime status info into a static JSON
+ * stored into a blob storage served by a public CDN.
+ *
+ */
 import { Context } from "@azure/functions";
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { get } from "superagent";
