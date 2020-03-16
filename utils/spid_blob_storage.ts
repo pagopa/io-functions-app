@@ -1,6 +1,6 @@
 import { BlobService } from "azure-storage";
 import * as azureStorage from "azure-storage";
-import { Either, either, left, right } from "fp-ts/lib/Either";
+import { Either, left, right } from "fp-ts/lib/Either";
 
 export function appendSpidBlob(
   blobService: BlobService,

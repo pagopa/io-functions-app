@@ -1,7 +1,7 @@
 import { Context } from "@azure/functions";
-import { BlobService, createBlobService } from "azure-storage";
+import { createBlobService } from "azure-storage";
 import * as azureStorage from "azure-storage";
-import { Either, fromNullable, left, right } from "fp-ts/lib/Either";
+import { Either } from "fp-ts/lib/Either";
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { AzureContextTransport } from "io-functions-commons/dist/src/utils/logging";
 import * as t from "io-ts";
