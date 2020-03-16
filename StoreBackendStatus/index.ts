@@ -12,7 +12,7 @@ const refreshIntervalMs = getRequiredStringEnv("STATUS_REFRESH_INTERVAL_MS");
 
 type IStoreBackendStatusHandler = (context: Context) => Promise<void>;
 
-export function StoreBackendStatusHandler(): IStoreBackendStatusHandler {
+export function index(): IStoreBackendStatusHandler {
   return async context => {
     // fetch backend info endpoint
     const backendInfoJson = await get(statusEndpointUrl)
@@ -30,4 +30,4 @@ export function StoreBackendStatusHandler(): IStoreBackendStatusHandler {
   };
 }
 
-export default StoreBackendStatusHandler;
+export default index;
