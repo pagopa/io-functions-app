@@ -2,7 +2,7 @@
   "bindings": [
     {
       "queueName": "spid-msg-items",
-      "connection": "AzureWebJobsStorage",
+      "connection": "QueueStorageConnection",
       "name": "spidMsgItem",
       "type": "queueTrigger",
       "direction": "in"
