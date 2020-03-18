@@ -40,15 +40,13 @@ winston.add(contextTransport);
  * Handler that gets triggered on incoming spid Request/Response Message by polling every xxx seconds
  * for new messages in spimsgitems azure storage queue.
  * It handles call to utility that manages blob's related operations.
+ * Store SPID request / responses, read from a queue, into a blob storage.
  */
 export function index(
   context: Context,
   spidMsgItem: SpidMsgItem
 ): Promise<azureStorage.BlobService.BlobResult> {
   logger = context.log;
-  winston.debug(
-    `StoreSpidLogsHandler|queueMessage|${JSON.stringify(spidMsgItem)}`
-  );
   const today = format(new Date(), "YYYY-MM-DD");
   return appendSpidBlob(
     blobService,
@@ -58,7 +56,6 @@ export function index(
   )
     .fold(
       l => {
-        winston.debug(`StoreSpidLogsHandler|throw err|${l}`);
         throw l;
       },
       a => {
