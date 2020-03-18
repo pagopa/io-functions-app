@@ -8,7 +8,7 @@ import * as t from "io-ts";
 import * as winston from "winston";
 import { appendSpidBlob } from "../utils/spid_blob_storage";
 
-const AZURE_STORAGE_CONNECTION_STRING = getRequiredStringEnv(
+const SPID_BLOB_STORAGE_CONNECTION_STRING = getRequiredStringEnv(
   "QueueStorageConnection"
 );
 
@@ -16,12 +16,15 @@ const SPID_BLOB_CONTAINER_NAME = getRequiredStringEnv(
   "SPID_BLOB_CONTAINER_NAME"
 );
 
-const blobService = createBlobService(AZURE_STORAGE_CONNECTION_STRING);
+const blobService = createBlobService(SPID_BLOB_STORAGE_CONNECTION_STRING);
 
+/**
+ * This type wraps a Spid Request/Response message sent over an azure storage queue, namely "spidmsgitems"
+ */
 const SpidMsgItem = t.interface({
-  ip: t.string,
-  payload: t.string,
-  timestamp: t.string
+  ip: t.string, // The client ip that made a Spid login action
+  payload: t.string, // The xml payload of a Spid Request/Response
+  timestamp: t.string // The timestamp of Request/Response creation
 });
 
 type SpidMsgItem = t.TypeOf<typeof SpidMsgItem>;
@@ -34,7 +37,9 @@ const contextTransport = new AzureContextTransport(() => logger, {
 winston.add(contextTransport);
 
 /**
- * Handler that gets triggered on incoming event.
+ * Handler that gets triggered on incoming spid Request/Response Message by polling every xxx seconds
+ * for new messages in spimsgitems azure storage queue.
+ * It handles call to utility that manages blob's related operations.
  */
 export function index(
   context: Context,
@@ -42,9 +47,9 @@ export function index(
 ): Promise<azureStorage.BlobService.BlobResult> {
   logger = context.log;
   winston.debug(
-    `getQueueSpidMessagesHandler|queueMessage|${JSON.stringify(spidMsgItem)}`
+    `StoreSpidLogsHandler|queueMessage|${JSON.stringify(spidMsgItem)}`
   );
-  const today = format(new Date(), "yyyy-MM-dd");
+  const today = format(new Date(), "YYYY-MM-DD");
   return appendSpidBlob(
     blobService,
     SPID_BLOB_CONTAINER_NAME,
@@ -53,6 +58,7 @@ export function index(
   )
     .fold(
       l => {
+        winston.debug(`StoreSpidLogsHandler|throw err|${l}`);
         throw l;
       },
       a => {

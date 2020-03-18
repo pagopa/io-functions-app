@@ -1,7 +1,7 @@
 {
   "bindings": [
     {
-      "queueName": "spid-msg-items",
+      "queueName": "spidmsgitems",
       "connection": "QueueStorageConnection",
       "name": "spidMsgItem",
       "type": "queueTrigger",
@@ -9,5 +9,5 @@
     }
   ],
   "disabled": false,
-  "scriptFile": "../dist/GetQueueSpidMessages/index.js"
+  "scriptFile": "../dist/StoreSpidLogs/index.js"
 }
