@@ -3,7 +3,7 @@ import * as azureStorage from "azure-storage";
 import { TaskEither, taskEither, taskify } from "fp-ts/lib/TaskEither";
 
 /**
- * Provides all the capabilities to manage an azure append blob for Spid Request/Response auditing.
+ * This method provides all the capabilities to manage an azure append blob for Spid Request/Response auditing.
  * It creates a new container if it is missing, based on the provided containerName.
  * If the blob identified by blobName is missing, it creates a new append blob and writes spidMsgItem, otherwise
  * it only append spidMsgItem to the existing blob.
