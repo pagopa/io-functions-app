@@ -28,7 +28,7 @@ export async function index(context: Context): Promise<void> {
   context.bindings.backendStatus = {
     ...backendInfoJson,
     last_update: new Date().toISOString(),
-    refresh_interval: refreshIntervalMs
+    refresh_interval: Number(refreshIntervalMs)
   };
 }
 
