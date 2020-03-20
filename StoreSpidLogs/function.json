@@ -6,6 +6,13 @@
       "name": "spidMsgItem",
       "type": "queueTrigger",
       "direction": "in"
+    },
+    {
+      "type": "blob",
+      "name": "spidblob",
+      "path": "spidblob/{spidRequestId}-{payloadType}-{createdAt}.json",
+      "connection": "QueueStorageConnection",
+      "direction": "out"
     }
   ],
   "disabled": false,
