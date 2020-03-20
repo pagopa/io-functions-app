@@ -1,5 +1,5 @@
 import { Context } from "@azure/functions";
-import { isLeft } from "fp-ts/lib/Either";
+import { fromNullable, isLeft } from "fp-ts/lib/Either";
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { AzureContextTransport } from "io-functions-commons/dist/src/utils/logging";
 import * as t from "io-ts";
@@ -12,14 +12,19 @@ const SPID_BLOB_CONTAINER_NAME = getRequiredStringEnv(
 /**
  * This type wraps a Spid Request/Response message sent over an azure storage queue, namely "spidmsgitems"
  */
-const SpidMsgItem = t.interface({
-  createdAt: t.string, // The timestamp of Request/Response creation
-  ip: t.string, // The client ip that made a Spid login action
-  payload: t.string, // The xml payload of a Spid Request/Response
-  payloadType: t.string, // The information about payload type: REQUEST | RESPONSE
-  spidRequestId: t.string, // The SpiD unique identifier
-  today: t.string // The today's date with YYYY-MM-DD format
-});
+const SpidMsgItem = t.intersection([
+  t.interface({
+    createdAt: t.string, // The timestamp of Request/Response creation
+    ip: t.string, // The client ip that made a Spid login action
+    payload: t.string, // The xml payload of a Spid Request/Response
+    payloadType: t.string, // The information about payload type: REQUEST | RESPONSE
+    spidRequestId: t.string, // The SpiD unique identifier
+    today: t.string // The today's date with YYYY-MM-DD format
+  }),
+  t.partial({
+    fiscalCode: t.string // The user's fiscalCode
+  })
+]);
 
 type SpidMsgItem = t.TypeOf<typeof SpidMsgItem>;
 
@@ -65,8 +70,15 @@ export async function index(
     return Promise.reject("Cannot decode Spid blob payload");
   }
   const spidBlobItem = spidBlobItemOrError.value;
-  // tslint:disable-next-line: no-object-mutation
-  context.bindings[SPID_BLOB_CONTAINER_NAME] = spidBlobItem;
+  if (spidMsgItem.fiscalCode) {
+    // tslint:disable-next-line: no-object-mutation
+    context.bindings[
+      `${SPID_BLOB_CONTAINER_NAME}withfiscalcode`
+    ] = spidBlobItem;
+  } else {
+    // tslint:disable-next-line: no-object-mutation
+    context.bindings[SPID_BLOB_CONTAINER_NAME] = spidBlobItem;
+  }
   context.done();
   return Promise.resolve();
 }

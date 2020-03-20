@@ -13,6 +13,13 @@
       "path": "spidblob/{spidRequestId}-{payloadType}-{createdAt}.json",
       "connection": "QueueStorageConnection",
       "direction": "out"
+    },
+    {
+      "type": "blob",
+      "name": "spidblobwithfiscalcode",
+      "path": "spidblob/{spidRequestId}-{payloadType}-{fiscalCode}-{createdAt}.json",
+      "connection": "QueueStorageConnection",
+      "direction": "out"
     }
   ],
   "disabled": false,
