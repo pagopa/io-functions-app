@@ -1,5 +1,4 @@
 import { Context } from "@azure/functions";
-import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { AzureContextTransport } from "io-functions-commons/dist/src/utils/logging";
 import * as t from "io-ts";
 import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
@@ -67,7 +66,10 @@ export async function index(
 
   const spidBlobItem = spidBlobItemOrError.fold(
     errs => {
-      logger.error("Cannot decode Spid blob payload: ", readableReport(errs));
+      context.log.error(
+        "Cannot decode Spid blob payload: ",
+        readableReport(errs)
+      );
       return void 0;
     },
     item => item

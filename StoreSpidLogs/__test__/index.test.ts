@@ -14,7 +14,7 @@ import { IPString } from "italia-ts-commons/lib/strings";
 import * as handler from "../index";
 const today = format(new Date(), "YYYY-MM-DD");
 const aSpidMsgItem = {
-  createdAt: "",
+  createdAt: "020-03-20T13:53:03.987Z",
   createdAtDay: today,
   ip: "192.168.1.6" as IPString,
   payload:
@@ -31,7 +31,9 @@ describe("StoreSpidLogs", () => {
         spidmsgitem: aSpidMsgItem
       },
       done: jest.fn(),
-      log: jest.fn()
+      log: {
+        error: jest.fn()
+      }
     };
 
     await handler.index(mockedContext as any, aSpidMsgItem);
