@@ -1,8 +1,10 @@
 import { Context } from "@azure/functions";
-import { fromNullable, isLeft } from "fp-ts/lib/Either";
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { AzureContextTransport } from "io-functions-commons/dist/src/utils/logging";
 import * as t from "io-ts";
+import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
+import { readableReport } from "italia-ts-commons/lib/reporters";
+import { IPString, PatternString } from "italia-ts-commons/lib/strings";
 import * as winston from "winston";
 
 const SPID_BLOB_CONTAINER_NAME = getRequiredStringEnv(
@@ -15,11 +17,11 @@ const SPID_BLOB_CONTAINER_NAME = getRequiredStringEnv(
 const SpidMsgItem = t.intersection([
   t.interface({
     createdAt: t.string, // The timestamp of Request/Response creation
-    ip: t.string, // The client ip that made a Spid login action
+    createdAtDay: PatternString("^[0-9]{4}-[0-9]{2}-[0-9]{2}$"), // The today's date expression in YYYY-MM-DD format
+    ip: IPString, // The client ip that made a Spid login action
     payload: t.string, // The xml payload of a Spid Request/Response
-    payloadType: t.string, // The information about payload type: REQUEST | RESPONSE
-    spidRequestId: t.string, // The SpiD unique identifier
-    today: t.string // The today's date with YYYY-MM-DD format
+    payloadType: t.keyof({ REQUEST: null, RESPONSE: null }), // The information about payload type: REQUEST | RESPONSE
+    spidRequestId: t.string // The SpiD unique identifier
   }),
   t.partial({
     fiscalCode: t.string // The user's fiscalCode
@@ -32,10 +34,10 @@ type SpidMsgItem = t.TypeOf<typeof SpidMsgItem>;
  * This type wraps a Spid Blob item, stored in a Blob for each message
  */
 const SpidBlobItem = t.interface({
-  createdAt: t.string, // The timestamp of Request/Response creation
-  ip: t.string, // The client ip that made a Spid login action
+  createdAt: UTCISODateFromString, // The timestamp of Request/Response creation
+  ip: IPString, // The client ip that made a Spid login action
   payload: t.string, // The xml payload of a Spid Request/Response
-  payloadType: t.string, // The nformation about payload type: REQUEST | RESPONSE
+  payloadType: t.keyof({ REQUEST: null, RESPONSE: null }), // The nformation about payload type: REQUEST | RESPONSE
   spidRequestId: t.string // The SpiD request ID
 });
 
@@ -66,19 +68,20 @@ export async function index(
     payloadType: spidMsgItem.payloadType,
     spidRequestId: spidMsgItem.spidRequestId
   });
-  if (isLeft(spidBlobItemOrError)) {
-    return Promise.reject("Cannot decode Spid blob payload");
-  }
-  const spidBlobItem = spidBlobItemOrError.value;
+
+  const spidBlobItem = spidBlobItemOrError.fold(
+    errs => {
+      logger.error("Cannot decode Spid blob payload: ", readableReport(errs));
+      return void 0;
+    },
+    item => item
+  );
   if (spidMsgItem.fiscalCode) {
     // tslint:disable-next-line: no-object-mutation
-    context.bindings[
-      `${SPID_BLOB_CONTAINER_NAME}withfiscalcode`
-    ] = spidBlobItem;
+    context.bindings.spidresponse = spidBlobItem;
   } else {
     // tslint:disable-next-line: no-object-mutation
-    context.bindings[SPID_BLOB_CONTAINER_NAME] = spidBlobItem;
+    context.bindings.spidrequest = spidBlobItem;
   }
   context.done();
-  return Promise.resolve();
 }
