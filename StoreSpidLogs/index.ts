@@ -7,10 +7,6 @@ import { readableReport } from "italia-ts-commons/lib/reporters";
 import { IPString, PatternString } from "italia-ts-commons/lib/strings";
 import * as winston from "winston";
 
-const SPID_BLOB_CONTAINER_NAME = getRequiredStringEnv(
-  "SPID_BLOB_CONTAINER_NAME"
-);
-
 /**
  * This type wraps a Spid Request/Response message sent over an azure storage queue, namely "spidmsgitems"
  */
