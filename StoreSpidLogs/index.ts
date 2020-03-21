@@ -46,7 +46,8 @@ const contextTransport = new AzureContextTransport(() => logger, {
 winston.add(contextTransport);
 
 /**
- * Handler that gets triggered on incoming spid Request/Response Message by polling every xxx seconds
+ * Handler that gets triggered on incoming spid Request/Response
+ * Message by polling every xxx seconds
  * for new messages in spimsgitems azure storage queue.
  * It handles call to utility that manages blob's related operations.
  * Store SPID request / responses, read from a queue, into a blob storage.
@@ -57,29 +58,26 @@ export async function index(
 ): Promise<Error | void> {
   logger = context.log;
   const spidBlobItemOrError = SpidBlobItem.decode({
-    createdAt: spidMsgItem.createdAt,
-    ip: spidMsgItem.ip,
-    payload: spidMsgItem.payload,
-    payloadType: spidMsgItem.payloadType,
-    spidRequestId: spidMsgItem.spidRequestId
+    spidMsgItem
   });
 
   const spidBlobItem = spidBlobItemOrError.fold(
     errs => {
       context.log.error(
-        "Cannot decode Spid blob payload: ",
-        readableReport(errs)
+        `StoreSpidLogs|ERROR=Cannot decode payload|ERROR_DETAILS=${readableReport(
+          errs
+        )}`
       );
       return void 0;
     },
     item => item
   );
-  if (spidMsgItem.fiscalCode) {
+  if (spidMsgItem.payloadType === "RESPONSE") {
     // tslint:disable-next-line: no-object-mutation
     context.bindings.spidresponse = spidBlobItem;
   } else {
     // tslint:disable-next-line: no-object-mutation
     context.bindings.spidrequest = spidBlobItem;
   }
-  context.done();
+  return Promise.resolve();
 }
