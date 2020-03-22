@@ -7,7 +7,8 @@ import { IPString, PatternString } from "italia-ts-commons/lib/strings";
 import * as winston from "winston";
 
 /**
- * This type wraps a Spid Request/Response message sent over an azure storage queue, namely "spidmsgitems"
+ * This type wraps a Spid Request/Response message sent over an azure storage queue
+
  */
 const SpidMsgItem = t.intersection([
   t.interface({
