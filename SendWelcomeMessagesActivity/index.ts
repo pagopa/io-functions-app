@@ -25,34 +25,69 @@ const welcomeMessages: WelcomeMessages = [
   (_: RetrievedProfile) =>
     NewMessage.decode({
       content: {
-        markdown: `## Benvenuto su IO, l'applicazione dei servizi pubblici, ora in fase beta!
+        markdown: `## Benvenuto nella versione beta di IO, l’app dei servizi pubblici!
 
-Scopri le funzioni e impara a usare l'app del cittadino.
+Ciao! Questa è la prima versione beta aperta a tutti (open beta) di IO, l’app dei servizi pubblici.
+Cosa vuol dire? Significa che tutti i cittadini, come te, potranno partecipare alla sperimentazione
+di un prodotto che evolverà e migliorerà continuamente anche grazie all’esperienza diretta
+e ai feedback delle persone a cui è destinato.
 
-### I messaggi
-IO ti consente di ricevere messaggi dalle Pubbliche Amministrazioni italiane, sia locali che nazionali, e all'occorrenza effettuare pagamenti.
-Puoi decidere da chi e come essere contattato, dalla sezione [servizi](ioit://PREFERENCES_SERVICES) di questa applicazione, e scegliere se inoltrare il messaggio anche al tuo indirizzo email associato a SPID.
+Rendendo per tutti disponibile IO in versione beta, consentiamo agli enti pubblici di portare progressivamente
+i propri servizi sull’app, e ai cittadini italiani di avere dei servizi pubblici nuovi, moderni e centrati sulle proprie esigenze.
 
-### I pagamenti
+### Scopri le funzioni di IO
 
-IO si appoggia a pagoPA per effettuare pagamenti verso la Pubblica Amministrazione: se hai già usato pagoPA come utente registrato potrai vedere lo storico delle transazioni ed eventuali carte di credito salvate nella sezione [portafoglio](ioit://WALLET_HOME).
-Altrimenti, sempre dal [portafoglio](ioit://WALLET_HOME) puoi aggiungere i tuoi metodi di pagamento preferiti, oppure pagare direttamente un avviso pagoPA leggendo il QR code di un avviso cartaceo.
-Quando effettui un pagamento tramite l’app, questa ti informerà del buon esito della transazione (salvo buon fine sul tuo conto) indicandoti accanto al pagamento che questo risulta “pagato”.
-L'effettiva chiusura della posizione debitoria ti verrà comunicata dall'ente titolare del servizio, se questo lo prevede.
+Ecco come potrai usare IO, sperimentando le diverse funzioni disponibili oggi nell’app:
+moltre altre ne arriveranno nei prossimi mesi!
 
-### Come comunicare con noi e contribuire al progetto
+#### I messaggi
 
-Lo sviluppo ed il miglioramento di IO non si fermerà di certo quest'anno, ma in questa fase di closed beta è importante il contributo di tutti gli utenti per migliorarla.
-Se qualcosa non funziona, segnalalo cliccando l'icona della coccinella che trovi in alto a destra nella app.
-Se invece vuoi comunicare direttamente col team di sviluppo di IO, puoi usare l'icona della chat sempre in alto a destra.
-Se qualcosa non ti dovesse essere chiaro durante l'utilizzo dell'app, clicca il punto di domanda (lo aggiungeremo mano a mano a tutte le schermate che lo richiedono).
+IO ti consente di ricevere comunicazioni da tutte le Pubbliche Amministrazioni italiane, locali e nazionali,
+di tenere sotto controllo ogni scadenza e, all’occorrenza, effettuare dei pagamenti.
+All’arrivo di ogni nuovo messaggio, IO ti informa attraverso una notifica e un inoltro del messaggio
+sulla tua casella di posta: nella sezione [servizi](ioit://PREFERENCES_SERVICES)
+puoi decidere come essere contattato da ciascun servizio.
 
-Se qualcosa dei messaggi che ricevi non ti è chiaro, puoi andare alla scheda servizio cliccando sul logo dell'ente che ti ha inviato il messaggio, e lì troverai i recapiti dei responsabili del servizio.
-IO è un progetto 100% open source: quindi se sei un designer o uno sviluppatore, puoi contribuire direttamente: trovi tutte le informazioni nella [sezione dedicata](https://io.italia.it/sviluppatori/) sul sito del progetto.
+#### I pagamenti
 
-Grazie per far parte del progetto IO!`,
+IO integra [pagoPA](https://www.pagopa.gov.it/) per effettuare pagamenti sicuri verso la Pubblica Amministrazione.
+Se hai già usato pagoPA come utente registrato, nella sezione [pagamenti](ioit://WALLET_HOME) potrai vedere lo storico delle transazioni
+effettuate e le tue carte di credito salvate. Puoi usare la sezione [pagamenti](ioit://WALLET_HOME) per aggiungere i tuoi metodi preferiti,
+procedere al pagamento di un avviso pagoPA (tramite scansione del codice QR o inserimento manuale del codice IUV)
+e tenere traccia di tutte le operazioni svolte.
 
-        subject: `Benvenuto!`
+#### I servizi
+
+Nella sezione [servizi](ioit://PREFERENCES_SERVICES) puoi vedere quali sono i servizi locali e nazionali disponibili all’interno dell’app
+e decidere da quali essere contattato e come. Aggiungi le tue aree geografiche di interesse per essere sempre
+informato sui nuovi servizi in arrivo nel tuo Comune o nella tua Regione.
+
+#### Serve aiuto ?
+
+Se qualcosa non ti è chiaro durante l’utilizzo dell’app, usa il punto di domanda in alto a destra per leggere approfondimenti
+e indicazioni utili relative alla sezione in cui ti trovi.
+Ricorda che i messaggi che IO ti recapita sono inviati direttamente dagli enti pubblici: se i tuoi dubbi riguardano
+il contenuto di un messaggio, contatta direttamente l’ente che ti ha scritto con gli appositi pulsanti che trovi nel
+corpo del messaggio o nella scheda del servizio.
+Se hai un problema e non trovi risposte utili nella pagina di aiuto, contatta il team di IO utilizzando
+il pulsante con la coccinella (se ti sembra si tratti di un malfunzionamento) o l’icona della chat
+(per interagire direttamente con la nostra assistenza, in caso di problemi urgenti).
+
+#### Come partecipare al progetto
+
+IO è un progetto che cresce e migliora giorno dopo giorno grazie al contributo di tutte le persone che, come te,
+partecipano alla sperimentazione. Per questo ti chiediamo, se vorrai, di segnalarci ogni aspetto dal tuo punto di vista migliorabile,
+utilizzando l'apposita funzione con l’icona a coccinella (per segnalare errori di funzionamento) o la chat
+(per inviare suggerimenti o commentare la tua esperienza).
+
+IO è un progetto 100% open source. Se sei un designer o uno sviluppatore, puoi contribuire direttamente al design
+e sviluppo dell’applicazione: visita il sito [io.italia.it](https://io.italia.it)
+per trovare più informazioni su come dare il tuo contributo.
+
+Grazie di far parte del progetto IO!
+`,
+
+        subject: `Benvenuto su IO`
       }
     }).getOrElseL(errs => {
       throw new Error(
@@ -62,18 +97,33 @@ Grazie per far parte del progetto IO!`,
   (_: RetrievedProfile) =>
     NewMessage.decode({
       content: {
-        markdown: `## Scopri come attivare o disattivare i servizi delle amministrazioni pubbliche.
+        markdown: `## Scopri quali enti e servizi puoi trovare all’interno di IO.
 
-Scegli i servizi con cui vuoi interagire nell'app.
+L’app IO nasce per offrirti un unico punto di accesso, comodo, semplice e sicuro, verso tutti i servizi della Pubblica Amministrazione.
+Diversi enti nazionali e locali hanno già portato i loro servizi a bordo, e molti se ne aggiungeranno in futuro.
+Siamo infatti solo all’inizio del percorso che, progressivamente, porterà i cittadini italiani ad avere nuovi servizi digitali messi
+a disposizione da tutti gli enti pubblici all’interno dell’app.
 
-Al lancio dell'applicazione la lista dei servizi disponibili comprende tutti quelli a livello nazionale (ad esempio l'ACI) e quelli relativi ad alcune regioni e ad alcuni comuni, ma non temere: ti scriveranno solo i servizi che hanno qualcosa di specifico da dire proprio a te! ;-)
+Nella sezione [servizi](ioit://PREFERENCES_SERVICES) puoi indicare le aree geografiche di tuo interesse
+(dove vivi, dove lavori, o dove magari vai spesso) per essere sempre informato sui nuovi servizi in arrivo in quel Comune o in quella Regione.
 
-Nella sezione [servizi](ioit://PREFERENCES_SERVICES) dentro [preferenze](ioit://PREFERENCES_HOME) puoi scegliere su quale canale ricevere le comunicazioni di ciascun servizio (notifiche, email, ecc.) e puoi anche decidere di disattivare eventuali servizi a cui non sei interessato. In quest'ultimo caso i servizi verranno disattivati da IO: per comunicare con gli enti dovrai utilizzare i canali tradizionali che usavi in precedenza.
+Se non vedi gli enti del tuo territorio tra quelli elencati, è perché i loro servizi sono ancora in corso di integrazione.
+Se vuoi saperne di più, chiedi al tuo Comune se hanno attivato il processo per essere presenti su IO e a che punto sono.
+La tua voce può essere un segnale importante!
 
-L’app IO infatti non sostituisce i mezzi di comunicazione che gli enti usano per comunicare con i cittadini, ma si aggiunge ad essi consentendoti di ricevere i messaggi e conoscere i servizi più agevolmente.
-È importante sapere che le comunicazioni inviate tramite IO, per il momento, non hanno valore legale.`,
+Tutti i servizi all’interno dell’app sono attivi: questo non vuol dire che ti contatteranno, anzi.
+Ti scriveranno solo i servizi che hanno qualcosa da dire proprio a te, in caso di comunicazioni rilevanti come ad esempio
+la scadenza di un documento, il promemoria per un pagamento o l’aggiornamento su una pratica in corso.
+Se, per un determinato servizio, preferisci utilizzare mezzi di comunicazione diversi dall’app IO, puoi in ogni
+momento disattivarlo nella relativa scheda servizio: in quel caso, l’Ente continuerà a contattarti avvalendosi
+dei canali tradizionali (come ad esempio la posta cartacea).
 
-        subject: `Gestire i servizi in IO`
+Infine, è importante sapere che per ora i messaggi inviati dagli enti tramite IO non hanno valore legale.
+
+Per approfondimenti ti invitiamo a consultare la sezione [servizi](ioit://PREFERENCES_SERVICES) di questa applicazione; per maggiori
+informazioni sull’avanzamento del progetto, visita il sito [io.italia.it](https://io.italia.it).
+`,
+        subject: `Quali servizi trovi su IO?`
       }
       // tslint:disable-next-line:no-identical-functions
     }).getOrElseL(errs => {
