@@ -14,7 +14,7 @@ import { IPString } from "italia-ts-commons/lib/strings";
 import * as handler from "../index";
 const today = format(new Date(), "YYYY-MM-DD");
 const aSpidMsgItem = {
-  createdAt: "020-03-20T13:53:03.987Z",
+  createdAt: new Date(),
   createdAtDay: today,
   ip: "192.168.1.6" as IPString,
   payload:
