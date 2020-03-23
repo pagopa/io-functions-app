@@ -11,14 +11,14 @@
     {
       "type": "blob",
       "name": "spidrequest",
-      "path": "spidassertions/{spidRequestId}-{payloadType}-{createdAtDay}.json",
+      "path": "spidassertions/{createdAtDay}-{spidRequestId}-{payloadType}.json",
       "connection": "SpidStorageAssertionsConnection",
       "direction": "out"
     },
     {
       "type": "blob",
       "name": "spidresponse",
-      "path": "spidassertions/{spidRequestId}-{payloadType}-{fiscalCode}-{createdAtDay}.json",
+      "path": "spidassertions/{createdAtDay}-{spidRequestId}-{payloadType}-{fiscalCode}.json",
       "connection": "SpidStorageAssertionsConnection",
       "direction": "out"
     }
