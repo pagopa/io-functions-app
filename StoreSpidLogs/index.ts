@@ -47,10 +47,6 @@ const contextTransport = new AzureContextTransport(() => logger, {
 winston.add(contextTransport);
 
 /**
- * Handler that gets triggered on incoming spid Request/Response
- * Message by polling every xxx seconds
- * for new messages in spimsgitems azure storage queue.
- * It handles call to utility that manages blob's related operations.
  * Store SPID request / responses, read from a queue, into a blob storage.
  */
 export async function index(
