@@ -10,14 +10,14 @@
     ,
     {
       "type": "blob",
-      "name": "spidrequest",
+      "name": "spidRequest",
       "path": "spidassertions/{createdAtDay}-{spidRequestId}-{payloadType}.json",
       "connection": "QueueStorageConnection",
       "direction": "out"
     },
     {
       "type": "blob",
-      "name": "spidresponse",
+      "name": "spidResponse",
       "path": "spidassertions/{createdAtDay}-{spidRequestId}-{payloadType}-{fiscalCode}.json",
       "connection": "QueueStorageConnection",
       "direction": "out"
