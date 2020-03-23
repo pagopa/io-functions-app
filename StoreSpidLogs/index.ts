@@ -7,26 +7,6 @@ import { IPString, PatternString } from "italia-ts-commons/lib/strings";
 import * as winston from "winston";
 
 /**
- * This type wraps a Spid Request/Response message sent over an azure storage queue
-
- */
-const SpidMsgItem = t.intersection([
-  t.interface({
-    createdAt: t.string, // The timestamp of Request/Response creation
-    createdAtDay: PatternString("^[0-9]{4}-[0-9]{2}-[0-9]{2}$"), // The today's date expression in YYYY-MM-DD format
-    ip: IPString, // The client ip that made a Spid login action
-    payload: t.string, // The xml payload of a Spid Request/Response
-    payloadType: t.keyof({ REQUEST: null, RESPONSE: null }), // The information about payload type: REQUEST | RESPONSE
-    spidRequestId: t.string // The SpiD unique identifier
-  }),
-  t.partial({
-    fiscalCode: t.string // The user's fiscalCode
-  })
-]);
-
-type SpidMsgItem = t.TypeOf<typeof SpidMsgItem>;
-
-/**
  * This type wraps a Spid Blob item, stored in a Blob for each message
  */
 const SpidBlobItem = t.interface({
@@ -38,6 +18,21 @@ const SpidBlobItem = t.interface({
 });
 
 type SpidBlobItem = t.TypeOf<typeof SpidBlobItem>;
+
+/**
+ * This type wraps a Spid Request/Response message sent over an azure storage queue
+ */
+const SpidMsgItem = t.intersection([
+  t.interface({
+    createdAtDay: PatternString("^[0-9]{4}-[0-9]{2}-[0-9]{2}$") // The today's date expression in YYYY-MM-DD format
+  }),
+  SpidBlobItem,
+  t.partial({
+    fiscalCode: t.string // The user's fiscalCode
+  })
+]);
+
+type SpidMsgItem = t.TypeOf<typeof SpidMsgItem>;
 
 // tslint:disable-next-line: no-let
 let logger: Context["log"] | undefined;
@@ -58,7 +53,7 @@ export async function index(
     spidMsgItem
   });
 
-  const spidBlobItem = spidBlobItemOrError.fold(
+  spidBlobItemOrError.fold(
     errs => {
       context.log.error(
         `StoreSpidLogs|ERROR=Cannot decode payload|ERROR_DETAILS=${readableReport(
@@ -67,14 +62,14 @@ export async function index(
       );
       return void 0;
     },
-    item => item
+    spidBlobItem => {
+      if (spidMsgItem.payloadType === "RESPONSE") {
+        // tslint:disable-next-line: no-object-mutation
+        context.bindings.spidresponse = spidBlobItem;
+      } else {
+        // tslint:disable-next-line: no-object-mutation
+        context.bindings.spidrequest = spidBlobItem;
+      }
+    }
   );
-  if (spidMsgItem.payloadType === "RESPONSE") {
-    // tslint:disable-next-line: no-object-mutation
-    context.bindings.spidresponse = spidBlobItem;
-  } else {
-    // tslint:disable-next-line: no-object-mutation
-    context.bindings.spidrequest = spidBlobItem;
-  }
-  return Promise.resolve();
 }
