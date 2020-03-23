@@ -47,7 +47,8 @@ winston.add(contextTransport);
 export async function index(
   context: Context,
   spidMsgItem: SpidMsgItem
-): Promise<Error | void> {
+): Promise<void> {
+
   logger = context.log;
   const spidBlobItemOrError = SpidBlobItem.decode({
     spidMsgItem

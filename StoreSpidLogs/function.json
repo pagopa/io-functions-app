@@ -2,7 +2,7 @@
   "bindings": [
     {
       "queueName": "spidmsgitems",
-      "connection": "SpidStorageAssertionsConnection",
+      "connection": "QueueStorageConnection",
       "name": "spidMsgItem",
       "type": "queueTrigger",
       "direction": "in"
@@ -12,14 +12,14 @@
       "type": "blob",
       "name": "spidrequest",
       "path": "spidassertions/{createdAtDay}-{spidRequestId}-{payloadType}.json",
-      "connection": "SpidStorageAssertionsConnection",
+      "connection": "QueueStorageConnection",
       "direction": "out"
     },
     {
       "type": "blob",
       "name": "spidresponse",
       "path": "spidassertions/{createdAtDay}-{spidRequestId}-{payloadType}-{fiscalCode}.json",
-      "connection": "SpidStorageAssertionsConnection",
+      "connection": "QueueStorageConnection",
       "direction": "out"
     }
   ],
