@@ -65,8 +65,7 @@ describe("StoreSpidLogs", () => {
       }
     };
     const blobItem = await index(mockedContext as any, aSpidMsgItem);
-    expect(blobItem).toEqual(aSpidBlobItem);
-    expect((mockedContext.bindings as any).spidRequest).toEqual(aSpidBlobItem);
+    expect(blobItem).toEqual({ spidRequest: aSpidBlobItem });
   });
 
   it("should store a SPID response published into the queue", async () => {
@@ -84,12 +83,10 @@ describe("StoreSpidLogs", () => {
       payloadType: "RESPONSE"
     });
     expect(blobItem).toEqual({
-      ...aSpidBlobItem,
-      payloadType: "RESPONSE"
-    });
-    expect((mockedContext.bindings as any).spidResponse).toEqual({
-      ...aSpidBlobItem,
-      payloadType: "RESPONSE"
+      spidResponse: {
+        ...aSpidBlobItem,
+        payloadType: "RESPONSE"
+      }
     });
   });
 });

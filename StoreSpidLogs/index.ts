@@ -76,14 +76,9 @@ export async function index(
         return void 0;
       },
       spidBlobItem => {
-        if (spidMsgItem.payloadType === "RESPONSE") {
-          // tslint:disable-next-line: no-object-mutation
-          context.bindings.spidResponse = spidBlobItem;
-        } else {
-          // tslint:disable-next-line: no-object-mutation
-          context.bindings.spidRequest = spidBlobItem;
-        }
-        return spidBlobItem;
+        return spidMsgItem.payloadType === "RESPONSE"
+          ? { spidResponse: spidBlobItem }
+          : { spidRequest: spidBlobItem };
       }
     );
 }
