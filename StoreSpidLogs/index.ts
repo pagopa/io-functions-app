@@ -54,13 +54,17 @@ const contextTransport = new AzureContextTransport(() => logger, {
 });
 winston.add(contextTransport);
 
+type OutputBinding =
+  | { spidResponse: SpidBlobItem }
+  | { spidRequest: SpidBlobItem };
+
 /**
  * Store SPID request / responses, read from a queue, into a blob storage.
  */
 export async function index(
   context: Context,
   spidMsgItem: SpidMsgItem
-): Promise<void | SpidBlobItem> {
+): Promise<void | OutputBinding> {
   logger = context.log;
   return t
     .exact(SpidBlobItem)
@@ -75,10 +79,9 @@ export async function index(
         // unrecoverable error
         return void 0;
       },
-      spidBlobItem => {
-        return spidMsgItem.payloadType === "RESPONSE"
+      spidBlobItem =>
+        spidMsgItem.payloadType === "RESPONSE"
           ? { spidResponse: spidBlobItem }
-          : { spidRequest: spidBlobItem };
-      }
+          : { spidRequest: spidBlobItem }
     );
 }
