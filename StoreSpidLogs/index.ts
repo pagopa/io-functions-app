@@ -69,15 +69,14 @@ export async function index(
   return t
     .exact(SpidBlobItem)
     .decode(spidMsgItem)
-    .fold(
+    .fold<void | OutputBinding>(
       errs => {
+        // unrecoverable error
         context.log.error(
           `StoreSpidLogs|ERROR=Cannot decode payload|ERROR_DETAILS=${readableReport(
             errs
           )}`
         );
-        // unrecoverable error
-        return void 0;
       },
       spidBlobItem =>
         spidMsgItem.payloadType === "RESPONSE"
