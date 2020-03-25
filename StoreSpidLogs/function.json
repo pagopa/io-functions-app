@@ -1,0 +1,28 @@
+{
+  "bindings": [
+    {
+      "queueName": "spidmsgitems",
+      "connection": "LogStorageConnection",
+      "name": "spidMsgItem",
+      "type": "queueTrigger",
+      "direction": "in"
+    }
+    ,
+    {
+      "type": "blob",
+      "name": "spidRequest",
+      "path": "spidassertions/{spidRequestId}-{payloadType}-{createdAtDay}.json",
+      "connection": "LogStorageConnection",
+      "direction": "out"
+    },
+    {
+      "type": "blob",
+      "name": "spidResponse",
+      "path": "spidassertions/{spidRequestId}-{payloadType}-{createdAtDay}-{fiscalCode}.json",
+      "connection": "LogStorageConnection",
+      "direction": "out"
+    }
+  ],
+  "disabled": false,
+  "scriptFile": "../dist/StoreSpidLogs/index.js"
+}
