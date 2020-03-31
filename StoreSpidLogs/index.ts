@@ -17,11 +17,11 @@ const SpidBlobItem = t.interface({
   // IP of the client that made a SPID login action
   ip: IPString,
 
-  // XML payload of the SPID Request/Response
-  payload: t.string,
+  // XML payload of the SPID Request
+  requestPayload: t.string,
 
-  // Payload type: REQUEST or RESPONSE
-  payloadType: t.keyof({ REQUEST: null, RESPONSE: null }),
+  // XML payload of the SPID Response
+  responsePayload: t.string,
 
   // SPID request ID
   spidRequestId: t.string
@@ -54,9 +54,11 @@ const contextTransport = new AzureContextTransport(() => logger, {
 });
 winston.add(contextTransport);
 
-type OutputBinding =
-  | { spidResponse: SpidBlobItem }
-  | { spidRequest: SpidBlobItem };
+const OutputBinding = t.interface({
+  spidRequestResponse: SpidBlobItem
+});
+
+export type OutputBinding = t.TypeOf<typeof OutputBinding>;
 
 /**
  * Store SPID request / responses, read from a queue, into a blob storage.
@@ -78,9 +80,10 @@ export async function index(
           )}`
         );
       },
-      spidBlobItem =>
-        spidMsgItem.payloadType === "RESPONSE"
-          ? { spidResponse: spidBlobItem }
-          : { spidRequest: spidBlobItem }
+      spidBlobItem => {
+        return {
+          spidRequestResponse: spidBlobItem
+        };
+      }
     );
 }
