@@ -17,10 +17,10 @@ const today = format(new Date(), "YYYY-MM-DD");
 const aSpidBlobItem: SpidBlobItem = {
   createdAt: new Date(),
   ip: "192.168.1.6" as IPString,
-  payload:
-    "<?xml version='1.0' encoding='UTF-8'?><note ID='AAAA_BBBB'><to>Azure</to><from>Azure</from><heading>Reminder</heading><body>New append from local dev</body></note>",
-  // tslint:disable-next-line: prettier
-  payloadType: "REQUEST" as "REQUEST" | "RESPONSE",
+  requestPayload:
+    "<?xml version='1.0' encoding='UTF-8'?><note ID='AAAA_BBBB'><to>Azure</to><from>Azure</from><heading>Reminder</heading><body>New append from local dev - REQUEST</body></note>",
+  responsePayload:
+    "<?xml version='1.0' encoding='UTF-8'?><note ID='AAAA_BBBB'><to>Azure</to><from>Azure</from><heading>Reminder</heading><body>New append from local dev - RESPONSE</body></note>",
   spidRequestId: "AAAA_BBBB"
 };
 
@@ -29,10 +29,10 @@ const aSpidMsgItem: SpidMsgItem = {
   createdAtDay: today,
   fiscalCode: aFiscalCode,
   ip: "192.168.1.6" as IPString,
-  payload:
-    "<?xml version='1.0' encoding='UTF-8'?><note ID='AAAA_BBBB'><to>Azure</to><from>Azure</from><heading>Reminder</heading><body>New append from local dev</body></note>",
-  // tslint:disable-next-line: prettier
-  payloadType: "REQUEST" as "REQUEST" | "RESPONSE",
+  requestPayload:
+    "<?xml version='1.0' encoding='UTF-8'?><note ID='AAAA_BBBB'><to>Azure</to><from>Azure</from><heading>Reminder</heading><body>New append from local dev - REQUEST</body></note>",
+  responsePayload:
+    "<?xml version='1.0' encoding='UTF-8'?><note ID='AAAA_BBBB'><to>Azure</to><from>Azure</from><heading>Reminder</heading><body>New append from local dev - RESPONSE</body></note>",
   spidRequestId: "AAAA_BBBB"
 };
 
@@ -65,7 +65,7 @@ describe("StoreSpidLogs", () => {
       }
     };
     const blobItem = await index(mockedContext as any, aSpidMsgItem);
-    expect(blobItem).toEqual({ spidRequest: aSpidBlobItem });
+    expect(blobItem).toEqual({ spidRequestResponse: aSpidBlobItem });
   });
 
   it("should store a SPID response published into the queue", async () => {
@@ -79,13 +79,11 @@ describe("StoreSpidLogs", () => {
       }
     };
     const blobItem = await index(mockedContext as any, {
-      ...aSpidMsgItem,
-      payloadType: "RESPONSE"
+      ...aSpidMsgItem
     });
     expect(blobItem).toEqual({
-      spidResponse: {
-        ...aSpidBlobItem,
-        payloadType: "RESPONSE"
+      spidRequestResponse: {
+        ...aSpidBlobItem
       }
     });
   });
