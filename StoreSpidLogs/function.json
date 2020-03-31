@@ -10,8 +10,8 @@
     {
       "type": "blob",
       "name": "spidRequestResponse",
-      "path": "spidassertions/{spidRequestId}-{createdAtDay}-{fiscalCode}.json",
-      "connection": "LogsStorageConnection",
+      "path": "spidassertions/{spidRequestId}-{createdAtDay}-{fiscalCode}.log",
+      "connection": "LogStorageConnection",
       "direction": "out"
     }
   ],
