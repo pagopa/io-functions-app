@@ -11,7 +11,7 @@
       "type": "blob",
       "name": "spidRequestResponse",
       "path": "spidassertions/{spidRequestId}-{createdAtDay}-{fiscalCode}.log",
-      "connection": "LogStorageConnection",
+      "connection": "LogsStorageConnection",
       "direction": "out"
     }
   ],

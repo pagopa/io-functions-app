@@ -15,19 +15,11 @@ import * as winston from "winston";
  * Encrypt a given string with RSA Public key
  * @param payload: a json payload to encrypt with public key
  */
-const encryptWithRsaPublicKey = (payload: string) => {
+const encryptWithRsaPublicKey = (payload: string, publicKey: string) => {
   return crypto
     .publicEncrypt(
       {
-        key: `-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi5NKxxANte+B7T1R7/oV
-BcEnobW83gF/G7uiWj0uprprhkN01El6OybHUI3XikPXXwQB7VdBFFuyNuuLXw3n
-B0Ed4sIVsaGnNqYkeGJ/+RD/9ptjWR/QNCZ5a50mGv1MuOD2Us4zRAmOLTbbKz0Q
-GCNfojkrDgwlNKDwNyJ9GCUkOqtf+CfeU7ntKK/3LQrarHrG2ybrtHQIq9v/NIrk
-GKuAsCBHn30CrFWWQA+4J4w8YAoP0CiA2DMRYlzJG7/sKAyu4FIT3eCHYCqPjqNl
-ccxJbYWiN26GbFNgYg1uN1zh3Y6rIPf8RQa2Z4rJ6N957HqeGtEct+8/CZFuzX9p
-0wIDAQAB
------END PUBLIC KEY-----`,
+        key: publicKey,
         padding: crypto.constants.RSA_NO_PADDING
       },
       Buffer.from(payload)
@@ -82,11 +74,9 @@ const contextTransport = new AzureContextTransport(() => logger, {
 });
 winston.add(contextTransport);
 
-const OutputBinding = t.interface({
-  spidRequestResponse: t.string
-});
-
-export type OutputBinding = t.TypeOf<typeof OutputBinding>;
+interface IOutputBinding {
+  spidRequestResponse: string;
+}
 
 /**
  * Store SPID request / responses, read from a queue, into a blob storage.
@@ -94,12 +84,12 @@ export type OutputBinding = t.TypeOf<typeof OutputBinding>;
 export async function index(
   context: Context,
   spidMsgItem: SpidMsgItem
-): Promise<void | OutputBinding> {
+): Promise<void | IOutputBinding> {
   logger = context.log;
   return t
     .exact(SpidBlobItem)
     .decode(spidMsgItem)
-    .fold<void | OutputBinding>(
+    .fold<void | IOutputBinding>(
       errs => {
         // unrecoverable error
         context.log.error(
@@ -111,7 +101,16 @@ export async function index(
       spidBlobItem => {
         return {
           spidRequestResponse: encryptWithRsaPublicKey(
-            JSON.stringify(spidBlobItem)
+            JSON.stringify(spidBlobItem),
+            `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi5NKxxANte+B7T1R7/oV
+BcEnobW83gF/G7uiWj0uprprhkN01El6OybHUI3XikPXXwQB7VdBFFuyNuuLXw3n
+B0Ed4sIVsaGnNqYkeGJ/+RD/9ptjWR/QNCZ5a50mGv1MuOD2Us4zRAmOLTbbKz0Q
+GCNfojkrDgwlNKDwNyJ9GCUkOqtf+CfeU7ntKK/3LQrarHrG2ybrtHQIq9v/NIrk
+GKuAsCBHn30CrFWWQA+4J4w8YAoP0CiA2DMRYlzJG7/sKAyu4FIT3eCHYCqPjqNl
+ccxJbYWiN26GbFNgYg1uN1zh3Y6rIPf8RQa2Z4rJ6N957HqeGtEct+8/CZFuzX9p
+0wIDAQAB
+-----END PUBLIC KEY-----`
           )
         };
       }
