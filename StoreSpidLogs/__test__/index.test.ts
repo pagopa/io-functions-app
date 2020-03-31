@@ -17,12 +17,7 @@ import { format } from "date-fns";
 import { IPString } from "italia-ts-commons/lib/strings";
 import * as NodeRSA from "node-rsa";
 import { aFiscalCode } from "../../__mocks__/mocks";
-import { index, SpidBlobItem, SpidMsgItem, IOutputBinding } from "../index";
-import { either, fromNullable } from "fp-ts/lib/Either";
-import { fromEither } from "fp-ts/lib/Option";
-import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
-import { isObject } from "italia-ts-commons/lib/types";
-import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
+import { index, IOutputBinding, SpidBlobItem, SpidMsgItem } from "../index";
 
 const today = format(new Date(), "YYYY-MM-DD");
 const aDate = new Date();
