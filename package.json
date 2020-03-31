@@ -55,6 +55,7 @@
     "italia-ts-commons": "^5.1.12",
     "nodemailer": "^4.7.0",
     "superagent": "^5.1.0",
-    "winston": "^3.2.1"
+    "winston": "^3.2.1",
+    "node-rsa": "^1.0.8"
   }
 }

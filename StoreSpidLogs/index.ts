@@ -1,30 +1,22 @@
 import { Context } from "@azure/functions";
-import * as crypto from "crypto";
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { AzureContextTransport } from "io-functions-commons/dist/src/utils/logging";
 import * as t from "io-ts";
 import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { IPString, PatternString } from "italia-ts-commons/lib/strings";
+import * as NodeRSA from "node-rsa";
 import * as winston from "winston";
 
-// tslint:disable-next-line: no-commented-code
-// const rsaPublicKey = getRequiredStringEnv("RSA_PUBLIC_KEY");
+const rsaPublicKey = getRequiredStringEnv("RSA_PUBLIC_KEY");
 
 /**
  * Encrypt a given string with RSA Public key
  * @param payload: a json payload to encrypt with public key
  */
 const encryptWithRsaPublicKey = (payload: string, publicKey: string) => {
-  return crypto
-    .publicEncrypt(
-      {
-        key: publicKey,
-        padding: crypto.constants.RSA_NO_PADDING
-      },
-      Buffer.from(payload)
-    )
-    .toString("base64");
+  const key = new NodeRSA(publicKey);
+  return key.encrypt(payload, "base64");
 };
 /**
  * Payload of the stored blob item
@@ -74,7 +66,7 @@ const contextTransport = new AzureContextTransport(() => logger, {
 });
 winston.add(contextTransport);
 
-interface IOutputBinding {
+export interface IOutputBinding {
   spidRequestResponse: string;
 }
 
@@ -102,15 +94,7 @@ export async function index(
         return {
           spidRequestResponse: encryptWithRsaPublicKey(
             JSON.stringify(spidBlobItem),
-            `-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi5NKxxANte+B7T1R7/oV
-BcEnobW83gF/G7uiWj0uprprhkN01El6OybHUI3XikPXXwQB7VdBFFuyNuuLXw3n
-B0Ed4sIVsaGnNqYkeGJ/+RD/9ptjWR/QNCZ5a50mGv1MuOD2Us4zRAmOLTbbKz0Q
-GCNfojkrDgwlNKDwNyJ9GCUkOqtf+CfeU7ntKK/3LQrarHrG2ybrtHQIq9v/NIrk
-GKuAsCBHn30CrFWWQA+4J4w8YAoP0CiA2DMRYlzJG7/sKAyu4FIT3eCHYCqPjqNl
-ccxJbYWiN26GbFNgYg1uN1zh3Y6rIPf8RQa2Z4rJ6N957HqeGtEct+8/CZFuzX9p
-0wIDAQAB
------END PUBLIC KEY-----`
+            rsaPublicKey
           )
         };
       }
