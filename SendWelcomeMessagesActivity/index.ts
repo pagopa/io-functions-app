@@ -30,7 +30,7 @@ const welcomeMessages: WelcomeMessages = [
 Ciao! Questa è la prima versione aperta a tutti di IO, l’app dei servizi pubblici.
 Cosa vuol dire? Significa che tutti i cittadini, come te, potranno partecipare alla sperimentazione di un prodotto che evolverà e migliorerà continuamente anche grazie all’esperienza diretta e ai feedback delle persone a cui è destinato.
 
-Rendendo per tutti disponibile l'app, consentiamo agli enti pubblici di portare progressivamente i propri servizi sull’app, e ai cittadini italiani di avere dei servizi pubblici nuovi, moderni e centrati sulle proprie esigenze.
+Rendendo per tutti disponibile IO, consentiamo agli enti pubblici di portare progressivamente i propri servizi sull’app, e ai cittadini italiani di avere dei servizi pubblici nuovi, moderni e centrati sulle proprie esigenze.
 
 ### Scopri le funzioni di IO
 
