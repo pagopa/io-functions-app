@@ -8,7 +8,7 @@ import { IPString, PatternString } from "italia-ts-commons/lib/strings";
 import * as NodeRSA from "node-rsa";
 import * as winston from "winston";
 
-const rsaPublicKey = getRequiredStringEnv("SPID_LOGS_PUBLIC_KEY");
+const rsaPublicKey = new NodeRSA(getRequiredStringEnv("SPID_LOGS_PUBLIC_KEY"));
 /**
  * Payload of the stored blob item
  * (one for each SPID request or response).
@@ -74,11 +74,8 @@ export async function index(
     createdAtDay: spidMsgItem.createdAtDay,
     fiscalCode: spidMsgItem.fiscalCode,
     ip: spidMsgItem.ip,
-    requestPayload: new NodeRSA(rsaPublicKey).encrypt(
-      spidMsgItem.requestPayload,
-      "base64"
-    ),
-    responsePayload: new NodeRSA(rsaPublicKey).encrypt(
+    requestPayload: rsaPublicKey.encrypt(spidMsgItem.requestPayload, "base64"),
+    responsePayload: rsaPublicKey.encrypt(
       spidMsgItem.responsePayload,
       "base64"
     ),

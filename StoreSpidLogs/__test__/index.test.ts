@@ -38,11 +38,6 @@ PszPw0tCkglLrQWi+kkCQDzR5FI2eGvXYdkJdAqofbEFDdP+N0ZMWdJITVntrhZO
 zsAyYUBrD/FpfHSA5UY9UsldiilvJeCzYbM6Rm1fpmc=
 -----END RSA PRIVATE KEY-----`;
 
-const decryptWithRsaPrivateKey = (encrypted: string) => {
-  const key = new NodeRSA(aRSAPrivateKey);
-  return Buffer.from(key.decrypt(encrypted)).toString("utf-8");
-};
-
 const aSpidBlobItem: SpidBlobItem = {
   createdAt: aDate,
   ip: "192.168.1.6" as IPString,
@@ -63,6 +58,28 @@ const aSpidMsgItem: SpidMsgItem = {
   responsePayload:
     "<?xml version='1.0' encoding='UTF-8'?><note ID='AAAA_BBBB'><to>Azure</to><from>Azure</from><heading>Reminder</heading><body>New append from local dev - RESPONSE</body></note>",
   spidRequestId: "AAAA_BBBB"
+};
+
+const anotherSpidBlobItem: SpidBlobItem = {
+  createdAt: aDate,
+  ip: "192.168.1.7" as IPString,
+  requestPayload:
+    "<?xml version='1.0' encoding='UTF-8'?><note ID='CCCC_DDDD'><to>Azure</to><from>Azure</from><heading>Reminder</heading><body>New append from local dev - REQUEST</body></note>",
+  responsePayload:
+    "<?xml version='1.0' encoding='UTF-8'?><note ID='CCCC_DDDD'><to>Azure</to><from>Azure</from><heading>Reminder</heading><body>New append from local dev - RESPONSE</body></note>",
+  spidRequestId: "CCCC_DDDD"
+};
+
+const anotherSpidMsgItem: SpidMsgItem = {
+  createdAt: aDate,
+  createdAtDay: today,
+  fiscalCode: aFiscalCode,
+  ip: "192.168.1.7" as IPString,
+  requestPayload:
+    "<?xml version='1.0' encoding='UTF-8'?><note ID='CCCC_DDDD'><to>Azure</to><from>Azure</from><heading>Reminder</heading><body>New append from local dev - REQUEST</body></note>",
+  responsePayload:
+    "<?xml version='1.0' encoding='UTF-8'?><note ID='CCCC_DDDD'><to>Azure</to><from>Azure</from><heading>Reminder</heading><body>New append from local dev - RESPONSE</body></note>",
+  spidRequestId: "CCCC_DDDD"
 };
 
 describe("StoreSpidLogs", () => {
@@ -100,12 +117,13 @@ describe("StoreSpidLogs", () => {
     const decryptedSpidBlobItem: SpidBlobItem = {
       createdAt: spidRequestResponse.createdAt,
       ip: spidRequestResponse.ip,
-      requestPayload: decryptWithRsaPrivateKey(
-        spidRequestResponse.requestPayload
-      ),
-      responsePayload: decryptWithRsaPrivateKey(
-        spidRequestResponse.responsePayload
-      ),
+      requestPayload: Buffer.from(
+        new NodeRSA(aRSAPrivateKey).decrypt(spidRequestResponse.requestPayload)
+      ).toString("utf-8"),
+
+      responsePayload: Buffer.from(
+        new NodeRSA(aRSAPrivateKey).decrypt(spidRequestResponse.responsePayload)
+      ).toString("utf-8"),
       spidRequestId: spidRequestResponse.spidRequestId
     };
     const decryptedBlobItem = {
@@ -113,6 +131,74 @@ describe("StoreSpidLogs", () => {
     };
     expect(decryptedBlobItem).toEqual({
       spidRequestResponse: aSpidBlobItem
+    });
+  });
+  it("should encrypt two different messages with the same Cipher instance and decrypt with another one", async () => {
+    const mockedContext = {
+      bindings: {
+        spidMsgItem: aSpidMsgItem
+      },
+      done: jest.fn(),
+      log: {
+        error: jest.fn()
+      }
+    };
+    const blobItem = await index(mockedContext as any, aSpidMsgItem);
+    const blob = blobItem as IOutputBinding;
+    const spidRequestResponse = blob.spidRequestResponse;
+    const decryptedSpidBlobItem: SpidBlobItem = {
+      createdAt: spidRequestResponse.createdAt,
+      ip: spidRequestResponse.ip,
+      requestPayload: Buffer.from(
+        new NodeRSA(aRSAPrivateKey).decrypt(spidRequestResponse.requestPayload)
+      ).toString("utf-8"),
+      responsePayload: Buffer.from(
+        new NodeRSA(aRSAPrivateKey).decrypt(spidRequestResponse.responsePayload)
+      ).toString("utf-8"),
+      spidRequestId: spidRequestResponse.spidRequestId
+    };
+    const decryptedBlobItem = {
+      spidRequestResponse: decryptedSpidBlobItem
+    };
+    expect(decryptedBlobItem).toEqual({
+      spidRequestResponse: aSpidBlobItem
+    });
+
+    const anotherMockedContext = {
+      bindings: {
+        spidMsgItem: anotherSpidMsgItem
+      },
+      done: jest.fn(),
+      log: {
+        error: jest.fn()
+      }
+    };
+    const secondBlobItem = await index(
+      anotherMockedContext as any,
+      anotherSpidMsgItem
+    );
+    const secondBlob = secondBlobItem as IOutputBinding;
+    const secondSpidRequestResponse = secondBlob.spidRequestResponse;
+    const secondDecryptedSpidBlobItem: SpidBlobItem = {
+      createdAt: secondSpidRequestResponse.createdAt,
+      ip: secondSpidRequestResponse.ip,
+      requestPayload: Buffer.from(
+        new NodeRSA(aRSAPrivateKey).decrypt(
+          secondSpidRequestResponse.requestPayload
+        )
+      ).toString("utf-8"),
+      responsePayload: Buffer.from(
+        new NodeRSA(aRSAPrivateKey).decrypt(
+          secondSpidRequestResponse.responsePayload
+        )
+      ).toString("utf-8"),
+      spidRequestId: secondSpidRequestResponse.spidRequestId
+    };
+    const secondDecryptedBlobItem = {
+      spidRequestResponse: secondDecryptedSpidBlobItem
+    };
+    expect(secondDecryptedBlobItem).toEqual({
+      spidRequestResponse: anotherSpidBlobItem
     });
   });
 });
