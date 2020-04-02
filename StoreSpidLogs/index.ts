@@ -8,16 +8,7 @@ import { IPString, PatternString } from "italia-ts-commons/lib/strings";
 import * as NodeRSA from "node-rsa";
 import * as winston from "winston";
 
-const rsaPublicKey = getRequiredStringEnv("RSA_PUBLIC_KEY");
-
-/**
- * Encrypt a given string with RSA Public key
- * @param payload: a json payload to encrypt with public key
- */
-const encryptWithRsaPublicKey = (payload: string, publicKey: string) => {
-  const key = new NodeRSA(publicKey);
-  return key.encrypt(payload, "base64");
-};
+const rsaPublicKey = getRequiredStringEnv("SPID_LOGS_PUBLIC_KEY");
 /**
  * Payload of the stored blob item
  * (one for each SPID request or response).
@@ -67,7 +58,7 @@ const contextTransport = new AzureContextTransport(() => logger, {
 winston.add(contextTransport);
 
 export interface IOutputBinding {
-  spidRequestResponse: string;
+  spidRequestResponse: SpidBlobItem;
 }
 
 /**
@@ -78,9 +69,24 @@ export async function index(
   spidMsgItem: SpidMsgItem
 ): Promise<void | IOutputBinding> {
   logger = context.log;
+  const encryptedMsgItem: SpidMsgItem = {
+    createdAt: spidMsgItem.createdAt,
+    createdAtDay: spidMsgItem.createdAtDay,
+    fiscalCode: spidMsgItem.fiscalCode,
+    ip: spidMsgItem.ip,
+    requestPayload: new NodeRSA(rsaPublicKey).encrypt(
+      spidMsgItem.requestPayload,
+      "base64"
+    ),
+    responsePayload: new NodeRSA(rsaPublicKey).encrypt(
+      spidMsgItem.responsePayload,
+      "base64"
+    ),
+    spidRequestId: spidMsgItem.spidRequestId
+  };
   return t
     .exact(SpidBlobItem)
-    .decode(spidMsgItem)
+    .decode(encryptedMsgItem)
     .fold<void | IOutputBinding>(
       errs => {
         // unrecoverable error
@@ -92,10 +98,7 @@ export async function index(
       },
       spidBlobItem => {
         return {
-          spidRequestResponse: encryptWithRsaPublicKey(
-            JSON.stringify(spidBlobItem),
-            rsaPublicKey
-          )
+          spidRequestResponse: spidBlobItem
         };
       }
     );

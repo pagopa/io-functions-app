@@ -2,7 +2,7 @@
   "bindings": [
     {
       "queueName": "spidmsgitems",
-      "connection": "LogsStorageConnection",
+      "connection": "LogStorageConnection",
       "name": "spidMsgItem",
       "type": "queueTrigger",
       "direction": "in"
@@ -10,8 +10,8 @@
     {
       "type": "blob",
       "name": "spidRequestResponse",
-      "path": "spidassertions/{spidRequestId}-{createdAtDay}-{fiscalCode}.log",
-      "connection": "LogsStorageConnection",
+      "path": "spidassertions/{spidRequestId}-{createdAtDay}-{fiscalCode}.json",
+      "connection": "LogStorageConnection",
       "direction": "out"
     }
   ],

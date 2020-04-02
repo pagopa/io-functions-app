@@ -3,14 +3,14 @@
 
 process.env = {
   QueueStorageConnection: "foobar",
-  RSA_PUBLIC_KEY: `-----BEGIN PUBLIC KEY-----
+  SPID_BLOB_CONTAINER_NAME: "spidblob",
+  SPID_BLOB_STORAGE_CONNECTION_STRING: "foobar",
+  SPID_LOGS_PUBLIC_KEY: `-----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDhiXpvLD8UMMUy1T2JCzo/Sj5E
 l09Fs0z2U4aA37BrXlSo1DwQ2O9i2XFxXGJmE83siSWEfRlMWlabMu7Yj6dkZvmj
 dGIO4gotO33TgiAQcwRo+4pwjoCN7Td47yssCcj9C727zBt+Br+XK7B1bRcqjc0J
 YdF4yiVtD7G4RDXmRQIDAQAB
------END PUBLIC KEY-----`,
-  SPID_BLOB_CONTAINER_NAME: "spidblob",
-  SPID_BLOB_STORAGE_CONNECTION_STRING: "foobar"
+-----END PUBLIC KEY-----`
 };
 
 import { format } from "date-fns";
@@ -96,15 +96,17 @@ describe("StoreSpidLogs", () => {
     const blobItem = await index(mockedContext as any, aSpidMsgItem);
     expect(blobItem).toHaveProperty("spidRequestResponse");
     const blob = blobItem as IOutputBinding;
-    const reqRes = JSON.parse(
-      decryptWithRsaPrivateKey(blob.spidRequestResponse)
-    );
+    const spidRequestResponse = blob.spidRequestResponse;
     const decryptedSpidBlobItem: SpidBlobItem = {
-      createdAt: aDate,
-      ip: reqRes.ip as IPString,
-      requestPayload: reqRes.requestPayload,
-      responsePayload: reqRes.responsePayload,
-      spidRequestId: reqRes.spidRequestId
+      createdAt: spidRequestResponse.createdAt,
+      ip: spidRequestResponse.ip,
+      requestPayload: decryptWithRsaPrivateKey(
+        spidRequestResponse.requestPayload
+      ),
+      responsePayload: decryptWithRsaPrivateKey(
+        spidRequestResponse.responsePayload
+      ),
+      spidRequestId: spidRequestResponse.spidRequestId
     };
     const decryptedBlobItem = {
       spidRequestResponse: decryptedSpidBlobItem
