@@ -70,16 +70,9 @@ export async function index(
 ): Promise<void | IOutputBinding> {
   logger = context.log;
   const encryptedMsgItem: SpidMsgItem = {
-    createdAt: spidMsgItem.createdAt,
-    createdAtDay: spidMsgItem.createdAtDay,
-    fiscalCode: spidMsgItem.fiscalCode,
-    ip: spidMsgItem.ip,
+    ...spidMsgItem,
     requestPayload: rsaPublicKey.encrypt(spidMsgItem.requestPayload, "base64"),
-    responsePayload: rsaPublicKey.encrypt(
-      spidMsgItem.responsePayload,
-      "base64"
-    ),
-    spidRequestId: spidMsgItem.spidRequestId
+    responsePayload: rsaPublicKey.encrypt(spidMsgItem.responsePayload, "base64")
   };
   return t
     .exact(SpidBlobItem)
