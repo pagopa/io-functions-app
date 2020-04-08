@@ -13,8 +13,6 @@ import { isLeft } from "fp-ts/lib/Either";
 import { isNone } from "fp-ts/lib/Option";
 
 import {
-  IResponseErrorConflict,
-  IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessAccepted,
@@ -52,8 +50,6 @@ type IStartEmailValidationProcessHandler = (
   | IResponseErrorValidation
   | IResponseErrorQuery
   | IResponseErrorNotFound
-  | IResponseErrorConflict
-  | IResponseErrorInternal
   | IResponseSuccessAccepted
 >;
 
