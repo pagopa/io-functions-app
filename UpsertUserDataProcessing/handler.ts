@@ -1,8 +1,8 @@
 import * as express from "express";
 
 import { Context } from "@azure/functions";
-
-import { isLeft } from "fp-ts/lib/Either";
+import * as df from "durable-functions";
+import { isLeft, isRight } from "fp-ts/lib/Either";
 
 import {
   IResponseErrorConflict,
@@ -25,15 +25,18 @@ import {
   wrapRequestHandler
 } from "io-functions-commons/dist/src/utils/request_middleware";
 
+import { isSome } from "fp-ts/lib/Option";
 import { UserDataProcessing as UserDataProcessingApi } from "io-functions-commons/dist/generated/definitions/UserDataProcessing";
 import { UserDataProcessingChoiceRequest } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoiceRequest";
 import { UserDataProcessingStatusEnum } from "io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
+import { ProfileModel } from "io-functions-commons/dist/src/models/profile";
 import {
   makeUserDataProcessingId,
   UserDataProcessing,
   UserDataProcessingModel
 } from "io-functions-commons/dist/src/models/user_data_processing";
 import { RequiredBodyPayloadMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_body_payload";
+import { OrchestratorInput } from "../UpsertedUserDataProcessingOrchestrator/handler";
 import { toUserDataProcessingApi } from "../utils/user_data_processings";
 
 /**
@@ -51,8 +54,11 @@ type IUpsertUserDataProcessingHandler = (
   | IResponseErrorConflict
 >;
 
+// TO-DO reduce cognitive complexity
+// tslint:disable-next-line: cognitive-complexity
 export function UpsertUserDataProcessingHandler(
-  userDataProcessingModel: UserDataProcessingModel
+  userDataProcessingModel: UserDataProcessingModel,
+  profileModel: ProfileModel
 ): IUpsertUserDataProcessingHandler {
   return async (context, fiscalCode, upsertUserDataProcessingPayload) => {
     const logPrefix = `UpsertUserDataProcessingHandler|FISCAL_CODE=${
@@ -106,10 +112,6 @@ export function UpsertUserDataProcessingHandler(
       const errorOrUpsertedUserDataProcessing = await userDataProcessingModel.createOrUpdateByNewOne(
         userDataProcessing.value
       );
-
-      context.log.error(
-        `errorOrUpsertedUserDataProcessing ${errorOrUpsertedUserDataProcessing}`
-      );
       if (isLeft(errorOrUpsertedUserDataProcessing)) {
         const { body } = errorOrUpsertedUserDataProcessing.value;
 
@@ -123,6 +125,29 @@ export function UpsertUserDataProcessingHandler(
 
       const createdOrUpdatedUserDataProcessing =
         errorOrUpsertedUserDataProcessing.value;
+      const errorOrMaybeRetrievedProfile = await profileModel.findOneProfileByFiscalCode(
+        fiscalCode
+      );
+      if (isRight(errorOrMaybeRetrievedProfile)) {
+        const maybeRetrievedProfile = errorOrMaybeRetrievedProfile.value;
+        if (isSome(maybeRetrievedProfile)) {
+          const upsertedUserDataProcessingOrchestratorInput = OrchestratorInput.encode(
+            {
+              choice: createdOrUpdatedUserDataProcessing.choice,
+              email: maybeRetrievedProfile.value.email,
+              fiscalCode
+            }
+          );
+
+          await df
+            .getClient(context)
+            .startNew(
+              "UpsertedUserDataProcessingOrchestrator",
+              undefined,
+              upsertedUserDataProcessingOrchestratorInput
+            );
+        }
+      }
       return ResponseSuccessJson(
         toUserDataProcessingApi(createdOrUpdatedUserDataProcessing)
       );
@@ -134,9 +159,13 @@ export function UpsertUserDataProcessingHandler(
  * Wraps an UpsertUserDataProcessing handler inside an Express request handler.
  */
 export function UpsertUserDataProcessing(
-  userDataProcessingModel: UserDataProcessingModel
+  userDataProcessingModel: UserDataProcessingModel,
+  profileModel: ProfileModel
 ): express.RequestHandler {
-  const handler = UpsertUserDataProcessingHandler(userDataProcessingModel);
+  const handler = UpsertUserDataProcessingHandler(
+    userDataProcessingModel,
+    profileModel
+  );
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),

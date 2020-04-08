@@ -7,9 +7,11 @@ import { left, right } from "fp-ts/lib/Either";
 import * as df from "durable-functions";
 
 import { some } from "fp-ts/lib/Option";
+import { profile } from "winston";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aFiscalCode,
+  aRetrievedProfile,
   aRetrievedUserDataProcessing,
   aUserDataProcessingApi,
   aUserDataProcessingChoiceRequest,
@@ -38,8 +40,13 @@ describe("UpsertUserDataProcessingHandler", () => {
       )
     };
 
+    const profileModelMock = {
+      findOneProfileByFiscalCode: jest.fn(() => right(some(aRetrievedProfile)))
+    };
+
     const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
-      userDataProcessingModelMock as any
+      userDataProcessingModelMock as any,
+      profileModelMock as any
     );
 
     const result = await upsertUserDataProcessingHandler(
@@ -60,9 +67,13 @@ describe("UpsertUserDataProcessingHandler", () => {
         right(some(aWipRetrievedUserDataProcessing))
       )
     };
+    const profileModelMock = {
+      findOneProfileByFiscalCode: jest.fn(() => right(some(aRetrievedProfile)))
+    };
 
     const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
-      userDataProcessingModelMock as any
+      userDataProcessingModelMock as any,
+      profileModelMock as any
     );
 
     const result = await upsertUserDataProcessingHandler(
@@ -86,9 +97,13 @@ describe("UpsertUserDataProcessingHandler", () => {
         right(some(aRetrievedUserDataProcessing))
       )
     };
+    const profileModelMock = {
+      findOneProfileByFiscalCode: jest.fn(() => right(some(aRetrievedProfile)))
+    };
 
     const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
-      userDataProcessingModelMock as any
+      userDataProcessingModelMock as any,
+      profileModelMock as any
     );
 
     const result = await upsertUserDataProcessingHandler(

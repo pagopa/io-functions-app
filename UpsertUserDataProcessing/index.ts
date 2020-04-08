@@ -18,6 +18,10 @@ import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/c
 
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
+import {
+  PROFILE_COLLECTION_NAME,
+  ProfileModel
+} from "io-functions-commons/dist/src/models/profile";
 import { UpsertUserDataProcessing } from "./handler";
 
 const cosmosDbUri = getRequiredStringEnv("COSMOSDB_URI");
@@ -29,6 +33,10 @@ const userDataProcessingsCollectionUrl = documentDbUtils.getCollectionUri(
   documentDbDatabaseUrl,
   USER_DATA_PROCESSING_COLLECTION_NAME
 );
+const profilesCollectionUrl = documentDbUtils.getCollectionUri(
+  documentDbDatabaseUrl,
+  PROFILE_COLLECTION_NAME
+);
 
 const documentClient = new DocumentDBClient(cosmosDbUri, {
   masterKey: cosmosDbKey
@@ -39,13 +47,15 @@ const userDataProcessingModel = new UserDataProcessingModel(
   userDataProcessingsCollectionUrl
 );
 
+const profileModel = new ProfileModel(documentClient, profilesCollectionUrl);
+
 // Setup Express
 const app = express();
 secureExpressApp(app);
 
 app.post(
   "/api/v1/user-data-processing/:fiscalcode",
-  UpsertUserDataProcessing(userDataProcessingModel)
+  UpsertUserDataProcessing(userDataProcessingModel, profileModel)
 );
 
 const azureFunctionHandler = createAzureFunctionHandler(app);

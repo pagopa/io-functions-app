@@ -1,0 +1,65 @@
+import * as t from "io-ts";
+
+import { isLeft } from "fp-ts/lib/Either";
+
+import * as df from "durable-functions";
+import { IFunctionContext } from "durable-functions/lib/src/classes";
+
+import { readableReport } from "italia-ts-commons/lib/reporters";
+
+import { UserDataProcessingChoice } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
+
+import { FiscalCode } from "io-functions-commons/dist/generated/definitions/FiscalCode";
+import { EmailString } from "italia-ts-commons/lib/strings";
+
+/**
+ * Carries information about created or updated user data processing.
+ */
+export const OrchestratorInput = t.interface({
+  choice: UserDataProcessingChoice,
+  email: EmailString,
+  fiscalCode: FiscalCode
+});
+
+export type OrchestratorInput = t.TypeOf<typeof OrchestratorInput>;
+
+export const handler = function*(
+  context: IFunctionContext
+): IterableIterator<unknown> {
+  const logPrefix = `UpsertedUserDataProcessingOrchestrator`;
+
+  const retryOptions = new df.RetryOptions(5000, 10);
+  // tslint:disable-next-line: no-object-mutation
+  retryOptions.backoffCoefficient = 1.5;
+
+  // Get and decode orchestrator input
+  const input = context.df.getInput();
+  const errorOrUpsertedUserDataProcessingOrchestratorInput = OrchestratorInput.decode(
+    input
+  );
+
+  if (isLeft(errorOrUpsertedUserDataProcessingOrchestratorInput)) {
+    context.log.error(
+      `${logPrefix}|Error decoding input|ERROR=${readableReport(
+        errorOrUpsertedUserDataProcessingOrchestratorInput.value
+      )}`
+    );
+    return false;
+  }
+
+  const upsertedUserDataProcessingOrchestratorInput =
+    errorOrUpsertedUserDataProcessingOrchestratorInput.value;
+
+  // Log the input
+  context.log.verbose(
+    `${logPrefix}|INPUT=${JSON.stringify(
+      upsertedUserDataProcessingOrchestratorInput
+    )}`
+  );
+
+  yield context.df.callActivity("SendUserDataProcessingEmailActivity", {
+    ...upsertedUserDataProcessingOrchestratorInput
+  });
+
+  return true;
+};
