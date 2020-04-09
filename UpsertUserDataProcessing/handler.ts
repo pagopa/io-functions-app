@@ -54,8 +54,6 @@ type IUpsertUserDataProcessingHandler = (
   | IResponseErrorConflict
 >;
 
-// TO-DO reduce cognitive complexity
-// tslint:disable-next-line: cognitive-complexity
 export function UpsertUserDataProcessingHandler(
   userDataProcessingModel: UserDataProcessingModel,
   profileModel: ProfileModel
@@ -97,61 +95,55 @@ export function UpsertUserDataProcessingHandler(
           : UserDataProcessingStatusEnum.PENDING;
       }
     );
-    const userDataProcessing = UserDataProcessing.decode({
+    const userDataProcessing: UserDataProcessing = {
       choice: upsertUserDataProcessingPayload.choice,
       createdAt: new Date(),
       fiscalCode,
       status: computedStatus,
       userDataProcessingId: id
-    });
+    };
+    const errorOrUpsertedUserDataProcessing = await userDataProcessingModel.createOrUpdateByNewOne(
+      userDataProcessing
+    );
+    if (isLeft(errorOrUpsertedUserDataProcessing)) {
+      const { body } = errorOrUpsertedUserDataProcessing.value;
 
-    if (isLeft(userDataProcessing)) {
-      const error = userDataProcessing.value;
-      return ResponseErrorFromValidationErrors(UserDataProcessing)(error);
-    } else {
-      const errorOrUpsertedUserDataProcessing = await userDataProcessingModel.createOrUpdateByNewOne(
-        userDataProcessing.value
-      );
-      if (isLeft(errorOrUpsertedUserDataProcessing)) {
-        const { body } = errorOrUpsertedUserDataProcessing.value;
+      context.log.error(`${logPrefix}|ERROR=${body}`);
 
-        context.log.error(`${logPrefix}|ERROR=${body}`);
-
-        return ResponseErrorQuery(
-          "Error while creating a new user data processing",
-          errorOrUpsertedUserDataProcessing.value
-        );
-      }
-
-      const createdOrUpdatedUserDataProcessing =
-        errorOrUpsertedUserDataProcessing.value;
-      const errorOrMaybeRetrievedProfile = await profileModel.findOneProfileByFiscalCode(
-        fiscalCode
-      );
-      if (isRight(errorOrMaybeRetrievedProfile)) {
-        const maybeRetrievedProfile = errorOrMaybeRetrievedProfile.value;
-        if (isSome(maybeRetrievedProfile)) {
-          const upsertedUserDataProcessingOrchestratorInput = OrchestratorInput.encode(
-            {
-              choice: createdOrUpdatedUserDataProcessing.choice,
-              email: maybeRetrievedProfile.value.email,
-              fiscalCode
-            }
-          );
-
-          await df
-            .getClient(context)
-            .startNew(
-              "UpsertedUserDataProcessingOrchestrator",
-              undefined,
-              upsertedUserDataProcessingOrchestratorInput
-            );
-        }
-      }
-      return ResponseSuccessJson(
-        toUserDataProcessingApi(createdOrUpdatedUserDataProcessing)
+      return ResponseErrorQuery(
+        "Error while creating a new user data processing",
+        errorOrUpsertedUserDataProcessing.value
       );
     }
+
+    const createdOrUpdatedUserDataProcessing =
+      errorOrUpsertedUserDataProcessing.value;
+    const errorOrMaybeRetrievedProfile = await profileModel.findOneProfileByFiscalCode(
+      fiscalCode
+    );
+    if (isRight(errorOrMaybeRetrievedProfile)) {
+      const maybeRetrievedProfile = errorOrMaybeRetrievedProfile.value;
+      if (isSome(maybeRetrievedProfile)) {
+        const upsertedUserDataProcessingOrchestratorInput = OrchestratorInput.encode(
+          {
+            choice: createdOrUpdatedUserDataProcessing.choice,
+            email: maybeRetrievedProfile.value.email,
+            fiscalCode
+          }
+        );
+
+        await df
+          .getClient(context)
+          .startNew(
+            "UpsertedUserDataProcessingOrchestrator",
+            undefined,
+            upsertedUserDataProcessingOrchestratorInput
+          );
+      }
+    }
+    return ResponseSuccessJson(
+      toUserDataProcessingApi(createdOrUpdatedUserDataProcessing)
+    );
   };
 }
 

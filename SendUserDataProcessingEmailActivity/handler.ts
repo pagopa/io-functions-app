@@ -68,8 +68,8 @@ export const getSendUserDataProcessingEmailActivityHandler = (
 
   // prepare the text version of the message
   const emailText = `Con la presente si informa che e' stata effettuata la richiesta di:
-                    ${choice.toString()} dall' utente con codice fiscale ${fiscalCode}.
-                    L' indirizzo e-mail dell' utente e' ${email}`;
+  ${choice.toString()} dall' utente con codice fiscale ${fiscalCode}.
+  L' indirizzo e-mail dell' utente e' ${email}`;
 
   // Send email to DPO with information about user's will to down load or delete its own data
   const errorOrSentMessageInfo = await sendMail(mailerTransporter, {

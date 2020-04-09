@@ -11,19 +11,19 @@ import {
   getSendUserDataProcessingEmailActivityHandler
 } from "../handler";
 
-const htmlAndTextContent = "CONTENT";
-
-jest.mock("../template", () => ({
-  __esModule: true,
-  getEmailHtmlFromTemplate: () => htmlAndTextContent
-}));
+const aUserDataProcessingChoice = "DOWNLOAD" as UserDataProcessingChoice;
+const userEmail = "email@example.com" as EmailString;
+const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
+const htmlAndTextContent = `Con la presente si informa che e' stata effettuata la richiesta di:
+  ${aUserDataProcessingChoice.toString()} dall' utente con codice fiscale ${aFiscalCode}.
+  L' indirizzo e-mail dell' utente e' ${userEmail}`;
 
 describe("SendValidationEmailActivityHandler", () => {
   it("should send the email using the input data", async () => {
     const emailDefaults: EmailDefaults = {
       from: "from@example.com" as any,
       title: "Email title",
-      to: "to@example.com" as any
+      to: "email@example.com" as any
     };
     const mailerTransporterMock = {
       sendMail: jest.fn((_, f) => {
@@ -37,9 +37,9 @@ describe("SendValidationEmailActivityHandler", () => {
     );
 
     const input = SendValidationEmailActivityInput.encode({
-      choice: "DOWNLOAD" as UserDataProcessingChoice,
-      email: "email@example.com" as EmailString,
-      fiscalCode: "FRLFRC74E04B157I" as FiscalCode
+      choice: aUserDataProcessingChoice,
+      email: userEmail,
+      fiscalCode: aFiscalCode
     });
 
     await handler(contextMock as any, input);
