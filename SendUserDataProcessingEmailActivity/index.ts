@@ -2,9 +2,31 @@
 
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 
+import { DocumentClient as DocumentDBClient } from "documentdb";
+import {
+  PROFILE_COLLECTION_NAME,
+  ProfileModel
+} from "io-functions-commons/dist/src/models/profile";
+import * as documentDbUtils from "io-functions-commons/dist/src/utils/documentdb";
 import { MailUpTransport } from "io-functions-commons/dist/src/utils/mailup";
-
 import { getSendUserDataProcessingEmailActivityHandler } from "./handler";
+
+const cosmosDbUri = getRequiredStringEnv("COSMOSDB_URI");
+const cosmosDbKey = getRequiredStringEnv("COSMOSDB_KEY");
+const cosmosDbName = getRequiredStringEnv("COSMOSDB_NAME");
+
+const documentDbDatabaseUrl = documentDbUtils.getDatabaseUri(cosmosDbName);
+
+const profilesCollectionUrl = documentDbUtils.getCollectionUri(
+  documentDbDatabaseUrl,
+  PROFILE_COLLECTION_NAME
+);
+
+const documentClient = new DocumentDBClient(cosmosDbUri, {
+  masterKey: cosmosDbKey
+});
+
+const profileModel = new ProfileModel(documentClient, profilesCollectionUrl);
 
 // Whether we're in a production environment
 const isProduction = process.env.NODE_ENV === "production";
@@ -14,13 +36,11 @@ const mailupUsername = getRequiredStringEnv("MAILUP_USERNAME");
 const mailupSecret = getRequiredStringEnv("MAILUP_SECRET");
 
 // Email data
-const EMAIL_TITLE = "IO - Richiesta di Download/Cancellazione Dati Utente";
-const mailFrom = getRequiredStringEnv("MAIL_FROM");
-const dpoMailTo = getRequiredStringEnv("DPO_MAIL_TO");
+const mailFrom = getRequiredStringEnv("DPO_EMAIL_FROM_ADDRESS");
+const dpoMailTo = getRequiredStringEnv("DPO_EMAIL_ADDRESS");
 
 const emailDefaults = {
   from: mailFrom,
-  title: EMAIL_TITLE,
   to: dpoMailTo
 };
 
@@ -45,7 +65,8 @@ const mailerTransporter = isProduction
 
 const activityFunctionHandler = getSendUserDataProcessingEmailActivityHandler(
   mailerTransporter,
-  emailDefaults
+  emailDefaults,
+  profileModel
 );
 
 export default activityFunctionHandler;

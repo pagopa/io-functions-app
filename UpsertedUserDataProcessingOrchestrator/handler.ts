@@ -10,14 +10,12 @@ import { readableReport } from "italia-ts-commons/lib/reporters";
 import { UserDataProcessingChoice } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
 
 import { FiscalCode } from "io-functions-commons/dist/generated/definitions/FiscalCode";
-import { EmailString } from "italia-ts-commons/lib/strings";
 
 /**
  * Carries information about created or updated user data processing.
  */
 export const OrchestratorInput = t.interface({
   choice: UserDataProcessingChoice,
-  email: EmailString,
   fiscalCode: FiscalCode
 });
 
@@ -40,6 +38,9 @@ export const handler = function*(
 
   if (isLeft(errorOrUpsertedUserDataProcessingOrchestratorInput)) {
     context.log.error(
+      `${logPrefix}|Error decoding input|ERROR=${errorOrUpsertedUserDataProcessingOrchestratorInput.value}`
+    );
+    context.log.verbose(
       `${logPrefix}|Error decoding input|ERROR=${readableReport(
         errorOrUpsertedUserDataProcessingOrchestratorInput.value
       )}`
@@ -49,13 +50,6 @@ export const handler = function*(
 
   const upsertedUserDataProcessingOrchestratorInput =
     errorOrUpsertedUserDataProcessingOrchestratorInput.value;
-
-  // Log the input
-  context.log.verbose(
-    `${logPrefix}|INPUT=${JSON.stringify(
-      upsertedUserDataProcessingOrchestratorInput
-    )}`
-  );
 
   yield context.df.callActivity("SendUserDataProcessingEmailActivity", {
     ...upsertedUserDataProcessingOrchestratorInput

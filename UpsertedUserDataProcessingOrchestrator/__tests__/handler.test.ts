@@ -1,11 +1,7 @@
 /* tslint:disable:no-any */
 
 import { context as contextMock } from "../../__mocks__/durable-functions";
-import {
-  aEmail,
-  aFiscalCode,
-  aUserDataProcessingChoice
-} from "../../__mocks__/mocks";
+import { aFiscalCode, aUserDataProcessingChoice } from "../../__mocks__/mocks";
 
 import { UserDataProcessingChoice } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
 import {
@@ -22,7 +18,6 @@ describe("UpsertedUserDataProcessingOrchestrator", () => {
     const upsertedUserDataProcessingOrchestratorInput = UpsertedUserDataProcessingOrchestratorInput.encode(
       {
         choice: "DOWNLOAD" as UserDataProcessingChoice,
-        email: aEmail,
         fiscalCode: aFiscalCode
       }
     );
@@ -49,7 +44,6 @@ describe("UpsertedUserDataProcessingOrchestrator", () => {
       "SendUserDataProcessingEmailActivity",
       SendUserDataProcessingEmailActivityInput.encode({
         choice: aUserDataProcessingChoice,
-        email: aEmail,
         fiscalCode: aFiscalCode
       })
     );

@@ -56,6 +56,19 @@ export const aRetrievedProfile: RetrievedProfile = {
   version: 0 as NonNegativeNumber
 };
 
+export const aRetrievedProfileWithEmail: RetrievedProfile = {
+  _self: "123",
+  _ts: 123,
+  email: "email@example.com" as EmailString,
+  fiscalCode: aFiscalCode,
+  id: "123" as NonEmptyString,
+  isEmailEnabled: true,
+  isInboxEnabled: false,
+  isWebhookEnabled: false,
+  kind: "IRetrievedProfile",
+  version: 0 as NonNegativeNumber
+};
+
 export const aNewDate = new Date();
 
 export const aExtendedProfile = retrievedProfileToExtendedProfile(

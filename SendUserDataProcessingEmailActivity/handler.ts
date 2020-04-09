@@ -1,24 +1,24 @@
 import * as t from "io-ts";
 
-import { isLeft } from "fp-ts/lib/Either";
+import { isLeft, isRight } from "fp-ts/lib/Either";
 
 import * as NodeMailer from "nodemailer";
 
 import { Context } from "@azure/functions";
 
 import { readableReport } from "italia-ts-commons/lib/reporters";
-import { EmailString } from "italia-ts-commons/lib/strings";
 
 import { sendMail } from "io-functions-commons/dist/src/utils/email";
 
+import { isSome } from "fp-ts/lib/Option";
 import { FiscalCode } from "io-functions-commons/dist/generated/definitions/FiscalCode";
 import { UserDataProcessingChoice } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
+import { ProfileModel } from "io-functions-commons/dist/src/models/profile";
 import { EmailDefaults } from ".";
 
 // Activity input
 export const ActivityInput = t.interface({
   choice: UserDataProcessingChoice,
-  email: EmailString,
   fiscalCode: FiscalCode
 });
 
@@ -43,14 +43,18 @@ export type ActivityResult = t.TypeOf<typeof ActivityResult>;
 
 export const getSendUserDataProcessingEmailActivityHandler = (
   mailerTransporter: NodeMailer.Transporter,
-  emailDefaults: EmailDefaults
-) => async (context: Context, input: unknown): Promise<unknown> => {
+  emailDefaults: EmailDefaults,
+  profileModel: ProfileModel
+) => async (context: Context, input: unknown) => {
   const logPrefix = "SendUserDataProcessingEmail";
 
   const errorOrActivityInput = ActivityInput.decode(input);
 
   if (isLeft(errorOrActivityInput)) {
     context.log.error(
+      `${logPrefix}|Error decoding SendUserDataProcessingActivity input|ERROR=${errorOrActivityInput.value}`
+    );
+    context.log.verbose(
       `${logPrefix}|Error decoding input|ERROR=${readableReport(
         errorOrActivityInput.value
       )}`
@@ -62,32 +66,54 @@ export const getSendUserDataProcessingEmailActivityHandler = (
   }
 
   const activityInput = errorOrActivityInput.value;
-  const { choice, email, fiscalCode } = activityInput;
+  const { choice, fiscalCode } = activityInput;
 
-  const { from, title, to } = emailDefaults;
+  const errorOrMaybeRetrievedProfile = await profileModel.findOneProfileByFiscalCode(
+    fiscalCode
+  );
+  if (isRight(errorOrMaybeRetrievedProfile)) {
+    const maybeRetrievedProfile = errorOrMaybeRetrievedProfile.value;
+    if (isSome(maybeRetrievedProfile)) {
+      const { from, to } = emailDefaults;
+      const subject = "IO - Richiesta di Download/Cancellazione Dati Utente";
+      const email = maybeRetrievedProfile.value.email;
+      // prepare the text version of the message
+      const emailText = `Un utente di IO ha inoltrato una nuova richiesta:
+  tipo richiesta: ${choice.toString()}
+  codice fiscale: ${fiscalCode}
+  indirizzo email: ${email}.`;
 
-  // prepare the text version of the message
-  const emailText = `Con la presente si informa che e' stata effettuata la richiesta di:
-  ${choice.toString()} dall' utente con codice fiscale ${fiscalCode}.
-  L' indirizzo e-mail dell' utente e' ${email}`;
+      // Send an email to the DPO containing the information about the IO user's
+      // choice to download or delete his own private data stored by the platform
+      const errorOrSentMessageInfo = await sendMail(mailerTransporter, {
+        from,
+        subject,
+        text: emailText,
+        to
+      });
 
-  // Send email to DPO with information about user's will to down load or delete its own data
-  const errorOrSentMessageInfo = await sendMail(mailerTransporter, {
-    from,
-    subject: title,
-    text: emailText,
-    to
-  });
+      if (isLeft(errorOrSentMessageInfo)) {
+        const error = Error(
+          `${logPrefix}|Error sending validation email|ERROR=${errorOrSentMessageInfo.value.message}`
+        );
+        context.log.error(error.message);
+        return ActivityResultFailure.encode({
+          kind: "FAILURE",
+          reason: "Error while sending mail"
+        });
+      }
 
-  if (isLeft(errorOrSentMessageInfo)) {
-    const error = Error(
-      `${logPrefix}|Error sending validation email|ERROR=${errorOrSentMessageInfo.value.message}`
+      return ActivityResultSuccess.encode({
+        kind: "SUCCESS"
+      });
+    }
+  } else {
+    context.log.error(
+      `${logPrefix}|Error retrieving user's profile|ERROR=${errorOrMaybeRetrievedProfile.value}`
     );
-    context.log.error(error.message);
-    throw error;
+    return ActivityResultFailure.encode({
+      kind: "FAILURE",
+      reason: "Error in retrieving user' s profile"
+    });
   }
-
-  return ActivityResultSuccess.encode({
-    kind: "SUCCESS"
-  });
 };
