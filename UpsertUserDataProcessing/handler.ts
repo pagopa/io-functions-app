@@ -8,7 +8,6 @@ import {
   IResponseErrorConflict,
   IResponseErrorValidation,
   IResponseSuccessJson,
-  ResponseErrorFromValidationErrors,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import { FiscalCode } from "italia-ts-commons/lib/strings";

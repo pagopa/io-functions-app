@@ -7,7 +7,6 @@ import { left, right } from "fp-ts/lib/Either";
 import * as df from "durable-functions";
 
 import { some } from "fp-ts/lib/Option";
-import { profile } from "winston";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aFiscalCode,
@@ -55,7 +54,7 @@ describe("UpsertUserDataProcessingHandler", () => {
       {} as any
     );
 
-    expect(result.kind).toBe("IResponseErrorValidation");
+    expect(result.kind).toBe("IResponseErrorQuery");
   });
 
   it("should keep the status WIP when a new request is upserted and it was already WIP", async () => {
