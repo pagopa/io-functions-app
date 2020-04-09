@@ -113,7 +113,7 @@ export const getSendUserDataProcessingEmailActivityHandler = (
     );
     return ActivityResultFailure.encode({
       kind: "FAILURE",
-      reason: "Error in retrieving user' s profile"
+      reason: "Error while retrieving user' s profile"
     });
   }
 };
