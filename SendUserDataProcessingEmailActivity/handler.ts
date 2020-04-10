@@ -52,7 +52,7 @@ export const getSendUserDataProcessingEmailActivityHandler = (
 
   if (isLeft(errorOrActivityInput)) {
     context.log.error(
-      `${logPrefix}|Error decoding SendUserDataProcessingActivity input|ERROR=${errorOrActivityInput.value}`
+      `${logPrefix}|Error decoding SendUserDataProcessingActivity input`
     );
     context.log.verbose(
       `${logPrefix}|Error decoding input|ERROR=${readableReport(
@@ -76,12 +76,12 @@ export const getSendUserDataProcessingEmailActivityHandler = (
     if (isSome(maybeRetrievedProfile)) {
       const { from, to } = emailDefaults;
       const subject = "IO - Richiesta di Download/Cancellazione Dati Utente";
-      const email = maybeRetrievedProfile.value.email;
+      const userEmailAddress = maybeRetrievedProfile.value.email;
       // prepare the text version of the message
       const emailText = `Un utente di IO ha inoltrato una nuova richiesta:
   tipo richiesta: ${choice.toString()}
   codice fiscale: ${fiscalCode}
-  indirizzo email: ${email}.`;
+  indirizzo email: ${userEmailAddress}.`;
 
       // Send an email to the DPO containing the information about the IO user's
       // choice to download or delete his own private data stored by the platform

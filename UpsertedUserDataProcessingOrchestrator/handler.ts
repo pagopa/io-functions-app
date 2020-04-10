@@ -37,9 +37,7 @@ export const handler = function*(
   );
 
   if (isLeft(errorOrUpsertedUserDataProcessingOrchestratorInput)) {
-    context.log.error(
-      `${logPrefix}|Error decoding input|ERROR=${errorOrUpsertedUserDataProcessingOrchestratorInput.value}`
-    );
+    context.log.error(`${logPrefix}|Error decoding input`);
     context.log.verbose(
       `${logPrefix}|Error decoding input|ERROR=${readableReport(
         errorOrUpsertedUserDataProcessingOrchestratorInput.value

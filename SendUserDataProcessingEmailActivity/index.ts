@@ -36,7 +36,7 @@ const mailupUsername = getRequiredStringEnv("MAILUP_USERNAME");
 const mailupSecret = getRequiredStringEnv("MAILUP_SECRET");
 
 // Email data
-const mailFrom = getRequiredStringEnv("DPO_EMAIL_FROM_ADDRESS");
+const mailFrom = getRequiredStringEnv("MAIL_FROM");
 const dpoMailTo = getRequiredStringEnv("DPO_EMAIL_ADDRESS");
 
 const emailDefaults = {
