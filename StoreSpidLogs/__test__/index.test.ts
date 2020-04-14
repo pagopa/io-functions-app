@@ -15,8 +15,10 @@ import { index, SpidBlobItem, SpidMsgItem } from "../index";
 
 const today = format(new Date(), "YYYY-MM-DD");
 
+const aDate = new Date();
+
 const aSpidBlobItem: SpidBlobItem = {
-  createdAt: new Date(),
+  createdAt: aDate,
   ip: "192.168.1.6" as IPString,
   requestPayload:
     "<?xml version='1.0' encoding='UTF-8'?><note ID='AAAA_BBBB'><to>Azure</to><from>Azure</from><heading>Reminder</heading><body>New append from local dev - REQUEST</body></note>",
@@ -26,7 +28,7 @@ const aSpidBlobItem: SpidBlobItem = {
 };
 
 const aSpidMsgItem: SpidMsgItem = {
-  createdAt: new Date(),
+  createdAt: aDate,
   createdAtDay: today,
   fiscalCode: aFiscalCode,
   ip: "192.168.1.6" as IPString,
