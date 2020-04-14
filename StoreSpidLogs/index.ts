@@ -57,11 +57,9 @@ const contextTransport = new AzureContextTransport(() => logger, {
 });
 winston.add(contextTransport);
 
-const OutputBinding = t.interface({
-  spidRequestResponse: SpidBlobItem
-});
-
-export type OutputBinding = t.TypeOf<typeof OutputBinding>;
+interface IOutputBinding {
+  spidRequestResponse: SpidBlobItem;
+}
 
 // Avoid to initialize Application Insights more than once
 if (!ai.defaultClient) {
@@ -75,7 +73,7 @@ export function index(context: Context, spidMsgItem: SpidMsgItem): void {
   logger = context.log;
   t.exact(SpidBlobItem)
     .decode(spidMsgItem)
-    .fold<void | OutputBinding>(
+    .fold(
       errs => {
         // unrecoverable error
         context.done(
@@ -87,7 +85,7 @@ export function index(context: Context, spidMsgItem: SpidMsgItem): void {
       spidBlobItem => {
         context.done(null, {
           spidRequestResponse: spidBlobItem
-        });
+        } as IOutputBinding);
       }
     );
 }
