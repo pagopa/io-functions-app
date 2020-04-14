@@ -1,4 +1,7 @@
 import { Context } from "@azure/functions";
+import * as ai from "applicationinsights";
+import { initAppInsights } from "io-functions-commons/dist/src/utils/application_insights";
+import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { AzureContextTransport } from "io-functions-commons/dist/src/utils/logging";
 import * as t from "io-ts";
 import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
@@ -54,36 +57,35 @@ const contextTransport = new AzureContextTransport(() => logger, {
 });
 winston.add(contextTransport);
 
-const OutputBinding = t.interface({
-  spidRequestResponse: SpidBlobItem
-});
+interface IOutputBinding {
+  spidRequestResponse: SpidBlobItem;
+}
 
-export type OutputBinding = t.TypeOf<typeof OutputBinding>;
+// Avoid to initialize Application Insights more than once
+if (!ai.defaultClient) {
+  initAppInsights(getRequiredStringEnv("APPINSIGHTS_INSTRUMENTATIONKEY"));
+}
 
 /**
  * Store SPID request / responses, read from a queue, into a blob storage.
  */
-export async function index(
-  context: Context,
-  spidMsgItem: SpidMsgItem
-): Promise<void | OutputBinding> {
+export function index(context: Context, spidMsgItem: SpidMsgItem): void {
   logger = context.log;
-  return t
-    .exact(SpidBlobItem)
+  t.exact(SpidBlobItem)
     .decode(spidMsgItem)
-    .fold<void | OutputBinding>(
+    .fold(
       errs => {
         // unrecoverable error
-        context.log.error(
+        context.done(
           `StoreSpidLogs|ERROR=Cannot decode payload|ERROR_DETAILS=${readableReport(
             errs
           )}`
         );
       },
       spidBlobItem => {
-        return {
+        context.done(null, {
           spidRequestResponse: spidBlobItem
-        };
+        } as IOutputBinding);
       }
     );
 }
