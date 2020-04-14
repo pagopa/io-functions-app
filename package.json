@@ -18,7 +18,7 @@
   },
   "description": "",
   "devDependencies": {
-    "@azure/functions": "^1.0.1-beta1",
+    "@azure/functions": "^1.2.0",
     "@types/documentdb": "^1.10.5",
     "@types/express": "^4.16.0",
     "@types/html-to-text": "^1.4.31",
