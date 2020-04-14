@@ -13,7 +13,7 @@
     "test:coverage": "jest --coverage",
     "lint": "tslint -p .",
     "deploy": "npm run build && func azure functionapp publish agid-functions-app-test",
-    "dist:modules": "modclean -r -n default:safe && npm prune --production",
+    "dist:modules": "modclean -r -n default:safe && yarn install --production",
     "predeploy": "npm-run-all build dist:modules"
   },
   "description": "",
