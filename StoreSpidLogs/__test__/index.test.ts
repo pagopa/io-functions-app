@@ -1,6 +1,5 @@
 /* tslint:disable:no-any */
 /* tslint:disable:no-object-mutation */
-
 process.env = {
   QueueStorageConnection: "foobar",
   SPID_BLOB_CONTAINER_NAME: "spidblob",
