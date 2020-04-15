@@ -78,9 +78,10 @@ export const getSendUserDataProcessingEmailActivityHandler = (
       const subject = `IO - Richiesta di tipo ${choice} da parte di ${fiscalCode}`;
       const userEmailAddress = maybeRetrievedProfile.value.email;
       // prepare the text version of the message
-      const emailText = `L' utente ${fiscalCode}, ha fatto richiesta
-  di ${choice === "DOWNLOAD" ? "esportare" : "cancellare"} i propri dati.
-  Per contattare l' utente e' possibile scrivere all' indirizzo mail: ${userEmailAddress}.`;
+      const emailText = `Un utente di IO ha inoltrato una nuova richiesta:
+  tipo richiesta: ${choice.toString()}
+  codice fiscale: ${fiscalCode}
+  indirizzo email: ${userEmailAddress}.`;
 
       // Send an email to the DPO containing the information about the IO user's
       // choice to download or delete his own private data stored by the platform

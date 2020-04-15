@@ -15,9 +15,10 @@ import {
 const aUserDataProcessingChoice = "DOWNLOAD" as UserDataProcessingChoice;
 const userEmail = aRetrievedProfileWithEmail.email;
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
-const htmlAndTextContent = `L' utente ${aFiscalCode}, ha fatto richiesta
-  di esportare i propri dati.
-  Per contattare l' utente e' possibile scrivere all' indirizzo mail: ${userEmail}.`;
+const htmlAndTextContent = `Un utente di IO ha inoltrato una nuova richiesta:
+  tipo richiesta: ${aUserDataProcessingChoice}
+  codice fiscale: ${aFiscalCode}
+  indirizzo email: ${userEmail}.`;
 const anEmailSubject = `IO - Richiesta di tipo ${aUserDataProcessingChoice} da parte di ${aFiscalCode}`;
 
 describe("SendValidationEmailActivityHandler", () => {
