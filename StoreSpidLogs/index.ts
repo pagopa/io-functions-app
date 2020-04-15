@@ -1,4 +1,6 @@
 import { Context } from "@azure/functions";
+import * as ai from "applicationinsights";
+import { initAppInsights } from "io-functions-commons/dist/src/utils/application_insights";
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { AzureContextTransport } from "io-functions-commons/dist/src/utils/logging";
 import * as t from "io-ts";
@@ -59,6 +61,11 @@ winston.add(contextTransport);
 
 export interface IOutputBinding {
   spidRequestResponse: SpidBlobItem;
+}
+
+// Avoid to initialize Application Insights more than once
+if (!ai.defaultClient) {
+  initAppInsights(getRequiredStringEnv("APPINSIGHTS_INSTRUMENTATIONKEY"));
 }
 
 /**

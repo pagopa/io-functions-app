@@ -18,7 +18,9 @@ beforeEach(() => {
 describe("StartEmailValidationProcessHandler", () => {
   it("should start the orchestrator with the right input and return an acceppted response", async () => {
     const profileModelMock = {
-      findOneProfileByFiscalCode: jest.fn(() => right(some(aRetrievedProfile)))
+      findOneProfileByFiscalCode: jest.fn(() =>
+        right(some({ ...aRetrievedProfile, isEmailValidated: false }))
+      )
     };
 
     const handler = StartEmailValidationProcessHandler(profileModelMock as any);
@@ -45,5 +47,19 @@ describe("StartEmailValidationProcessHandler", () => {
     );
 
     expect(result.kind).toBe("IResponseSuccessAccepted");
+  });
+
+  it("should not start the orchestrator if the email is already validated", async () => {
+    const profileModelMock = {
+      findOneProfileByFiscalCode: jest.fn(() =>
+        right(some({ ...aRetrievedProfile, isEmailValidated: true }))
+      )
+    };
+
+    const handler = StartEmailValidationProcessHandler(profileModelMock as any);
+
+    await handler(contextMock as any, aRetrievedProfile.fiscalCode);
+
+    expect(df.getClient).not.toHaveBeenCalledTimes(1);
   });
 });

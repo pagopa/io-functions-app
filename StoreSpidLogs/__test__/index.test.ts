@@ -2,6 +2,7 @@
 /* tslint:disable:no-object-mutation */
 
 process.env = {
+  APPINSIGHTS_INSTRUMENTATIONKEY: "foo",
   QueueStorageConnection: "foobar",
   SPID_BLOB_CONTAINER_NAME: "spidblob",
   SPID_BLOB_STORAGE_CONNECTION_STRING: "foobar",
@@ -111,7 +112,6 @@ describe("StoreSpidLogs", () => {
       }
     };
     const blobItem = await index(mockedContext as any, aSpidMsgItem);
-    expect(blobItem).toHaveProperty("spidRequestResponse");
     const blob = blobItem as IOutputBinding;
     const spidRequestResponse = blob.spidRequestResponse;
     const decryptedSpidBlobItem: SpidBlobItem = {

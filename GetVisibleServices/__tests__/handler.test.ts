@@ -64,6 +64,7 @@ const aVisibleService: VisibleService = {
   id: aRetrievedService.id,
   organizationFiscalCode: aRetrievedService.organizationFiscalCode,
   organizationName: aRetrievedService.organizationName,
+  requireSecureChannels: false,
   serviceId: aRetrievedService.serviceId,
   serviceName: aRetrievedService.serviceName,
   version: aRetrievedService.version
