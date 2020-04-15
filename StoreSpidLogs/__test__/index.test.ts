@@ -13,7 +13,7 @@ import { aFiscalCode } from "../../__mocks__/mocks";
 import { index, SpidBlobItem, SpidMsgItem } from "../index";
 
 const aDate = new Date();
-const today = format(aDate, "YYYY-MM-DD");
+const today = format(new Date(), "YYYY-MM-DD");
 
 const aSpidBlobItem: SpidBlobItem = {
   createdAt: aDate,
