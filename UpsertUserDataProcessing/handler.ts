@@ -5,7 +5,6 @@ import * as df from "durable-functions";
 import { isLeft } from "fp-ts/lib/Either";
 
 import {
-  IResponseErrorConflict,
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseSuccessJson
@@ -48,7 +47,6 @@ type IUpsertUserDataProcessingHandler = (
   | IResponseSuccessJson<UserDataProcessingApi>
   | IResponseErrorValidation
   | IResponseErrorQuery
-  | IResponseErrorConflict
 >;
 
 export function UpsertUserDataProcessingHandler(
@@ -71,10 +69,10 @@ export function UpsertUserDataProcessingHandler(
     // compute the request status according to its previous value (when found)
     // This is the machine state table implemented by following code:
     // |current	         |  POST
-    // |undefined / none |	PENDING
+    // |undefined / none |  PENDING
     // |PENDING	         |  PENDING
     // |WIP	             |  WIP
-    // |CLOSED	         |  PENDING
+    // |CLOSED           |  PENDING
     if (isLeft(errorOrMaybeRetrievedUserDataProcessing)) {
       return ResponseErrorQuery(
         "Error while retrieving a previous version of user data processing",

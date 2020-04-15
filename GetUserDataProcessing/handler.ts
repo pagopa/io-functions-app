@@ -5,7 +5,6 @@ import { Context } from "@azure/functions";
 import { isLeft } from "fp-ts/lib/Either";
 
 import {
-  IResponseErrorConflict,
   IResponseErrorNotFound,
   IResponseSuccessJson,
   ResponseErrorNotFound,
@@ -47,7 +46,6 @@ type IGetUserDataProcessingHandler = (
   | IResponseSuccessJson<UserDataProcessingApi>
   | IResponseErrorQuery
   | IResponseErrorNotFound
-  | IResponseErrorConflict
 >;
 
 export function GetUserDataProcessingHandler(

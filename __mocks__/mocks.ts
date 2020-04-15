@@ -50,6 +50,7 @@ export const aRetrievedProfile: RetrievedProfile = {
   fiscalCode: aFiscalCode,
   id: "123" as NonEmptyString,
   isEmailEnabled: true,
+  isEmailValidated: true,
   isInboxEnabled: false,
   isWebhookEnabled: false,
   kind: "IRetrievedProfile",

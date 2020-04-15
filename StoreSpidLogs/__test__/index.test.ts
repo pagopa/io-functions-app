@@ -1,6 +1,7 @@
 /* tslint:disable:no-any */
 /* tslint:disable:no-object-mutation */
 process.env = {
+  APPINSIGHTS_INSTRUMENTATIONKEY: "foo",
   QueueStorageConnection: "foobar",
   SPID_BLOB_CONTAINER_NAME: "spidblob",
   SPID_BLOB_STORAGE_CONNECTION_STRING: "foobar"
@@ -13,6 +14,8 @@ import { index, SpidBlobItem, SpidMsgItem } from "../index";
 
 const aDate = new Date();
 const today = format(aDate, "YYYY-MM-DD");
+
+const aDate = new Date();
 
 const aSpidBlobItem: SpidBlobItem = {
   createdAt: aDate,
@@ -47,14 +50,14 @@ describe("StoreSpidLogs", () => {
         error: jest.fn()
       }
     };
-    const blobItem = await index(mockedContext as any, {
+    index(mockedContext as any, {
       ...aSpidMsgItem,
       ip: "XX" as IPString
     });
-    expect(blobItem).toBeUndefined();
+    expect(mockedContext.done).toHaveBeenCalledWith(expect.any(String));
   });
 
-  it("should store a SPID request published into the queue", async () => {
+  it("should store a SPID request / response published into the queue", async () => {
     const mockedContext = {
       bindings: {
         spidMsgItem: aSpidMsgItem
@@ -64,27 +67,9 @@ describe("StoreSpidLogs", () => {
         error: jest.fn()
       }
     };
-    const blobItem = await index(mockedContext as any, aSpidMsgItem);
-    expect(blobItem).toEqual({ spidRequestResponse: aSpidBlobItem });
-  });
-
-  it("should store a SPID response published into the queue", async () => {
-    const mockedContext = {
-      bindings: {
-        spidMsgItem: aSpidMsgItem
-      },
-      done: jest.fn(),
-      log: {
-        error: jest.fn()
-      }
-    };
-    const blobItem = await index(mockedContext as any, {
-      ...aSpidMsgItem
-    });
-    expect(blobItem).toEqual({
-      spidRequestResponse: {
-        ...aSpidBlobItem
-      }
+    index(mockedContext as any, aSpidMsgItem);
+    expect(mockedContext.done).toHaveBeenCalledWith(null, {
+      spidRequestResponse: aSpidBlobItem
     });
   });
 });
