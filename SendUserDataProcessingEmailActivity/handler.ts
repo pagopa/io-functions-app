@@ -79,7 +79,7 @@ export const getSendUserDataProcessingEmailActivityHandler = (
       const userEmailAddress = maybeRetrievedProfile.value.email;
       // prepare the text version of the message
       const emailText = `Un utente di IO ha inoltrato una nuova richiesta:
-  tipo richiesta: ${choice.toString()}
+  tipo richiesta: ${choice}
   codice fiscale: ${fiscalCode}
   indirizzo email: ${userEmailAddress}.`;
 
@@ -93,10 +93,9 @@ export const getSendUserDataProcessingEmailActivityHandler = (
       });
 
       if (isLeft(errorOrSentMessageInfo)) {
-        const error = Error(
+        context.log.error(
           `${logPrefix}|Error sending validation email|ERROR=${errorOrSentMessageInfo.value.message}`
         );
-        context.log.error(error.message);
         return ActivityResultFailure.encode({
           kind: "FAILURE",
           reason: "Error while sending mail"
@@ -113,7 +112,7 @@ export const getSendUserDataProcessingEmailActivityHandler = (
     );
     return ActivityResultFailure.encode({
       kind: "FAILURE",
-      reason: "Error while retrieving user' s profile"
+      reason: "Error while retrieving user's profile"
     });
   }
 };

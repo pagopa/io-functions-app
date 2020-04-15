@@ -26,10 +26,6 @@ export const handler = function*(
 ): IterableIterator<unknown> {
   const logPrefix = `UpsertedUserDataProcessingOrchestrator`;
 
-  const retryOptions = new df.RetryOptions(5000, 10);
-  // tslint:disable-next-line: no-object-mutation
-  retryOptions.backoffCoefficient = 1.5;
-
   // Get and decode orchestrator input
   const input = context.df.getInput();
   const errorOrUpsertedUserDataProcessingOrchestratorInput = OrchestratorInput.decode(
@@ -50,7 +46,7 @@ export const handler = function*(
     errorOrUpsertedUserDataProcessingOrchestratorInput.value;
 
   yield context.df.callActivity("SendUserDataProcessingEmailActivity", {
-    ...upsertedUserDataProcessingOrchestratorInput
+    upsertedUserDataProcessingOrchestratorInput
   });
 
   return true;

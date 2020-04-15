@@ -15,8 +15,6 @@ import { index, SpidBlobItem, SpidMsgItem } from "../index";
 const aDate = new Date();
 const today = format(aDate, "YYYY-MM-DD");
 
-const aDate = new Date();
-
 const aSpidBlobItem: SpidBlobItem = {
   createdAt: aDate,
   ip: "192.168.1.6" as IPString,
