@@ -1,5 +1,6 @@
 /* tslint:disable:no-any */
 /* tslint:disable:no-object-mutation */
+
 process.env = {
   APPINSIGHTS_INSTRUMENTATIONKEY: "foo",
   QueueStorageConnection: "foobar",
@@ -12,8 +13,9 @@ import { IPString } from "italia-ts-commons/lib/strings";
 import { aFiscalCode } from "../../__mocks__/mocks";
 import { index, SpidBlobItem, SpidMsgItem } from "../index";
 
-const aDate = new Date();
 const today = format(new Date(), "YYYY-MM-DD");
+
+const aDate = new Date();
 
 const aSpidBlobItem: SpidBlobItem = {
   createdAt: aDate,
