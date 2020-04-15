@@ -44,9 +44,10 @@ export const handler = function*(
   const upsertedUserDataProcessingOrchestratorInput =
     errorOrUpsertedUserDataProcessingOrchestratorInput.value;
 
-  yield context.df.callActivity("SendUserDataProcessingEmailActivity", {
-    ...upsertedUserDataProcessingOrchestratorInput
-  });
+  yield context.df.callActivity(
+    "SendUserDataProcessingEmailActivity",
+    upsertedUserDataProcessingOrchestratorInput
+  );
 
   return true;
 };
