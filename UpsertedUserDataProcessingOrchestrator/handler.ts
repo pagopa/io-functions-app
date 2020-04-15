@@ -2,7 +2,6 @@ import * as t from "io-ts";
 
 import { isLeft } from "fp-ts/lib/Either";
 
-import * as df from "durable-functions";
 import { IFunctionContext } from "durable-functions/lib/src/classes";
 
 import { readableReport } from "italia-ts-commons/lib/reporters";
@@ -46,7 +45,7 @@ export const handler = function*(
     errorOrUpsertedUserDataProcessingOrchestratorInput.value;
 
   yield context.df.callActivity("SendUserDataProcessingEmailActivity", {
-    upsertedUserDataProcessingOrchestratorInput
+    ...upsertedUserDataProcessingOrchestratorInput
   });
 
   return true;
