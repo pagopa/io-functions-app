@@ -4366,7 +4366,7 @@ italia-ts-commons@^6.3.0:
     node-fetch "^2.6.0"
     validator "^10.1.0"
 
-italia-ts-commons@^6.4.0:
+italia-ts-commons@^6.4.1:
   version "6.4.1"
   resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-6.4.1.tgz#dbe46659b4aee68995393d63364e977e41ef7b86"
   integrity sha512-1wRKf+uobLsD0ycmRrCs8CGNXRs7nMW4T/EXFpBjcvUcgMJLN2/ISDiMR1gRWrBEFOb1+vaEVaBjpaJ2yJTpmw==

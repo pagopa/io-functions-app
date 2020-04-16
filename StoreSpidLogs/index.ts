@@ -1,30 +1,21 @@
 import { Context } from "@azure/functions";
 import * as ai from "applicationinsights";
 import { isLeft } from "fp-ts/lib/Either";
+import { curry } from "fp-ts/lib/function";
 import { initAppInsights } from "io-functions-commons/dist/src/utils/application_insights";
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
-import { AzureContextTransport } from "io-functions-commons/dist/src/utils/logging";
 import * as t from "io-ts";
 import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
-import { toEncryptedPayload } from "italia-ts-commons/lib/encrypt";
+import {
+  EncryptedPayload,
+  toEncryptedPayload
+} from "italia-ts-commons/lib/encrypt";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { IPString, PatternString } from "italia-ts-commons/lib/strings";
-import * as winston from "winston";
 
 const rsaPublicKey = getRequiredStringEnv("SPID_LOGS_PUBLIC_KEY");
+const encrypt = curry(toEncryptedPayload)(rsaPublicKey);
 
-const EncryptedPayload = t.interface({
-  // Hybrid encrypted result (Base64)
-  cypherText: t.string,
-
-  // random AES string (Base64)
-  iv: t.string,
-
-  // AES Key encrypted with RSA public key (Base64)
-  encryptedKey: t.string
-});
-
-export type EncryptedPayload = t.TypeOf<typeof EncryptedPayload>;
 /**
  * Payload of the stored blob item
  * (one for each SPID request or response).
@@ -80,13 +71,6 @@ const SpidMsgItem = t.intersection([
 
 export type SpidMsgItem = t.TypeOf<typeof SpidMsgItem>;
 
-// tslint:disable-next-line: no-let
-let logger: Context["log"] | undefined;
-const contextTransport = new AzureContextTransport(() => logger, {
-  level: "debug"
-});
-winston.add(contextTransport);
-
 export interface IOutputBinding {
   spidRequestResponse: SpidBlobItem;
 }
@@ -103,23 +87,16 @@ export async function index(
   context: Context,
   spidMsgItem: SpidMsgItem
 ): Promise<void | IOutputBinding> {
-  logger = context.log;
-  const errorOrEncryptedRequestPayload = toEncryptedPayload(
-    rsaPublicKey,
-    spidMsgItem.requestPayload
-  );
-  const errorOrEncryptedResponsePayload = toEncryptedPayload(
-    rsaPublicKey,
-    spidMsgItem.responsePayload
-  );
+  const errorOrEncryptedRequestPayload = encrypt(spidMsgItem.requestPayload);
+  const errorOrEncryptedResponsePayload = encrypt(spidMsgItem.responsePayload);
   if (
     isLeft(errorOrEncryptedRequestPayload) ||
     isLeft(errorOrEncryptedResponsePayload)
   ) {
     context.log.error(
-      `StoreSpidLogs|ERROR=Cannot encrypt SpID request/response payload|${errorOrEncryptedRequestPayload.value}`
+      `StoreSpidLogs|ERROR=Cannot encrypt SPID request/response payload|${errorOrEncryptedRequestPayload.value}`
     );
-    return void 0;
+    return;
   }
   const encryptedBlobItem: SpidBlobItem = {
     ...spidMsgItem,
@@ -129,7 +106,7 @@ export async function index(
   return t
     .exact(SpidBlobItem)
     .decode(encryptedBlobItem)
-    .fold<void | IOutputBinding>(
+    .fold(
       errs => {
         // unrecoverable error
         context.log.error(
@@ -138,10 +115,8 @@ export async function index(
           )}`
         );
       },
-      spidBlobItem => {
-        return {
-          spidRequestResponse: spidBlobItem
-        };
-      }
+      spidBlobItem => ({
+        spidRequestResponse: spidBlobItem
+      })
     );
 }
