@@ -1,13 +1,12 @@
 import * as express from "express";
 
 import { Context } from "@azure/functions";
-
+import * as df from "durable-functions";
 import { isLeft } from "fp-ts/lib/Either";
 
 import {
   IResponseErrorValidation,
   IResponseSuccessJson,
-  ResponseErrorFromValidationErrors,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
@@ -33,6 +32,7 @@ import {
   UserDataProcessingModel
 } from "io-functions-commons/dist/src/models/user_data_processing";
 import { RequiredBodyPayloadMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_body_payload";
+import { OrchestratorInput } from "../UpsertedUserDataProcessingOrchestrator/handler";
 import { toUserDataProcessingApi } from "../utils/user_data_processings";
 
 /**
@@ -89,42 +89,46 @@ export function UpsertUserDataProcessingHandler(
           : UserDataProcessingStatusEnum.PENDING;
       }
     );
-    const userDataProcessing = UserDataProcessing.decode({
+    const userDataProcessing: UserDataProcessing = {
       choice: upsertUserDataProcessingPayload.choice,
       createdAt: new Date(),
       fiscalCode,
       status: computedStatus,
       userDataProcessingId: id
-    });
+    };
+    const errorOrUpsertedUserDataProcessing = await userDataProcessingModel.createOrUpdateByNewOne(
+      userDataProcessing
+    );
+    if (isLeft(errorOrUpsertedUserDataProcessing)) {
+      const { body } = errorOrUpsertedUserDataProcessing.value;
 
-    if (isLeft(userDataProcessing)) {
-      const error = userDataProcessing.value;
-      return ResponseErrorFromValidationErrors(UserDataProcessing)(error);
-    } else {
-      const errorOrUpsertedUserDataProcessing = await userDataProcessingModel.createOrUpdateByNewOne(
-        userDataProcessing.value
-      );
+      context.log.error(`${logPrefix}|ERROR=${body}`);
 
-      context.log.error(
-        `errorOrUpsertedUserDataProcessing ${errorOrUpsertedUserDataProcessing}`
-      );
-      if (isLeft(errorOrUpsertedUserDataProcessing)) {
-        const { body } = errorOrUpsertedUserDataProcessing.value;
-
-        context.log.error(`${logPrefix}|ERROR=${body}`);
-
-        return ResponseErrorQuery(
-          "Error while creating a new user data processing",
-          errorOrUpsertedUserDataProcessing.value
-        );
-      }
-
-      const createdOrUpdatedUserDataProcessing =
-        errorOrUpsertedUserDataProcessing.value;
-      return ResponseSuccessJson(
-        toUserDataProcessingApi(createdOrUpdatedUserDataProcessing)
+      return ResponseErrorQuery(
+        "Error while creating a new user data processing",
+        errorOrUpsertedUserDataProcessing.value
       );
     }
+
+    const createdOrUpdatedUserDataProcessing =
+      errorOrUpsertedUserDataProcessing.value;
+
+    const upsertedUserDataProcessingOrchestratorInput = OrchestratorInput.encode(
+      {
+        choice: createdOrUpdatedUserDataProcessing.choice,
+        fiscalCode
+      }
+    );
+    await df
+      .getClient(context)
+      .startNew(
+        "UpsertedUserDataProcessingOrchestrator",
+        undefined,
+        upsertedUserDataProcessingOrchestratorInput
+      );
+    return ResponseSuccessJson(
+      toUserDataProcessingApi(createdOrUpdatedUserDataProcessing)
+    );
   };
 }
 

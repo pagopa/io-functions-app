@@ -48,7 +48,7 @@ describe("UpsertUserDataProcessingHandler", () => {
       {} as any
     );
 
-    expect(result.kind).toBe("IResponseErrorValidation");
+    expect(result.kind).toBe("IResponseErrorQuery");
   });
 
   it("should keep the status WIP when a new request is upserted and it was already WIP", async () => {
@@ -86,7 +86,6 @@ describe("UpsertUserDataProcessingHandler", () => {
         right(some(aRetrievedUserDataProcessing))
       )
     };
-
     const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
       userDataProcessingModelMock as any
     );
