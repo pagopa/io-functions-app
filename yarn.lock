@@ -981,7 +981,7 @@ arrify@^1.0.1:
   resolved "https://registry.yarnpkg.com/arrify/-/arrify-1.0.1.tgz#898508da2226f380df904728456849c1501a4b0d"
   integrity sha1-iYUI2iIm84DfkEcoRWhJwVAaSw0=
 
-asn1@^0.2.4, asn1@~0.2.3:
+asn1@~0.2.3:
   version "0.2.4"
   resolved "https://registry.yarnpkg.com/asn1/-/asn1-0.2.4.tgz#8d2475dfab553bb33e77b54e59e880bb8ce23136"
   integrity sha512-jxwzQpLQjSmWXgwaCZE9Nz+glAG01yF1QnWgbhGwHI5A6FRIEY6IVqtHhIepHqI7/kyEyQEagBC5mBEFlIYvdg==
@@ -6033,13 +6033,6 @@ node-pre-gyp@^0.12.0:
     rimraf "^2.6.1"
     semver "^5.3.0"
     tar "^4"
-
-node-rsa@^1.0.8:
-  version "1.0.8"
-  resolved "https://registry.yarnpkg.com/node-rsa/-/node-rsa-1.0.8.tgz#29a4517380f3272cd2073ff4d4c1ca44127ea4ad"
-  integrity sha512-q8knkMHEqViIX/fshOltCHTtlt4Nw5wpBpu0//LB1tkxqYZB/001dYMwbPvTPiENwKvPqVDkhxK6J4fV09oa7w==
-  dependencies:
-    asn1 "^0.2.4"
 
 nodemailer@^4.6.7, nodemailer@^4.7.0:
   version "4.7.0"
