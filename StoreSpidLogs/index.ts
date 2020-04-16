@@ -1,13 +1,21 @@
 import { Context } from "@azure/functions";
 import * as ai from "applicationinsights";
+import { sequenceS } from "fp-ts/lib/Apply";
+import { either } from "fp-ts/lib/Either";
+import { curry } from "fp-ts/lib/function";
 import { initAppInsights } from "io-functions-commons/dist/src/utils/application_insights";
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
-import { AzureContextTransport } from "io-functions-commons/dist/src/utils/logging";
 import * as t from "io-ts";
 import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
+import {
+  EncryptedPayload,
+  toEncryptedPayload
+} from "italia-ts-commons/lib/encrypt";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { IPString, PatternString } from "italia-ts-commons/lib/strings";
-import * as winston from "winston";
+
+const rsaPublicKey = getRequiredStringEnv("SPID_LOGS_PUBLIC_KEY");
+const encrypt = curry(toEncryptedPayload)(rsaPublicKey);
 
 /**
  * Payload of the stored blob item
@@ -21,10 +29,10 @@ const SpidBlobItem = t.interface({
   ip: IPString,
 
   // XML payload of the SPID Request
-  requestPayload: t.string,
+  encryptedRequestPayload: EncryptedPayload,
 
   // XML payload of the SPID Response
-  responsePayload: t.string,
+  encryptedResponsePayload: EncryptedPayload,
 
   // SPID request ID
   spidRequestId: t.string
@@ -38,10 +46,24 @@ export type SpidBlobItem = t.TypeOf<typeof SpidBlobItem>;
  */
 const SpidMsgItem = t.intersection([
   t.interface({
+    // Timestamp of Request/Response creation
+    createdAt: UTCISODateFromString,
+
     // Date of the SPID request / response in YYYY-MM-DD format
-    createdAtDay: PatternString("^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
+    createdAtDay: PatternString("^[0-9]{4}-[0-9]{2}-[0-9]{2}$"),
+
+    // IP of the client that made a SPID login action
+    ip: IPString,
+
+    // XML payload of the SPID Request
+    requestPayload: t.string,
+
+    // XML payload of the SPID Response
+    responsePayload: t.string,
+
+    // SPID request ID
+    spidRequestId: t.string
   }),
-  SpidBlobItem,
   t.partial({
     // SPID user fiscal code
     fiscalCode: t.string
@@ -50,14 +72,7 @@ const SpidMsgItem = t.intersection([
 
 export type SpidMsgItem = t.TypeOf<typeof SpidMsgItem>;
 
-// tslint:disable-next-line: no-let
-let logger: Context["log"] | undefined;
-const contextTransport = new AzureContextTransport(() => logger, {
-  level: "debug"
-});
-winston.add(contextTransport);
-
-interface IOutputBinding {
+export interface IOutputBinding {
   spidRequestResponse: SpidBlobItem;
 }
 
@@ -69,23 +84,37 @@ if (!ai.defaultClient) {
 /**
  * Store SPID request / responses, read from a queue, into a blob storage.
  */
-export function index(context: Context, spidMsgItem: SpidMsgItem): void {
-  logger = context.log;
-  t.exact(SpidBlobItem)
-    .decode(spidMsgItem)
+export async function index(
+  context: Context,
+  spidMsgItem: SpidMsgItem
+): Promise<void | IOutputBinding> {
+  return sequenceS(either)({
+    encryptedRequestPayload: encrypt(spidMsgItem.requestPayload),
+    encryptedResponsePayload: encrypt(spidMsgItem.responsePayload)
+  })
+    .map(item => ({
+      ...spidMsgItem,
+      ...item
+    }))
     .fold(
-      errs => {
-        // unrecoverable error
-        context.done(
-          `StoreSpidLogs|ERROR=Cannot decode payload|ERROR_DETAILS=${readableReport(
-            errs
-          )}`
-        );
-      },
-      spidBlobItem => {
-        context.done(null, {
-          spidRequestResponse: spidBlobItem
-        } as IOutputBinding);
-      }
+      err =>
+        context.log.error(`StoreSpidLogs|ERROR=Cannot encrypt payload|${err}`),
+      (encryptedBlobItem: SpidBlobItem) =>
+        t
+          .exact(SpidBlobItem)
+          .decode(encryptedBlobItem)
+          .fold(
+            errs => {
+              // unrecoverable error
+              context.log.error(
+                `StoreSpidLogs|ERROR=Cannot decode payload|ERROR_DETAILS=${readableReport(
+                  errs
+                )}`
+              );
+            },
+            spidBlobItem => ({
+              spidRequestResponse: spidBlobItem
+            })
+          )
     );
 }
