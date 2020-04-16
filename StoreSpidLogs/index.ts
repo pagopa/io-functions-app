@@ -1,6 +1,7 @@
 import { Context } from "@azure/functions";
 import * as ai from "applicationinsights";
-import { isLeft } from "fp-ts/lib/Either";
+import { sequenceS } from "fp-ts/lib/Apply";
+import { either } from "fp-ts/lib/Either";
 import { curry } from "fp-ts/lib/function";
 import { initAppInsights } from "io-functions-commons/dist/src/utils/application_insights";
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
@@ -87,36 +88,33 @@ export async function index(
   context: Context,
   spidMsgItem: SpidMsgItem
 ): Promise<void | IOutputBinding> {
-  const errorOrEncryptedRequestPayload = encrypt(spidMsgItem.requestPayload);
-  const errorOrEncryptedResponsePayload = encrypt(spidMsgItem.responsePayload);
-  if (
-    isLeft(errorOrEncryptedRequestPayload) ||
-    isLeft(errorOrEncryptedResponsePayload)
-  ) {
-    context.log.error(
-      `StoreSpidLogs|ERROR=Cannot encrypt SPID request/response payload|${errorOrEncryptedRequestPayload.value}`
-    );
-    return;
-  }
-  const encryptedBlobItem: SpidBlobItem = {
-    ...spidMsgItem,
-    encryptedRequestPayload: errorOrEncryptedRequestPayload.value,
-    encryptedResponsePayload: errorOrEncryptedResponsePayload.value
-  };
-  return t
-    .exact(SpidBlobItem)
-    .decode(encryptedBlobItem)
+  return sequenceS(either)({
+    encryptedRequestPayload: encrypt(spidMsgItem.requestPayload),
+    encryptedResponsePayload: encrypt(spidMsgItem.responsePayload)
+  })
+    .map(item => ({
+      ...spidMsgItem,
+      ...item
+    }))
     .fold(
-      errs => {
-        // unrecoverable error
-        context.log.error(
-          `StoreSpidLogs|ERROR=Cannot decode payload|ERROR_DETAILS=${readableReport(
-            errs
-          )}`
-        );
-      },
-      spidBlobItem => ({
-        spidRequestResponse: spidBlobItem
-      })
+      err =>
+        context.log.error(`StoreSpidLogs|ERROR=Cannot encrypt payload|${err}`),
+      (encryptedBlobItem: SpidBlobItem) =>
+        t
+          .exact(SpidBlobItem)
+          .decode(encryptedBlobItem)
+          .fold(
+            errs => {
+              // unrecoverable error
+              context.log.error(
+                `StoreSpidLogs|ERROR=Cannot decode payload|ERROR_DETAILS=${readableReport(
+                  errs
+                )}`
+              );
+            },
+            spidBlobItem => ({
+              spidRequestResponse: spidBlobItem
+            })
+          )
     );
 }
