@@ -84,8 +84,13 @@ export const getSendUserDataProcessingEmailActivityHandler = (
   indirizzo email: ${userEmailAddress}.`;
       const documentHtml = `
       <!doctype html>
-      <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
-        <body style="background-color:#ffffff;">
+      <html>
+        <head>
+          <meta name="viewport" content="width=device-width" />
+          <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+          <title>${subject}</title>
+        </head>
+        <body>
           <p>${emailText}</p>
         </body>
       </html>`;

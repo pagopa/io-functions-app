@@ -15,18 +15,23 @@ import {
 const aUserDataProcessingChoice = "DOWNLOAD" as UserDataProcessingChoice;
 const userEmail = aRetrievedProfileWithEmail.email;
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
+const anEmailSubject = `IO - Richiesta di tipo ${aUserDataProcessingChoice} da parte di ${aFiscalCode}`;
 const htmlAndTextContent = `Un utente di IO ha inoltrato una nuova richiesta:
   tipo richiesta: ${aUserDataProcessingChoice}
   codice fiscale: ${aFiscalCode}
   indirizzo email: ${userEmail}.`;
 const aHtmlDocument = `
       <!doctype html>
-      <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
-        <body style="background-color:#ffffff;">
+      <html>
+        <head>
+          <meta name="viewport" content="width=device-width" />
+          <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+          <title>${anEmailSubject}</title>
+        </head>
+        <body>
           <p>${htmlAndTextContent}</p>
         </body>
       </html>`;
-const anEmailSubject = `IO - Richiesta di tipo ${aUserDataProcessingChoice} da parte di ${aFiscalCode}`;
 
 describe("SendValidationEmailActivityHandler", () => {
   it("should send the email using the input data", async () => {
