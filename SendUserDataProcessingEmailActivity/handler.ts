@@ -82,11 +82,18 @@ export const getSendUserDataProcessingEmailActivityHandler = (
   tipo richiesta: ${choice}
   codice fiscale: ${fiscalCode}
   indirizzo email: ${userEmailAddress}.`;
-
+      const documentHtml = `
+      <!doctype html>
+      <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+        <body style="background-color:#ffffff;">
+          <p>${emailText}</p>
+        </body>
+      </html>`;
       // Send an email to the DPO containing the information about the IO user's
       // choice to download or delete his own private data stored by the platform
       const errorOrSentMessageInfo = await sendMail(mailerTransporter, {
         from,
+        html: documentHtml,
         subject,
         text: emailText,
         to
@@ -94,7 +101,7 @@ export const getSendUserDataProcessingEmailActivityHandler = (
 
       if (isLeft(errorOrSentMessageInfo)) {
         context.log.error(
-          `${logPrefix}|Error sending validation email|ERROR=${errorOrSentMessageInfo.value.message}`
+          `${logPrefix}|Error sending userDataProcessing email|ERROR=${errorOrSentMessageInfo.value.message}`
         );
         return ActivityResultFailure.encode({
           kind: "FAILURE",

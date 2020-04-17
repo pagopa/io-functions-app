@@ -19,6 +19,13 @@ const htmlAndTextContent = `Un utente di IO ha inoltrato una nuova richiesta:
   tipo richiesta: ${aUserDataProcessingChoice}
   codice fiscale: ${aFiscalCode}
   indirizzo email: ${userEmail}.`;
+const aHtmlDocument = `
+      <!doctype html>
+      <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+        <body style="background-color:#ffffff;">
+          <p>${htmlAndTextContent}</p>
+        </body>
+      </html>`;
 const anEmailSubject = `IO - Richiesta di tipo ${aUserDataProcessingChoice} da parte di ${aFiscalCode}`;
 
 describe("SendValidationEmailActivityHandler", () => {
@@ -54,6 +61,7 @@ describe("SendValidationEmailActivityHandler", () => {
     expect(mailerTransporterMock.sendMail).toHaveBeenCalledWith(
       {
         from: emailDefaults.from,
+        html: aHtmlDocument,
         subject: anEmailSubject,
         text: htmlAndTextContent,
         to: emailDefaults.to
