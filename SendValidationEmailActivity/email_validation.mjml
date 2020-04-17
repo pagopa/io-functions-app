@@ -12,7 +12,7 @@
   <mj-body background-color="#ffffff" color="#55575d" font-family="Arial, sans-serif">
     <mj-section background-repeat="repeat" padding="20px 0" text-align="center" vertical-align="top">
       <mj-column>
-        <mj-image align="center" alt="" border="none" href="" padding-bottom="0px" padding-left="25px" padding-right="25px" padding-top="0px" padding="0px 25px 0px 25px" src="https://app-backend.dev.io.italia.it/assets/logo.png" target="_blank" title="" width="56px"></mj-image>
+        <mj-image align="center" alt="" border="none" href="" padding-bottom="0px" padding-left="25px" padding-right="25px" padding-top="0px" padding="0px 25px 0px 25px" src="https://app-backend.io.italia.it/assets/logo.png" target="_blank" title="" width="56px"></mj-image>
         <mj-text align="left" color="#000000" font-family="Arial, sans-serif" font-size="13px" line-height="24px" padding-bottom="0px" padding-left="25px" padding-right="25px" padding-top="0px" padding="0px 25px 0px 25px">
           <p style="text-align: center; margin: 10px 0;"><span style="color:#5c6f82;"><span style="font-size:14px;"><span style="font-family:Titillium Web,Helvetica,Arial,sans-serif;">IO, l’app dei servizi pubblici</span></span></span></p>
         </mj-text>
