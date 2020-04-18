@@ -67,7 +67,7 @@ export const getDpoEmailHtml = (subject: string, emailText: string) => `
           <title>${subject}</title>
         </head>
         <body>
-          <p>${emailText.replace("\n", "<br>\n")}</p>
+          <p>${emailText.replace(/\n/g, "<br>\n")}</p>
         </body>
       </html>`;
 
