@@ -1,7 +1,5 @@
 // tslint:disable:no-any no-duplicate-string no-big-function
 
-jest.mock("winston");
-
 import { right } from "fp-ts/lib/Either";
 import { none, some } from "fp-ts/lib/Option";
 
