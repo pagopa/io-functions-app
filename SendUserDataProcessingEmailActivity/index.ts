@@ -1,14 +1,20 @@
 ﻿import * as NodeMailer from "nodemailer";
-
-import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
+import Mail = require("nodemailer/lib/mailer");
 
 import { DocumentClient as DocumentDBClient } from "documentdb";
+import { toError } from "fp-ts/lib/Either";
+import { Option } from "fp-ts/lib/Option";
+import { Task } from "fp-ts/lib/Task";
+import * as TE from "fp-ts/lib/TaskEither";
 import {
   PROFILE_COLLECTION_NAME,
-  ProfileModel
+  ProfileModel,
+  RetrievedProfile
 } from "io-functions-commons/dist/src/models/profile";
 import * as documentDbUtils from "io-functions-commons/dist/src/utils/documentdb";
+import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { MailUpTransport } from "io-functions-commons/dist/src/utils/mailup";
+import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { getSendUserDataProcessingEmailActivityHandler } from "./handler";
 
 const cosmosDbUri = getRequiredStringEnv("COSMOSDB_URI");
@@ -27,6 +33,23 @@ const documentClient = new DocumentDBClient(cosmosDbUri, {
 });
 
 const profileModel = new ProfileModel(documentClient, profilesCollectionUrl);
+
+const findOneProfileByFiscalCodeTask = (pm: ProfileModel) => (
+  fiscalCode: FiscalCode
+) =>
+  TE.tryCatch(
+    () => pm.findOneProfileByFiscalCode(fiscalCode),
+    toError
+  ).foldTaskEither<Error, Option<RetrievedProfile>>(
+    err => TE.left(new Task(async () => err)),
+    queryErrorOrMaybeProfile =>
+      queryErrorOrMaybeProfile.fold(
+        queryError => TE.left(new Task(async () => new Error(queryError.body))),
+        maybeProfile => TE.right(new Task(async () => maybeProfile))
+      )
+  );
+
+export type findOneProfileByFiscalCodeTaskT = typeof findOneProfileByFiscalCodeTask;
 
 // Whether we're in a production environment
 const isProduction = process.env.NODE_ENV === "production";
@@ -63,10 +86,16 @@ const mailerTransporter = isProduction
       secure: false
     });
 
+const sendMailTask = (mt: Mail) => (
+  options: Mail.Options & { html: Mail.Options["html"] }
+) => TE.tryCatch(() => mt.sendMail(options), toError);
+
+export type sendMailTaskT = typeof sendMailTask;
+
 const activityFunctionHandler = getSendUserDataProcessingEmailActivityHandler(
-  mailerTransporter,
   emailDefaults,
-  profileModel
+  sendMailTask(mailerTransporter),
+  findOneProfileByFiscalCodeTask(profileModel)
 );
 
 export default activityFunctionHandler;
