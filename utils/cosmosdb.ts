@@ -1,3 +1,6 @@
+/**
+ * Use a singleton CosmosDB client across functions.
+ */
 import { DocumentClient as DocumentDBClient } from "documentdb";
 
 // tslint:disable-next-line: no-let
