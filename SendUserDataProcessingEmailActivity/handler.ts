@@ -12,7 +12,6 @@ import {
   UserDataProcessingChoiceEnum
 } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
 import { EmailString } from "italia-ts-commons/lib/strings";
-import Mail = require("nodemailer/lib/mailer");
 import {
   EmailDefaults,
   findOneProfileByFiscalCodeTaskT,
