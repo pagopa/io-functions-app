@@ -1,7 +1,5 @@
 // tslint:disable:no-any no-duplicate-string no-big-function
 
-jest.mock("winston");
-
 import { left, right } from "fp-ts/lib/Either";
 import { none, some } from "fp-ts/lib/Option";
 
@@ -17,6 +15,7 @@ import { MessageResponseWithoutContent } from "io-functions-commons/dist/generat
 import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
 import { TimeToLiveSeconds } from "io-functions-commons/dist/generated/definitions/TimeToLiveSeconds";
 
+import { context as contextMock } from "../../__mocks__/durable-functions";
 import { GetMessageHandler } from "../handler";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
@@ -67,6 +66,7 @@ describe("GetMessageHandler", () => {
     );
 
     const result = await getMessageHandler(
+      contextMock as any,
       aFiscalCode,
       aRetrievedMessageWithoutContent.id
     );
@@ -95,6 +95,7 @@ describe("GetMessageHandler", () => {
     );
 
     const result = await getMessageHandler(
+      contextMock as any,
       aFiscalCode,
       aRetrievedMessageWithoutContent.id
     );
@@ -124,6 +125,7 @@ describe("GetMessageHandler", () => {
     );
 
     const result = await getMessageHandler(
+      contextMock as any,
       aFiscalCode,
       aRetrievedMessageWithoutContent.id
     );

@@ -1,5 +1,4 @@
 import * as express from "express";
-import * as winston from "winston";
 
 import { isLeft } from "fp-ts/lib/Either";
 import { isNone } from "fp-ts/lib/Option";
@@ -33,10 +32,12 @@ import {
 
 import { MessageModel } from "io-functions-commons/dist/src/models/message";
 
+import { Context } from "@azure/functions";
 import { CreatedMessageWithContent } from "io-functions-commons/dist/generated/definitions/CreatedMessageWithContent";
 import { CreatedMessageWithoutContent } from "io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
 import { MessageResponseWithContent } from "io-functions-commons/dist/generated/definitions/MessageResponseWithContent";
 import { MessageResponseWithoutContent } from "io-functions-commons/dist/generated/definitions/MessageResponseWithoutContent";
+import { ContextMiddleware } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
 
 /**
  * Type of a GetMessage handler.
@@ -46,6 +47,7 @@ import { MessageResponseWithoutContent } from "io-functions-commons/dist/generat
  * errors.
  */
 type IGetMessageHandler = (
+  context: Context,
   fiscalCode: FiscalCode,
   messageId: string
 ) => Promise<
@@ -67,7 +69,7 @@ export function GetMessageHandler(
   messageModel: MessageModel,
   blobService: BlobService
 ): IGetMessageHandler {
-  return async (fiscalCode, messageId) => {
+  return async (context, fiscalCode, messageId) => {
     const [errorOrMaybeDocument, errorOrMaybeContent] = await Promise.all([
       messageModel.findMessageForRecipient(fiscalCode, messageId),
       messageModel.getContentFromBlob(blobService, messageId)
@@ -93,7 +95,7 @@ export function GetMessageHandler(
     const retrievedMessage = maybeDocument.value;
 
     if (isLeft(errorOrMaybeContent)) {
-      winston.error(
+      context.log.error(
         `GetMessageHandler|${JSON.stringify(errorOrMaybeContent.value)}`
       );
       return ResponseErrorInternal(
@@ -129,6 +131,7 @@ export function GetMessage(
 ): express.RequestHandler {
   const handler = GetMessageHandler(messageModel, blobService);
   const middlewaresWrap = withRequestMiddlewares(
+    ContextMiddleware(),
     FiscalCodeMiddleware,
     RequiredParamMiddleware("id", NonEmptyString)
   );

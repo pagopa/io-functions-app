@@ -1,14 +1,12 @@
 import { Context } from "@azure/functions";
 
 import * as express from "express";
-import * as winston from "winston";
 
 import { DocumentClient as DocumentDBClient } from "documentdb";
 
 import * as documentDbUtils from "io-functions-commons/dist/src/utils/documentdb";
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { secureExpressApp } from "io-functions-commons/dist/src/utils/express";
-import { AzureContextTransport } from "io-functions-commons/dist/src/utils/logging";
 import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
 
 import {
@@ -57,16 +55,8 @@ app.get(
 
 const azureFunctionHandler = createAzureFunctionHandler(app);
 
-// tslint:disable-next-line: no-let
-let logger: Context["log"] | undefined;
-const contextTransport = new AzureContextTransport(() => logger, {
-  level: "debug"
-});
-winston.add(contextTransport);
-
 // Binds the express app to an Azure Function handler
 function httpStart(context: Context): void {
-  logger = context.log;
   setAppContext(app, context);
   azureFunctionHandler(context);
 }
