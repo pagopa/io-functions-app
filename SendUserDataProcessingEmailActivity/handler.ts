@@ -115,8 +115,9 @@ export const getSendUserDataProcessingEmailActivityHandler = (
             left(failure("Error retrieving user's profile", err.message))
           ),
         maybeRetrievedProfile =>
-          maybeRetrievedProfile.fold(
-            fromEither(left(failure("No user's profile found", fiscalCode))),
+          maybeRetrievedProfile.foldL(
+            () =>
+              fromEither(left(failure("No user's profile found", fiscalCode))),
             profile => fromEither(right({ choice, fiscalCode, profile }))
           )
       )
