@@ -1,9 +1,8 @@
 ﻿import * as NodeMailer from "nodemailer";
 import Mail = require("nodemailer/lib/mailer");
 
-import { toError } from "fp-ts/lib/Either";
+import { left, right, toError } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
-import { Task } from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import {
   PROFILE_COLLECTION_NAME,
@@ -39,11 +38,11 @@ const findOneProfileByFiscalCodeTask = (pm: ProfileModel) => (
     () => pm.findOneProfileByFiscalCode(fiscalCode),
     toError
   ).foldTaskEither<Error, Option<RetrievedProfile>>(
-    err => TE.left(new Task(async () => err)),
+    err => TE.fromEither(left(err)),
     queryErrorOrMaybeProfile =>
       queryErrorOrMaybeProfile.fold(
-        queryError => TE.left(new Task(async () => new Error(queryError.body))),
-        maybeProfile => TE.right(new Task(async () => maybeProfile))
+        queryError => TE.fromEither(left(new Error(queryError.body))),
+        maybeProfile => TE.fromEither(right(maybeProfile))
       )
   );
 

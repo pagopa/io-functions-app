@@ -79,8 +79,8 @@ const failActivity = (context: Context, logPrefix: string) => (
   errorMessage: string,
   errorDetails?: string
 ) => {
-  const details = errorDetails ? `ERROR_DETAILS=${errorDetails}` : ``;
-  context.log.error(`${logPrefix}|${errorMessage}|${details}`);
+  const details = errorDetails ? `|ERROR_DETAILS=${errorDetails}` : ``;
+  context.log.error(`${logPrefix}|${errorMessage}${details}`);
   return ActivityResultFailure.encode({
     kind: "FAILURE",
     reason: errorMessage
@@ -116,7 +116,7 @@ export const getSendUserDataProcessingEmailActivityHandler = (
           ),
         maybeRetrievedProfile =>
           maybeRetrievedProfile.fold(
-            fromEither(left(failure("No user's profile found"))),
+            fromEither(left(failure("No user's profile found", fiscalCode))),
             profile => fromEither(right({ choice, fiscalCode, profile }))
           )
       )
