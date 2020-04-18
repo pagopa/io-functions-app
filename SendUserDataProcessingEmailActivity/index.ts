@@ -1,7 +1,6 @@
 ﻿import * as NodeMailer from "nodemailer";
 import Mail = require("nodemailer/lib/mailer");
 
-import { DocumentClient as DocumentDBClient } from "documentdb";
 import { toError } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
 import { Task } from "fp-ts/lib/Task";
@@ -15,6 +14,7 @@ import * as documentDbUtils from "io-functions-commons/dist/src/utils/documentdb
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { MailUpTransport } from "io-functions-commons/dist/src/utils/mailup";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { getDocumentClient } from "../utils/cosmosdb";
 import { getSendUserDataProcessingEmailActivityHandler } from "./handler";
 
 const cosmosDbUri = getRequiredStringEnv("COSMOSDB_URI");
@@ -28,9 +28,7 @@ const profilesCollectionUrl = documentDbUtils.getCollectionUri(
   PROFILE_COLLECTION_NAME
 );
 
-const documentClient = new DocumentDBClient(cosmosDbUri, {
-  masterKey: cosmosDbKey
-});
+const documentClient = getDocumentClient(cosmosDbUri, cosmosDbKey);
 
 const profileModel = new ProfileModel(documentClient, profilesCollectionUrl);
 

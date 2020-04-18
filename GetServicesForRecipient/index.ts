@@ -2,8 +2,6 @@ import { Context } from "@azure/functions";
 
 import * as express from "express";
 
-import { DocumentClient as DocumentDBClient } from "documentdb";
-
 import {
   SENDER_SERVICE_COLLECTION_NAME,
   SenderServiceModel
@@ -15,6 +13,7 @@ import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/c
 
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
+import { getDocumentClient } from "../utils/cosmosdb";
 import { GetServicesForRecipient } from "./handler";
 
 // Setup Express
@@ -31,9 +30,7 @@ const senderServicesCollectionUrl = documentDbUtils.getCollectionUri(
   SENDER_SERVICE_COLLECTION_NAME
 );
 
-const documentClient = new DocumentDBClient(cosmosDbUri, {
-  masterKey: cosmosDbKey
-});
+const documentClient = getDocumentClient(cosmosDbUri, cosmosDbKey);
 
 const senderServiceModel = new SenderServiceModel(
   documentClient,

@@ -2,8 +2,6 @@ import { Context } from "@azure/functions";
 
 import * as express from "express";
 
-import { DocumentClient as DocumentDBClient } from "documentdb";
-
 import {
   PROFILE_COLLECTION_NAME,
   ProfileModel
@@ -16,6 +14,7 @@ import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/c
 
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
+import { getDocumentClient } from "../utils/cosmosdb";
 import { StartEmailValidationProcess } from "./handler";
 
 // Setup Express
@@ -32,9 +31,7 @@ const profilesCollectionUrl = documentDbUtils.getCollectionUri(
   PROFILE_COLLECTION_NAME
 );
 
-const documentClient = new DocumentDBClient(cosmosDbUri, {
-  masterKey: cosmosDbKey
-});
+const documentClient = getDocumentClient(cosmosDbUri, cosmosDbKey);
 
 const profileModel = new ProfileModel(documentClient, profilesCollectionUrl);
 
