@@ -2,8 +2,6 @@
 
 import * as express from "express";
 
-import { DocumentClient as DocumentDBClient } from "documentdb";
-
 import {
   USER_DATA_PROCESSING_COLLECTION_NAME,
   UserDataProcessingModel
@@ -16,6 +14,7 @@ import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/c
 
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
+import { getDocumentClient } from "../utils/cosmosdb";
 import { GetUserDataProcessing } from "./handler";
 
 const cosmosDbUri = getRequiredStringEnv("COSMOSDB_URI");
@@ -28,9 +27,7 @@ const userDataProcessingsCollectionUrl = documentDbUtils.getCollectionUri(
   USER_DATA_PROCESSING_COLLECTION_NAME
 );
 
-const documentClient = new DocumentDBClient(cosmosDbUri, {
-  masterKey: cosmosDbKey
-});
+const documentClient = getDocumentClient(cosmosDbUri, cosmosDbKey);
 
 const userDataProcessingModel = new UserDataProcessingModel(
   documentClient,

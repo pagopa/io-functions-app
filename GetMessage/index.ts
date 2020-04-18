@@ -2,8 +2,6 @@ import { Context } from "@azure/functions";
 
 import * as express from "express";
 
-import { DocumentClient as DocumentDBClient } from "documentdb";
-
 import * as documentDbUtils from "io-functions-commons/dist/src/utils/documentdb";
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { secureExpressApp } from "io-functions-commons/dist/src/utils/express";
@@ -18,6 +16,7 @@ import { createBlobService } from "azure-storage";
 
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
+import { getDocumentClient } from "../utils/cosmosdb";
 import { GetMessage } from "./handler";
 
 // Setup Express
@@ -35,9 +34,7 @@ const messagesCollectionUrl = documentDbUtils.getCollectionUri(
   MESSAGE_COLLECTION_NAME
 );
 
-const documentClient = new DocumentDBClient(cosmosDbUri, {
-  masterKey: cosmosDbKey
-});
+const documentClient = getDocumentClient(cosmosDbUri, cosmosDbKey);
 
 const messageModel = new MessageModel(
   documentClient,
