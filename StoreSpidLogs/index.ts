@@ -1,9 +1,7 @@
 import { Context } from "@azure/functions";
-import * as ai from "applicationinsights";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { either } from "fp-ts/lib/Either";
 import { curry } from "fp-ts/lib/function";
-import { initAppInsights } from "io-functions-commons/dist/src/utils/application_insights";
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import * as t from "io-ts";
 import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
@@ -13,6 +11,7 @@ import {
 } from "italia-ts-commons/lib/encrypt";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { IPString, PatternString } from "italia-ts-commons/lib/strings";
+import { initTelemetryClient } from "../utils/appinsights";
 
 const rsaPublicKey = getRequiredStringEnv("SPID_LOGS_PUBLIC_KEY");
 const encrypt = curry(toEncryptedPayload)(rsaPublicKey);
@@ -76,10 +75,8 @@ export interface IOutputBinding {
   spidRequestResponse: SpidBlobItem;
 }
 
-// Avoid to initialize Application Insights more than once
-if (!ai.defaultClient) {
-  initAppInsights(getRequiredStringEnv("APPINSIGHTS_INSTRUMENTATIONKEY"));
-}
+// Initialize application insights
+initTelemetryClient();
 
 /**
  * Store SPID request / responses, read from a queue, into a blob storage.
