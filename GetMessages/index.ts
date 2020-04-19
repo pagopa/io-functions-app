@@ -14,15 +14,13 @@ import {
 
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
-import { getDocumentClient } from "../utils/cosmosdb";
+import { documentClient } from "../utils/cosmosdb";
 import { GetMessages } from "./handler";
 
 // Setup Express
 const app = express();
 secureExpressApp(app);
 
-const cosmosDbUri = getRequiredStringEnv("COSMOSDB_URI");
-const cosmosDbKey = getRequiredStringEnv("COSMOSDB_KEY");
 const cosmosDbName = getRequiredStringEnv("COSMOSDB_NAME");
 const messageContainerName = getRequiredStringEnv("MESSAGE_CONTAINER_NAME");
 
@@ -31,8 +29,6 @@ const messagesCollectionUrl = documentDbUtils.getCollectionUri(
   documentDbDatabaseUrl,
   MESSAGE_COLLECTION_NAME
 );
-
-const documentClient = getDocumentClient(cosmosDbUri, cosmosDbKey);
 
 const messageModel = new MessageModel(
   documentClient,

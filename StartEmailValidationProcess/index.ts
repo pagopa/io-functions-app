@@ -14,15 +14,13 @@ import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/c
 
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
-import { getDocumentClient } from "../utils/cosmosdb";
+import { documentClient } from "../utils/cosmosdb";
 import { StartEmailValidationProcess } from "./handler";
 
 // Setup Express
 const app = express();
 secureExpressApp(app);
 
-const cosmosDbUri = getRequiredStringEnv("COSMOSDB_URI");
-const cosmosDbKey = getRequiredStringEnv("COSMOSDB_KEY");
 const cosmosDbName = getRequiredStringEnv("COSMOSDB_NAME");
 
 const documentDbDatabaseUrl = documentDbUtils.getDatabaseUri(cosmosDbName);
@@ -30,8 +28,6 @@ const profilesCollectionUrl = documentDbUtils.getCollectionUri(
   documentDbDatabaseUrl,
   PROFILE_COLLECTION_NAME
 );
-
-const documentClient = getDocumentClient(cosmosDbUri, cosmosDbKey);
 
 const profileModel = new ProfileModel(documentClient, profilesCollectionUrl);
 

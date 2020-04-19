@@ -14,11 +14,9 @@ import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/c
 
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
-import { getDocumentClient } from "../utils/cosmosdb";
+import { documentClient } from "../utils/cosmosdb";
 import { UpsertUserDataProcessing } from "./handler";
 
-const cosmosDbUri = getRequiredStringEnv("COSMOSDB_URI");
-const cosmosDbKey = getRequiredStringEnv("COSMOSDB_KEY");
 const cosmosDbName = getRequiredStringEnv("COSMOSDB_NAME");
 
 const documentDbDatabaseUrl = documentDbUtils.getDatabaseUri(cosmosDbName);
@@ -26,8 +24,6 @@ const userDataProcessingsCollectionUrl = documentDbUtils.getCollectionUri(
   documentDbDatabaseUrl,
   USER_DATA_PROCESSING_COLLECTION_NAME
 );
-
-const documentClient = getDocumentClient(cosmosDbUri, cosmosDbKey);
 
 const userDataProcessingModel = new UserDataProcessingModel(
   documentClient,

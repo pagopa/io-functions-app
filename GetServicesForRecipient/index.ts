@@ -13,15 +13,13 @@ import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/c
 
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
-import { getDocumentClient } from "../utils/cosmosdb";
+import { documentClient } from "../utils/cosmosdb";
 import { GetServicesForRecipient } from "./handler";
 
 // Setup Express
 const app = express();
 secureExpressApp(app);
 
-const cosmosDbUri = getRequiredStringEnv("COSMOSDB_URI");
-const cosmosDbKey = getRequiredStringEnv("COSMOSDB_KEY");
 const cosmosDbName = getRequiredStringEnv("COSMOSDB_NAME");
 
 const documentDbDatabaseUrl = documentDbUtils.getDatabaseUri(cosmosDbName);
@@ -29,8 +27,6 @@ const senderServicesCollectionUrl = documentDbUtils.getCollectionUri(
   documentDbDatabaseUrl,
   SENDER_SERVICE_COLLECTION_NAME
 );
-
-const documentClient = getDocumentClient(cosmosDbUri, cosmosDbKey);
 
 const senderServiceModel = new SenderServiceModel(
   documentClient,
