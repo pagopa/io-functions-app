@@ -1,7 +1,6 @@
 ﻿import { AzureFunction, Context } from "@azure/functions";
 
-import * as request from "superagent";
-
+import { agent } from "italia-ts-commons";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
@@ -9,6 +8,12 @@ import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { RetrievedProfile } from "io-functions-commons/dist/src/models/profile";
 
 import { NewMessage } from "io-functions-commons/dist/generated/definitions/NewMessage";
+import {
+  AbortableFetch,
+  setFetchTimeout,
+  toFetch
+} from "italia-ts-commons/lib/fetch";
+import { Millisecond } from "italia-ts-commons/lib/units";
 
 // HTTP external requests timeout in milliseconds
 const DEFAULT_REQUEST_TIMEOUT_MS = 10000;
@@ -16,6 +21,16 @@ const DEFAULT_REQUEST_TIMEOUT_MS = 10000;
 // Needed to call notifications API
 const publicApiUrl = getRequiredStringEnv("PUBLIC_API_URL");
 const publicApiKey = getRequiredStringEnv("PUBLIC_API_KEY");
+
+// HTTP-only fetch with optional keepalive agent
+// @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
+const httpApiFetch = agent.getHttpsFetch(process.env);
+
+// a fetch that can be aborted and that gets cancelled after fetchTimeoutMs
+const abortableFetch = AbortableFetch(httpApiFetch);
+const timeoutFetch = toFetch(
+  setFetchTimeout(DEFAULT_REQUEST_TIMEOUT_MS as Millisecond, abortableFetch)
+);
 
 type WelcomeMessages = ReadonlyArray<(p: RetrievedProfile) => NewMessage>;
 
@@ -82,8 +97,8 @@ Nella sezione [servizi](ioit://SERVICES_HOME) puoi indicare le aree geografiche 
 Se non vedi gli enti del tuo territorio tra quelli elencati, è perché i loro servizi sono ancora in corso di integrazione. Se vuoi saperne di più, chiedi al tuo Comune se hanno attivato il processo per essere presenti su IO e a che punto sono. La tua voce può essere un segnale importante!
 
 Tutti i servizi all’interno dell’app sono attivi: questo non vuol dire che ti contatteranno, anzi. Ti scriveranno solo i servizi che hanno qualcosa da dire proprio a te, in caso di comunicazioni rilevanti come ad esempio la scadenza di un documento, il promemoria per un pagamento o l’aggiornamento su una pratica in corso.
-Se, per un determinato servizio, preferisci utilizzare mezzi di comunicazione diversi dall’app IO, puoi in ogni momento disattivarlo: in quel caso, l’Ente continuerà a contattarti avvalendosi dei canali tradizionali (come ad esempio la posta cartacea). 
-In particolare: 
+Se, per un determinato servizio, preferisci utilizzare mezzi di comunicazione diversi dall’app IO, puoi in ogni momento disattivarlo: in quel caso, l’Ente continuerà a contattarti avvalendosi dei canali tradizionali (come ad esempio la posta cartacea).
+In particolare:
 - nella sezione [Servizi](ioit://SERVICES_HOME) ti viene data la possibilità di disattivare tutti i servizi, disattivare tutti i servizi per un singolo Ente, oppure disattivare singoli servizi. Inoltre cliccando su ciascun servizio e entrando nella relativa scheda, potrai disattivare le notifiche via email e/o push (che possono essere disabilitate anche tramite la funzionalità del tuo dispositivo);
 - nella Sezione [Preferenze](ioit://PROFILE_PREFERENCES_HOME) troverai la funzione "Inoltro dei messaggi via email" dove potrai abilitare/disabilitare tale modalità di notifica per tutti o singoli servizi.
 
@@ -104,19 +119,20 @@ Per approfondimenti ti invitiamo a consultare la sezione [servizi](ioit://SERVIC
 /**
  * Send a single welcome message using the
  * Digital Citizenship Notification API (REST).
- *
- *  TODO: use italia-commons client with retries
  */
 async function sendWelcomeMessage(
   url: string,
   apiKey: string,
   newMessage: NewMessage
 ): Promise<number> {
-  const response = await request("POST", url)
-    .set("Content-Type", "application/json")
-    .set("Ocp-Apim-Subscription-Key", apiKey)
-    .timeout(DEFAULT_REQUEST_TIMEOUT_MS)
-    .send(newMessage);
+  const response = await timeoutFetch(url, {
+    body: JSON.stringify(newMessage),
+    headers: {
+      "Content-Type": "application/json",
+      "Ocp-Apim-Subscription-Key": apiKey
+    },
+    method: "POST"
+  });
 
   return response.status;
 }
