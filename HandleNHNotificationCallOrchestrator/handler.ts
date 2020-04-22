@@ -12,11 +12,13 @@ import { NotificationHubMessage } from "../HandleNHNotificationCall";
 /**
  * Carries information about Notification Hub Message payload
  */
-export const OrchestratorInput = t.interface({
+export const NhNotificationOrchestratorInput = t.interface({
   message: NotificationHubMessage
 });
 
-export type OrchestratorInput = t.TypeOf<typeof OrchestratorInput>;
+export type NhNotificationOrchestratorInput = t.TypeOf<
+  typeof NhNotificationOrchestratorInput
+>;
 
 export const handler = function*(
   context: IFunctionContext
@@ -29,7 +31,9 @@ export const handler = function*(
 
   // Get and decode orchestrator input
   const input = context.df.getInput();
-  const errorOrNHCallOrchestratorInput = OrchestratorInput.decode(input);
+  const errorOrNHCallOrchestratorInput = NhNotificationOrchestratorInput.decode(
+    input
+  );
 
   if (isLeft(errorOrNHCallOrchestratorInput)) {
     context.log.error(`${logPrefix}|Error decoding input`);

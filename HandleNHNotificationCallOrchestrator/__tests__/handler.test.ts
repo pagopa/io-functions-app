@@ -1,5 +1,11 @@
 /* tslint:disable:no-any */
-
+// tslint:disable-next-line: no-object-mutation
+process.env = {
+  ...process.env,
+  AZURE_NH_ENDPOINT:
+    "AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://fnstorage:10000/devstoreaccount1;QueueEndpoint=http://fnstorage:10001/devstoreaccount1;TableEndpoint=http://fnstorage:10002/devstoreaccount1;",
+  AZURE_NH_HUB_NAME: "AZURE_NH_HUB_NAME"
+};
 import { context as contextMock } from "../../__mocks__/durable-functions";
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
@@ -9,10 +15,7 @@ import {
   ActivityInput as NHCallServiceActivityInput,
   ActivityResult
 } from "../../HandleNHNotificationCallActivity/handler";
-import {
-  handler,
-  OrchestratorInput as NhCallOrchestratorInput
-} from "../handler";
+import { handler, NhNotificationOrchestratorInput } from "../handler";
 
 const aFiscalCodeHash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" as NonEmptyString;
 const aPushChannel =
@@ -25,9 +28,9 @@ const aNotificationHubMessage: NotificationHubCreateOrUpdateMessage = {
   tags: [aFiscalCodeHash]
 };
 
-describe("NHCallOrchestrator", () => {
+describe("HandleNHNotificationCallOrchestrator", () => {
   it("should start the activities with the right inputs", async () => {
-    const nhCallOrchestratorInput = NhCallOrchestratorInput.encode({
+    const nhCallOrchestratorInput = NhNotificationOrchestratorInput.encode({
       message: aNotificationHubMessage
     });
 
@@ -50,7 +53,7 @@ describe("NHCallOrchestrator", () => {
     orchestratorHandler.next();
 
     expect(contextMockWithDf.df.callActivity).toBeCalledWith(
-      "NHCallServiceActivity",
+      "HandleNHNotificationCallActivity",
       NHCallServiceActivityInput.encode({
         message: aNotificationHubMessage
       })

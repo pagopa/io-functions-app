@@ -3,7 +3,6 @@ import * as df from "durable-functions";
 import * as t from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { Platform } from "../generated/backend/Platform";
-import { OrchestratorInput as NHCallOrchestratorInput } from "../HandleNHNotificationCallOrchestrator/handler";
 import { initTelemetryClient } from "../utils/appinsights";
 
 export const NotificationHubNotifyMessage = t.interface({
@@ -56,14 +55,9 @@ export async function index(
   context: Context,
   notificationHubMessage: NotificationHubMessage
 ): Promise<void> {
-  const nhCallOrchestratorInput = NHCallOrchestratorInput.encode({
-    message: notificationHubMessage
-  });
   await df
     .getClient(context)
-    .startNew(
-      "HandleNHNotificationCallOrchestrator",
-      undefined,
-      nhCallOrchestratorInput
-    );
+    .startNew("HandleNHNotificationCallOrchestrator", undefined, {
+      message: notificationHubMessage
+    });
 }

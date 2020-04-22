@@ -1,8 +1,8 @@
 {
   "bindings": [
     {
-      "queueName": "nhcalls",
-      "connection": "NHStorageConnection",
+      "queueName": "notificationhubcalls",
+      "connection": "NotificationHubCallsStorageConnection",
       "name": "notificationHubMessage",
       "type": "queueTrigger",
       "direction": "in"

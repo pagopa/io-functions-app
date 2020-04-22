@@ -16,11 +16,14 @@ const aNotificationHubMessage: NotificationHubMessage = {
   tags: [aFiscalCodeHash]
 };
 
-describe("NHCallService", () => {
+describe("HandleNHNotificationCall", () => {
   it("should fail on invalid payload published into the queue", async () => {
     const mockedContext = {
       bindings: {
-        notificationHubMessage: aNotificationHubMessage
+        notificationHubMessage: {
+          ...aNotificationHubMessage,
+          foo: "foo"
+        }
       },
       done: jest.fn(),
       log: {
