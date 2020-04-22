@@ -66,24 +66,23 @@ export const getCallNHServiceActivityHandler = (
   const failure = failActivity(context, logPrefix);
   const errorOrMessage = ActivityInput.decode(input);
   if (isLeft(errorOrMessage)) {
-    failure(
+    return failure(
       "Error decoding activity input",
       readableReport(errorOrMessage.value)
     );
   }
-  const message = errorOrMessage.value;
-  if (NotificationHubCreateOrUpdateMessage.is(message)) {
-    return createOrUpdateInstallation(
-      message.installationId,
-      message.platform,
-      message.pushChannel,
-      message.tags
-    ).run();
-  }
-  if (NotificationHubNotifyMessage.is(message)) {
-    return notify(message.installationId, message.payload).run();
-  }
-  if (NotificationHubDeleteMessage.is(message)) {
-    return deleteInstallation(message.installationId).run();
+  const message = errorOrMessage.value.message;
+  switch (message.kind) {
+    case "CreateOrUpdate":
+      return createOrUpdateInstallation(
+        message.installationId,
+        message.platform,
+        message.pushChannel,
+        message.tags
+      ).run();
+    case "Notify":
+      return notify(message.installationId, message.payload).run();
+    case "Delete":
+      return deleteInstallation(message.installationId).run();
   }
 };
