@@ -7,7 +7,7 @@ import { IFunctionContext } from "durable-functions/lib/src/classes";
 import * as df from "durable-functions";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 
-import { NotificationHubMessage } from "../NHCallService";
+import { NotificationHubMessage } from "../HandleNHNotificationCall";
 
 /**
  * Carries information about Notification Hub Message payload
@@ -44,7 +44,7 @@ export const handler = function*(
   const nhCallOrchestratorInput = errorOrNHCallOrchestratorInput.value;
 
   yield context.df.callActivity(
-    "NHCallServiceActivity",
+    "HandleNHNotificationCallActivity",
     nhCallOrchestratorInput
   );
 

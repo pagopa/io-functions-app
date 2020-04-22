@@ -10,12 +10,12 @@ import {
   NotificationHubDeleteMessage,
   NotificationHubMessage,
   NotificationHubNotifyMessage
-} from "../NHCallService";
+} from "../HandleNHNotificationCall";
 import {
   createOrUpdateInstallation,
   deleteInstallation,
   notify
-} from "../utils/notificationhub";
+} from "../utils/notification";
 
 // Activity input
 export const ActivityInput = t.interface({

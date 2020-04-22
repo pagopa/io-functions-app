@@ -1,17 +1,14 @@
 import { Context } from "@azure/functions";
 import * as df from "durable-functions";
 import * as t from "io-ts";
-import { PatternString } from "italia-ts-commons/lib/strings";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { Platform } from "../generated/backend/Platform";
-import { OrchestratorInput as NHCallOrchestratorInput } from "../NHCallOrchestrator/handler";
+import { OrchestratorInput as NHCallOrchestratorInput } from "../HandleNHNotificationCallOrchestrator/handler";
 import { initTelemetryClient } from "../utils/appinsights";
 
-export type FiscalCodeHash = t.TypeOf<typeof FiscalCodeHash>;
-export const FiscalCodeHash = PatternString("[0-9a-f]{64}");
-
 export const NotificationHubNotifyMessage = t.interface({
-  installationId: FiscalCodeHash,
-  kind: t.literal("NotifyKind"),
+  installationId: NonEmptyString,
+  kind: t.literal("Notify"),
   payload: t.interface({
     message: t.string,
     message_id: t.string,
@@ -22,8 +19,8 @@ export type NotificationHubNotifyMessage = t.TypeOf<
   typeof NotificationHubNotifyMessage
 >;
 export const NotificationHubCreateOrUpdateMessage = t.interface({
-  installationId: FiscalCodeHash,
-  kind: t.literal("CreateOrUpdateKind"),
+  installationId: NonEmptyString,
+  kind: t.literal("CreateOrUpdate"),
   platform: Platform,
   pushChannel: t.string,
   tags: t.array(t.string)
@@ -33,8 +30,8 @@ export type NotificationHubCreateOrUpdateMessage = t.TypeOf<
 >;
 
 export const NotificationHubDeleteMessage = t.interface({
-  installationId: FiscalCodeHash,
-  kind: t.literal("DeleteKind")
+  installationId: NonEmptyString,
+  kind: t.literal("Delete")
 });
 
 export type NotificationHubDeleteMessage = t.TypeOf<
@@ -64,5 +61,9 @@ export async function index(
   });
   await df
     .getClient(context)
-    .startNew("NHCallOrchestrator", undefined, nhCallOrchestratorInput);
+    .startNew(
+      "HandleNHNotificationCallOrchestrator",
+      undefined,
+      nhCallOrchestratorInput
+    );
 }

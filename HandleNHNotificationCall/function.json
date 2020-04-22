@@ -14,5 +14,5 @@
     }
   ],
   "disabled": false,
-  "scriptFile": "../dist/NHCallService/index.js"
+  "scriptFile": "../dist/HandleNHNotificationCall/index.js"
 }
