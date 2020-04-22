@@ -5,12 +5,7 @@ import { Context } from "@azure/functions";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 
 import { isLeft } from "fp-ts/lib/Either";
-import {
-  NotificationHubCreateOrUpdateMessage,
-  NotificationHubDeleteMessage,
-  NotificationHubMessage,
-  NotificationHubNotifyMessage
-} from "../HandleNHNotificationCall";
+import { NotificationHubMessage } from "../HandleNHNotificationCall";
 import {
   createOrUpdateInstallation,
   deleteInstallation,
