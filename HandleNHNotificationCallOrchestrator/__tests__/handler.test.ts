@@ -3,7 +3,7 @@
 process.env = {
   ...process.env,
   AZURE_NH_ENDPOINT:
-    "AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://fnstorage:10000/devstoreaccount1;QueueEndpoint=http://fnstorage:10001/devstoreaccount1;TableEndpoint=http://fnstorage:10002/devstoreaccount1;",
+    "Endpoint=sb://io-lab-notification-hub-ns.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=C4xIzNZv4VrUnu5jkmPH635MApRUj8wABky8VfdPLqg=",
   AZURE_NH_HUB_NAME: "AZURE_NH_HUB_NAME"
 };
 import { context as contextMock } from "../../__mocks__/durable-functions";
