@@ -59,4 +59,30 @@ describe("HandleNHNotificationCallOrchestrator", () => {
       })
     );
   });
+
+  it("should not start activity with wrong inputs", async () => {
+    const nhCallOrchestratorInput = {
+      message: "aMessage"
+    };
+
+    const callNHServiceActivityResult = ActivityResult.encode({
+      kind: "SUCCESS"
+    });
+
+    const contextMockWithDf = {
+      ...contextMock,
+      df: {
+        callActivity: jest
+          .fn()
+          .mockReturnValueOnce(callNHServiceActivityResult),
+        getInput: jest.fn(() => nhCallOrchestratorInput)
+      }
+    };
+
+    const orchestratorHandler = handler(contextMockWithDf as any);
+
+    orchestratorHandler.next();
+
+    expect(contextMockWithDf.df.callActivity).not.toBeCalled();
+  });
 });
