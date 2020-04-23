@@ -3,7 +3,7 @@
   "version": "1.13.0",
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
+    "build": "yarn generate:backend-models && tsc",
     "build:production": "npm run prestart && npm prune --production",
     "watch": "tsc --w",
     "prestart": "npm run build && func extensions install",
