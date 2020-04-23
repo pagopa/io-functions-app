@@ -47,8 +47,9 @@ export const handler = function*(
 
   const nhCallOrchestratorInput = errorOrNHCallOrchestratorInput.value;
 
-  yield context.df.callActivity(
+  yield context.df.callActivityWithRetry(
     "HandleNHNotificationCallActivity",
+    retryOptions,
     nhCallOrchestratorInput
   );
 
