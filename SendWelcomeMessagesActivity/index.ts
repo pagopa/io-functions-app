@@ -22,7 +22,7 @@ const DEFAULT_REQUEST_TIMEOUT_MS = 10000;
 const publicApiUrl = getRequiredStringEnv("PUBLIC_API_URL");
 const publicApiKey = getRequiredStringEnv("PUBLIC_API_KEY");
 
-// HTTPS-only fetch with optional keepalive agent
+// HTTP-only fetch with optional keepalive agent
 // @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
 const httpApiFetch = agent.getHttpFetch(process.env);
 
