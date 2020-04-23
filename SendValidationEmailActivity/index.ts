@@ -1,5 +1,7 @@
 ﻿import * as NodeMailer from "nodemailer";
 
+import { agent } from "italia-ts-commons";
+
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 
 import { MailUpTransport } from "io-functions-commons/dist/src/utils/mailup";
@@ -41,7 +43,9 @@ const mailerTransporter = isProduction
         creds: {
           Secret: mailupSecret,
           Username: mailupUsername
-        }
+        },
+        // HTTPS-only fetch with optional keepalive agent
+        fetchAgent: agent.getHttpsFetch(process.env)
       })
     )
   : NodeMailer.createTransport({

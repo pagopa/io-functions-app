@@ -24,7 +24,7 @@ const publicApiKey = getRequiredStringEnv("PUBLIC_API_KEY");
 
 // HTTP-only fetch with optional keepalive agent
 // @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
-const httpApiFetch = agent.getHttpsFetch(process.env);
+const httpApiFetch = agent.getHttpFetch(process.env);
 
 // a fetch that can be aborted and that gets cancelled after fetchTimeoutMs
 const abortableFetch = AbortableFetch(httpApiFetch);
