@@ -109,7 +109,7 @@ stages:
         steps:
         - template: azure-templates/make-build-steps.yml
           parameters:
-            make: install_dependencies
+            make: build
 
         - script: |
             yarn lint
