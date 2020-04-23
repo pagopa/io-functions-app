@@ -4,7 +4,8 @@ import { Context } from "@azure/functions";
 
 import { readableReport } from "italia-ts-commons/lib/reporters";
 
-import { isLeft } from "fp-ts/lib/Either";
+import { fromEither } from "fp-ts/lib/TaskEither";
+import { NotificationHubMessageKindEnum } from "../generated/notifications/NotificationHubMessageKind";
 import { NotificationHubMessage } from "../HandleNHNotificationCall";
 import {
   createOrUpdateInstallation,
@@ -46,10 +47,7 @@ const failActivity = (context: Context, logPrefix: string) => (
 ) => {
   const details = errorDetails ? `|ERROR_DETAILS=${errorDetails}` : ``;
   context.log.error(`${logPrefix}|${errorMessage}${details}`);
-  return ActivityResultFailure.encode({
-    kind: "FAILURE",
-    reason: errorMessage
-  });
+  return new Error(errorMessage);
 };
 
 /**
@@ -59,25 +57,24 @@ export const getCallNHServiceActivityHandler = (
   logPrefix = "NHCallServiceActivity"
 ) => async (context: Context, input: unknown) => {
   const failure = failActivity(context, logPrefix);
-  const errorOrMessage = ActivityInput.decode(input);
-  if (isLeft(errorOrMessage)) {
-    return failure(
-      "Error decoding activity input",
-      readableReport(errorOrMessage.value)
-    );
-  }
-  const message = errorOrMessage.value.message;
-  switch (message.kind) {
-    case "CreateOrUpdateInstallation":
-      return createOrUpdateInstallation(
-        message.installationId,
-        message.platform,
-        message.pushChannel,
-        message.tags
-      ).run();
-    case "NotifyInstallation":
-      return notify(message.installationId, message.payload).run();
-    case "DeleteInstallation":
-      return deleteInstallation(message.installationId).run();
-  }
+  return fromEither(ActivityInput.decode(input))
+    .mapLeft(errs =>
+      failure("Error decoding activity input", readableReport(errs))
+    )
+    .chain(({ message }) => {
+      switch (message.kind) {
+        case NotificationHubMessageKindEnum.CreateOrUpdateInstallation:
+          return createOrUpdateInstallation(
+            message.installationId,
+            message.platform,
+            message.pushChannel,
+            message.tags
+          );
+        case NotificationHubMessageKindEnum.Notify:
+          return notify(message.installationId, message.payload);
+        case NotificationHubMessageKindEnum.DeleteInstallation:
+          return deleteInstallation(message.installationId);
+      }
+    })
+    .run();
 };

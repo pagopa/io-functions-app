@@ -3,11 +3,12 @@ import * as df from "durable-functions";
 import * as t from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { Platform } from "../generated/backend/Platform";
+import { NotificationHubMessageKindEnum } from "../generated/notifications/NotificationHubMessageKind";
 import { initTelemetryClient } from "../utils/appinsights";
 
 export const NotificationHubNotifyInstallationMessage = t.interface({
   installationId: NonEmptyString,
-  kind: t.literal("NotifyInstallation"),
+  kind: t.literal(NotificationHubMessageKindEnum.Notify),
   payload: t.interface({
     message: t.string,
     message_id: t.string,
@@ -19,7 +20,7 @@ export type NotificationHubNotifyInstallationMessage = t.TypeOf<
 >;
 export const NotificationHubCreateOrUpdateInstallationMessage = t.interface({
   installationId: NonEmptyString,
-  kind: t.literal("CreateOrUpdateInstallation"),
+  kind: t.literal(NotificationHubMessageKindEnum.CreateOrUpdateInstallation),
   platform: Platform,
   pushChannel: t.string,
   tags: t.array(t.string)
@@ -30,7 +31,7 @@ export type NotificationHubCreateOrUpdateInstallationMessage = t.TypeOf<
 
 export const NotificationHubDeleteInstallationMessage = t.interface({
   installationId: NonEmptyString,
-  kind: t.literal("DeleteInstallation")
+  kind: t.literal(NotificationHubMessageKindEnum.DeleteInstallation)
 });
 
 export type NotificationHubDeleteInstallationMessage = t.TypeOf<

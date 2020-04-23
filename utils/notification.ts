@@ -118,11 +118,11 @@ const NotifyPayload = t.interface({
 
 type NotifyPayload = t.TypeOf<typeof NotifyPayload>;
 // NH result
-const NHResultSuccess = t.interface({
+export const NHResultSuccess = t.interface({
   kind: t.literal("SUCCESS")
 });
 
-type NHResultSuccess = t.TypeOf<typeof NHResultSuccess>;
+export type NHResultSuccess = t.TypeOf<typeof NHResultSuccess>;
 
 const successNH = () =>
   NHResultSuccess.encode({
