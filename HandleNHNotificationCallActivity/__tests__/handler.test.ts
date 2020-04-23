@@ -33,7 +33,6 @@ describe("HandleNHNotificationCallActivity", () => {
     const input = NHServiceActivityInput.encode({
       message: aNotificationHubMessage
     });
-
     const ret = await handler(contextMock as any, input);
 
     expect(isLeft(ret)).toBeTruthy();
