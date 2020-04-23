@@ -5,42 +5,42 @@ import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { Platform } from "../generated/backend/Platform";
 import { initTelemetryClient } from "../utils/appinsights";
 
-export const NotificationHubNotifyMessage = t.interface({
+export const NotificationHubNotifyInstallationMessage = t.interface({
   installationId: NonEmptyString,
-  kind: t.literal("Notify"),
+  kind: t.literal("NotifyInstallation"),
   payload: t.interface({
     message: t.string,
     message_id: t.string,
     title: t.string
   })
 });
-export type NotificationHubNotifyMessage = t.TypeOf<
-  typeof NotificationHubNotifyMessage
+export type NotificationHubNotifyInstallationMessage = t.TypeOf<
+  typeof NotificationHubNotifyInstallationMessage
 >;
-export const NotificationHubCreateOrUpdateMessage = t.interface({
+export const NotificationHubCreateOrUpdateInstallationMessage = t.interface({
   installationId: NonEmptyString,
-  kind: t.literal("CreateOrUpdate"),
+  kind: t.literal("CreateOrUpdateInstallation"),
   platform: Platform,
   pushChannel: t.string,
   tags: t.array(t.string)
 });
-export type NotificationHubCreateOrUpdateMessage = t.TypeOf<
-  typeof NotificationHubCreateOrUpdateMessage
+export type NotificationHubCreateOrUpdateInstallationMessage = t.TypeOf<
+  typeof NotificationHubCreateOrUpdateInstallationMessage
 >;
 
-export const NotificationHubDeleteMessage = t.interface({
+export const NotificationHubDeleteInstallationMessage = t.interface({
   installationId: NonEmptyString,
-  kind: t.literal("Delete")
+  kind: t.literal("DeleteInstallation")
 });
 
-export type NotificationHubDeleteMessage = t.TypeOf<
-  typeof NotificationHubDeleteMessage
+export type NotificationHubDeleteInstallationMessage = t.TypeOf<
+  typeof NotificationHubDeleteInstallationMessage
 >;
 
 export const NotificationHubMessage = t.taggedUnion("kind", [
-  NotificationHubNotifyMessage,
-  NotificationHubCreateOrUpdateMessage,
-  NotificationHubDeleteMessage
+  NotificationHubNotifyInstallationMessage,
+  NotificationHubCreateOrUpdateInstallationMessage,
+  NotificationHubDeleteInstallationMessage
 ]);
 
 export type NotificationHubMessage = t.TypeOf<typeof NotificationHubMessage>;

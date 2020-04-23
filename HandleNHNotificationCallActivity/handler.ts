@@ -68,16 +68,16 @@ export const getCallNHServiceActivityHandler = (
   }
   const message = errorOrMessage.value.message;
   switch (message.kind) {
-    case "CreateOrUpdate":
+    case "CreateOrUpdateInstallation":
       return createOrUpdateInstallation(
         message.installationId,
         message.platform,
         message.pushChannel,
         message.tags
       ).run();
-    case "Notify":
+    case "NotifyInstallation":
       return notify(message.installationId, message.payload).run();
-    case "Delete":
+    case "DeleteInstallation":
       return deleteInstallation(message.installationId).run();
   }
 };
