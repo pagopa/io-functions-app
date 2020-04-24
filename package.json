@@ -3,8 +3,8 @@
   "version": "1.13.0",
   "license": "MIT",
   "scripts": {
-    "build": "yarn generate:backend-models && tsc",
-    "build:production": "npm run prestart && npm prune --production",
+    "prebuild": "yarn generate:backend-models",
+    "build": "tsc",
     "watch": "tsc --w",
     "prestart": "npm run build && func extensions install",
     "start:host": "func start",
@@ -18,7 +18,7 @@
     "generate:backend:notification-hub": "shx rm -rf generated/notifications && shx mkdir -p generated/notifications && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-backend/172407010-notificatonhub-queue-storage/api_notificationhub_messages.yaml --out-dir generated/notifications",
     "deploy": "npm run build && func azure functionapp publish agid-functions-app-test",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
-    "predeploy": "npm-run-all generate:backend-models build dist:modules"
+    "predeploy": "npm-run-all build dist:modules"
   },
   "description": "",
   "devDependencies": {
