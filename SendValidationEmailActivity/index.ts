@@ -8,6 +8,20 @@ import { MailUpTransport } from "io-functions-commons/dist/src/utils/mailup";
 
 import { getSendValidationEmailActivityHandler } from "./handler";
 
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import nodemailerSendgrid = require("nodemailer-sendgrid");
+
+//
+//  Setup SendGrid
+//
+const SendgridTransport = NonEmptyString.decode(process.env.SENDGRID_API_KEY)
+  .map(sendgridApiKey =>
+    nodemailerSendgrid({
+      apiKey: sendgridApiKey
+    })
+  )
+  .getOrElse(undefined);
+
 // Whether we're in a production environment
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -38,16 +52,18 @@ export type EmailDefaults = typeof emailDefaults;
 // For development we use mailhog to intercept emails
 // Use the `docker-compose.yml` file to run the mailhog server
 const mailerTransporter = isProduction
-  ? NodeMailer.createTransport(
-      MailUpTransport({
-        creds: {
-          Secret: mailupSecret,
-          Username: mailupUsername
-        },
-        // HTTPS-only fetch with optional keepalive agent
-        fetchAgent: agent.getHttpsFetch(process.env)
-      })
-    )
+  ? SendgridTransport !== undefined
+    ? SendgridTransport
+    : NodeMailer.createTransport(
+        MailUpTransport({
+          creds: {
+            Secret: mailupSecret,
+            Username: mailupUsername
+          },
+          // HTTPS-only fetch with optional keepalive agent
+          fetchAgent: agent.getHttpsFetch(process.env)
+        })
+      )
   : NodeMailer.createTransport({
       host: "localhost",
       port: 1025,
