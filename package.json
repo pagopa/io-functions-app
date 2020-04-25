@@ -42,6 +42,7 @@
     "typescript": "^3.6.2"
   },
   "dependencies": {
+    "abort-controller": "^3.0.0",
     "applicationinsights": "^1.7.4",
     "azure-storage": "^2.10.3",
     "documentdb": "^1.12.2",

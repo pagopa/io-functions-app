@@ -125,6 +125,7 @@ async function sendWelcomeMessage(
   apiKey: string,
   newMessage: NewMessage
 ): Promise<number> {
+  require("abort-controller/polyfill");
   const response = await timeoutFetch(url, {
     body: JSON.stringify(newMessage),
     headers: {
