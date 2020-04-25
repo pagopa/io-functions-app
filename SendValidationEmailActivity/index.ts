@@ -52,18 +52,18 @@ export type EmailDefaults = typeof emailDefaults;
 // For development we use mailhog to intercept emails
 // Use the `docker-compose.yml` file to run the mailhog server
 const mailerTransporter = isProduction
-  ? SendgridTransport !== undefined
-    ? SendgridTransport
-    : NodeMailer.createTransport(
-        MailUpTransport({
-          creds: {
-            Secret: mailupSecret,
-            Username: mailupUsername
-          },
-          // HTTPS-only fetch with optional keepalive agent
-          fetchAgent: agent.getHttpsFetch(process.env)
-        })
-      )
+  ? NodeMailer.createTransport(
+      SendgridTransport !== undefined
+        ? SendgridTransport
+        : MailUpTransport({
+            creds: {
+              Secret: mailupSecret,
+              Username: mailupUsername
+            },
+            // HTTPS-only fetch with optional keepalive agent
+            fetchAgent: agent.getHttpsFetch(process.env)
+          })
+    )
   : NodeMailer.createTransport({
       host: "localhost",
       port: 1025,
