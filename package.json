@@ -54,6 +54,7 @@
     "io-ts": "1.8.5",
     "italia-ts-commons": "^7.0.1",
     "nodemailer": "^4.7.0",
+    "nodemailer-sendgrid": "^1.0.3",
     "superagent": "^5.1.0"
   },
   "resolutions": {
