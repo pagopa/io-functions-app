@@ -53,7 +53,7 @@
     "io-functions-commons": "^9.0.0",
     "io-functions-express": "^0.1.0",
     "io-ts": "1.8.5",
-    "italia-ts-commons": "^7.0.1",
+    "italia-ts-commons": "^8.1.0",
     "nodemailer": "^4.7.0",
     "nodemailer-sendgrid": "^1.0.3",
     "superagent": "^5.1.0"
