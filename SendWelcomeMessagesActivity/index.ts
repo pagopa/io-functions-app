@@ -1,4 +1,6 @@
-﻿import { AzureFunction, Context } from "@azure/functions";
+﻿import { fromEither, Option } from "fp-ts/lib/Option";
+
+import { AzureFunction, Context } from "@azure/functions";
 
 import { agent } from "italia-ts-commons";
 import { readableReport } from "italia-ts-commons/lib/reporters";
@@ -13,6 +15,7 @@ import {
   setFetchTimeout,
   toFetch
 } from "italia-ts-commons/lib/fetch";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { Millisecond } from "italia-ts-commons/lib/units";
 
 // HTTP external requests timeout in milliseconds
@@ -20,7 +23,9 @@ const DEFAULT_REQUEST_TIMEOUT_MS = 10000;
 
 // Needed to call notifications API
 const publicApiUrl = getRequiredStringEnv("PUBLIC_API_URL");
-const publicApiKey = getRequiredStringEnv("PUBLIC_API_KEY");
+const publicApiKey = fromEither(
+  NonEmptyString.decode(process.env.PUBLIC_API_KEY)
+);
 
 // HTTP-only fetch with optional keepalive agent
 // @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
@@ -116,20 +121,35 @@ Per approfondimenti ti invitiamo a consultare la sezione [servizi](ioit://SERVIC
     })
 ];
 
+const SERVICES_API_BASE_HEADERS = {
+  "Content-Type": "application/json"
+};
+
 /**
- * Send a single welcome message using the
- * Digital Citizenship Notification API (REST).
+ * Send a single welcome message using the Services API.
+ *
+ * If the apiKey is empty, the request will include the authorization
+ * headers that the Services API expects from the API Manager.
  */
 async function sendWelcomeMessage(
   url: string,
-  apiKey: string,
+  apiKey: Option<NonEmptyString>,
   newMessage: NewMessage
 ): Promise<number> {
+  const authHeaders = apiKey
+    .map<{ [key: string]: string }>(k => ({
+      "Ocp-Apim-Subscription-Key": k
+    }))
+    .getOrElse({
+      "x-subscription-id": "functions-app",
+      "x-user-groups": "ApiMessageWrite",
+      "x-user-id": "functions-app"
+    });
   const response = await timeoutFetch(url, {
     body: JSON.stringify(newMessage),
     headers: {
-      "Content-Type": "application/json",
-      "Ocp-Apim-Subscription-Key": apiKey
+      ...SERVICES_API_BASE_HEADERS,
+      ...authHeaders
     },
     method: "POST"
   });
@@ -143,7 +163,7 @@ async function sendWelcomeMessage(
  */
 function sendWelcomeMessages(
   apiUrl: string,
-  apiKey: string,
+  apiKey: Option<NonEmptyString>,
   messages: WelcomeMessages,
   profile: RetrievedProfile
 ): Promise<ReadonlyArray<number>> {
