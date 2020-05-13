@@ -147,9 +147,13 @@ export const handler = function*(
   );
 
   if (hasJustEnabledInbox) {
-    yield context.df.callActivity("SendWelcomeMessagesActivity", {
-      profile: newProfile
-    });
+    yield context.df.callActivityWithRetry(
+      "SendWelcomeMessagesActivity",
+      retryOptions,
+      {
+        profile: newProfile
+      }
+    );
   }
 
   // Update subscriptions feed

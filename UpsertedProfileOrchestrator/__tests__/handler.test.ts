@@ -1,5 +1,6 @@
 /* tslint:disable:no-any */
 
+import * as df from "durable-functions";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aEmailChanged,
@@ -14,6 +15,10 @@ import {
   handler,
   OrchestratorInput as UpsertedProfileOrchestratorInput
 } from "../handler";
+
+const someRetryOptions = new df.RetryOptions(5000, 10);
+// tslint:disable-next-line: no-object-mutation
+someRetryOptions.backoffCoefficient = 1.5;
 
 describe("UpsertedProfileOrchestrator", () => {
   it("should not start the EmailValidationProcessOrchestrator if the email is not changed", () => {
@@ -64,7 +69,7 @@ describe("UpsertedProfileOrchestrator", () => {
     const contextMockWithDf = {
       ...contextMock,
       df: {
-        callActivity: jest
+        callActivityWithRetry: jest
           .fn()
           .mockReturnValueOnce(sendWelcomeMessagesActivityResult),
         callSubOrchestratorWithRetry: jest.fn(
@@ -89,8 +94,9 @@ describe("UpsertedProfileOrchestrator", () => {
 
     orchestratorHandler.next(result.value);
 
-    expect(contextMockWithDf.df.callActivity).toBeCalledWith(
+    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
+      someRetryOptions,
       {
         profile: upsertedProfileOrchestratorInput.newProfile
       }
