@@ -99,6 +99,9 @@ export const aUserDataProcessingStatus: UserDataProcessingStatus =
 export const aWipUserDataProcessingStatus: UserDataProcessingStatus =
   UserDataProcessingStatusEnum.WIP;
 
+export const aClosedUserDataProcessingStatus: UserDataProcessingStatus =
+  UserDataProcessingStatusEnum.CLOSED;
+
 export const aRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
   _etag: "xyz",
   _rid: "xyz",
@@ -110,6 +113,22 @@ export const aRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
   id: "xyz" as NonEmptyString,
   kind: "IRetrievedUserDataProcessing",
   status: aUserDataProcessingStatus,
+  updatedAt: aNewDate,
+  userDataProcessingId: aUserDataProcessingId,
+  version: 0 as NonNegativeNumber
+};
+
+export const aClosedRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
+  _etag: "xyz",
+  _rid: "xyz",
+  _self: "aaa",
+  _ts: 111,
+  choice: aUserDataProcessingChoice,
+  createdAt: aNewDate,
+  fiscalCode: aFiscalCode,
+  id: "xyz" as NonEmptyString,
+  kind: "IRetrievedUserDataProcessing",
+  status: aClosedUserDataProcessingStatus,
   updatedAt: aNewDate,
   userDataProcessingId: aUserDataProcessingId,
   version: 0 as NonNegativeNumber

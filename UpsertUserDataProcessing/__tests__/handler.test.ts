@@ -6,15 +6,15 @@ import { left, right } from "fp-ts/lib/Either";
 
 import * as df from "durable-functions";
 
-import { some } from "fp-ts/lib/Option";
+import { none, some } from "fp-ts/lib/Option";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
+  aClosedRetrievedUserDataProcessing,
   aFiscalCode,
   aRetrievedUserDataProcessing,
   aUserDataProcessingApi,
   aUserDataProcessingChoiceRequest,
-  aWipRetrievedUserDataProcessing,
-  aWipUserDataProcessingApi
+  aWipRetrievedUserDataProcessing
 } from "../../__mocks__/mocks";
 import { UpsertUserDataProcessingHandler } from "../handler";
 
@@ -33,9 +33,7 @@ describe("UpsertUserDataProcessingHandler", () => {
   it("should return a query error when an error occurs creating the new User data processing", async () => {
     const userDataProcessingModelMock = {
       createOrUpdateByNewOne: jest.fn(() => left({})),
-      findOneUserDataProcessingById: jest.fn(() =>
-        right(some(aWipRetrievedUserDataProcessing))
-      )
+      findOneUserDataProcessingById: jest.fn(() => left(none))
     };
 
     const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
@@ -51,7 +49,7 @@ describe("UpsertUserDataProcessingHandler", () => {
     expect(result.kind).toBe("IResponseErrorQuery");
   });
 
-  it("should keep the status WIP when a new request is upserted and it was already WIP", async () => {
+  it("should return a conflict error when a new request is upserted and it was already WIP", async () => {
     const userDataProcessingModelMock = {
       createOrUpdateByNewOne: jest.fn(() =>
         right(aWipRetrievedUserDataProcessing)
@@ -71,10 +69,7 @@ describe("UpsertUserDataProcessingHandler", () => {
       aUserDataProcessingChoiceRequest
     );
 
-    expect(result.kind).toBe("IResponseSuccessJson");
-    if (result.kind === "IResponseSuccessJson") {
-      expect(result.value).toEqual(aWipUserDataProcessingApi);
-    }
+    expect(result.kind).toBe("IResponseErrorConflict");
   });
 
   it("should return the upserted user data processing", async () => {
@@ -83,7 +78,7 @@ describe("UpsertUserDataProcessingHandler", () => {
         right(aRetrievedUserDataProcessing)
       ),
       findOneUserDataProcessingById: jest.fn(() =>
-        right(some(aRetrievedUserDataProcessing))
+        right(some(aClosedRetrievedUserDataProcessing))
       )
     };
     const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(

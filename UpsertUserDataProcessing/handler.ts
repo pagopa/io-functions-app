@@ -2,11 +2,13 @@ import * as express from "express";
 
 import { Context } from "@azure/functions";
 import * as df from "durable-functions";
-import { isLeft } from "fp-ts/lib/Either";
+import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 
 import {
+  IResponseErrorConflict,
   IResponseErrorValidation,
   IResponseSuccessJson,
+  ResponseErrorConflict,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
@@ -47,6 +49,7 @@ type IUpsertUserDataProcessingHandler = (
   | IResponseSuccessJson<UserDataProcessingApi>
   | IResponseErrorValidation
   | IResponseErrorQuery
+  | IResponseErrorConflict
 >;
 
 export function UpsertUserDataProcessingHandler(
@@ -70,8 +73,8 @@ export function UpsertUserDataProcessingHandler(
     // This is the machine state table implemented by following code:
     // |current	         |  POST
     // |undefined / none |  PENDING
-    // |PENDING	         |  PENDING
-    // |WIP	             |  WIP
+    // |PENDING	         |  Conflict Error
+    // |WIP	             |  Conflict Error
     // |CLOSED           |  PENDING
     if (isLeft(errorOrMaybeRetrievedUserDataProcessing)) {
       return ResponseErrorQuery(
@@ -81,54 +84,63 @@ export function UpsertUserDataProcessingHandler(
     }
     const maybeRetrievedUserDataProcessing =
       errorOrMaybeRetrievedUserDataProcessing.value;
-    const computedStatus = maybeRetrievedUserDataProcessing.fold(
-      UserDataProcessingStatusEnum.PENDING,
-      retrieved => {
-        return retrieved.status === UserDataProcessingStatusEnum.WIP
-          ? retrieved.status
-          : UserDataProcessingStatusEnum.PENDING;
+    const errorOrComputedStatus = maybeRetrievedUserDataProcessing.fold<
+      Either<IResponseErrorConflict, UserDataProcessingStatusEnum>
+    >(right(UserDataProcessingStatusEnum.PENDING), retrieved => {
+      return retrieved.status === UserDataProcessingStatusEnum.CLOSED
+        ? right(UserDataProcessingStatusEnum.PENDING)
+        : left(
+            ResponseErrorConflict(
+              "An other request is already PENDING or WIP for this User"
+            )
+          );
+    });
+
+    return errorOrComputedStatus.bimap(
+      conflicError => conflicError,
+      async computedStatus => {
+        const userDataProcessing: UserDataProcessing = {
+          choice: upsertUserDataProcessingPayload.choice,
+          createdAt: new Date(),
+          fiscalCode,
+          status: computedStatus,
+          userDataProcessingId: id
+        };
+        const errorOrUpsertedUserDataProcessing = await userDataProcessingModel.createOrUpdateByNewOne(
+          userDataProcessing
+        );
+        if (isLeft(errorOrUpsertedUserDataProcessing)) {
+          const { body } = errorOrUpsertedUserDataProcessing.value;
+
+          context.log.error(`${logPrefix}|ERROR=${body}`);
+
+          return ResponseErrorQuery(
+            "Error while creating a new user data processing",
+            errorOrUpsertedUserDataProcessing.value
+          );
+        }
+
+        const createdOrUpdatedUserDataProcessing =
+          errorOrUpsertedUserDataProcessing.value;
+
+        const upsertedUserDataProcessingOrchestratorInput = OrchestratorInput.encode(
+          {
+            choice: createdOrUpdatedUserDataProcessing.choice,
+            fiscalCode
+          }
+        );
+        await df
+          .getClient(context)
+          .startNew(
+            "UpsertedUserDataProcessingOrchestrator",
+            undefined,
+            upsertedUserDataProcessingOrchestratorInput
+          );
+        return ResponseSuccessJson(
+          toUserDataProcessingApi(createdOrUpdatedUserDataProcessing)
+        );
       }
-    );
-    const userDataProcessing: UserDataProcessing = {
-      choice: upsertUserDataProcessingPayload.choice,
-      createdAt: new Date(),
-      fiscalCode,
-      status: computedStatus,
-      userDataProcessingId: id
-    };
-    const errorOrUpsertedUserDataProcessing = await userDataProcessingModel.createOrUpdateByNewOne(
-      userDataProcessing
-    );
-    if (isLeft(errorOrUpsertedUserDataProcessing)) {
-      const { body } = errorOrUpsertedUserDataProcessing.value;
-
-      context.log.error(`${logPrefix}|ERROR=${body}`);
-
-      return ResponseErrorQuery(
-        "Error while creating a new user data processing",
-        errorOrUpsertedUserDataProcessing.value
-      );
-    }
-
-    const createdOrUpdatedUserDataProcessing =
-      errorOrUpsertedUserDataProcessing.value;
-
-    const upsertedUserDataProcessingOrchestratorInput = OrchestratorInput.encode(
-      {
-        choice: createdOrUpdatedUserDataProcessing.choice,
-        fiscalCode
-      }
-    );
-    await df
-      .getClient(context)
-      .startNew(
-        "UpsertedUserDataProcessingOrchestrator",
-        undefined,
-        upsertedUserDataProcessingOrchestratorInput
-      );
-    return ResponseSuccessJson(
-      toUserDataProcessingApi(createdOrUpdatedUserDataProcessing)
-    );
+    ).value;
   };
 }
 

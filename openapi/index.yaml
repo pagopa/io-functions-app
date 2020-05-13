@@ -335,6 +335,8 @@ paths:
           description: Unauthorized
         "429":
           description: Too many requests
+        "409":
+          description: Conflict
   "/user-data-processing/{fiscal_code}/{choice}":  
     get:
       operationId: getUserDataProcessing
