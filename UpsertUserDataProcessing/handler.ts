@@ -25,6 +25,7 @@ import {
   wrapRequestHandler
 } from "io-functions-commons/dist/src/utils/request_middleware";
 
+import { none, some } from "fp-ts/lib/Option";
 import { UserDataProcessing as UserDataProcessingApi } from "io-functions-commons/dist/generated/definitions/UserDataProcessing";
 import { UserDataProcessingChoiceRequest } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoiceRequest";
 import { UserDataProcessingStatusEnum } from "io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
@@ -69,13 +70,6 @@ export function UpsertUserDataProcessingHandler(
       id
     );
 
-    // compute the request status according to its previous value (when found)
-    // This is the machine state table implemented by following code:
-    // |current	         |  POST
-    // |undefined / none |  PENDING
-    // |PENDING	         |  Conflict Error
-    // |WIP	             |  Conflict Error
-    // |CLOSED           |  PENDING
     if (isLeft(errorOrMaybeRetrievedUserDataProcessing)) {
       return ResponseErrorQuery(
         "Error while retrieving a previous version of user data processing",
@@ -84,28 +78,36 @@ export function UpsertUserDataProcessingHandler(
     }
     const maybeRetrievedUserDataProcessing =
       errorOrMaybeRetrievedUserDataProcessing.value;
-    const errorOrComputedStatus = maybeRetrievedUserDataProcessing.fold<
-      Either<string, UserDataProcessingStatusEnum>
-    >(right(UserDataProcessingStatusEnum.PENDING), retrieved => {
-      return retrieved.status === UserDataProcessingStatusEnum.CLOSED
-        ? right(UserDataProcessingStatusEnum.PENDING)
-        : left("Another request is already PENDING or WIP for this User");
-    });
 
-    return errorOrComputedStatus.fold<
+    const maybeNewStatus = maybeRetrievedUserDataProcessing.fold(
+      // create a new PENDING request in case this is the first request
+      some(UserDataProcessingStatusEnum.PENDING),
+      _ =>
+        // create a new PENDING request in case the last request
+        // of the same type is CLOSED
+        _.status === UserDataProcessingStatusEnum.CLOSED
+          ? some(UserDataProcessingStatusEnum.PENDING)
+          : // do not create a new request in all other cases
+            none
+    );
+
+    return maybeNewStatus.foldL<
       Promise<
         | IResponseSuccessJson<UserDataProcessingApi>
         | IResponseErrorQuery
         | IResponseErrorConflict
       >
     >(
-      async conflictErrorMessage => ResponseErrorConflict(conflictErrorMessage),
-      async computedStatus => {
+      async () =>
+        ResponseErrorConflict(
+          "Another request is already PENDING or WIP for this User"
+        ),
+      async newStatus => {
         const userDataProcessing: UserDataProcessing = {
           choice: upsertUserDataProcessingPayload.choice,
           createdAt: new Date(),
           fiscalCode,
-          status: computedStatus,
+          status: newStatus,
           userDataProcessingId: id
         };
         const errorOrUpsertedUserDataProcessing = await userDataProcessingModel.createOrUpdateByNewOne(

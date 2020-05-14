@@ -119,35 +119,13 @@ export const aRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
 };
 
 export const aClosedRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
-  _etag: "xyz",
-  _rid: "xyz",
-  _self: "aaa",
-  _ts: 111,
-  choice: aUserDataProcessingChoice,
-  createdAt: aNewDate,
-  fiscalCode: aFiscalCode,
-  id: "xyz" as NonEmptyString,
-  kind: "IRetrievedUserDataProcessing",
-  status: aClosedUserDataProcessingStatus,
-  updatedAt: aNewDate,
-  userDataProcessingId: aUserDataProcessingId,
-  version: 0 as NonNegativeNumber
+  ...aRetrievedUserDataProcessing,
+  status: aClosedUserDataProcessingStatus
 };
 
 export const aWipRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
-  _etag: "xyz",
-  _rid: "xyz",
-  _self: "aaa",
-  _ts: 111,
-  choice: aUserDataProcessingChoice,
-  createdAt: aNewDate,
-  fiscalCode: aFiscalCode,
-  id: "xyz" as NonEmptyString,
-  kind: "IRetrievedUserDataProcessing",
-  status: aWipUserDataProcessingStatus,
-  updatedAt: aNewDate,
-  userDataProcessingId: aUserDataProcessingId,
-  version: 0 as NonNegativeNumber
+  ...aRetrievedUserDataProcessing,
+  status: aWipUserDataProcessingStatus
 };
 
 export const aUserDataProcessingApi: UserDataProcessingApi = toUserDataProcessingApi(

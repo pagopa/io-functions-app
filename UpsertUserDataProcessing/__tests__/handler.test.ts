@@ -33,7 +33,7 @@ describe("UpsertUserDataProcessingHandler", () => {
   it("should return a query error when an error occurs creating the new User data processing", async () => {
     const userDataProcessingModelMock = {
       createOrUpdateByNewOne: jest.fn(() => left({})),
-      findOneUserDataProcessingById: jest.fn(() => left(none))
+      findOneUserDataProcessingById: jest.fn(() => right(none))
     };
 
     const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
@@ -49,11 +49,28 @@ describe("UpsertUserDataProcessingHandler", () => {
     expect(result.kind).toBe("IResponseErrorQuery");
   });
 
+  it("should return a conflict error when a new request is upserted and it was already PENDING", async () => {
+    const userDataProcessingModelMock = {
+      findOneUserDataProcessingById: jest.fn(() =>
+        right(some(aRetrievedUserDataProcessing))
+      )
+    };
+
+    const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
+      userDataProcessingModelMock as any
+    );
+
+    const result = await upsertUserDataProcessingHandler(
+      contextMock as any,
+      aFiscalCode,
+      aUserDataProcessingChoiceRequest
+    );
+
+    expect(result.kind).toBe("IResponseErrorConflict");
+  });
+
   it("should return a conflict error when a new request is upserted and it was already WIP", async () => {
     const userDataProcessingModelMock = {
-      createOrUpdateByNewOne: jest.fn(() =>
-        right(aWipRetrievedUserDataProcessing)
-      ),
       findOneUserDataProcessingById: jest.fn(() =>
         right(some(aWipRetrievedUserDataProcessing))
       )
@@ -72,7 +89,7 @@ describe("UpsertUserDataProcessingHandler", () => {
     expect(result.kind).toBe("IResponseErrorConflict");
   });
 
-  it("should return the upserted user data processing", async () => {
+  it("should return the upserted user data processing in case the request was CLOSED", async () => {
     const userDataProcessingModelMock = {
       createOrUpdateByNewOne: jest.fn(() =>
         right(aRetrievedUserDataProcessing)
@@ -80,6 +97,29 @@ describe("UpsertUserDataProcessingHandler", () => {
       findOneUserDataProcessingById: jest.fn(() =>
         right(some(aClosedRetrievedUserDataProcessing))
       )
+    };
+    const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
+      userDataProcessingModelMock as any
+    );
+
+    const result = await upsertUserDataProcessingHandler(
+      contextMock as any,
+      aFiscalCode,
+      aUserDataProcessingChoiceRequest
+    );
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual(aUserDataProcessingApi);
+    }
+  });
+
+  it("should return the upserted user data processing in case there was no preceeding request", async () => {
+    const userDataProcessingModelMock = {
+      createOrUpdateByNewOne: jest.fn(() =>
+        right(aRetrievedUserDataProcessing)
+      ),
+      findOneUserDataProcessingById: jest.fn(() => right(none))
     };
     const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
       userDataProcessingModelMock as any
