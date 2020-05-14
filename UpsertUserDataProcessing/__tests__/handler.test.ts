@@ -6,15 +6,15 @@ import { left, right } from "fp-ts/lib/Either";
 
 import * as df from "durable-functions";
 
-import { some } from "fp-ts/lib/Option";
+import { none, some } from "fp-ts/lib/Option";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
+  aClosedRetrievedUserDataProcessing,
   aFiscalCode,
   aRetrievedUserDataProcessing,
   aUserDataProcessingApi,
   aUserDataProcessingChoiceRequest,
-  aWipRetrievedUserDataProcessing,
-  aWipUserDataProcessingApi
+  aWipRetrievedUserDataProcessing
 } from "../../__mocks__/mocks";
 import { UpsertUserDataProcessingHandler } from "../handler";
 
@@ -33,9 +33,7 @@ describe("UpsertUserDataProcessingHandler", () => {
   it("should return a query error when an error occurs creating the new User data processing", async () => {
     const userDataProcessingModelMock = {
       createOrUpdateByNewOne: jest.fn(() => left({})),
-      findOneUserDataProcessingById: jest.fn(() =>
-        right(some(aWipRetrievedUserDataProcessing))
-      )
+      findOneUserDataProcessingById: jest.fn(() => right(none))
     };
 
     const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
@@ -51,11 +49,28 @@ describe("UpsertUserDataProcessingHandler", () => {
     expect(result.kind).toBe("IResponseErrorQuery");
   });
 
-  it("should keep the status WIP when a new request is upserted and it was already WIP", async () => {
+  it("should return a conflict error when a new request is upserted and it was already PENDING", async () => {
     const userDataProcessingModelMock = {
-      createOrUpdateByNewOne: jest.fn(() =>
-        right(aWipRetrievedUserDataProcessing)
-      ),
+      findOneUserDataProcessingById: jest.fn(() =>
+        right(some(aRetrievedUserDataProcessing))
+      )
+    };
+
+    const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
+      userDataProcessingModelMock as any
+    );
+
+    const result = await upsertUserDataProcessingHandler(
+      contextMock as any,
+      aFiscalCode,
+      aUserDataProcessingChoiceRequest
+    );
+
+    expect(result.kind).toBe("IResponseErrorConflict");
+  });
+
+  it("should return a conflict error when a new request is upserted and it was already WIP", async () => {
+    const userDataProcessingModelMock = {
       findOneUserDataProcessingById: jest.fn(() =>
         right(some(aWipRetrievedUserDataProcessing))
       )
@@ -71,20 +86,40 @@ describe("UpsertUserDataProcessingHandler", () => {
       aUserDataProcessingChoiceRequest
     );
 
-    expect(result.kind).toBe("IResponseSuccessJson");
-    if (result.kind === "IResponseSuccessJson") {
-      expect(result.value).toEqual(aWipUserDataProcessingApi);
-    }
+    expect(result.kind).toBe("IResponseErrorConflict");
   });
 
-  it("should return the upserted user data processing", async () => {
+  it("should return the upserted user data processing in case the request was CLOSED", async () => {
     const userDataProcessingModelMock = {
       createOrUpdateByNewOne: jest.fn(() =>
         right(aRetrievedUserDataProcessing)
       ),
       findOneUserDataProcessingById: jest.fn(() =>
-        right(some(aRetrievedUserDataProcessing))
+        right(some(aClosedRetrievedUserDataProcessing))
       )
+    };
+    const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
+      userDataProcessingModelMock as any
+    );
+
+    const result = await upsertUserDataProcessingHandler(
+      contextMock as any,
+      aFiscalCode,
+      aUserDataProcessingChoiceRequest
+    );
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual(aUserDataProcessingApi);
+    }
+  });
+
+  it("should return the upserted user data processing in case there was no preceeding request", async () => {
+    const userDataProcessingModelMock = {
+      createOrUpdateByNewOne: jest.fn(() =>
+        right(aRetrievedUserDataProcessing)
+      ),
+      findOneUserDataProcessingById: jest.fn(() => right(none))
     };
     const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
       userDataProcessingModelMock as any
