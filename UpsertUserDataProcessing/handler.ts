@@ -85,19 +85,21 @@ export function UpsertUserDataProcessingHandler(
     const maybeRetrievedUserDataProcessing =
       errorOrMaybeRetrievedUserDataProcessing.value;
     const errorOrComputedStatus = maybeRetrievedUserDataProcessing.fold<
-      Either<IResponseErrorConflict, UserDataProcessingStatusEnum>
+      Either<string, UserDataProcessingStatusEnum>
     >(right(UserDataProcessingStatusEnum.PENDING), retrieved => {
       return retrieved.status === UserDataProcessingStatusEnum.CLOSED
         ? right(UserDataProcessingStatusEnum.PENDING)
-        : left(
-            ResponseErrorConflict(
-              "An other request is already PENDING or WIP for this User"
-            )
-          );
+        : left("Another request is already PENDING or WIP for this User");
     });
 
-    return errorOrComputedStatus.bimap(
-      conflicError => conflicError,
+    return errorOrComputedStatus.fold<
+      Promise<
+        | IResponseSuccessJson<UserDataProcessingApi>
+        | IResponseErrorQuery
+        | IResponseErrorConflict
+      >
+    >(
+      async conflictErrorMessage => ResponseErrorConflict(conflictErrorMessage),
       async computedStatus => {
         const userDataProcessing: UserDataProcessing = {
           choice: upsertUserDataProcessingPayload.choice,
@@ -140,7 +142,7 @@ export function UpsertUserDataProcessingHandler(
           toUserDataProcessingApi(createdOrUpdatedUserDataProcessing)
         );
       }
-    ).value;
+    );
   };
 }
 
