@@ -337,6 +337,8 @@ paths:
           description: Too many requests
         "409":
           description: Conflict
+          schema:
+            $ref: "#/definitions/ProblemJson"
   "/user-data-processing/{fiscal_code}/{choice}":  
     get:
       operationId: getUserDataProcessing
