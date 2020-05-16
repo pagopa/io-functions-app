@@ -86,8 +86,8 @@ const profileModel = new ProfileModel(documentClient, profilesCollectionUrl);
 
 const aProfile: Profile = Profile.decode({
   acceptedTosVersion: 1,
-  email: "spammmmme@gmail.com",
-  fiscalCode: "SPNDNL80R13C523K",
+  email: "spammmmme@example.com",
+  fiscalCode: "SPNDNL80R11C555K",
   isEmailEnabled: true,
   isEmailValidated: true,
   isInboxEnabled: true,
@@ -102,7 +102,6 @@ createDatabase(cosmosDbName)
   .then(() => createCollection("notification-status", "notificationId"))
   .then(() => createCollection("notifications", "messageId"))
   .then(() => createCollection("profiles", "fiscalCode"))
-  .then(() => createCollection("sender-services", "recipientFiscalCode"))
   .then(() => createCollection("services", "serviceId"))
   .then(() => serviceModel.create(aService, aService.serviceId))
   // tslint:disable-next-line: no-console
