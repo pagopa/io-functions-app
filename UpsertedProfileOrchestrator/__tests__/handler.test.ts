@@ -93,11 +93,21 @@ describe("UpsertedProfileOrchestrator", () => {
     );
 
     orchestratorHandler.next(result.value);
-
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
       {
+        messageKind: "WELCOME",
+        profile: upsertedProfileOrchestratorInput.newProfile
+      }
+    );
+
+    orchestratorHandler.next();
+    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
+      "SendWelcomeMessagesActivity",
+      someRetryOptions,
+      {
+        messageKind: "HOWTO",
         profile: upsertedProfileOrchestratorInput.newProfile
       }
     );
