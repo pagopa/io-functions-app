@@ -256,33 +256,6 @@ paths:
           description: Conflict
         "429":
           description: Too many requests
-  "/profiles/{recipient}/sender-services":
-    get:
-      operationId: getServicesByRecipient
-      summary: GetServicesForRecipient
-      description: |-
-        Returns the service IDs of all the services that have contacted the recipient,
-        identified by the provided fiscal code, at least once.
-      tags:
-        - restricted
-      parameters:
-        - name: recipient
-          in: path
-          type: string
-          required: true
-          description: The recipient's fiscal code.
-          minLength: 16
-          maxLength: 16
-          pattern: "[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]"
-      responses:
-        "200":
-          description: Found.
-          schema:
-            $ref: "#/definitions/PaginatedServiceTupleCollection"
-        "401":
-          description: Unauthorized
-        "429":
-          description: Too many requests
   "/email-validation-process/{fiscal_code}":
     post:
       operationId: startEmailValidationProcess
