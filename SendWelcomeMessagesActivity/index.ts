@@ -32,12 +32,16 @@ const timeoutFetch = toFetch(
   setFetchTimeout(DEFAULT_REQUEST_TIMEOUT_MS as Millisecond, abortableFetch)
 );
 
-type WelcomeMessages = ReadonlyArray<(p: RetrievedProfile) => NewMessage>;
+export enum WelcomeMessageKind {
+  "WELCOME" = "WELCOME",
+  "HOWTO" = "HOWTO"
+}
 
-// TODO: internal links
+type WelcomeMessages = Record<string, (p: RetrievedProfile) => NewMessage>;
+
 // TODO: switch text based on user's preferred_language
-const welcomeMessages: WelcomeMessages = [
-  (_: RetrievedProfile) =>
+const welcomeMessages: WelcomeMessages = {
+  [WelcomeMessageKind.WELCOME]: (_: RetrievedProfile) =>
     NewMessage.decode({
       content: {
         markdown: `## Benvenuto nella prima versione pubblica di IO!
@@ -85,7 +89,7 @@ Grazie di far parte del progetto IO!
         "Invalid MessageContent for welcome message: " + readableReport(errs)
       );
     }),
-  (_: RetrievedProfile) =>
+  [WelcomeMessageKind.HOWTO]: (_: RetrievedProfile) =>
     NewMessage.decode({
       content: {
         markdown: `## Scopri quali enti e servizi puoi trovare all’interno di IO.
@@ -114,54 +118,37 @@ Per approfondimenti ti invitiamo a consultare la sezione [servizi](ioit://SERVIC
         "Invalid MessageContent for welcome message: " + readableReport(errs)
       );
     })
-];
+};
 
 /**
  * Send a single welcome message using the
  * Digital Citizenship Notification API (REST).
  */
-async function sendWelcomeMessage(
-  url: string,
+async function sendMessage(
+  profile: RetrievedProfile,
+  apiUrl: string,
   apiKey: string,
   newMessage: NewMessage
 ): Promise<number> {
-  const response = await timeoutFetch(url, {
-    body: JSON.stringify(newMessage),
-    headers: {
-      "Content-Type": "application/json",
-      "Ocp-Apim-Subscription-Key": apiKey
-    },
-    method: "POST"
-  });
-
-  return response.status;
-}
-
-/**
- * Send all welcome messages to the user
- * identified by the provided fiscal code.
- */
-function sendWelcomeMessages(
-  apiUrl: string,
-  apiKey: string,
-  messages: WelcomeMessages,
-  profile: RetrievedProfile
-): Promise<ReadonlyArray<number>> {
-  const fiscalCode = profile.fiscalCode;
-
-  const url = `${apiUrl}/api/v1/messages/${fiscalCode}`;
-
-  return Promise.all(
-    messages.map(welcomeMessage =>
-      sendWelcomeMessage(url, apiKey, welcomeMessage(profile))
-    )
+  const response = await timeoutFetch(
+    `${apiUrl}/api/v1/messages/${profile.fiscalCode}`,
+    {
+      body: JSON.stringify(newMessage),
+      headers: {
+        "Content-Type": "application/json",
+        "Ocp-Apim-Subscription-Key": apiKey
+      },
+      method: "POST"
+    }
   );
+  return response.status;
 }
 
 const activityFunction: AzureFunction = async (
   context: Context,
   input: {
     profile: RetrievedProfile;
+    messageKind: WelcomeMessageKind;
   }
 ): Promise<string> => {
   const profileOrError = RetrievedProfile.decode(input.profile);
@@ -175,20 +162,28 @@ const activityFunction: AzureFunction = async (
     return "FAILURE";
   }
 
+  if (!input.messageKind || !welcomeMessages[input.messageKind]) {
+    context.log.error(
+      `SendWelcomeMessageActivity|Cannot decode input profile|ERROR=Cannot decode message type
+      )}|INPUT=${input.messageKind}`
+    );
+    return "FAILURE";
+  }
+
   const profile = profileOrError.value;
 
   const logPrefix = `SendWelcomeMessageActivity|PROFILE=${profile.fiscalCode}|VERSION=${profile.version}`;
 
-  context.log.verbose(`${logPrefix}|Sending welcome messages`);
+  context.log.verbose(`${logPrefix}|Sending welcome message`);
 
-  const result = await sendWelcomeMessages(
+  const result = await sendMessage(
+    profile,
     publicApiUrl,
     publicApiKey,
-    welcomeMessages,
-    profile
+    welcomeMessages[input.messageKind](profile)
   );
 
-  context.log.verbose(`${logPrefix}|RESPONSES=${result.join(",")}`);
+  context.log.verbose(`${logPrefix}|RESPONSES=${result}`);
 
   return "SUCCESS";
 };
