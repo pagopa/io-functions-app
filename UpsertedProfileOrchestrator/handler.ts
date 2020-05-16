@@ -15,9 +15,10 @@ import {
   OrchestratorInput as EmailValidationProcessOrchestratorInput,
   OrchestratorResult as EmailValidationProcessOrchestratorResult
 } from "../EmailValidationProcessOrchestrator/handler";
-import { WelcomeMessageKind } from "../SendWelcomeMessagesActivity";
 import { Input as UpdateServiceSubscriptionFeedActivityInput } from "../UpdateSubscriptionsFeedActivity/index";
 import { diffBlockedServices } from "../utils/profiles";
+
+import { ActivityInput as SendWelcomeMessageActivityInput } from "../SendWelcomeMessagesActivity/handler";
 
 /**
  * Carries information about created or updated profile.
@@ -152,17 +153,17 @@ export const handler = function*(
       "SendWelcomeMessagesActivity",
       retryOptions,
       {
-        messageKind: WelcomeMessageKind.WELCOME,
+        messageKind: "WELCOME",
         profile: newProfile
-      }
+      } as SendWelcomeMessageActivityInput
     );
     yield context.df.callActivityWithRetry(
       "SendWelcomeMessagesActivity",
       retryOptions,
       {
-        messageKind: WelcomeMessageKind.HOWTO,
+        messageKind: "HOWTO",
         profile: newProfile
-      }
+      } as SendWelcomeMessageActivityInput
     );
   }
 
