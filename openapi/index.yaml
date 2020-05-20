@@ -454,3 +454,6 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.0/openapi/definitions.yaml#/UserDataProcessingChoice"
   UserDataProcessingChoiceRequest:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.0/openapi/definitions.yaml#/UserDataProcessingChoiceRequest"
+  IsTestProfile:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.0/openapi/definitions.yaml#/IsTestProfile"
+ 
