@@ -52,6 +52,7 @@ export const aRetrievedProfile: RetrievedProfile = {
   isEmailEnabled: true,
   isEmailValidated: true,
   isInboxEnabled: false,
+  isTestProfile: false,
   isWebhookEnabled: false,
   kind: "IRetrievedProfile",
   version: 0 as NonNegativeNumber
