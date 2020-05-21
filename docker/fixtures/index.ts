@@ -1,7 +1,11 @@
 /**
  * Insert fake data into CosmosDB database emulator.
  */
-import { CollectionMeta, UriFactory } from "documentdb";
+import {
+  CollectionMeta,
+  DocumentClient as DocumentDBClient,
+  UriFactory
+} from "documentdb";
 import { Either, left, right } from "fp-ts/lib/Either";
 import {
   Profile,
@@ -15,11 +19,16 @@ import {
 } from "io-functions-commons/dist/src/models/service";
 import * as documentDbUtils from "io-functions-commons/dist/src/utils/documentdb";
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
-import { documentClient } from "../../utils/cosmosdb";
 
+const cosmosDbKey = getRequiredStringEnv("CUSTOMCONNSTR_COSMOSDB_KEY");
+const cosmosDbUri = getRequiredStringEnv("CUSTOMCONNSTR_COSMOSDB_URI");
 const cosmosDbName = getRequiredStringEnv("COSMOSDB_NAME");
 
 const documentDbDatabaseUrl = documentDbUtils.getDatabaseUri(cosmosDbName);
+
+const documentClient = new DocumentDBClient(cosmosDbUri, {
+  masterKey: cosmosDbKey
+});
 
 function createDatabase(databaseName: string): Promise<Either<Error, void>> {
   return new Promise(resolve => {
@@ -86,8 +95,8 @@ const profileModel = new ProfileModel(documentClient, profilesCollectionUrl);
 
 const aProfile: Profile = Profile.decode({
   acceptedTosVersion: 1,
-  email: "spammmmme@example.com",
-  fiscalCode: "SPNDNL80R11C555K",
+  email: "email@example.com",
+  fiscalCode: "AAAAAA00A00A000A",
   isEmailEnabled: true,
   isEmailValidated: true,
   isInboxEnabled: true,
