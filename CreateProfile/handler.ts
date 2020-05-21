@@ -60,6 +60,7 @@ export function CreateProfileHandler(
       isEmailEnabled: true,
       isEmailValidated: createProfilePayload.is_email_validated,
       isInboxEnabled: false,
+      isTestProfile: createProfilePayload.is_test_profile,
       isWebhookEnabled: false
     };
 
