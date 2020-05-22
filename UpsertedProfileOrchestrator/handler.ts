@@ -18,6 +18,8 @@ import {
 import { Input as UpdateServiceSubscriptionFeedActivityInput } from "../UpdateSubscriptionsFeedActivity/index";
 import { diffBlockedServices } from "../utils/profiles";
 
+import { ActivityInput as SendWelcomeMessageActivityInput } from "../SendWelcomeMessagesActivity/handler";
+
 /**
  * Carries information about created or updated profile.
  *
@@ -147,9 +149,22 @@ export const handler = function*(
   );
 
   if (hasJustEnabledInbox) {
-    yield context.df.callActivity("SendWelcomeMessagesActivity", {
-      profile: newProfile
-    });
+    yield context.df.callActivityWithRetry(
+      "SendWelcomeMessagesActivity",
+      retryOptions,
+      {
+        messageKind: "WELCOME",
+        profile: newProfile
+      } as SendWelcomeMessageActivityInput
+    );
+    yield context.df.callActivityWithRetry(
+      "SendWelcomeMessagesActivity",
+      retryOptions,
+      {
+        messageKind: "HOWTO",
+        profile: newProfile
+      } as SendWelcomeMessageActivityInput
+    );
   }
 
   // Update subscriptions feed

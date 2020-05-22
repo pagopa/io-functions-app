@@ -52,6 +52,7 @@ export const aRetrievedProfile: RetrievedProfile = {
   isEmailEnabled: true,
   isEmailValidated: true,
   isInboxEnabled: false,
+  isTestProfile: false,
   isWebhookEnabled: false,
   kind: "IRetrievedProfile",
   version: 0 as NonNegativeNumber
@@ -99,6 +100,9 @@ export const aUserDataProcessingStatus: UserDataProcessingStatus =
 export const aWipUserDataProcessingStatus: UserDataProcessingStatus =
   UserDataProcessingStatusEnum.WIP;
 
+export const aClosedUserDataProcessingStatus: UserDataProcessingStatus =
+  UserDataProcessingStatusEnum.CLOSED;
+
 export const aRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
   _etag: "xyz",
   _rid: "xyz",
@@ -115,20 +119,14 @@ export const aRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
   version: 0 as NonNegativeNumber
 };
 
+export const aClosedRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
+  ...aRetrievedUserDataProcessing,
+  status: aClosedUserDataProcessingStatus
+};
+
 export const aWipRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
-  _etag: "xyz",
-  _rid: "xyz",
-  _self: "aaa",
-  _ts: 111,
-  choice: aUserDataProcessingChoice,
-  createdAt: aNewDate,
-  fiscalCode: aFiscalCode,
-  id: "xyz" as NonEmptyString,
-  kind: "IRetrievedUserDataProcessing",
-  status: aWipUserDataProcessingStatus,
-  updatedAt: aNewDate,
-  userDataProcessingId: aUserDataProcessingId,
-  version: 0 as NonNegativeNumber
+  ...aRetrievedUserDataProcessing,
+  status: aWipUserDataProcessingStatus
 };
 
 export const aUserDataProcessingApi: UserDataProcessingApi = toUserDataProcessingApi(

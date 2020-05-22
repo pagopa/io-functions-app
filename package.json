@@ -1,6 +1,6 @@
 {
   "name": "io-functions-app",
-  "version": "1.13.0",
+  "version": "1.19.2",
   "license": "MIT",
   "scripts": {
     "prebuild": "yarn generate:backend-models",
@@ -30,7 +30,6 @@
     "@types/jest": "^24.0.15",
     "@types/lolex": "^3.1.1",
     "@types/nodemailer": "^4.6.8",
-    "@types/superagent": "^4.1.3",
     "danger": "^4.0.2",
     "danger-plugin-digitalcitizenship": "^0.3.1",
     "fast-check": "^1.16.0",
@@ -49,6 +48,7 @@
     "typescript": "^3.6.2"
   },
   "dependencies": {
+    "abort-controller": "^3.0.0",
     "applicationinsights": "^1.7.4",
     "azure-storage": "^2.10.3",
     "azure-sb": "^0.11.1",
@@ -57,12 +57,12 @@
     "express": "^4.15.3",
     "fp-ts": "1.17.4",
     "html-to-text": "^5.1.1",
-    "io-functions-commons": "^8.0.0",
+    "io-functions-commons": "^10.2.3",
     "io-functions-express": "^0.1.0",
     "io-ts": "1.8.5",
-    "italia-ts-commons": "^7.0.1",
+    "italia-ts-commons": "^8.1.0",
     "nodemailer": "^4.7.0",
-    "superagent": "^5.1.0"
+    "nodemailer-sendgrid": "^1.0.3"
   },
   "resolutions": {
     "fp-ts": "1.17.4"

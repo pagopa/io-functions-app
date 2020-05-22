@@ -1,5 +1,4 @@
-﻿import * as NodeMailer from "nodemailer";
-import Mail = require("nodemailer/lib/mailer");
+﻿import Mail = require("nodemailer/lib/mailer");
 
 import { left, right, toError } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
@@ -11,9 +10,9 @@ import {
 } from "io-functions-commons/dist/src/models/profile";
 import * as documentDbUtils from "io-functions-commons/dist/src/utils/documentdb";
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
-import { MailUpTransport } from "io-functions-commons/dist/src/utils/mailup";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import { documentClient } from "../utils/cosmosdb";
+import { getMailerTransporter } from "../utils/email";
 import { getSendUserDataProcessingEmailActivityHandler } from "./handler";
 
 const cosmosDbName = getRequiredStringEnv("COSMOSDB_NAME");
@@ -47,6 +46,11 @@ export type findOneProfileByFiscalCodeTaskT = typeof findOneProfileByFiscalCodeT
 // Whether we're in a production environment
 const isProduction = process.env.NODE_ENV === "production";
 
+// Optional SendGrid key
+const sendgridApiKey = NonEmptyString.decode(
+  process.env.SENDGRID_API_KEY
+).getOrElse(undefined);
+
 // Mailup
 const mailupUsername = getRequiredStringEnv("MAILUP_USERNAME");
 const mailupSecret = getRequiredStringEnv("MAILUP_SECRET");
@@ -62,22 +66,10 @@ const emailDefaults = {
 
 export type EmailDefaults = typeof emailDefaults;
 
-// For development we use mailhog to intercept emails
-// Use the `docker-compose.yml` file to run the mailhog server
-const mailerTransporter = isProduction
-  ? NodeMailer.createTransport(
-      MailUpTransport({
-        creds: {
-          Secret: mailupSecret,
-          Username: mailupUsername
-        }
-      })
-    )
-  : NodeMailer.createTransport({
-      host: "localhost",
-      port: 1025,
-      secure: false
-    });
+const mailerTransporter = getMailerTransporter({
+  isProduction,
+  ...(sendgridApiKey ? { sendgridApiKey } : { mailupSecret, mailupUsername })
+});
 
 const sendMailTask = (mt: Mail) => (
   options: Mail.Options & { html: Mail.Options["html"] }
