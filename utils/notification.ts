@@ -2,30 +2,13 @@
  * This file contains the CreatedMessageEventSenderMetadata and Notification models.
  */
 
-import * as crypto from "crypto";
 import * as t from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { tag } from "italia-ts-commons/lib/types";
 
 import * as azure from "azure-sb";
 import { tryCatch } from "fp-ts/lib/TaskEither";
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
-import { FiscalCode } from "../generated/backend/FiscalCode";
 import { Platform, PlatformEnum } from "../generated/backend/Platform";
-
-/**
- * An hashed fiscal code.
- *
- * The fiscal code is used as a tag in the Notification Hub installation, to avoid expose the fiscal code to a third
- * party system we use an hash instead.
- */
-interface IFiscalCodeHashTag {
-  readonly kind: "IFiscalCodeHashTag";
-}
-
-const FiscalCodeHash = tag<IFiscalCodeHashTag>()(NonEmptyString);
-
-type FiscalCodeHash = t.TypeOf<typeof FiscalCodeHash>;
 
 /**
  * Notification template.
@@ -51,16 +34,6 @@ export enum APNSPushType {
   FILEPROVIDER = "fileprovider",
   MDM = "mdm"
 }
-
-/**
- * Compute the sha256 hash of a string.
- */
-export const toFiscalCodeHash = (fiscalCode: FiscalCode): FiscalCodeHash => {
-  const hash = crypto.createHash("sha256");
-  hash.update(fiscalCode);
-
-  return hash.digest("hex") as FiscalCodeHash;
-};
 
 const hubName = getRequiredStringEnv("AZURE_NH_HUB_NAME");
 const endpointOrConnectionString = getRequiredStringEnv("AZURE_NH_ENDPOINT");
@@ -190,18 +163,15 @@ export const createOrUpdateInstallation = (
             err == null
               ? resolve(successNH())
               : reject(
-                  `Error while creating or updating installation on NotificationHub [${JSON.stringify(
-                    installationId
-                  )}] [${err.message}]`
+                  `Error while creating or updating installation on NotificationHub [
+                    ${installationId}] [${err.message}]`
                 )
         )
       );
     },
     errs =>
       new Error(
-        `Error while creating or updating installation on NotificationHub [${JSON.stringify(
-          installationId
-        )}] [${errs}]`
+        `Error while creating or updating installation on NotificationHub [${installationId}] [${errs}]`
       )
   );
 };
@@ -214,18 +184,14 @@ export const deleteInstallation = (installationId: NonEmptyString) => {
           e == null
             ? resolve(successNH())
             : reject(
-                `Error while deleting installation on NotificationHub [${JSON.stringify(
-                  installationId
-                )}] [${e.message}]`
+                `Error while deleting installation on NotificationHub [${installationId}] [${e.message}]`
               )
         )
       );
     },
     errs =>
       new Error(
-        `Error while deleting installation on NotificationHub [${JSON.stringify(
-          installationId
-        )}] [${errs}]`
+        `Error while deleting installation on NotificationHub [${installationId}] [${errs}]`
       )
   );
 };

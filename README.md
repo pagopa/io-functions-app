@@ -41,7 +41,9 @@ following contents:
     "AssetsStorageConnection": "<ASSETS_STORAGE_CONNECTION_STRING>",
     "STATUS_ENDPOINT_URL": "<APP_BACKEND_INFO_ENDPOINT>",
     "STATUS_REFRESH_INTERVAL_MS": "<STATUS_REFRESH_INTERVAL_MS>",
-    "SUBSCRIPTIONS_FEED_TABLE": "SubscriptionsFeedByDay"
+    "SUBSCRIPTIONS_FEED_TABLE": "SubscriptionsFeedByDay",
+    "AZURE_NH_HUB_NAME": "notification-hub-name",
+    "AZURE_NH_ENDPOINT": "Notification Hub Endpoint"
   },
   "ConnectionStrings": {}
 }
