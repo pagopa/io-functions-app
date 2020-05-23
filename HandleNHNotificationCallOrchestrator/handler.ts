@@ -7,13 +7,13 @@ import { IFunctionContext } from "durable-functions/lib/src/classes";
 import * as df from "durable-functions";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 
-import { NotificationHubMessage } from "../HandleNHNotificationCall";
+import { NotificationMessage } from "../HandleNHNotificationCall";
 
 /**
  * Carries information about Notification Hub Message payload
  */
 export const NhNotificationOrchestratorInput = t.interface({
-  message: NotificationHubMessage
+  message: NotificationMessage
 });
 
 export type NhNotificationOrchestratorInput = t.TypeOf<

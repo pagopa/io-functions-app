@@ -1,12 +1,15 @@
 import * as t from "io-ts";
 
 import { Context } from "@azure/functions";
+import { toString } from "fp-ts/lib/function";
 
 import { readableReport } from "italia-ts-commons/lib/reporters";
 
 import { fromEither } from "fp-ts/lib/TaskEither";
-import { NotificationHubMessageKindEnum } from "../generated/notifications/NotificationHubMessageKind";
-import { NotificationHubMessage } from "../HandleNHNotificationCall";
+import { KindEnum as CreateOrUpdateKind } from "../generated/notifications/CreateOrUpdateInstallationMessage";
+import { KindEnum as DeleteKind } from "../generated/notifications/DeleteInstallationMessage";
+import { KindEnum as NotifyKind } from "../generated/notifications/NotifyMessage";
+import { NotificationMessage } from "../HandleNHNotificationCall";
 import {
   createOrUpdateInstallation,
   deleteInstallation,
@@ -15,7 +18,7 @@ import {
 
 // Activity input
 export const ActivityInput = t.interface({
-  message: NotificationHubMessage
+  message: NotificationMessage
 });
 
 export type ActivityInput = t.TypeOf<typeof ActivityInput>;
@@ -50,6 +53,10 @@ const failActivity = (context: Context, logPrefix: string) => (
   return new Error(errorMessage);
 };
 
+const assertNever = (x: never): never => {
+  throw new Error(`Unexpected object: ${toString(x)}`);
+};
+
 /**
  * For each Notification Hub Message calls related Notification Hub service
  */
@@ -61,19 +68,21 @@ export const getCallNHServiceActivityHandler = (
     .mapLeft(errs =>
       failure("Error decoding activity input", readableReport(errs))
     )
-    .chain(({ message }) => {
+    .chain<ActivityResultSuccess>(({ message }) => {
       switch (message.kind) {
-        case NotificationHubMessageKindEnum.CreateOrUpdateInstallation:
+        case CreateOrUpdateKind.CreateOrUpdateInstallation:
           return createOrUpdateInstallation(
             message.installationId,
             message.platform,
             message.pushChannel,
             message.tags
           );
-        case NotificationHubMessageKindEnum.Notify:
+        case NotifyKind.Notify:
           return notify(message.installationId, message.payload);
-        case NotificationHubMessageKindEnum.DeleteInstallation:
+        case DeleteKind.DeleteInstallation:
           return deleteInstallation(message.installationId);
+        default:
+          assertNever(message);
       }
     })
     .run();

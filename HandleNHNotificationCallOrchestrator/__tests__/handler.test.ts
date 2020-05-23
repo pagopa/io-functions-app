@@ -9,8 +9,10 @@ process.env = {
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import { PlatformEnum } from "../../generated/backend/Platform";
-import { NotificationHubMessageKindEnum } from "../../generated/notifications/NotificationHubMessageKind";
-import { NotificationHubCreateOrUpdateInstallationMessage } from "../../HandleNHNotificationCall";
+import {
+  CreateOrUpdateInstallationMessage,
+  KindEnum as CreateOrUpdateInstallationKind
+} from "../../generated/notifications/CreateOrUpdateInstallationMessage";
 import {
   ActivityInput as NHCallServiceActivityInput,
   ActivityResult
@@ -20,9 +22,9 @@ import { handler, NhNotificationOrchestratorInput } from "../handler";
 const aFiscalCodeHash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" as NonEmptyString;
 const aPushChannel =
   "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p";
-const aNotificationHubMessage: NotificationHubCreateOrUpdateInstallationMessage = {
+const aNotificationHubMessage: CreateOrUpdateInstallationMessage = {
   installationId: aFiscalCodeHash,
-  kind: NotificationHubMessageKindEnum.CreateOrUpdateInstallation,
+  kind: CreateOrUpdateInstallationKind.CreateOrUpdateInstallation,
   platform: PlatformEnum.apns,
   pushChannel: aPushChannel,
   tags: [aFiscalCodeHash]

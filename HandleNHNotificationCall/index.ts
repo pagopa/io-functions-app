@@ -1,50 +1,18 @@
 import { Context } from "@azure/functions";
 import * as df from "durable-functions";
 import * as t from "io-ts";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { Platform } from "../generated/backend/Platform";
-import { NotificationHubMessageKindEnum } from "../generated/notifications/NotificationHubMessageKind";
+import { CreateOrUpdateInstallationMessage } from "../generated/notifications/CreateOrUpdateInstallationMessage";
+import { DeleteInstallationMessage } from "../generated/notifications/DeleteInstallationMessage";
+import { NotifyMessage } from "../generated/notifications/NotifyMessage";
 import { initTelemetryClient } from "../utils/appinsights";
 
-export const NotificationHubNotifyInstallationMessage = t.interface({
-  installationId: NonEmptyString,
-  kind: t.literal(NotificationHubMessageKindEnum.Notify),
-  payload: t.interface({
-    message: t.string,
-    message_id: t.string,
-    title: t.string
-  })
-});
-export type NotificationHubNotifyInstallationMessage = t.TypeOf<
-  typeof NotificationHubNotifyInstallationMessage
->;
-export const NotificationHubCreateOrUpdateInstallationMessage = t.interface({
-  installationId: NonEmptyString,
-  kind: t.literal(NotificationHubMessageKindEnum.CreateOrUpdateInstallation),
-  platform: Platform,
-  pushChannel: t.string,
-  tags: t.array(t.string)
-});
-export type NotificationHubCreateOrUpdateInstallationMessage = t.TypeOf<
-  typeof NotificationHubCreateOrUpdateInstallationMessage
->;
-
-export const NotificationHubDeleteInstallationMessage = t.interface({
-  installationId: NonEmptyString,
-  kind: t.literal(NotificationHubMessageKindEnum.DeleteInstallation)
-});
-
-export type NotificationHubDeleteInstallationMessage = t.TypeOf<
-  typeof NotificationHubDeleteInstallationMessage
->;
-
-export const NotificationHubMessage = t.taggedUnion("kind", [
-  NotificationHubNotifyInstallationMessage,
-  NotificationHubCreateOrUpdateInstallationMessage,
-  NotificationHubDeleteInstallationMessage
+export const NotificationMessage = t.taggedUnion("kind", [
+  NotifyMessage,
+  CreateOrUpdateInstallationMessage,
+  DeleteInstallationMessage
 ]);
 
-export type NotificationHubMessage = t.TypeOf<typeof NotificationHubMessage>;
+export type NotificationHubMessage = t.TypeOf<typeof NotificationMessage>;
 
 // Initialize application insights
 initTelemetryClient();
