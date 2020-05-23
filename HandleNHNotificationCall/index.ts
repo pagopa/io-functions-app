@@ -6,7 +6,7 @@ import { DeleteInstallationMessage } from "../generated/notifications/DeleteInst
 import { NotifyMessage } from "../generated/notifications/NotifyMessage";
 import { initTelemetryClient } from "../utils/appinsights";
 
-export const NotificationMessage = t.taggedUnion("kind", [
+export const NotificationMessage = t.union([
   NotifyMessage,
   CreateOrUpdateInstallationMessage,
   DeleteInstallationMessage
