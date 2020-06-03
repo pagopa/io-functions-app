@@ -85,5 +85,9 @@ export const getCallNHServiceActivityHandler = (
           assertNever(message);
       }
     })
+    .mapLeft(e => {
+      context.log.error(`${logPrefix}|ERROR=${toString(e)}`);
+      throw e;
+    })
     .run();
 };
