@@ -476,10 +476,10 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@types/azure-sb@0.0.32":
-  version "0.0.32"
-  resolved "https://registry.yarnpkg.com/@types/azure-sb/-/azure-sb-0.0.32.tgz#4977ba6ac8dce07c9e1c4905e5423d39c50e8d3a"
-  integrity sha512-9mHESUOmrDwo1q42O8SolToBNis7cFTxYIo0+ay1Eor+eHzLJphLgMtK+UMy7IuPXvX2bTOwtwTNwilcIGQIjw==
+"@types/azure-sb@^0.0.37":
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/@types/azure-sb/-/azure-sb-0.0.37.tgz#b0ebfbb2a249ef571dac03622072a279697fa2b4"
+  integrity sha512-5BrnwUlRAuU2IV2FSvEzaqAoaO/nLS9CJQiQzeDboIX3jD7ED7l4wAHsjxcIZ7xe7nIW5yX7yZFKz8e1fcwaTg==
   dependencies:
     "@types/node" "*"
 
