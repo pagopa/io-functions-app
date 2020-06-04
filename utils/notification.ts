@@ -71,7 +71,13 @@ export const toNotificationTag = (fiscalCodeHash: NonEmptyString) =>
 
 const CreateOrUpdateInstallationOptions = t.interface({
   installationId: t.string,
-  platform: t.string,
+  platform: t.keyof({
+    adm: null,
+    apns: null,
+    gcm: null,
+    mpns: null,
+    wns: null
+  }),
   pushChannel: t.string,
   tags: t.array(t.string),
   templates: t.interface({
@@ -157,7 +163,6 @@ export const createOrUpdateInstallation = (
     () => {
       return new Promise<NHResultSuccess>((resolve, reject) =>
         notificationHubService.createOrUpdateInstallation(
-          installationId,
           azureInstallationOptions,
           (err, _) =>
             err == null
