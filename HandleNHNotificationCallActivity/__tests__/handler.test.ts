@@ -37,7 +37,7 @@ describe("HandleNHNotificationCallActivity", () => {
     });
     expect.assertions(1);
     try {
-      const ret = await handler(contextMock as any, input);
+      await handler(contextMock as any, input);
     } catch (e) {
       expect(e).toBeInstanceOf(Error);
     }
