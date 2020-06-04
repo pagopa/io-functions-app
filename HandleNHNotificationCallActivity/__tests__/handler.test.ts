@@ -6,6 +6,7 @@ process.env = {
     "Endpoint=sb://anendpoint.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=C4xIzNZv4VrUnu5jkmPH635MApRUj8wABky8VfduYqg=",
   AZURE_NH_HUB_NAME: "AZURE_NH_HUB_NAME"
 };
+import { isLeft } from "fp-ts/lib/Either";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import { PlatformEnum } from "../../generated/backend/Platform";
@@ -34,11 +35,7 @@ describe("HandleNHNotificationCallActivity", () => {
     const input = NHServiceActivityInput.encode({
       message: aNotificationHubMessage
     });
-    expect.assertions(1);
-    try {
-      await handler(contextMock as any, input);
-    } catch (e) {
-      expect(e).toBeInstanceOf(Error);
-    }
+    const res = await handler(contextMock as any, input);
+    expect(isLeft(res)).toBeTruthy();
   });
 });

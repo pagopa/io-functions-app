@@ -81,7 +81,11 @@ export const getCallNHServiceActivityHandler = (
             message.tags
           );
         case NotifyKind.Notify:
-          return notify(message.installationId, message.payload);
+          return notify(message.installationId, message.payload).mapLeft(e => {
+            context.log.error(`${logPrefix}|ERROR=${toString(e)}`);
+            // trigger a rety in case the notification fail
+            throw e;
+          });
         case DeleteKind.DeleteInstallation:
           return deleteInstallation(message.installationId);
         default:
@@ -90,7 +94,6 @@ export const getCallNHServiceActivityHandler = (
     })
     .mapLeft(e => {
       context.log.error(`${logPrefix}|ERROR=${toString(e)}`);
-      throw e;
     })
     .run();
 };
