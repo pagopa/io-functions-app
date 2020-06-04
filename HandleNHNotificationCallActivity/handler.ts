@@ -69,6 +69,9 @@ export const getCallNHServiceActivityHandler = (
       failure("Error decoding activity input", readableReport(errs))
     )
     .chain<ActivityResultSuccess>(({ message }) => {
+      context.log.info(
+        `${logPrefix}|${message.kind}|INSTALLATION_ID=${message.installationId}`
+      );
       switch (message.kind) {
         case CreateOrUpdateKind.CreateOrUpdateInstallation:
           return createOrUpdateInstallation(
