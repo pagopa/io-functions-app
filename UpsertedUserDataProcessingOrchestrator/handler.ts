@@ -2,7 +2,7 @@ import * as t from "io-ts";
 
 import { isLeft } from "fp-ts/lib/Either";
 
-import { IFunctionContext } from "durable-functions/lib/src/classes";
+import { IOrchestrationFunctionContext } from "durable-functions/lib/src/classes";
 
 import { readableReport } from "italia-ts-commons/lib/reporters";
 
@@ -21,8 +21,8 @@ export const OrchestratorInput = t.interface({
 export type OrchestratorInput = t.TypeOf<typeof OrchestratorInput>;
 
 export const handler = function*(
-  context: IFunctionContext
-): IterableIterator<unknown> {
+  context: IOrchestrationFunctionContext
+): Generator<unknown> {
   const logPrefix = `UpsertedUserDataProcessingOrchestrator`;
 
   // Get and decode orchestrator input
