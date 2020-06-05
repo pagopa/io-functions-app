@@ -22,7 +22,7 @@ export type NhNotificationOrchestratorInput = t.TypeOf<
 
 export const handler = function*(
   context: IOrchestrationFunctionContext
-): IterableIterator<unknown> {
+): Generator<unknown> {
   const logPrefix = `NHCallOrchestrator`;
 
   const retryOptions = new df.RetryOptions(5000, 10);

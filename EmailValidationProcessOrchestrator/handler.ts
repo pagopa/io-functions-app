@@ -47,7 +47,7 @@ export type OrchestratorResult = t.TypeOf<typeof OrchestratorResult>;
  */
 export const handler = function*(
   context: IOrchestrationFunctionContext
-): IterableIterator<unknown> {
+): Generator<unknown> {
   const logPrefix = `EmailValidationProcessOrchestrator`;
 
   const retryOptions = new df.RetryOptions(5000, 10);
