@@ -5,6 +5,7 @@ import { toString } from "fp-ts/lib/function";
 
 import { readableReport } from "italia-ts-commons/lib/reporters";
 
+import { toError } from "fp-ts/lib/Either";
 import { fromEither } from "fp-ts/lib/TaskEither";
 import { KindEnum as CreateOrUpdateKind } from "../generated/notifications/CreateOrUpdateInstallationMessage";
 import { KindEnum as DeleteKind } from "../generated/notifications/DeleteInstallationMessage";
@@ -53,6 +54,12 @@ const failActivity = (context: Context, logPrefix: string) => (
   return new Error(errorMessage);
 };
 
+// trigger a rety in case the notification fail
+const retryActivity = (context: Context, msg: string) => {
+  context.log.error(msg);
+  throw toError(msg);
+};
+
 const assertNever = (x: never): never => {
   throw new Error(`Unexpected object: ${toString(x)}`);
 };
@@ -79,21 +86,22 @@ export const getCallNHServiceActivityHandler = (
             message.platform,
             message.pushChannel,
             message.tags
+          ).mapLeft(e =>
+            retryActivity(context, `${logPrefix}|ERROR=${toString(e)}`)
           );
         case NotifyKind.Notify:
-          return notify(message.installationId, message.payload).mapLeft(e => {
-            context.log.error(`${logPrefix}|ERROR=${toString(e)}`);
-            // trigger a rety in case the notification fail
-            throw e;
-          });
+          return notify(message.installationId, message.payload).mapLeft(e =>
+            retryActivity(context, `${logPrefix}|ERROR=${toString(e)}`)
+          );
         case DeleteKind.DeleteInstallation:
-          return deleteInstallation(message.installationId);
+          return deleteInstallation(message.installationId).mapLeft(e => {
+            // do not trigger a retry as delete may fail in case of 404
+            context.log.error(`${logPrefix}|ERROR=${toString(e)}`);
+            return e;
+          });
         default:
           assertNever(message);
       }
-    })
-    .mapLeft(e => {
-      context.log.error(`${logPrefix}|ERROR=${toString(e)}`);
     })
     .run();
 };
