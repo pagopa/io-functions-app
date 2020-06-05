@@ -3,7 +3,7 @@ import * as t from "io-ts";
 import { isLeft } from "fp-ts/lib/Either";
 
 import * as df from "durable-functions";
-import { IFunctionContext } from "durable-functions/lib/src/classes";
+import { IOrchestrationFunctionContext } from "durable-functions/lib/src/classes";
 
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { EmailString, FiscalCode } from "italia-ts-commons/lib/strings";
@@ -46,8 +46,8 @@ export type OrchestratorResult = t.TypeOf<typeof OrchestratorResult>;
  * An orchestrator to handle the email validation process.
  */
 export const handler = function*(
-  context: IFunctionContext
-): IterableIterator<unknown> {
+  context: IOrchestrationFunctionContext
+): Generator<unknown> {
   const logPrefix = `EmailValidationProcessOrchestrator`;
 
   const retryOptions = new df.RetryOptions(5000, 10);

@@ -2,7 +2,7 @@ import * as t from "io-ts";
 
 import { isLeft } from "fp-ts/lib/Either";
 
-import { IFunctionContext } from "durable-functions/lib/src/classes";
+import { IOrchestrationFunctionContext } from "durable-functions/lib/src/classes";
 
 import * as df from "durable-functions";
 import { readableReport } from "italia-ts-commons/lib/reporters";
@@ -21,8 +21,8 @@ export type NhNotificationOrchestratorInput = t.TypeOf<
 >;
 
 export const handler = function*(
-  context: IFunctionContext
-): IterableIterator<unknown> {
+  context: IOrchestrationFunctionContext
+): Generator<unknown> {
   const logPrefix = `NHCallOrchestrator`;
 
   const retryOptions = new df.RetryOptions(5000, 10);

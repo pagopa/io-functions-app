@@ -3,7 +3,7 @@ import * as t from "io-ts";
 import { isLeft } from "fp-ts/lib/Either";
 
 import * as df from "durable-functions";
-import { IFunctionContext } from "durable-functions/lib/src/classes";
+import { IOrchestrationFunctionContext } from "durable-functions/lib/src/classes";
 
 import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
 import { readableReport } from "italia-ts-commons/lib/reporters";
@@ -39,8 +39,8 @@ export const OrchestratorInput = t.intersection([
 export type OrchestratorInput = t.TypeOf<typeof OrchestratorInput>;
 
 export const handler = function*(
-  context: IFunctionContext
-): IterableIterator<unknown> {
+  context: IOrchestrationFunctionContext
+): Generator<unknown> {
   const logPrefix = `UpsertedProfileOrchestrator`;
 
   const retryOptions = new df.RetryOptions(5000, 10);
