@@ -45,7 +45,7 @@
     "shx": "^0.3.2",
     "ts-jest": "^24.0.2",
     "tslint": "^5.17.0",
-    "typescript": "^3.6.2"
+    "typescript": "^3.9.5"
   },
   "dependencies": {
     "abort-controller": "^3.0.0",
