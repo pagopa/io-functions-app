@@ -1,9 +1,9 @@
 ﻿import { AzureFunction, Context } from "@azure/functions";
+import { toString } from "fp-ts/lib/function";
 import { NewMessage } from "io-functions-commons/dist/generated/definitions/NewMessage";
 import { RetrievedProfile } from "io-functions-commons/dist/src/models/profile";
-import { readableReport } from "italia-ts-commons/lib/reporters";
-
 import * as t from "io-ts";
+import { readableReport } from "italia-ts-commons/lib/reporters";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 export const WelcomeMessageKind = t.keyof({
@@ -174,25 +174,41 @@ export const getActivityFunction = (
   return ActivityInput.decode(input).fold<Promise<ActivityResult>>(
     async errs =>
       failure(
-        `SendWelcomeMessageActivity|Cannot decode input profile|ERROR=${readableReport(
+        `SendWelcomeMessagesActivity|Cannot decode input profile|ERROR=${readableReport(
           errs
         )}|INPUT=${JSON.stringify(input.profile)}`
       ),
     async ({ profile, messageKind }) => {
-      const logPrefix = `SendWelcomeMessageActivity|PROFILE=${profile.fiscalCode}|VERSION=${profile.version}`;
+      const logPrefix = `SendWelcomeMessagesActivity|PROFILE=${profile.fiscalCode}|VERSION=${profile.version}`;
       context.log.verbose(`${logPrefix}|Sending welcome message`);
 
-      // throws in case of timeout so
-      // the orchestrator can schedule a retry
-      const result = await sendMessage(
-        profile,
-        publicApiUrl,
-        publicApiKey,
-        welcomeMessages[messageKind](profile),
-        timeoutFetch
-      );
+      try {
+        const status = await sendMessage(
+          profile,
+          publicApiUrl,
+          publicApiKey,
+          welcomeMessages[messageKind](profile),
+          timeoutFetch
+        );
+        if (status !== 201) {
+          if (status >= 500) {
+            throw new Error(`${status}`);
+          } else {
+            return failure(`${logPrefix}|HTTP_ERROR=${status}`);
+          }
+        }
+      } catch (e) {
+        context.log.error(
+          `${logPrefix}|ERROR=${toString(e)}|ID=${profile.fiscalCode.substr(
+            0,
+            5
+          )}`
+        );
+        // throws in case of error or timeout so
+        // the orchestrator can schedule a retry
+        throw e;
+      }
 
-      context.log.verbose(`${logPrefix}|RESPONSE=${result}`);
       return success();
     }
   );
