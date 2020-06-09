@@ -11,6 +11,12 @@ import {
 
 const htmlAndTextContent = "CONTENT";
 
+jest.mock("applicationinsights", () => ({
+  defaultClient: {
+    trackEvent: jest.fn()
+  }
+}));
+
 jest.mock("../template", () => ({
   __esModule: true,
   getEmailHtmlFromTemplate: () => htmlAndTextContent
