@@ -3917,10 +3917,10 @@ invert-kv@^2.0.0:
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-2.0.0.tgz#7393f5afa59ec9ff5f67a27620d11c226e3eec02"
   integrity sha512-wPVv/y/QQ/Uiirj/vh3oP+1Ww+AWehmi1g5fFWGPF6IpCBCDVrhgHRMvrLfdYcwDh3QJbGXDW4JAuzxElLSqKA==
 
-io-functions-commons@^10.2.3:
-  version "10.2.3"
-  resolved "https://registry.yarnpkg.com/io-functions-commons/-/io-functions-commons-10.2.3.tgz#063648d0f72e1c4bef8d09936b71745915576072"
-  integrity sha512-PKi2UGn1dU0OW1PLWKdF8aVvHI0s0cVRou+mfhoqi+nBbvoZ8x+7gYOVYU+mlogIRDGGF4vhEwklbC+KAMwtOg==
+io-functions-commons@^10.4.0:
+  version "10.4.0"
+  resolved "https://registry.yarnpkg.com/io-functions-commons/-/io-functions-commons-10.4.0.tgz#ec5cecc6bc2ed83c3267592a29ecb7e7607b1481"
+  integrity sha512-wQa9sI/VumXT/whNZa3aYI8hYXlLA89AVGMUndul+Od2as8zf7QKD2dEPz7Jig/3Tg3YKbComVZ2HausYi5t8w==
   dependencies:
     "@types/node-fetch" "^2.5.6"
     applicationinsights "^1.7.3"

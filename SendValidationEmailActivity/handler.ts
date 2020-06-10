@@ -7,6 +7,8 @@ import * as NodeMailer from "nodemailer";
 
 import { Context } from "@azure/functions";
 
+import * as ai from "applicationinsights";
+
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { EmailString } from "italia-ts-commons/lib/strings";
 
@@ -91,6 +93,16 @@ export const getSendValidationEmailActivityHandler = (
     context.log.error(error.message);
     throw error;
   }
+
+  const messageInfo = errorOrSentMessageInfo.value;
+
+  // on success, track a custom event with properties of transport used
+  // see https://github.com/pagopa/io-functions-commons/blob/master/src/utils/nodemailer.ts
+  // note: the extra properties will be defined only when using a MultiTransport
+  ai.defaultClient.trackEvent({
+    name: `SendValidationEmailActivity.success`,
+    properties: typeof messageInfo === "object" ? messageInfo : {}
+  });
 
   return ActivityResultSuccess.encode({
     kind: "SUCCESS"
