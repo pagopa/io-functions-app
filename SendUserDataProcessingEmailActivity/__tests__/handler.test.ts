@@ -1,6 +1,6 @@
 /* tslint:disable: no-any */
 
-import { isLeft, isRight, left, right } from "fp-ts/lib/Either";
+import { left, right } from "fp-ts/lib/Either";
 import { none, some } from "fp-ts/lib/Option";
 import { fromEither } from "fp-ts/lib/TaskEither";
 import { FiscalCode } from "io-functions-commons/dist/generated/definitions/FiscalCode";
@@ -62,10 +62,7 @@ describe("SendValidationEmailActivityHandler", () => {
       text: anEmailText,
       to: someEmailDefaults.to
     });
-    expect(isRight(ret)).toBeTruthy();
-    if (isRight(ret)) {
-      expect(ret.value.kind).toEqual("SUCCESS");
-    }
+    expect(ret.kind).toEqual("SUCCESS");
   });
   it("should fail if the user profile is not found", async () => {
     const sendMailMock = jest.fn(() => fromEither(right("ok")));
@@ -87,10 +84,7 @@ describe("SendValidationEmailActivityHandler", () => {
     const ret = await handler(contextMock as any, input);
 
     expect(sendMailMock).not.toHaveBeenCalled();
-    expect(isLeft(ret)).toBeTruthy();
-    if (isLeft(ret)) {
-      expect(ret.value.kind).toEqual("FAILURE");
-    }
+    expect(ret.kind).toEqual("FAILURE");
   });
   it("should fail if there is an error querying user profile", async () => {
     const sendMailMock = jest.fn(() => fromEither(right("ok")));
@@ -112,10 +106,7 @@ describe("SendValidationEmailActivityHandler", () => {
     const ret = await handler(contextMock as any, input);
 
     expect(sendMailMock).not.toHaveBeenCalled();
-    expect(isLeft(ret)).toBeTruthy();
-    if (isLeft(ret)) {
-      expect(ret.value.kind).toEqual("FAILURE");
-    }
+    expect(ret.kind).toEqual("FAILURE");
   });
 
   it("should fail if there is an error sending the email", async () => {
@@ -144,10 +135,7 @@ describe("SendValidationEmailActivityHandler", () => {
       text: anEmailText,
       to: someEmailDefaults.to
     });
-    expect(isLeft(ret)).toBeTruthy();
-    if (isLeft(ret)) {
-      expect(ret.value.kind).toEqual("FAILURE");
-    }
+    expect(ret.kind).toEqual("FAILURE");
   });
 
   it("should fail if there is an error decoding the activity input", async () => {
@@ -171,9 +159,6 @@ describe("SendValidationEmailActivityHandler", () => {
 
     expect(findOneProfileByFiscalCodeMock).not.toHaveBeenCalled();
     expect(sendMailMock).not.toHaveBeenCalled();
-    expect(isLeft(ret)).toBeTruthy();
-    if (isLeft(ret)) {
-      expect(ret.value.kind).toEqual("FAILURE");
-    }
+    expect(ret.kind).toEqual("FAILURE");
   });
 });

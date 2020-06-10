@@ -132,10 +132,8 @@ export const getSendUserDataProcessingEmailActivityHandler = (
         subject,
         text: emailText,
         to: emailDefaults.to
-      }).foldTaskEither<ActivityResultFailure, ActivityResultSuccess>(
-        err => fromEither(left(failure("Error sending email", err.message))),
-        _ => fromEither(right(success()))
-      );
+      }).mapLeft(e => failure(e.message));
     })
+    .fold<ActivityResult>(err => err, _ => success())
     .run();
 };
