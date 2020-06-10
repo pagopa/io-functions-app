@@ -15,7 +15,6 @@ import { getCallNHServiceActivityHandler } from "../handler";
 import { ActivityInput as NHServiceActivityInput } from "../handler";
 
 import * as azure from "azure-sb";
-import { isLeft } from "fp-ts/lib/Either";
 import { DeleteInstallationMessage } from "../../generated/notifications/DeleteInstallationMessage";
 import { NotifyMessage } from "../../generated/notifications/NotifyMessage";
 
@@ -96,6 +95,6 @@ describe("HandleNHNotificationCallActivity", () => {
     });
     const res = await handler(contextMock as any, input);
     expect(deleteInstallationSpy).toHaveBeenCalledTimes(1);
-    expect(isLeft(res)).toBeTruthy();
+    expect(res.kind).toEqual("FAILURE");
   });
 });

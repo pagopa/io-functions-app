@@ -51,7 +51,10 @@ const failActivity = (context: Context, logPrefix: string) => (
 ) => {
   const details = errorDetails ? `|ERROR_DETAILS=${errorDetails}` : ``;
   context.log.error(`${logPrefix}|${errorMessage}${details}`);
-  return new Error(errorMessage);
+  return ActivityResultFailure.encode({
+    kind: "FAILURE",
+    reason: errorMessage
+  });
 };
 
 // trigger a rety in case the notification fail
@@ -59,6 +62,11 @@ const retryActivity = (context: Context, msg: string) => {
   context.log.error(msg);
   throw toError(msg);
 };
+
+const success = () =>
+  ActivityResultSuccess.encode({
+    kind: "SUCCESS"
+  });
 
 const assertNever = (x: never): never => {
   throw new Error(`Unexpected object: ${toString(x)}`);
@@ -97,11 +105,12 @@ export const getCallNHServiceActivityHandler = (
           return deleteInstallation(message.installationId).mapLeft(e => {
             // do not trigger a retry as delete may fail in case of 404
             context.log.error(`${logPrefix}|ERROR=${toString(e)}`);
-            return e;
+            return failure(e.message);
           });
         default:
           assertNever(message);
       }
     })
+    .fold<ActivityResult>(err => err, _ => success())
     .run();
 };
