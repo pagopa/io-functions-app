@@ -31,7 +31,7 @@ Rendendo IO disponibile per tutti, consentiamo agli enti pubblici di portare pro
 ### Scopri le funzioni di IO
 
 Ecco come potrai usare IO attraverso le diverse funzioni disponibili oggi nell’app: molte altre ne arriveranno nei prossimi mesi!  
-IO ti permetterà di richiedere e spendere il “[Bonus Vacanze](https://io.italia.it/bonus-vacanze/)”, che troverai nella sezione “Pagamenti” dell’app a partire dal 1° luglio. IO ti avviserà con un aggiornamento quando il nuovo servizio sarà disponibile.
+IO ti permetterà di richiedere e spendere il “[Bonus Vacanze](https://io.italia.it/bonus-vacanze/)”, che troverai nella sezione “Pagamenti” dell’app a partire dal 1° Luglio. IO ti avviserà con un aggiornamento quando il nuovo servizio sarà disponibile.
 
 #### I messaggi
 
