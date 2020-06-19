@@ -30,7 +30,8 @@ Rendendo IO disponibile per tutti, consentiamo agli enti pubblici di portare pro
 
 ### Scopri le funzioni di IO
 
-Ecco come potrai usare IO attraverso le diverse funzioni disponibili oggi nell’app: molte altre ne arriveranno nei prossimi mesi!
+Ecco come potrai usare IO attraverso le diverse funzioni disponibili oggi nell’app: molte altre ne arriveranno nei prossimi mesi!  
+IO ti permetterà di richiedere e spendere il “[Bonus Vacanze](https://io.italia.it/bonus-vacanze/)”, che troverai nella sezione “Pagamenti” dell’app a partire dal 1° Luglio. IO ti avviserà con un aggiornamento quando il nuovo servizio sarà disponibile.
 
 #### I messaggi
 
@@ -39,7 +40,8 @@ All’arrivo di ogni nuovo messaggio, IO ti informa attraverso una notifica e un
 
 #### I pagamenti
 
-IO integra [pagoPA](https://www.pagopa.gov.it/) per effettuare pagamenti sicuri verso la Pubblica Amministrazione. Se hai già usato pagoPA come utente registrato, nella sezione [Pagamenti](ioit://WALLET_HOME) potrai vedere lo storico delle transazioni effettuate e le tue carte di credito salvate. Puoi usare la sezione [Pagamenti](ioit://WALLET_HOME) per aggiungere i tuoi metodi di pagamento preferiti, procedere al pagamento di un avviso pagoPA (tramite scansione del codice QR o inserimento manuale del codice IUV) e tenere traccia di tutte le operazioni svolte.
+IO integra [pagoPA](https://www.pagopa.gov.it/) per effettuare pagamenti sicuri verso la Pubblica Amministrazione. Se hai già usato pagoPA come utente registrato, nella sezione [Pagamenti](ioit://WALLET_HOME) potrai vedere lo storico delle transazioni effettuate e le tue carte di credito salvate. Puoi usare la sezione [Pagamenti](ioit://WALLET_HOME) per aggiungere i tuoi metodi di pagamento preferiti, procedere al pagamento di un avviso pagoPA (tramite scansione del codice QR o inserimento manuale del codice IUV) e tenere traccia di tutte le operazioni svolte.  
+Nella sezione [Pagamenti](ioit://WALLET_HOME) troverai la possibilità di richiedere il Bonus Vacanze, disponibile a partire dal 1° Luglio.
 
 #### I servizi
 
