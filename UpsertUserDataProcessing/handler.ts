@@ -59,7 +59,7 @@ export function UpsertUserDataProcessingHandler(
   return async (context, fiscalCode, upsertUserDataProcessingPayload) => {
     const logPrefix = `UpsertUserDataProcessingHandler|FISCAL_CODE=${
       fiscalCode === undefined ? undefined : fiscalCode.substring(0, 5)
-    }`;
+      }`;
     const id = makeUserDataProcessingId(
       upsertUserDataProcessingPayload.choice,
       fiscalCode
@@ -84,11 +84,11 @@ export function UpsertUserDataProcessingHandler(
       some(UserDataProcessingStatusEnum.PENDING),
       _ =>
         // create a new PENDING request in case the last request
-        // of the same type is CLOSED
-        _.status === UserDataProcessingStatusEnum.CLOSED
+        // of the same type is CLOSED or ABORTED
+        _.status === UserDataProcessingStatusEnum.CLOSED || _.status === UserDataProcessingStatusEnum.ABORTED
           ? some(UserDataProcessingStatusEnum.PENDING)
           : // do not create a new request in all other cases
-            none
+          none
     );
 
     return maybeNewStatus.foldL<
