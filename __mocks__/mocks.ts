@@ -103,6 +103,9 @@ export const aWipUserDataProcessingStatus: UserDataProcessingStatus =
 export const aClosedUserDataProcessingStatus: UserDataProcessingStatus =
   UserDataProcessingStatusEnum.CLOSED;
 
+export const aAbortedUserDataProcessingStatus: UserDataProcessingStatus =
+  UserDataProcessingStatusEnum.ABORTED;
+
 export const aRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
   _etag: "xyz",
   _rid: "xyz",
@@ -127,6 +130,11 @@ export const aClosedRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
 export const aWipRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
   ...aRetrievedUserDataProcessing,
   status: aWipUserDataProcessingStatus
+};
+
+export const aAbortedRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
+  ...aRetrievedUserDataProcessing,
+  status: aAbortedUserDataProcessingStatus
 };
 
 export const aUserDataProcessingApi: UserDataProcessingApi = toUserDataProcessingApi(
