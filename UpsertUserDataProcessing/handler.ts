@@ -80,14 +80,12 @@ export function UpsertUserDataProcessingHandler(
     const maybeNewStatus = maybeRetrievedUserDataProcessing.fold(
       // create a new PENDING request in case this is the first request
       some(UserDataProcessingStatusEnum.PENDING),
-      _ =>
-        // create a new PENDING request in case the last request
-        // of the same type is CLOSED or ABORTED
-        _.status === UserDataProcessingStatusEnum.CLOSED ||
-        _.status === UserDataProcessingStatusEnum.ABORTED
-          ? some(UserDataProcessingStatusEnum.PENDING)
-          : // do not create a new request in all other cases
-            none
+      ({ status }) =>
+        // if the request is currently on going, don't create another
+        UserDataProcessingStatusEnum.PENDING === status ||
+        UserDataProcessingStatusEnum.WIP === status
+          ? none
+          : some(UserDataProcessingStatusEnum.PENDING)
     );
 
     return maybeNewStatus.foldL<
