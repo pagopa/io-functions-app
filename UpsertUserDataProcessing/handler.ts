@@ -1,7 +1,6 @@
 import * as express from "express";
 
 import { Context } from "@azure/functions";
-import * as df from "durable-functions";
 import { isLeft } from "fp-ts/lib/Either";
 
 import {
@@ -35,7 +34,6 @@ import {
   UserDataProcessingModel
 } from "io-functions-commons/dist/src/models/user_data_processing";
 import { RequiredBodyPayloadMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_body_payload";
-import { OrchestratorInput } from "../UpsertedUserDataProcessingOrchestrator/handler";
 import { toUserDataProcessingApi } from "../utils/user_data_processings";
 
 /**
@@ -128,19 +126,6 @@ export function UpsertUserDataProcessingHandler(
         const createdOrUpdatedUserDataProcessing =
           errorOrUpsertedUserDataProcessing.value;
 
-        const upsertedUserDataProcessingOrchestratorInput = OrchestratorInput.encode(
-          {
-            choice: createdOrUpdatedUserDataProcessing.choice,
-            fiscalCode
-          }
-        );
-        await df
-          .getClient(context)
-          .startNew(
-            "UpsertedUserDataProcessingOrchestrator",
-            undefined,
-            upsertedUserDataProcessingOrchestratorInput
-          );
         return ResponseSuccessJson(
           toUserDataProcessingApi(createdOrUpdatedUserDataProcessing)
         );
