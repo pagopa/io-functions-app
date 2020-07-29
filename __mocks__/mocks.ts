@@ -1,4 +1,4 @@
-import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import {
   EmailString,
   FiscalCode,
@@ -41,12 +41,12 @@ export const aProfile: Profile = {
   is_email_enabled: true,
   is_inbox_enabled: false,
   is_webhook_enabled: false,
-  version: 0 as NonNegativeNumber
+  version: 0 as NonNegativeInteger
 };
 
 export const aRetrievedProfile: RetrievedProfile = {
-  _self: "123",
-  _ts: 123,
+  /*  _self: "123",
+  _ts: 123, */
   fiscalCode: aFiscalCode,
   id: "123" as NonEmptyString,
   isEmailEnabled: true,
@@ -55,12 +55,12 @@ export const aRetrievedProfile: RetrievedProfile = {
   isTestProfile: false,
   isWebhookEnabled: false,
   kind: "IRetrievedProfile",
-  version: 0 as NonNegativeNumber
+  version: 0 as NonNegativeInteger
 };
 
 export const aRetrievedProfileWithEmail: RetrievedProfile = {
-  _self: "123",
-  _ts: 123,
+  /*  _self: "123",
+  _ts: 123, */
   email: "email@example.com" as EmailString,
   fiscalCode: aFiscalCode,
   id: "123" as NonEmptyString,
@@ -68,7 +68,7 @@ export const aRetrievedProfileWithEmail: RetrievedProfile = {
   isInboxEnabled: false,
   isWebhookEnabled: false,
   kind: "IRetrievedProfile",
-  version: 0 as NonNegativeNumber
+  version: 0 as NonNegativeInteger
 };
 
 export const aNewDate = new Date();
@@ -107,10 +107,10 @@ export const aAbortedUserDataProcessingStatus: UserDataProcessingStatus =
   UserDataProcessingStatusEnum.ABORTED;
 
 export const aRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
-  _etag: "xyz",
+  /*  _etag: "xyz",
   _rid: "xyz",
   _self: "aaa",
-  _ts: 111,
+  _ts: 111, */
   choice: aUserDataProcessingChoice,
   createdAt: aNewDate,
   fiscalCode: aFiscalCode,
@@ -119,7 +119,7 @@ export const aRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
   status: aUserDataProcessingStatus,
   updatedAt: aNewDate,
   userDataProcessingId: aUserDataProcessingId,
-  version: 0 as NonNegativeNumber
+  version: 0 as NonNegativeInteger
 };
 
 export const aClosedRetrievedUserDataProcessing: RetrievedUserDataProcessing = {

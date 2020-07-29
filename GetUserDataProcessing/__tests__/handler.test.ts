@@ -1,7 +1,7 @@
 /* tslint:disable:no-any */
 
-import { right } from "fp-ts/lib/Either";
 import { none, some } from "fp-ts/lib/Option";
+import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aFiscalCode,
@@ -15,8 +15,8 @@ import { GetUserDataProcessingHandler } from "../handler";
 describe("GetUserDataProcessingHandler", () => {
   it("should find an existing User data processing", async () => {
     const userDataProcessingModelMock = {
-      findOneUserDataProcessingById: jest.fn(() => {
-        return Promise.resolve(right(some(aRetrievedUserDataProcessing)));
+      findLastVersionByModelId: jest.fn(() => {
+        return taskEither.of(some(aRetrievedUserDataProcessing));
       })
     };
 
@@ -31,8 +31,8 @@ describe("GetUserDataProcessingHandler", () => {
     );
 
     expect(
-      userDataProcessingModelMock.findOneUserDataProcessingById
-    ).toHaveBeenCalledWith(aFiscalCode, aUserDataProcessingId);
+      userDataProcessingModelMock.findLastVersionByModelId
+    ).toHaveBeenCalledWith(aUserDataProcessingId);
     expect(response.kind).toBe("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
       expect(response.value).toEqual(aUserDataProcessingApi);
@@ -41,8 +41,8 @@ describe("GetUserDataProcessingHandler", () => {
 
   it("should respond with NotFound if userDataProcessing does not exist", async () => {
     const userDataProcessingModelMock = {
-      findOneUserDataProcessingById: jest.fn(() => {
-        return Promise.resolve(right(none));
+      findLastVersionByModelId: jest.fn(() => {
+        return taskEither.of(none);
       })
     };
 
@@ -56,15 +56,15 @@ describe("GetUserDataProcessingHandler", () => {
       aUserDataProcessingChoice
     );
     expect(
-      userDataProcessingModelMock.findOneUserDataProcessingById
-    ).toHaveBeenCalledWith(aFiscalCode, aUserDataProcessingId);
+      userDataProcessingModelMock.findLastVersionByModelId
+    ).toHaveBeenCalledWith(aUserDataProcessingId);
     expect(response.kind).toBe("IResponseErrorNotFound");
   });
 
-  it("should reject the promise in case of errors", () => {
+  it("should reject the promise in case of errors", async () => {
     const userDataProcessingModelMock = {
-      findOneUserDataProcessingById: jest.fn(() => {
-        return Promise.reject("error");
+      findLastVersionByModelId: jest.fn(() => {
+        return fromLeft("error");
       })
     };
 
@@ -72,12 +72,12 @@ describe("GetUserDataProcessingHandler", () => {
       userDataProcessingModelMock as any
     );
 
-    const promise = getUserDataProcessingHandler(
+    const result = await getUserDataProcessingHandler(
       contextMock as any,
       aFiscalCode,
       aUserDataProcessingChoice
     );
 
-    return expect(promise).rejects.toBe("error");
+    return expect(result.kind).toBe("IResponseErrorQuery");
   });
 });

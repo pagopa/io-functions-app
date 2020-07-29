@@ -1,6 +1,6 @@
 // tslint:disable:no-any
 
-import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import {
   NonEmptyString,
   OrganizationFiscalCode
@@ -47,16 +47,16 @@ const aService: Service = {
 
 const aNewService: NewService = {
   ...aService,
-  id: "123" as NonEmptyString,
-  kind: "INewService",
-  version: 1 as NonNegativeNumber
+  kind: "INewService"
 };
 
 const aRetrievedService: RetrievedService = {
   ...aNewService,
-  _self: "123",
-  _ts: 123,
-  kind: "IRetrievedService"
+  /*   _self: "123",
+  _ts: 123, */
+  id: "123" as NonEmptyString,
+  kind: "IRetrievedService",
+  version: 1 as NonNegativeInteger
 };
 
 const aVisibleService: VisibleService = {

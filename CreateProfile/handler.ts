@@ -16,9 +16,9 @@ import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { ExtendedProfile } from "io-functions-commons/dist/generated/definitions/ExtendedProfile";
 import { NewProfile } from "io-functions-commons/dist/generated/definitions/NewProfile";
 import {
+  NewProfile as INewProfile,
   Profile,
-  ProfileModel,
-  NewProfile as INewProfile
+  ProfileModel
 } from "io-functions-commons/dist/src/models/profile";
 import {
   IResponseErrorQuery,
@@ -32,14 +32,15 @@ import {
   wrapRequestHandler
 } from "io-functions-commons/dist/src/utils/request_middleware";
 
-import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
-import { NewProfileMiddleware } from "../utils/middlewares/profile";
-import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 import { fromEither } from "fp-ts/lib/TaskEither";
 import {
   CosmosDecodingError,
   CosmosErrors
 } from "io-functions-commons/dist/src/utils/cosmosdb_model";
+import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
+import { NewProfileMiddleware } from "../utils/middlewares/profile";
+import { retrievedProfileToExtendedProfile } from "../utils/profiles";
+import { readableReport } from "italia-ts-commons/lib/reporters";
 
 /**
  * Type of an CreateProfile handler.
@@ -70,12 +71,13 @@ export function CreateProfileHandler(
       isWebhookEnabled: false
     };
 
-    const errorOrCreatedProfile = await fromEither<CosmosErrors, INewProfile>(
+    const errorOrCreatedProfile = await fromEither(
       INewProfile.decode({
         ...profile,
         kind: "INewProfile"
-      }).mapLeft(errors => CosmosDecodingError(errors))
+      })
     )
+      .mapLeft<CosmosErrors>(CosmosDecodingError)
       .chain(newProfile => profileModel.create(newProfile))
       .run();
 

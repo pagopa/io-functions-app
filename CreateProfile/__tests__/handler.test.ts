@@ -6,12 +6,14 @@ import { left, right } from "fp-ts/lib/Either";
 
 import * as df from "durable-functions";
 
+import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aExtendedProfile,
   aFiscalCode,
   aNewProfile,
-  aRetrievedProfile
+  aRetrievedProfile,
+  aProfile
 } from "../../__mocks__/mocks";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../../UpsertedProfileOrchestrator/handler";
 import { CreateProfileHandler } from "../handler";
@@ -30,7 +32,7 @@ afterEach(() => {
 describe("CreateProfileHandler", () => {
   it("should return a query error when an error occurs creating the new profile", async () => {
     const profileModelMock = {
-      create: jest.fn(() => left({}))
+      create: jest.fn(() => fromLeft({}))
     };
 
     const createProfileHandler = CreateProfileHandler(profileModelMock as any);
@@ -46,7 +48,7 @@ describe("CreateProfileHandler", () => {
 
   it("should return the created profile", async () => {
     const profileModelMock = {
-      create: jest.fn(() => right(aRetrievedProfile))
+      create: jest.fn(() => taskEither.of(aRetrievedProfile))
     };
 
     const createProfileHandler = CreateProfileHandler(profileModelMock as any);
@@ -65,11 +67,11 @@ describe("CreateProfileHandler", () => {
 
   it("should start the orchestrator with the appropriate input after the profile has been created", async () => {
     const profileModelMock = {
-      create: jest.fn(() => right(aRetrievedProfile))
+      create: jest.fn(() => taskEither.of(aRetrievedProfile))
     };
     const createProfileHandler = CreateProfileHandler(profileModelMock as any);
 
-    await createProfileHandler(contextMock as any, undefined as any, {} as any);
+    await createProfileHandler(contextMock as any, aFiscalCode, {} as any);
 
     const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.encode(
       {
