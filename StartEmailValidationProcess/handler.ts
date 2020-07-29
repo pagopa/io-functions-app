@@ -59,9 +59,9 @@ export function StartEmailValidationProcessHandler(
   return async (context, fiscalCode) => {
     const logPrefix = `StartEmailValidationProcessHandler|FISCAL_CODE=${fiscalCode}`;
 
-    const errorOrMaybeExistingProfile = await profileModel.findOneProfileByFiscalCode(
-      fiscalCode
-    );
+    const errorOrMaybeExistingProfile = await profileModel
+      .findLastVersionByModelId(fiscalCode)
+      .run();
 
     if (isLeft(errorOrMaybeExistingProfile)) {
       return ResponseErrorQuery(

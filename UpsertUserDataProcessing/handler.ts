@@ -31,10 +31,16 @@ import { UserDataProcessingStatusEnum } from "io-functions-commons/dist/generate
 import {
   makeUserDataProcessingId,
   UserDataProcessing,
-  UserDataProcessingModel
+  UserDataProcessingModel,
+  NewUserDataProcessing
 } from "io-functions-commons/dist/src/models/user_data_processing";
 import { RequiredBodyPayloadMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_body_payload";
 import { toUserDataProcessingApi } from "../utils/user_data_processings";
+import { fromEither } from "fp-ts/lib/TaskEither";
+import {
+  CosmosErrors,
+  CosmosDecodingError
+} from "io-functions-commons/dist/src/utils/cosmosdb_model";
 
 /**
  * Type of an UpsertUserDataProcessing handler.
@@ -63,10 +69,9 @@ export function UpsertUserDataProcessingHandler(
       fiscalCode
     );
 
-    const errorOrMaybeRetrievedUserDataProcessing = await userDataProcessingModel.findOneUserDataProcessingById(
-      fiscalCode,
-      id
-    );
+    const errorOrMaybeRetrievedUserDataProcessing = await userDataProcessingModel
+      .findLastVersionByModelId(id)
+      .run();
 
     if (isLeft(errorOrMaybeRetrievedUserDataProcessing)) {
       return ResponseErrorQuery(
@@ -107,13 +112,20 @@ export function UpsertUserDataProcessingHandler(
           status: newStatus,
           userDataProcessingId: id
         };
-        const errorOrUpsertedUserDataProcessing = await userDataProcessingModel.createOrUpdateByNewOne(
-          userDataProcessing
-        );
-        if (isLeft(errorOrUpsertedUserDataProcessing)) {
-          const { body } = errorOrUpsertedUserDataProcessing.value;
+        const errorOrUpsertedUserDataProcessing = await fromEither(
+          NewUserDataProcessing.decode({
+            ...userDataProcessing,
+            kind: "INewUserDataProcessing"
+          })
+        )
+          .mapLeft<CosmosErrors>(CosmosDecodingError)
+          .chain(userDataProcessingModel.upsert)
+          .run();
 
-          context.log.error(`${logPrefix}|ERROR=${body}`);
+        if (isLeft(errorOrUpsertedUserDataProcessing)) {
+          const failure = errorOrUpsertedUserDataProcessing.value;
+
+          context.log.error(`${logPrefix}|ERROR=${failure.kind}`);
 
           return ResponseErrorQuery(
             "Error while creating a new user data processing",

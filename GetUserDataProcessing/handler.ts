@@ -54,24 +54,26 @@ export function GetUserDataProcessingHandler(
   return async (context, fiscalCode, choice) => {
     const logPrefix = `GetUserDataProcessingHandler|FISCAL_CODE=${fiscalCode}`;
     const id = makeUserDataProcessingId(choice, fiscalCode);
-    const maybeResultOrError = await userDataProcessingModel.findOneUserDataProcessingById(
-      fiscalCode,
-      id
-    );
+    const maybeResultOrError = await userDataProcessingModel
+      .findLastVersionByModelId(id)
+      .run();
 
     if (isLeft(maybeResultOrError)) {
-      const { code, body } = maybeResultOrError.value;
+      const failure = maybeResultOrError.value;
 
-      context.log.error(`${logPrefix}|ERROR=${body}`);
-      if (code === 404) {
+      context.log.error(`${logPrefix}|ERROR=${failure.kind}`);
+      if (
+        failure.kind === "COSMOS_ERROR_RESPONSE" &&
+        failure.error.code === 404
+      ) {
         return ResponseErrorNotFound(
           "Not Found while retrieving User Data Processing",
-          `${body}`
+          `${failure.error.message}`
         );
       } else {
         return ResponseErrorQuery(
           "Error while retrieving a user data processing",
-          maybeResultOrError.value
+          failure
         );
       }
     }

@@ -71,8 +71,8 @@ export function GetMessageHandler(
 ): IGetMessageHandler {
   return async (context, fiscalCode, messageId) => {
     const [errorOrMaybeDocument, errorOrMaybeContent] = await Promise.all([
-      messageModel.findMessageForRecipient(fiscalCode, messageId),
-      messageModel.getContentFromBlob(blobService, messageId)
+      messageModel.findMessageForRecipient(fiscalCode, messageId).run(),
+      messageModel.getContentFromBlob(blobService, messageId).run()
     ]);
 
     if (isLeft(errorOrMaybeDocument)) {

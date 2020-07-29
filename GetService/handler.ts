@@ -97,7 +97,7 @@ export function GetServiceHandler(
   serviceModel: ServiceModel
 ): IGetServiceHandler {
   return async serviceId =>
-    (await serviceModel.findOneByServiceId(serviceId)).fold<
+    (await serviceModel.findOneByServiceId(serviceId).run()).fold<
       IGetServiceHandlerRet
     >(
       error => ResponseErrorQuery("Error while retrieving the service", error),

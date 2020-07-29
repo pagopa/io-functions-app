@@ -47,9 +47,9 @@ export function GetProfileHandler(
   profileModel: ProfileModel
 ): IGetProfileHandler {
   return async fiscalCode => {
-    const errorOrMaybeProfile = await profileModel.findOneProfileByFiscalCode(
-      fiscalCode
-    );
+    const errorOrMaybeProfile = await profileModel
+      .findLastVersionByModelId(fiscalCode)
+      .run();
     if (isRight(errorOrMaybeProfile)) {
       const maybeProfile = errorOrMaybeProfile.value;
       if (isSome(maybeProfile)) {

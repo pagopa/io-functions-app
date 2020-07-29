@@ -20,7 +20,11 @@ import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { withoutUndefinedValues } from "italia-ts-commons/lib/types";
 
 import { Profile as ApiProfile } from "io-functions-commons/dist/generated/definitions/Profile";
-import { ProfileModel } from "io-functions-commons/dist/src/models/profile";
+import {
+  ProfileModel,
+  RetrievedProfile,
+  NewProfile
+} from "io-functions-commons/dist/src/models/profile";
 import {
   IResponseErrorQuery,
   ResponseErrorQuery
@@ -39,6 +43,11 @@ import {
   apiProfileToProfile,
   retrievedProfileToExtendedProfile
 } from "../utils/profiles";
+import { fromEither } from "fp-ts/lib/TaskEither";
+import {
+  CosmosErrors,
+  CosmosDecodingError
+} from "io-functions-commons/dist/src/utils/cosmosdb_model";
 
 /**
  * Type of an UpdateProfile handler.
@@ -62,9 +71,9 @@ export function UpdateProfileHandler(
   return async (context, fiscalCode, profilePayload) => {
     const logPrefix = `UpdateProfileHandler|FISCAL_CODE=${fiscalCode}`;
 
-    const errorOrMaybeExistingProfile = await profileModel.findOneProfileByFiscalCode(
-      fiscalCode
-    );
+    const errorOrMaybeExistingProfile = await profileModel
+      .findLastVersionByModelId(fiscalCode)
+      .run();
 
     if (isLeft(errorOrMaybeExistingProfile)) {
       return ResponseErrorQuery(
@@ -107,18 +116,20 @@ export function UpdateProfileHandler(
     // Remove undefined values to avoid overriding already existing profile properties
     const profileWithoutUndefinedValues = withoutUndefinedValues(profile);
 
-    const errorOrMaybeUpdatedProfile = await profileModel.update(
-      existingProfile.id,
-      existingProfile.fiscalCode,
-      p => ({
-        ...p,
-        ...profileWithoutUndefinedValues
+    const errorOrMaybeUpdatedProfile = await fromEither(
+      NewProfile.decode({
+        ...existingProfile,
+        ...profileWithoutUndefinedValues,
+        kind: "INewProfile"
       })
-    );
+    )
+      .mapLeft<CosmosErrors>(CosmosDecodingError)
+      .chain(profileModel.upsert)
+      .run();
 
     if (isLeft(errorOrMaybeUpdatedProfile)) {
       context.log.error(
-        `${logPrefix}|ERROR=${errorOrMaybeUpdatedProfile.value.body}`
+        `${logPrefix}|ERROR=${errorOrMaybeUpdatedProfile.value.kind}`
       );
       return ResponseErrorQuery(
         "Error while updating the existing profile",
@@ -126,17 +137,7 @@ export function UpdateProfileHandler(
       );
     }
 
-    const maybeUpdatedProfile = errorOrMaybeUpdatedProfile.value;
-
-    if (isNone(maybeUpdatedProfile)) {
-      // This should never happen since if the profile doesn't exist this function
-      // will never be called, but let's deal with this anyway, you never know
-      return ResponseErrorInternal(
-        "Error while updating the existing profile, the profile does not exist!"
-      );
-    }
-
-    const updateProfile = maybeUpdatedProfile.value;
+    const updateProfile = errorOrMaybeUpdatedProfile.value;
 
     // Start the Orchestrator
     const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.encode(

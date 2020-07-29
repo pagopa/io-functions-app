@@ -17,7 +17,8 @@ import { ExtendedProfile } from "io-functions-commons/dist/generated/definitions
 import { NewProfile } from "io-functions-commons/dist/generated/definitions/NewProfile";
 import {
   Profile,
-  ProfileModel
+  ProfileModel,
+  NewProfile as INewProfile
 } from "io-functions-commons/dist/src/models/profile";
 import {
   IResponseErrorQuery,
@@ -34,6 +35,11 @@ import {
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { NewProfileMiddleware } from "../utils/middlewares/profile";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
+import { fromEither } from "fp-ts/lib/TaskEither";
+import {
+  CosmosDecodingError,
+  CosmosErrors
+} from "io-functions-commons/dist/src/utils/cosmosdb_model";
 
 /**
  * Type of an CreateProfile handler.
@@ -64,27 +70,31 @@ export function CreateProfileHandler(
       isWebhookEnabled: false
     };
 
-    const errorOrCreatedProfile = await profileModel.create(
-      profile,
-      profile.fiscalCode
-    );
+    const errorOrCreatedProfile = await fromEither<CosmosErrors, INewProfile>(
+      INewProfile.decode({
+        ...profile,
+        kind: "INewProfile"
+      }).mapLeft(errors => CosmosDecodingError(errors))
+    )
+      .chain(newProfile => profileModel.create(newProfile))
+      .run();
 
     if (isLeft(errorOrCreatedProfile)) {
-      const { code, body } = errorOrCreatedProfile.value;
+      const failure = errorOrCreatedProfile.value;
 
-      context.log.error(`${logPrefix}|ERROR=${body}`);
+      context.log.error(`${logPrefix}|ERROR=${failure.kind}`);
 
       // Conflict, resource already exists
-      if (code === 409) {
+      if (
+        failure.kind === "COSMOS_ERROR_RESPONSE" &&
+        failure.error.code === 409
+      ) {
         return ResponseErrorConflict(
           "A profile with the requested fiscal_code already exists"
         );
       }
 
-      return ResponseErrorQuery(
-        "Error while creating a new profile",
-        errorOrCreatedProfile.value
-      );
+      return ResponseErrorQuery("Error while creating a new profile", failure);
     }
 
     const createdProfile = errorOrCreatedProfile.value;
