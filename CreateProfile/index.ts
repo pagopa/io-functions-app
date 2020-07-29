@@ -7,7 +7,6 @@ import {
   ProfileModel
 } from "io-functions-commons/dist/src/models/profile";
 
-import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { secureExpressApp } from "io-functions-commons/dist/src/utils/express";
 import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
 

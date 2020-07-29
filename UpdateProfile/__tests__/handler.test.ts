@@ -10,7 +10,6 @@ import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aEmailChanged,
-  aExtendedProfile,
   aFiscalCode,
   aProfile,
   aRetrievedProfile

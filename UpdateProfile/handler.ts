@@ -12,7 +12,6 @@ import {
   IResponseErrorNotFound,
   IResponseSuccessJson,
   ResponseErrorConflict,
-  ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
@@ -21,9 +20,8 @@ import { withoutUndefinedValues } from "italia-ts-commons/lib/types";
 
 import { Profile as ApiProfile } from "io-functions-commons/dist/generated/definitions/Profile";
 import {
-  ProfileModel,
-  RetrievedProfile,
-  NewProfile
+  NewProfile,
+  ProfileModel
 } from "io-functions-commons/dist/src/models/profile";
 import {
   IResponseErrorQuery,
@@ -37,17 +35,17 @@ import {
   wrapRequestHandler
 } from "io-functions-commons/dist/src/utils/request_middleware";
 
+import { fromEither } from "fp-ts/lib/TaskEither";
+import {
+  CosmosDecodingError,
+  CosmosErrors
+} from "io-functions-commons/dist/src/utils/cosmosdb_model";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { ProfileMiddleware } from "../utils/middlewares/profile";
 import {
   apiProfileToProfile,
   retrievedProfileToExtendedProfile
 } from "../utils/profiles";
-import { fromEither } from "fp-ts/lib/TaskEither";
-import {
-  CosmosErrors,
-  CosmosDecodingError
-} from "io-functions-commons/dist/src/utils/cosmosdb_model";
 
 /**
  * Type of an UpdateProfile handler.

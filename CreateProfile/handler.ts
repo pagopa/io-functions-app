@@ -40,7 +40,6 @@ import {
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { NewProfileMiddleware } from "../utils/middlewares/profile";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
-import { readableReport } from "italia-ts-commons/lib/reporters";
 
 /**
  * Type of an CreateProfile handler.

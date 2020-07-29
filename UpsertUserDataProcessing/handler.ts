@@ -25,22 +25,22 @@ import {
 } from "io-functions-commons/dist/src/utils/request_middleware";
 
 import { none, some } from "fp-ts/lib/Option";
+import { fromEither } from "fp-ts/lib/TaskEither";
 import { UserDataProcessing as UserDataProcessingApi } from "io-functions-commons/dist/generated/definitions/UserDataProcessing";
 import { UserDataProcessingChoiceRequest } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoiceRequest";
 import { UserDataProcessingStatusEnum } from "io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
 import {
   makeUserDataProcessingId,
+  NewUserDataProcessing,
   UserDataProcessing,
-  UserDataProcessingModel,
-  NewUserDataProcessing
+  UserDataProcessingModel
 } from "io-functions-commons/dist/src/models/user_data_processing";
+import {
+  CosmosDecodingError,
+  CosmosErrors
+} from "io-functions-commons/dist/src/utils/cosmosdb_model";
 import { RequiredBodyPayloadMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_body_payload";
 import { toUserDataProcessingApi } from "../utils/user_data_processings";
-import { fromEither } from "fp-ts/lib/TaskEither";
-import {
-  CosmosErrors,
-  CosmosDecodingError
-} from "io-functions-commons/dist/src/utils/cosmosdb_model";
 
 /**
  * Type of an UpsertUserDataProcessing handler.
@@ -48,7 +48,7 @@ import {
 type IUpsertUserDataProcessingHandler = (
   context: Context,
   fiscalCode: FiscalCode,
-  
+
   userDataProcessingChoiceRequest: UserDataProcessingChoiceRequest
 ) => Promise<
   // tslint:disable-next-line: max-union-size

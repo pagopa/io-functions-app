@@ -2,7 +2,6 @@
 
 import { none, some } from "fp-ts/lib/Option";
 
-import { left, right } from "fp-ts/lib/Either";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import {
   NonEmptyString,
@@ -20,12 +19,12 @@ import {
 import { MaxAllowedPaymentAmount } from "io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
 import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
 
+import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { NotificationChannelEnum } from "io-functions-commons/dist/generated/definitions/NotificationChannel";
 import {
   GetServiceHandler,
   serviceAvailableNotificationChannels
 } from "../handler";
-import { taskEither, fromLeft } from "fp-ts/lib/TaskEither";
 
 afterEach(() => {
   jest.resetAllMocks();
@@ -66,8 +65,8 @@ const aRetrievedService: RetrievedService = {
   /*  _self: "123",
   _ts: 123, */
   id: "123" as NonEmptyString,
-  version: 1 as NonNegativeInteger,
-  kind: "IRetrievedService"
+  kind: "IRetrievedService",
+  version: 1 as NonNegativeInteger
 };
 
 const aSeralizedService: ServicePublic = {

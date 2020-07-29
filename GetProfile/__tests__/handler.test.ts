@@ -10,7 +10,6 @@ import {
   aRetrievedProfile
 } from "../../__mocks__/mocks";
 import { GetProfileHandler } from "../handler";
-import { CosmosErrorResponse } from "io-functions-commons/dist/src/utils/cosmosdb_model";
 
 describe("GetProfileHandler", () => {
   it("should find an existing profile", async () => {

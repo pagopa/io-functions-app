@@ -2,8 +2,6 @@
 
 import * as lolex from "lolex";
 
-import { left, right } from "fp-ts/lib/Either";
-
 import * as df from "durable-functions";
 
 import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
@@ -12,8 +10,7 @@ import {
   aExtendedProfile,
   aFiscalCode,
   aNewProfile,
-  aRetrievedProfile,
-  aProfile
+  aRetrievedProfile
 } from "../../__mocks__/mocks";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../../UpsertedProfileOrchestrator/handler";
 import { CreateProfileHandler } from "../handler";
