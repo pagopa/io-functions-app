@@ -15,6 +15,7 @@ import { TimeToLiveSeconds } from "io-functions-commons/dist/generated/definitio
 
 import { response as MockResponse } from "jest-mock-express";
 
+import { taskEither } from "fp-ts/lib/TaskEither";
 import { GetMessagesHandler } from "../handler";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
@@ -33,35 +34,34 @@ const aNewMessageWithoutContent: NewMessageWithoutContent = {
 
 const aRetrievedMessageWithoutContent: RetrievedMessageWithoutContent = {
   ...aNewMessageWithoutContent,
-  _self: "xyz",
-  _ts: 1,
+  /*   _self: "xyz",
+  _ts: 1, */
   kind: "IRetrievedMessageWithoutContent"
 };
 
 describe("GetMessagesHandler", () => {
   it("should respond with the messages for the recipient", async () => {
     const mockIterator = {
-      executeNext: jest
+      next: jest
         .fn()
-        .mockImplementationOnce(() =>
-          Promise.resolve(right(some([aRetrievedMessageWithoutContent])))
-        )
-        .mockImplementationOnce(() => Promise.resolve(right(none)))
+        .mockImplementationOnce(async () => ({
+          value: [right(aRetrievedMessageWithoutContent)]
+        }))
+        .mockImplementationOnce(async () => ({ done: true }))
     };
 
     const mockMessageModel = {
-      findMessages: jest.fn(() => mockIterator)
+      findMessages: jest.fn(() => taskEither.of(mockIterator))
     };
 
     const getMessagesHandler = GetMessagesHandler(mockMessageModel as any);
 
     const result = await getMessagesHandler(aFiscalCode);
-
     expect(result.kind).toBe("IResponseSuccessJsonIterator");
 
     const mockResponse = MockResponse();
     await result.apply(mockResponse);
 
-    expect(mockIterator.executeNext).toHaveBeenCalledTimes(2);
+    expect(mockIterator.next).toHaveBeenCalledTimes(2);
   });
 });
