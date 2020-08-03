@@ -1,7 +1,6 @@
 // tslint:disable:no-any no-duplicate-string no-big-function
 
 import { right } from "fp-ts/lib/Either";
-import { none, some } from "fp-ts/lib/Option";
 
 import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 

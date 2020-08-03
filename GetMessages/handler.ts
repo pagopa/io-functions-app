@@ -1,10 +1,7 @@
 import * as express from "express";
 import * as t from "io-ts";
 
-import {
-  IResponseErrorValidation,
-  ResponseErrorValidation
-} from "italia-ts-commons/lib/responses";
+import { IResponseErrorValidation } from "italia-ts-commons/lib/responses";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 
 import { mapAsyncIterator } from "io-functions-commons/dist/src/utils/async";
@@ -31,17 +28,14 @@ import {
   RetrievedMessage
 } from "io-functions-commons/dist/src/models/message";
 
-import { Either, Right, isRight } from "fp-ts/lib/Either";
+import { isRight } from "fp-ts/lib/Either";
 import { CreatedMessageWithoutContent } from "io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
-import { CosmosErrors } from "io-functions-commons/dist/src/utils/cosmosdb_model";
 
 type RetrievedPendingMessage = t.TypeOf<typeof RetrievedPendingMessage>;
 const RetrievedPendingMessage = t.intersection([
   RetrievedMessage,
   t.interface({ isPending: t.literal(true) })
 ]);
-
-const pick = <T>(k: keyof T) => (e: T) => e[k];
 
 type IGetMessagesHandlerResponse =
   | IResponseSuccessJsonIterator<CreatedMessageWithoutContent>

@@ -1,10 +1,10 @@
 /* tslint:disable: no-any */
 
-import { right } from "fp-ts/lib/Either";
 import { some } from "fp-ts/lib/Option";
 
 import * as df from "durable-functions";
 
+import { taskEither } from "fp-ts/lib/TaskEither";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import { aRetrievedProfile } from "../../__mocks__/mocks";
 import { OrchestratorInput as EmailValidationProcessOrchestratorInput } from "../../EmailValidationProcessOrchestrator/handler";
@@ -18,8 +18,8 @@ beforeEach(() => {
 describe("StartEmailValidationProcessHandler", () => {
   it("should start the orchestrator with the right input and return an acceppted response", async () => {
     const profileModelMock = {
-      findOneProfileByFiscalCode: jest.fn(() =>
-        right(some({ ...aRetrievedProfile, isEmailValidated: false }))
+      findLastVersionByModelId: jest.fn(() =>
+        taskEither.of(some({ ...aRetrievedProfile, isEmailValidated: false }))
       )
     };
 
@@ -51,8 +51,8 @@ describe("StartEmailValidationProcessHandler", () => {
 
   it("should not start the orchestrator if the email is already validated", async () => {
     const profileModelMock = {
-      findOneProfileByFiscalCode: jest.fn(() =>
-        right(some({ ...aRetrievedProfile, isEmailValidated: true }))
+      findLastVersionByModelId: jest.fn(() =>
+        taskEither.of(some({ ...aRetrievedProfile, isEmailValidated: true }))
       )
     };
 
