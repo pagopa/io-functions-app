@@ -15,6 +15,7 @@ import { TimeToLiveSeconds } from "io-functions-commons/dist/generated/definitio
 import { response as MockResponse } from "jest-mock-express";
 
 import { taskEither } from "fp-ts/lib/TaskEither";
+import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetMessagesHandler } from "../handler";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
@@ -33,8 +34,7 @@ const aNewMessageWithoutContent: NewMessageWithoutContent = {
 
 const aRetrievedMessageWithoutContent: RetrievedMessageWithoutContent = {
   ...aNewMessageWithoutContent,
-  /*   _self: "xyz",
-  _ts: 1, */
+  ...aCosmosResourceMetadata,
   kind: "IRetrievedMessageWithoutContent"
 };
 

@@ -16,6 +16,7 @@ import { TimeToLiveSeconds } from "io-functions-commons/dist/generated/definitio
 
 import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { context as contextMock } from "../../__mocks__/durable-functions";
+import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetMessageHandler } from "../handler";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
@@ -35,8 +36,7 @@ const aNewMessageWithoutContent: NewMessageWithoutContent = {
 
 const aRetrievedMessageWithoutContent: RetrievedMessageWithoutContent = {
   ...aNewMessageWithoutContent,
-  /*  _self: "xyz",
-  _ts: 1, */
+  ...aCosmosResourceMetadata,
   kind: "IRetrievedMessageWithoutContent"
 };
 

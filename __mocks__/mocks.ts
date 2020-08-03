@@ -23,6 +23,7 @@ import {
   RetrievedUserDataProcessing,
   UserDataProcessingId
 } from "io-functions-commons/dist/src/models/user_data_processing";
+import { CosmosResource } from "io-functions-commons/dist/src/utils/cosmosdb_model";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 import { toUserDataProcessingApi } from "../utils/user_data_processings";
 
@@ -30,6 +31,14 @@ export const aEmail = "email@example.com" as EmailString;
 export const aEmailChanged = "email.changed@example.com" as EmailString;
 
 export const aFiscalCode = "SPNDNL80A13Y555X" as FiscalCode;
+
+// CosmosResourceMetadata
+export const aCosmosResourceMetadata: Omit<CosmosResource, "id"> = {
+  _etag: "_etag",
+  _rid: "_rid",
+  _self: "_self",
+  _ts: 1
+};
 
 export const aNewProfile: NewProfile = {
   email: aEmail,
@@ -45,8 +54,7 @@ export const aProfile: Profile = {
 };
 
 export const aRetrievedProfile: RetrievedProfile = {
-  /*  _self: "123",
-  _ts: 123, */
+  ...aCosmosResourceMetadata,
   fiscalCode: aFiscalCode,
   id: "123" as NonEmptyString,
   isEmailEnabled: true,
@@ -59,8 +67,7 @@ export const aRetrievedProfile: RetrievedProfile = {
 };
 
 export const aRetrievedProfileWithEmail: RetrievedProfile = {
-  /*  _self: "123",
-  _ts: 123, */
+  ...aCosmosResourceMetadata,
   email: "email@example.com" as EmailString,
   fiscalCode: aFiscalCode,
   id: "123" as NonEmptyString,
@@ -107,10 +114,7 @@ export const aAbortedUserDataProcessingStatus: UserDataProcessingStatus =
   UserDataProcessingStatusEnum.ABORTED;
 
 export const aRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
-  /*  _etag: "xyz",
-  _rid: "xyz",
-  _self: "aaa",
-  _ts: 111, */
+  ...aCosmosResourceMetadata,
   choice: aUserDataProcessingChoice,
   createdAt: aNewDate,
   fiscalCode: aFiscalCode,

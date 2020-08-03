@@ -23,6 +23,7 @@ import {
 
 import { MaxAllowedPaymentAmount } from "io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
 
+import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetVisibleServices, GetVisibleServicesHandler } from "../handler";
 
 afterEach(() => {
@@ -52,14 +53,14 @@ const aNewService: NewService = {
 
 const aRetrievedService: RetrievedService = {
   ...aNewService,
-  /*   _self: "123",
-  _ts: 123, */
+  ...aCosmosResourceMetadata,
   id: "123" as NonEmptyString,
   kind: "IRetrievedService",
   version: 1 as NonNegativeInteger
 };
 
 const aVisibleService: VisibleService = {
+  ...aCosmosResourceMetadata,
   departmentName: aRetrievedService.departmentName,
   id: aRetrievedService.id,
   organizationFiscalCode: aRetrievedService.organizationFiscalCode,

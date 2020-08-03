@@ -21,6 +21,7 @@ import { ServicePublic } from "io-functions-commons/dist/generated/definitions/S
 
 import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { NotificationChannelEnum } from "io-functions-commons/dist/generated/definitions/NotificationChannel";
+import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import {
   GetServiceHandler,
   serviceAvailableNotificationChannels
@@ -62,8 +63,7 @@ const aNewService: NewService = {
 
 const aRetrievedService: RetrievedService = {
   ...aNewService,
-  /*  _self: "123",
-  _ts: 123, */
+  ...aCosmosResourceMetadata,
   id: "123" as NonEmptyString,
   kind: "IRetrievedService",
   version: 1 as NonNegativeInteger
