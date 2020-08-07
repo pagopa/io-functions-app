@@ -71,7 +71,9 @@ export function GetMessageHandler(
 ): IGetMessageHandler {
   return async (context, fiscalCode, messageId) => {
     const [errorOrMaybeDocument, errorOrMaybeContent] = await Promise.all([
-      messageModel.findMessageForRecipient(fiscalCode, messageId).run(),
+      messageModel
+        .findMessageForRecipient(fiscalCode, messageId as NonEmptyString) // FIXME: decode instead of cast
+        .run(),
       messageModel.getContentFromBlob(blobService, messageId).run()
     ]);
 

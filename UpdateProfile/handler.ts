@@ -70,7 +70,7 @@ export function UpdateProfileHandler(
     const logPrefix = `UpdateProfileHandler|FISCAL_CODE=${fiscalCode}`;
 
     const errorOrMaybeExistingProfile = await profileModel
-      .findLastVersionByModelId(fiscalCode)
+      .findLastVersionByModelId([fiscalCode])
       .run();
 
     if (isLeft(errorOrMaybeExistingProfile)) {

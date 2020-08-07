@@ -23,9 +23,9 @@ describe("GetProfileHandler", () => {
 
     const response = await getProfileHandler(aFiscalCode);
 
-    expect(profileModelMock.findLastVersionByModelId).toHaveBeenCalledWith(
+    expect(profileModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
       aFiscalCode
-    );
+    ]);
     expect(response.kind).toBe("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
       expect(response.value).toEqual(aExtendedProfile);
@@ -42,9 +42,9 @@ describe("GetProfileHandler", () => {
     const getProfileHandler = GetProfileHandler(profileModelMock as any);
 
     const response = await getProfileHandler(aFiscalCode);
-    expect(profileModelMock.findLastVersionByModelId).toHaveBeenCalledWith(
+    expect(profileModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
       aFiscalCode
-    );
+    ]);
     expect(response.kind).toBe("IResponseErrorNotFound");
   });
 

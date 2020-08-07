@@ -41,8 +41,8 @@ describe("UpsertUserDataProcessingHandler", () => {
 
     const result = await upsertUserDataProcessingHandler(
       contextMock as any,
-      undefined as any,
-      {} as any
+      aFiscalCode,
+      aUserDataProcessingChoiceRequest
     );
 
     expect(result.kind).toBe("IResponseErrorQuery");

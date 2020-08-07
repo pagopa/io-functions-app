@@ -55,9 +55,8 @@ export function GetUserDataProcessingHandler(
     const logPrefix = `GetUserDataProcessingHandler|FISCAL_CODE=${fiscalCode}`;
     const id = makeUserDataProcessingId(choice, fiscalCode);
     const maybeResultOrError = await userDataProcessingModel
-      .findLastVersionByModelId(id)
+      .findLastVersionByModelId([id, fiscalCode])
       .run();
-
     if (isLeft(maybeResultOrError)) {
       const failure = maybeResultOrError.value;
 

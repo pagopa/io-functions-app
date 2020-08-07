@@ -45,7 +45,7 @@ export function GetProfileHandler(
 ): IGetProfileHandler {
   return async fiscalCode =>
     profileModel
-      .findLastVersionByModelId(fiscalCode)
+      .findLastVersionByModelId([fiscalCode])
       .fold(
         failure =>
           ResponseErrorQuery("Error while retrieving the profile", failure),

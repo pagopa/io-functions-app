@@ -71,7 +71,7 @@ export function UpsertUserDataProcessingHandler(
     );
 
     const errorOrMaybeRetrievedUserDataProcessing = await userDataProcessingModel
-      .findLastVersionByModelId(id)
+      .findLastVersionByModelId([id, fiscalCode])
       .run();
 
     if (isLeft(errorOrMaybeRetrievedUserDataProcessing)) {

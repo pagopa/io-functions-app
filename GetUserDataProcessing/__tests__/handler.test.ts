@@ -32,7 +32,7 @@ describe("GetUserDataProcessingHandler", () => {
 
     expect(
       userDataProcessingModelMock.findLastVersionByModelId
-    ).toHaveBeenCalledWith(aUserDataProcessingId);
+    ).toHaveBeenCalledWith([aUserDataProcessingId, aFiscalCode]);
     expect(response.kind).toBe("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
       expect(response.value).toEqual(aUserDataProcessingApi);
@@ -57,7 +57,7 @@ describe("GetUserDataProcessingHandler", () => {
     );
     expect(
       userDataProcessingModelMock.findLastVersionByModelId
-    ).toHaveBeenCalledWith(aUserDataProcessingId);
+    ).toHaveBeenCalledWith([aUserDataProcessingId, aFiscalCode]);
     expect(response.kind).toBe("IResponseErrorNotFound");
   });
 
