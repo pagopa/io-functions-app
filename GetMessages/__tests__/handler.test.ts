@@ -19,13 +19,15 @@ import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetMessagesHandler } from "../handler";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
+const aMessageId = "A_MESSAGE_ID" as NonEmptyString;
+const aPendingMessageId = "A_PENDING_MESSAGE_ID" as NonEmptyString;
 
 const aNewMessageWithoutContent: NewMessageWithoutContent = {
   createdAt: new Date(),
   fiscalCode: aFiscalCode,
-  id: "A_MESSAGE_ID" as NonEmptyString,
+  id: aMessageId,
   indexedId: "A_MESSAGE_ID" as NonEmptyString,
-  isPending: true,
+  isPending: false,
   kind: "INewMessageWithoutContent",
   senderServiceId: "test" as ServiceId,
   senderUserId: "u123" as NonEmptyString,
@@ -35,6 +37,14 @@ const aNewMessageWithoutContent: NewMessageWithoutContent = {
 const aRetrievedMessageWithoutContent: RetrievedMessageWithoutContent = {
   ...aNewMessageWithoutContent,
   ...aCosmosResourceMetadata,
+  kind: "IRetrievedMessageWithoutContent"
+};
+
+const aRetrievedPendingMessageWithoutContent: RetrievedMessageWithoutContent = {
+  ...aNewMessageWithoutContent,
+  ...aCosmosResourceMetadata,
+  id: aPendingMessageId,
+  isPending: true,
   kind: "IRetrievedMessageWithoutContent"
 };
 
@@ -61,6 +71,38 @@ describe("GetMessagesHandler", () => {
     const mockResponse = MockResponse();
     await result.apply(mockResponse);
 
+    expect(mockIterator.next).toHaveBeenCalledTimes(2);
+  });
+
+  it("should respondonly with non-pending messages", async () => {
+    const mockIterator = {
+      next: jest
+        .fn()
+        .mockImplementationOnce(async () => ({
+          value: [
+            right(aRetrievedMessageWithoutContent),
+            right(aRetrievedPendingMessageWithoutContent)
+          ]
+        }))
+        .mockImplementationOnce(async () => ({ done: true }))
+    };
+
+    const mockMessageModel = {
+      findMessages: jest.fn(() => taskEither.of(mockIterator))
+    };
+
+    const getMessagesHandler = GetMessagesHandler(mockMessageModel as any);
+
+    const result = await getMessagesHandler(aFiscalCode);
+    expect(result.kind).toBe("IResponseSuccessJsonIterator");
+
+    const mockResponse = MockResponse();
+    await result.apply(mockResponse);
+
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      items: [expect.objectContaining({ id: aMessageId })],
+      page_size: 1
+    });
     expect(mockIterator.next).toHaveBeenCalledTimes(2);
   });
 });

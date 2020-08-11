@@ -31,10 +31,10 @@ import {
 import { isRight } from "fp-ts/lib/Either";
 import { CreatedMessageWithoutContent } from "io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
 
-type RetrievedPendingMessage = t.TypeOf<typeof RetrievedPendingMessage>;
-const RetrievedPendingMessage = t.intersection([
+type RetrievedNotPendingMessage = t.TypeOf<typeof RetrievedNotPendingMessage>;
+const RetrievedNotPendingMessage = t.intersection([
   RetrievedMessage,
-  t.interface({ isPending: t.literal(true) })
+  t.interface({ isPending: t.literal(false) })
 ]);
 
 type IGetMessagesHandlerResponse =
@@ -66,7 +66,7 @@ export function GetMessagesHandler(
       .map(flattenAsyncIterator)
       .map(_ => filterAsyncIterator(_, isRight))
       .map(_ => mapAsyncIterator(_, e => e.value))
-      .map(_ => filterAsyncIterator(_, RetrievedPendingMessage.is))
+      .map(_ => filterAsyncIterator(_, RetrievedNotPendingMessage.is))
       .map(_ => mapAsyncIterator(_, retrievedMessageToPublic))
       .fold<IGetMessagesHandlerResponse>(
         failure => ResponseErrorQuery(failure.kind, failure),
