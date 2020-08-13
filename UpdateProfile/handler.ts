@@ -19,10 +19,7 @@ import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { withoutUndefinedValues } from "italia-ts-commons/lib/types";
 
 import { Profile as ApiProfile } from "io-functions-commons/dist/generated/definitions/Profile";
-import {
-  NewProfile,
-  ProfileModel
-} from "io-functions-commons/dist/src/models/profile";
+import { ProfileModel } from "io-functions-commons/dist/src/models/profile";
 import {
   IResponseErrorQuery,
   ResponseErrorQuery
@@ -35,11 +32,6 @@ import {
   wrapRequestHandler
 } from "io-functions-commons/dist/src/utils/request_middleware";
 
-import { fromEither } from "fp-ts/lib/TaskEither";
-import {
-  CosmosDecodingError,
-  CosmosErrors
-} from "io-functions-commons/dist/src/utils/cosmosdb_model";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { ProfileMiddleware } from "../utils/middlewares/profile";
 import {
@@ -111,18 +103,12 @@ export function UpdateProfileHandler(
       emailChanged ? false : existingProfile.isEmailValidated
     );
 
-    // Remove undefined values to avoid overriding already existing profile properties
-    const profileWithoutUndefinedValues = withoutUndefinedValues(profile);
-
-    const errorOrMaybeUpdatedProfile = await fromEither(
-      NewProfile.decode({
+    const errorOrMaybeUpdatedProfile = await profileModel
+      .update({
         ...existingProfile,
-        ...profileWithoutUndefinedValues,
-        kind: "INewProfile"
+        // Remove undefined values to avoid overriding already existing profile properties
+        ...withoutUndefinedValues(profile)
       })
-    )
-      .mapLeft<CosmosErrors>(CosmosDecodingError)
-      .chain(profileModel.upsert)
       .run();
 
     if (isLeft(errorOrMaybeUpdatedProfile)) {

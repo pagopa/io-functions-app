@@ -88,7 +88,7 @@ describe("UpdateProfileHandler", () => {
         // Return a profile with a validated email
         taskEither.of(some({ ...aRetrievedProfile, isEmailValidated: true }))
       ),
-      upsert: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
     };
 
     const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
@@ -127,7 +127,7 @@ describe("UpdateProfileHandler", () => {
       findLastVersionByModelId: jest.fn(() =>
         taskEither.of(some(aRetrievedProfile))
       ),
-      upsert: jest.fn(() => taskEither.of(updatedProfile))
+      update: jest.fn(() => taskEither.of(updatedProfile))
     };
 
     const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
