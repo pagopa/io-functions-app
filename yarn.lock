@@ -2497,10 +2497,10 @@ duplexer@~0.1.1:
   resolved "https://registry.yarnpkg.com/duplexer/-/duplexer-0.1.1.tgz#ace6ff808c1ce66b57d1ebf97977acb02334cfc1"
   integrity sha1-rOb/gIwc5mtX0ev5eXessCM0z8E=
 
-durable-functions@^1.4.1:
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/durable-functions/-/durable-functions-1.4.1.tgz#f316a9b49971fbe39e3dc078a1c78b7ed93e5521"
-  integrity sha512-tvoxsd+endsprdhCDpdMr1+577iRZ9yIJRSrsAeICK0xuZoNkpIPIP8K5VjIH+qWMohwfRxWDFsZfNB1Xnwb4g==
+durable-functions@^1.4.3:
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/durable-functions/-/durable-functions-1.4.3.tgz#e8258f62fd9ee80829fc7e6fa31425a26065612b"
+  integrity sha512-MJMnqpHmAuZt+IK6uTij7DE+yzMa+++YPhdb1FOIwm+AeBI/R4CYZnnsmOo6DnrmOIfnF0XBewL0nEhx23se8g==
   dependencies:
     "@azure/functions" "^1.0.2-beta2"
     "@types/lodash" "^4.14.119"
