@@ -346,7 +346,7 @@ produces:
 securityDefinitions:
   SubscriptionKey:
     type: apiKey
-    name: Ocp-Apim-Subscription-Key
+    name: X-Functions-Key
     in: header
     description: The API key obtained through the developer portal.
 parameters:
