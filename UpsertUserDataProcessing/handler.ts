@@ -120,7 +120,7 @@ export function UpsertUserDataProcessingHandler(
           })
         )
           .mapLeft<CosmosErrors>(CosmosDecodingError)
-          .chain(userDataProcessingModel.upsert)
+          .chain(_ => userDataProcessingModel.upsert(_))
           .run();
 
         if (isLeft(errorOrUpsertedUserDataProcessing)) {
