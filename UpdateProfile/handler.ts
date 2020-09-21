@@ -12,7 +12,6 @@ import {
   IResponseErrorNotFound,
   IResponseSuccessJson,
   ResponseErrorConflict,
-  ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
@@ -62,9 +61,9 @@ export function UpdateProfileHandler(
   return async (context, fiscalCode, profilePayload) => {
     const logPrefix = `UpdateProfileHandler|FISCAL_CODE=${fiscalCode}`;
 
-    const errorOrMaybeExistingProfile = await profileModel.findOneProfileByFiscalCode(
-      fiscalCode
-    );
+    const errorOrMaybeExistingProfile = await profileModel
+      .findLastVersionByModelId([fiscalCode])
+      .run();
 
     if (isLeft(errorOrMaybeExistingProfile)) {
       return ResponseErrorQuery(
@@ -104,21 +103,17 @@ export function UpdateProfileHandler(
       emailChanged ? false : existingProfile.isEmailValidated
     );
 
-    // Remove undefined values to avoid overriding already existing profile properties
-    const profileWithoutUndefinedValues = withoutUndefinedValues(profile);
-
-    const errorOrMaybeUpdatedProfile = await profileModel.update(
-      existingProfile.id,
-      existingProfile.fiscalCode,
-      p => ({
-        ...p,
-        ...profileWithoutUndefinedValues
+    const errorOrMaybeUpdatedProfile = await profileModel
+      .update({
+        ...existingProfile,
+        // Remove undefined values to avoid overriding already existing profile properties
+        ...withoutUndefinedValues(profile)
       })
-    );
+      .run();
 
     if (isLeft(errorOrMaybeUpdatedProfile)) {
       context.log.error(
-        `${logPrefix}|ERROR=${errorOrMaybeUpdatedProfile.value.body}`
+        `${logPrefix}|ERROR=${errorOrMaybeUpdatedProfile.value.kind}`
       );
       return ResponseErrorQuery(
         "Error while updating the existing profile",
@@ -126,17 +121,7 @@ export function UpdateProfileHandler(
       );
     }
 
-    const maybeUpdatedProfile = errorOrMaybeUpdatedProfile.value;
-
-    if (isNone(maybeUpdatedProfile)) {
-      // This should never happen since if the profile doesn't exist this function
-      // will never be called, but let's deal with this anyway, you never know
-      return ResponseErrorInternal(
-        "Error while updating the existing profile, the profile does not exist!"
-      );
-    }
-
-    const updateProfile = maybeUpdatedProfile.value;
+    const updateProfile = errorOrMaybeUpdatedProfile.value;
 
     // Start the Orchestrator
     const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.encode(

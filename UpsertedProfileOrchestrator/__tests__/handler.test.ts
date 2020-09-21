@@ -1,6 +1,7 @@
 /* tslint:disable:no-any */
 
 import * as df from "durable-functions";
+import { readableReport } from "italia-ts-commons/lib/reporters";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aEmailChanged,
@@ -22,12 +23,16 @@ someRetryOptions.backoffCoefficient = 1.5;
 
 describe("UpsertedProfileOrchestrator", () => {
   it("should not start the EmailValidationProcessOrchestrator if the email is not changed", () => {
-    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.encode(
+    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.decode(
       {
         newProfile: { ...aRetrievedProfile, isWebhookEnabled: true },
         oldProfile: aRetrievedProfile,
         updatedAt: new Date()
       }
+    ).getOrElseL(_ =>
+      fail(
+        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(_)}`
+      )
     );
 
     const contextMockWithDf = {
@@ -46,7 +51,7 @@ describe("UpsertedProfileOrchestrator", () => {
   });
 
   it("should start the activities with the right inputs", async () => {
-    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.encode(
+    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.decode(
       {
         newProfile: {
           ...aRetrievedProfile,
@@ -56,12 +61,22 @@ describe("UpsertedProfileOrchestrator", () => {
         oldProfile: aRetrievedProfile,
         updatedAt: new Date()
       }
+    ).getOrElseL(_ =>
+      fail(
+        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(_)}`
+      )
     );
 
-    const emailValidationProcessOrchestratorResult = EmailValidationProcessOrchestratorResult.encode(
+    const emailValidationProcessOrchestratorResult = EmailValidationProcessOrchestratorResult.decode(
       {
         kind: "SUCCESS"
       }
+    ).getOrElseL(_ =>
+      fail(
+        `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
+          _
+        )}`
+      )
     );
 
     const sendWelcomeMessagesActivityResult = "SUCCESS";

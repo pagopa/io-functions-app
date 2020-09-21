@@ -1,76 +1,51 @@
 /**
  * Insert fake data into CosmosDB database emulator.
  */
+import { ContainerResponse, CosmosClient, Database } from "@azure/cosmos";
+import { toError } from "fp-ts/lib/Either";
 import {
-  CollectionMeta,
-  DocumentClient as DocumentDBClient,
-  UriFactory
-} from "documentdb";
-import { Either, left, right } from "fp-ts/lib/Either";
-import {
+  NewProfile,
   Profile,
   PROFILE_COLLECTION_NAME,
   ProfileModel
 } from "io-functions-commons/dist/src/models/profile";
 import {
+  NewService,
   Service,
   SERVICE_COLLECTION_NAME,
   ServiceModel
 } from "io-functions-commons/dist/src/models/service";
-import * as documentDbUtils from "io-functions-commons/dist/src/utils/documentdb";
+
+import { sequenceT } from "fp-ts/lib/Apply";
+import { TaskEither, taskEitherSeq, tryCatch } from "fp-ts/lib/TaskEither";
 import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 
 const cosmosDbKey = getRequiredStringEnv("CUSTOMCONNSTR_COSMOSDB_KEY");
 const cosmosDbUri = getRequiredStringEnv("CUSTOMCONNSTR_COSMOSDB_URI");
 const cosmosDbName = getRequiredStringEnv("COSMOSDB_NAME");
 
-const documentDbDatabaseUrl = documentDbUtils.getDatabaseUri(cosmosDbName);
-
-const documentClient = new DocumentDBClient(cosmosDbUri, {
-  masterKey: cosmosDbKey
+export const cosmosdbClient = new CosmosClient({
+  endpoint: cosmosDbUri,
+  key: cosmosDbKey
 });
 
-function createDatabase(databaseName: string): Promise<Either<Error, void>> {
-  return new Promise(resolve => {
-    documentClient.createDatabase({ id: databaseName }, (err, _) => {
-      if (err) {
-        return resolve(left<Error, void>(new Error(err.body)));
-      }
-      resolve(right<Error, void>(void 0));
-    });
-  });
+function createDatabase(databaseName: string): TaskEither<Error, Database> {
+  return tryCatch(
+    () => cosmosdbClient.databases.create({ id: databaseName }),
+    toError
+  ).map(_ => _.database);
 }
 
 function createCollection(
+  db: Database,
   collectionName: string,
   partitionKey: string
-): Promise<Either<Error, CollectionMeta>> {
-  return new Promise(resolve => {
-    const dbUri = UriFactory.createDatabaseUri(cosmosDbName);
-    documentClient.createCollection(
-      dbUri,
-      {
-        id: collectionName,
-        partitionKey: {
-          kind: "Hash",
-          paths: [`/${partitionKey}`]
-        }
-      },
-      (err, ret) => {
-        if (err) {
-          return resolve(left<Error, CollectionMeta>(new Error(err.body)));
-        }
-        resolve(right<Error, CollectionMeta>(ret));
-      }
-    );
-  });
+): TaskEither<Error, ContainerResponse> {
+  return tryCatch(
+    () => db.containers.createIfNotExists({ id: collectionName, partitionKey }),
+    toError
+  );
 }
-
-const servicesCollectionUrl = documentDbUtils.getCollectionUri(
-  documentDbDatabaseUrl,
-  SERVICE_COLLECTION_NAME
-);
-const serviceModel = new ServiceModel(documentClient, servicesCollectionUrl);
 
 const aService: Service = Service.decode({
   authorizedCIDRs: [],
@@ -87,11 +62,12 @@ const aService: Service = Service.decode({
   throw new Error("Cannot decode service payload.");
 });
 
-const profilesCollectionUrl = documentDbUtils.getCollectionUri(
-  documentDbDatabaseUrl,
-  PROFILE_COLLECTION_NAME
-);
-const profileModel = new ProfileModel(documentClient, profilesCollectionUrl);
+const aNewService = NewService.decode({
+  ...aService,
+  kind: "INewService"
+}).getOrElseL(() => {
+  throw new Error("Cannot decode new service.");
+});
 
 const aProfile: Profile = Profile.decode({
   acceptedTosVersion: 1,
@@ -105,18 +81,38 @@ const aProfile: Profile = Profile.decode({
   throw new Error("Cannot decode profile payload.");
 });
 
+const aNewProfile = NewProfile.decode({
+  ...aProfile,
+  kind: "INewProfile"
+}).getOrElseL(() => {
+  throw new Error("Cannot decode new profile.");
+});
+
 createDatabase(cosmosDbName)
-  .then(() => createCollection("message-status", "messageId"))
-  .then(() => createCollection("messages", "fiscalCode"))
-  .then(() => createCollection("notification-status", "notificationId"))
-  .then(() => createCollection("notifications", "messageId"))
-  .then(() => createCollection("profiles", "fiscalCode"))
-  .then(() => createCollection("services", "serviceId"))
-  .then(() => serviceModel.create(aService, aService.serviceId))
-  // tslint:disable-next-line: no-console
-  .then(p => console.log(p.value))
-  .then(() => profileModel.create(aProfile, aProfile.fiscalCode))
-  // tslint:disable-next-line: no-console
-  .then(s => console.log(s.value))
-  // tslint:disable-next-line: no-console
-  .catch(console.error);
+  .chain(db =>
+    sequenceT(taskEitherSeq)(
+      createCollection(db, "message-status", "messageId"),
+      createCollection(db, "messages", "fiscalCode"),
+      createCollection(db, "notification-status", "notificationId"),
+      createCollection(db, "notifications", "messageId"),
+      createCollection(db, "profiles", "fiscalCode"),
+      createCollection(db, "services", "serviceId")
+    ).map(_ => db)
+  )
+  .chain(db =>
+    sequenceT(taskEitherSeq)(
+      new ServiceModel(db.container(SERVICE_COLLECTION_NAME)).create(
+        aNewService
+      ),
+      new ProfileModel(db.container(PROFILE_COLLECTION_NAME)).create(
+        aNewProfile
+      )
+    ).mapLeft(_ => new Error(`CosmosError: ${_.kind}`))
+  )
+  .run()
+  .then(
+    // tslint:disable-next-line: no-console
+    _ => console.log(`Successfully created fixtures`),
+    // tslint:disable-next-line: no-console
+    _ => console.error(`Failed generate fixtures ${_.message}`)
+  );

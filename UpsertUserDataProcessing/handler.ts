@@ -25,14 +25,20 @@ import {
 } from "io-functions-commons/dist/src/utils/request_middleware";
 
 import { none, some } from "fp-ts/lib/Option";
+import { fromEither } from "fp-ts/lib/TaskEither";
 import { UserDataProcessing as UserDataProcessingApi } from "io-functions-commons/dist/generated/definitions/UserDataProcessing";
 import { UserDataProcessingChoiceRequest } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoiceRequest";
 import { UserDataProcessingStatusEnum } from "io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
 import {
   makeUserDataProcessingId,
+  NewUserDataProcessing,
   UserDataProcessing,
   UserDataProcessingModel
 } from "io-functions-commons/dist/src/models/user_data_processing";
+import {
+  CosmosDecodingError,
+  CosmosErrors
+} from "io-functions-commons/dist/src/utils/cosmosdb_model";
 import { RequiredBodyPayloadMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_body_payload";
 import { toUserDataProcessingApi } from "../utils/user_data_processings";
 
@@ -42,6 +48,7 @@ import { toUserDataProcessingApi } from "../utils/user_data_processings";
 type IUpsertUserDataProcessingHandler = (
   context: Context,
   fiscalCode: FiscalCode,
+
   userDataProcessingChoiceRequest: UserDataProcessingChoiceRequest
 ) => Promise<
   // tslint:disable-next-line: max-union-size
@@ -63,10 +70,9 @@ export function UpsertUserDataProcessingHandler(
       fiscalCode
     );
 
-    const errorOrMaybeRetrievedUserDataProcessing = await userDataProcessingModel.findOneUserDataProcessingById(
-      fiscalCode,
-      id
-    );
+    const errorOrMaybeRetrievedUserDataProcessing = await userDataProcessingModel
+      .findLastVersionByModelId([id, fiscalCode])
+      .run();
 
     if (isLeft(errorOrMaybeRetrievedUserDataProcessing)) {
       return ResponseErrorQuery(
@@ -107,13 +113,20 @@ export function UpsertUserDataProcessingHandler(
           status: newStatus,
           userDataProcessingId: id
         };
-        const errorOrUpsertedUserDataProcessing = await userDataProcessingModel.createOrUpdateByNewOne(
-          userDataProcessing
-        );
-        if (isLeft(errorOrUpsertedUserDataProcessing)) {
-          const { body } = errorOrUpsertedUserDataProcessing.value;
+        const errorOrUpsertedUserDataProcessing = await fromEither(
+          NewUserDataProcessing.decode({
+            ...userDataProcessing,
+            kind: "INewUserDataProcessing"
+          })
+        )
+          .mapLeft<CosmosErrors>(CosmosDecodingError)
+          .chain(_ => userDataProcessingModel.upsert(_))
+          .run();
 
-          context.log.error(`${logPrefix}|ERROR=${body}`);
+        if (isLeft(errorOrUpsertedUserDataProcessing)) {
+          const failure = errorOrUpsertedUserDataProcessing.value;
+
+          context.log.error(`${logPrefix}|ERROR=${failure.kind}`);
 
           return ResponseErrorQuery(
             "Error while creating a new user data processing",

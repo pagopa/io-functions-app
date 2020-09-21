@@ -2,15 +2,14 @@
 
 import * as lolex from "lolex";
 
-import { left, right } from "fp-ts/lib/Either";
 import { none, some } from "fp-ts/lib/Option";
 
 import * as df from "durable-functions";
 
+import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aEmailChanged,
-  aExtendedProfile,
   aFiscalCode,
   aProfile,
   aRetrievedProfile
@@ -33,7 +32,7 @@ afterEach(() => {
 describe("UpdateProfileHandler", () => {
   it("should return a query error when an error occurs retrieving the existing profile", async () => {
     const profileModelMock = {
-      findOneProfileByFiscalCode: jest.fn(() => left({}))
+      findLastVersionByModelId: jest.fn(() => fromLeft({}))
     };
 
     const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
@@ -49,7 +48,7 @@ describe("UpdateProfileHandler", () => {
 
   it("should return a not found error if can't find an existing profile", async () => {
     const profileModelMock = {
-      findOneProfileByFiscalCode: jest.fn(() => right(none))
+      findLastVersionByModelId: jest.fn(() => taskEither.of(none))
     };
 
     const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
@@ -65,7 +64,9 @@ describe("UpdateProfileHandler", () => {
 
   it("should return a conflict error if the verion in the payload is not the latest", async () => {
     const profileModelMock = {
-      findOneProfileByFiscalCode: jest.fn(() => right(some(aRetrievedProfile)))
+      findLastVersionByModelId: jest.fn(() =>
+        taskEither.of(some(aRetrievedProfile))
+      )
     };
 
     const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
@@ -83,14 +84,11 @@ describe("UpdateProfileHandler", () => {
 
   it("should set isEmailValidated to false if the email is changed", async () => {
     const profileModelMock = {
-      findOneProfileByFiscalCode: jest.fn(() =>
+      findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        right(some({ ...aRetrievedProfile, isEmailValidated: true }))
+        taskEither.of(some({ ...aRetrievedProfile, isEmailValidated: true }))
       ),
-      update: jest.fn((_, __, f) => {
-        const updatedProfile = f(aRetrievedProfile);
-        return Promise.resolve(right(some(updatedProfile)));
-      })
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
     };
 
     const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
@@ -102,22 +100,34 @@ describe("UpdateProfileHandler", () => {
 
     expect(result.kind).toBe("IResponseSuccessJson");
     if (result.kind === "IResponseSuccessJson") {
-      expect(result.value).toEqual({
-        ...aExtendedProfile,
-        email: aEmailChanged,
-        // The email is no more validated
-        is_email_validated: false
-      });
+      expect(result.value).toEqual(
+        expect.objectContaining({
+          email: aEmailChanged,
+          is_email_validated: false
+        })
+      );
     }
   });
 
   it("should start the orchestrator with the appropriate input after the profile has been created", async () => {
+    const updatedProfile = {
+      ...aRetrievedProfile,
+      email: aEmailChanged,
+      isEmailValidated: false
+    };
+    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.encode(
+      {
+        newProfile: updatedProfile,
+        oldProfile: aRetrievedProfile,
+        updatedAt: new Date()
+      }
+    );
+
     const profileModelMock = {
-      findOneProfileByFiscalCode: jest.fn(() => right(some(aRetrievedProfile))),
-      update: jest.fn((_, __, f) => {
-        const updatedProfile = f(aRetrievedProfile);
-        return Promise.resolve(right(some(updatedProfile)));
-      })
+      findLastVersionByModelId: jest.fn(() =>
+        taskEither.of(some(aRetrievedProfile))
+      ),
+      update: jest.fn(() => taskEither.of(updatedProfile))
     };
 
     const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
@@ -126,18 +136,6 @@ describe("UpdateProfileHandler", () => {
       ...aProfile,
       email: aEmailChanged
     });
-
-    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.encode(
-      {
-        newProfile: {
-          ...aRetrievedProfile,
-          email: aEmailChanged,
-          isEmailValidated: false
-        },
-        oldProfile: aRetrievedProfile,
-        updatedAt: new Date()
-      }
-    );
 
     expect(df.getClient).toHaveBeenCalledTimes(1);
 

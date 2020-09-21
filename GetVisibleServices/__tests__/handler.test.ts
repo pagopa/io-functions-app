@@ -1,6 +1,6 @@
 // tslint:disable:no-any
 
-import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import {
   NonEmptyString,
   OrganizationFiscalCode
@@ -23,6 +23,7 @@ import {
 
 import { MaxAllowedPaymentAmount } from "io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
 
+import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetVisibleServices, GetVisibleServicesHandler } from "../handler";
 
 afterEach(() => {
@@ -47,19 +48,19 @@ const aService: Service = {
 
 const aNewService: NewService = {
   ...aService,
-  id: "123" as NonEmptyString,
-  kind: "INewService",
-  version: 1 as NonNegativeNumber
+  kind: "INewService"
 };
 
 const aRetrievedService: RetrievedService = {
   ...aNewService,
-  _self: "123",
-  _ts: 123,
-  kind: "IRetrievedService"
+  ...aCosmosResourceMetadata,
+  id: "123" as NonEmptyString,
+  kind: "IRetrievedService",
+  version: 1 as NonNegativeInteger
 };
 
 const aVisibleService: VisibleService = {
+  ...aCosmosResourceMetadata,
   departmentName: aRetrievedService.departmentName,
   id: aRetrievedService.id,
   organizationFiscalCode: aRetrievedService.organizationFiscalCode,

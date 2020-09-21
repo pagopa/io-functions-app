@@ -1,4 +1,4 @@
-import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import {
   EmailString,
   FiscalCode,
@@ -23,6 +23,7 @@ import {
   RetrievedUserDataProcessing,
   UserDataProcessingId
 } from "io-functions-commons/dist/src/models/user_data_processing";
+import { CosmosResource } from "io-functions-commons/dist/src/utils/cosmosdb_model";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 import { toUserDataProcessingApi } from "../utils/user_data_processings";
 
@@ -30,6 +31,14 @@ export const aEmail = "email@example.com" as EmailString;
 export const aEmailChanged = "email.changed@example.com" as EmailString;
 
 export const aFiscalCode = "SPNDNL80A13Y555X" as FiscalCode;
+
+// CosmosResourceMetadata
+export const aCosmosResourceMetadata: Omit<CosmosResource, "id"> = {
+  _etag: "_etag",
+  _rid: "_rid",
+  _self: "_self",
+  _ts: 1
+};
 
 export const aNewProfile: NewProfile = {
   email: aEmail,
@@ -41,12 +50,11 @@ export const aProfile: Profile = {
   is_email_enabled: true,
   is_inbox_enabled: false,
   is_webhook_enabled: false,
-  version: 0 as NonNegativeNumber
+  version: 0 as NonNegativeInteger
 };
 
 export const aRetrievedProfile: RetrievedProfile = {
-  _self: "123",
-  _ts: 123,
+  ...aCosmosResourceMetadata,
   fiscalCode: aFiscalCode,
   id: "123" as NonEmptyString,
   isEmailEnabled: true,
@@ -55,12 +63,11 @@ export const aRetrievedProfile: RetrievedProfile = {
   isTestProfile: false,
   isWebhookEnabled: false,
   kind: "IRetrievedProfile",
-  version: 0 as NonNegativeNumber
+  version: 0 as NonNegativeInteger
 };
 
 export const aRetrievedProfileWithEmail: RetrievedProfile = {
-  _self: "123",
-  _ts: 123,
+  ...aCosmosResourceMetadata,
   email: "email@example.com" as EmailString,
   fiscalCode: aFiscalCode,
   id: "123" as NonEmptyString,
@@ -68,7 +75,7 @@ export const aRetrievedProfileWithEmail: RetrievedProfile = {
   isInboxEnabled: false,
   isWebhookEnabled: false,
   kind: "IRetrievedProfile",
-  version: 0 as NonNegativeNumber
+  version: 0 as NonNegativeInteger
 };
 
 export const aNewDate = new Date();
@@ -107,10 +114,7 @@ export const aAbortedUserDataProcessingStatus: UserDataProcessingStatus =
   UserDataProcessingStatusEnum.ABORTED;
 
 export const aRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
-  _etag: "xyz",
-  _rid: "xyz",
-  _self: "aaa",
-  _ts: 111,
+  ...aCosmosResourceMetadata,
   choice: aUserDataProcessingChoice,
   createdAt: aNewDate,
   fiscalCode: aFiscalCode,
@@ -119,7 +123,7 @@ export const aRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
   status: aUserDataProcessingStatus,
   updatedAt: aNewDate,
   userDataProcessingId: aUserDataProcessingId,
-  version: 0 as NonNegativeNumber
+  version: 0 as NonNegativeInteger
 };
 
 export const aClosedRetrievedUserDataProcessing: RetrievedUserDataProcessing = {
