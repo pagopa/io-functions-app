@@ -34,6 +34,7 @@ import {
 } from "io-functions-commons/dist/generated/definitions/NotificationChannel";
 import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
+import { toApiServiceMetadata } from "io-functions-commons/dist/src/utils/service_metadata";
 
 type IGetServiceHandlerRet =
   | IResponseSuccessJson<ServicePublic>
@@ -67,19 +68,9 @@ function retrievedServiceToPublic(
     organization_fiscal_code: retrievedService.organizationFiscalCode,
     organization_name: retrievedService.organizationName,
     service_id: retrievedService.serviceId,
-    service_metadata: retrievedService.serviceMetadata && {
-      address: retrievedService.serviceMetadata.address,
-      app_android: retrievedService.serviceMetadata.appAndroid,
-      app_ios: retrievedService.serviceMetadata.appIos,
-      description: retrievedService.serviceMetadata.description,
-      email: retrievedService.serviceMetadata.email,
-      pec: retrievedService.serviceMetadata.pec,
-      phone: retrievedService.serviceMetadata.phone,
-      privacy_url: retrievedService.serviceMetadata.privacyUrl,
-      scope: retrievedService.serviceMetadata.scope,
-      tos_url: retrievedService.serviceMetadata.tosUrl,
-      web_url: retrievedService.serviceMetadata.webUrl
-    },
+    service_metadata: retrievedService.serviceMetadata
+      ? toApiServiceMetadata(retrievedService.serviceMetadata)
+      : undefined,
     service_name: retrievedService.serviceName,
     version: retrievedService.version
   };
