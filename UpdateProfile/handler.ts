@@ -4,7 +4,7 @@ import { Context } from "@azure/functions";
 import * as df from "durable-functions";
 
 import { isLeft } from "fp-ts/lib/Either";
-import { isNone } from "fp-ts/lib/Option";
+import { fromNullable, isNone } from "fp-ts/lib/Option";
 
 import {
   IResponseErrorConflict,
@@ -103,11 +103,27 @@ export function UpdateProfileHandler(
       emailChanged ? false : existingProfile.isEmailValidated
     );
 
+    const autoEnableInboxAndWebHook =
+      existingProfile.acceptedTosVersion === undefined &&
+      profile.acceptedTosVersion !== undefined;
+
     const errorOrMaybeUpdatedProfile = await profileModel
       .update({
         ...existingProfile,
         // Remove undefined values to avoid overriding already existing profile properties
-        ...withoutUndefinedValues(profile)
+        ...withoutUndefinedValues(profile),
+
+        // Bugfix missing enable of Inbox and Webhook https://www.pivotaltracker.com/story/show/175095963
+        isInboxEnabled:
+          autoEnableInboxAndWebHook ||
+          fromNullable(profile.isInboxEnabled).getOrElse(
+            existingProfile.isInboxEnabled
+          ),
+        isWebhookEnabled:
+          autoEnableInboxAndWebHook ||
+          fromNullable(profile.isInboxEnabled).getOrElse(
+            existingProfile.isInboxEnabled
+          )
       })
       .run();
 
