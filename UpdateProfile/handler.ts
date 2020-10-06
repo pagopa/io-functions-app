@@ -121,8 +121,8 @@ export function UpdateProfileHandler(
           ),
         isWebhookEnabled:
           autoEnableInboxAndWebHook ||
-          fromNullable(profile.isInboxEnabled).getOrElse(
-            existingProfile.isInboxEnabled
+          fromNullable(profile.isWebhookEnabled).getOrElse(
+            existingProfile.isWebhookEnabled
           )
       })
       .run();
