@@ -1,9 +1,13 @@
 import { Either } from "fp-ts/lib/Either";
-import { IConfig, MailerConfig } from "../config";
+import { MailerConfig } from "../config";
 
 const aMailFrom = "example@test.com";
+const mailSecret = "a-mu-secret";
+const mailUsername = "a-mu-username";
+const devEnv = "dev";
+const prodEnv = "production";
 
-const noop = () => {};
+const noop = () => null;
 const expectRight = <L, R>(e: Either<L, R>, t: (r: R) => void = noop) =>
   e.fold(
     _ =>
@@ -22,7 +26,7 @@ describe("MailerConfig", () => {
   it("should decode configuration for sendgrid", () => {
     const rawConf = {
       MAIL_FROM: aMailFrom,
-      NODE_ENV: "production",
+      NODE_ENV: prodEnv,
       SENDGRID_API_KEY: "a-sg-key"
     };
     const result = MailerConfig.decode(rawConf);
@@ -35,11 +39,11 @@ describe("MailerConfig", () => {
 
   it("should decode configuration for sendgrid even if mailup conf is passed", () => {
     const rawConf = {
+      MAILUP_SECRET: mailSecret,
+      MAILUP_USERNAME: mailUsername,
       MAIL_FROM: aMailFrom,
-      NODE_ENV: "production",
-      SENDGRID_API_KEY: "a-sg-key",
-      MAILUP_USERNAME: "a-mu-username",
-      MAILUP_SECRET: "a-mu-secret"
+      NODE_ENV: prodEnv,
+      SENDGRID_API_KEY: "a-sg-key"
     };
     const result = MailerConfig.decode(rawConf);
 
@@ -50,10 +54,10 @@ describe("MailerConfig", () => {
 
   it("should decode configuration for mailup", () => {
     const rawConf = {
+      MAILUP_SECRET: mailSecret,
+      MAILUP_USERNAME: mailUsername,
       MAIL_FROM: aMailFrom,
-      NODE_ENV: "production",
-      MAILUP_USERNAME: "a-mu-username",
-      MAILUP_SECRET: "a-mu-secret"
+      NODE_ENV: prodEnv
     };
     const result = MailerConfig.decode(rawConf);
 
@@ -77,8 +81,8 @@ describe("MailerConfig", () => {
 
     const rawConf = {
       MAIL_FROM: aMailFrom,
-      NODE_ENV: "production",
-      MAIL_TRANSPORTS: [aRawTrasport, aRawTrasport].join(";")
+      MAIL_TRANSPORTS: [aRawTrasport, aRawTrasport].join(";"),
+      NODE_ENV: prodEnv
     };
     const result = MailerConfig.decode(rawConf);
 
@@ -89,9 +93,9 @@ describe("MailerConfig", () => {
 
   it("should decode configuration for mailhog", () => {
     const rawConf = {
+      MAILHOG_HOSTNAME: "a-mh-host",
       MAIL_FROM: aMailFrom,
-      NODE_ENV: "dev",
-      MAILHOG_HOSTNAME: "a-mh-host"
+      NODE_ENV: devEnv
     };
     const result = MailerConfig.decode(rawConf);
 
@@ -103,7 +107,7 @@ describe("MailerConfig", () => {
   it("should require mailhog if not in prod", () => {
     const rawConf = {
       MAIL_FROM: aMailFrom,
-      NODE_ENV: "dev"
+      NODE_ENV: devEnv
     };
     const result = MailerConfig.decode(rawConf);
 
@@ -113,7 +117,7 @@ describe("MailerConfig", () => {
   it("should require at least on transporter if in prod", () => {
     const rawConf = {
       MAIL_FROM: aMailFrom,
-      NODE_ENV: "production"
+      NODE_ENV: prodEnv
     };
     const result = MailerConfig.decode(rawConf);
 
@@ -122,9 +126,9 @@ describe("MailerConfig", () => {
 
   it("should not allow mailhog if in prod", () => {
     const rawConf = {
+      MAILHOG_HOSTNAME: "a-mh-host",
       MAIL_FROM: aMailFrom,
-      NODE_ENV: "production",
-      MAILHOG_HOSTNAME: "a-mh-host"
+      NODE_ENV: prodEnv
     };
     const result = MailerConfig.decode(rawConf);
 
@@ -134,8 +138,8 @@ describe("MailerConfig", () => {
   it("should not decode configuration with empty transport", () => {
     const rawConf = {
       MAIL_FROM: aMailFrom,
-      NODE_ENV: "production",
-      MAIL_TRANSPORTS: ""
+      MAIL_TRANSPORTS: "",
+      NODE_ENV: prodEnv
     };
     const result = MailerConfig.decode(rawConf);
 
@@ -152,30 +156,17 @@ describe("MailerConfig", () => {
   });
 
   it("should not decode ambiguos configuration", () => {
-    const withMailUp = {
-      MAILUP_USERNAME: "a-mu-username",
-      MAILUP_SECRET: "a-mu-secret"
-    };
-    const withSendGrid = {
+    const rawConf = {
+      MAILUP_SECRET: mailSecret,
+      MAILUP_USERNAME: mailUsername,
+      MAIL_FROM: aMailFrom,
+      MAIL_TRANSPORTS: "a-trasnport-name",
+      NODE_ENV: prodEnv,
       SENDGRID_API_KEY: "a-sg-key"
     };
-    const withMultiTransport = {
-      MAIL_TRANSPORTS: "a-trasnport-name"
-    };
-    const base = {
-      MAIL_FROM: aMailFrom,
-      NODE_ENV: "production"
-    };
 
-    const examples = [
-      // the following configuration is not ambiguos as sendgrid would override mailup anyway
-      // see here for the rationale: https://github.com/pagopa/io-functions-admin/pull/89#commitcomment-42917672
-      // { ...base, ...withMailUp, ...withSendGrid },
-      { ...base, ...withMultiTransport, ...withSendGrid },
-      { ...base, ...withMailUp, ...withMultiTransport },
-      { ...base, ...withMailUp, ...withSendGrid, ...withMultiTransport }
-    ];
+    const result = MailerConfig.decode(rawConf);
 
-    examples.map(MailerConfig.decode).forEach(_ => expectLeft(_));
+    expectLeft(result);
   });
 });

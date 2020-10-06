@@ -1,4 +1,3 @@
-import { nonEmptyArray } from "fp-ts/lib/NonEmptyArray2v";
 /**
  * Config module
  *
@@ -91,12 +90,12 @@ export const MailerConfig = t.intersection([
 export type ReqServiceIdConfig = t.TypeOf<typeof ReqServiceIdConfig>;
 export const ReqServiceIdConfig = t.union([
   t.interface({
-    REQ_SERVICE_ID: t.undefined,
-    NODE_ENV: t.literal("production")
+    NODE_ENV: t.literal("production"),
+    REQ_SERVICE_ID: t.undefined
   }),
   t.interface({
-    REQ_SERVICE_ID: NonEmptyString,
     NODE_ENV: AnyBut("production", t.string),
+    REQ_SERVICE_ID: NonEmptyString
   })
 ]);
 
@@ -104,24 +103,27 @@ export const ReqServiceIdConfig = t.union([
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
   t.interface({
-    QueueStorageConnection: NonEmptyString,
-    MESSAGE_CONTAINER_NAME: NonEmptyString,
-    SUBSCRIPTIONS_FEED_TABLE: NonEmptyString,
+    AZURE_NH_ENDPOINT: NonEmptyString,
+    AZURE_NH_HUB_NAME: NonEmptyString,
+
+    COSMOSDB_KEY: NonEmptyString,
+    COSMOSDB_NAME: NonEmptyString,
+    COSMOSDB_URI: NonEmptyString,
 
     CUSTOMCONNSTR_COSMOSDB_KEY: NonEmptyString,
     CUSTOMCONNSTR_COSMOSDB_URI: NonEmptyString,
-    COSMOSDB_NAME: NonEmptyString,
-    COSMOSDB_URI: NonEmptyString,
-    COSMOSDB_KEY: NonEmptyString,
 
     FUNCTIONS_PUBLIC_URL: NonEmptyString,
-    PUBLIC_API_URL: NonEmptyString,
+
+    MESSAGE_CONTAINER_NAME: NonEmptyString,
+
     PUBLIC_API_KEY: NonEmptyString,
+    PUBLIC_API_URL: NonEmptyString,
+
+    QueueStorageConnection: NonEmptyString,
 
     SPID_LOGS_PUBLIC_KEY: NonEmptyString,
-
-    AZURE_NH_HUB_NAME: NonEmptyString,
-    AZURE_NH_ENDPOINT: NonEmptyString,
+    SUBSCRIPTIONS_FEED_TABLE: NonEmptyString,
 
     isProduction: t.boolean
   }),

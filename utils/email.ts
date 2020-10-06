@@ -30,7 +30,7 @@ const fetchWithTimeout = setFetchTimeout(
   abortableFetch
 );
 
-const config = getConfigOrThrow();
+const conf = getConfigOrThrow();
 
 interface IMailUpOptions {
   mailupSecret: NonEmptyString;
@@ -64,7 +64,7 @@ export function getMailerTransporter(opts: MailTransportOptions): Mail {
     : // For development we use mailhog to intercept emails
       // Use the `docker-compose.yml` file to run the mailhog server
       NodeMailer.createTransport({
-        host: config.MAILHOG_HOSTNAME || "localhost",
+        host: conf.MAILHOG_HOSTNAME || "localhost",
         port: 1025,
         secure: false
       });

@@ -21,9 +21,9 @@ const config = getConfigOrThrow();
 const isProduction = config.NODE_ENV === "production";
 
 // Optional SendGrid key
-const sendgridApiKey = NonEmptyString.decode(
-  config.SENDGRID_API_KEY
-).getOrElse(undefined);
+const sendgridApiKey = NonEmptyString.decode(config.SENDGRID_API_KEY).getOrElse(
+  undefined
+);
 
 // Mailup
 const mailupUsername = config.MAILUP_USERNAME;
