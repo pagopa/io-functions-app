@@ -2,9 +2,25 @@
 // tslint:disable-next-line: no-object-mutation
 process.env = {
   ...process.env,
+  MESSAGE_CONTAINER_NAME: "msg",
+  QueueStorageConnection: "foobar",
   AZURE_NH_ENDPOINT:
     "Endpoint=sb://anendpoint.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=XXX",
-  AZURE_NH_HUB_NAME: "AZURE_NH_HUB_NAME"
+  AZURE_NH_HUB_NAME: "AZURE_NH_HUB_NAME",
+  SUBSCRIPTIONS_FEED_TABLE: "feed",
+  CUSTOMCONNSTR_COSMOSDB_KEY: "key",
+  CUSTOMCONNSTR_COSMOSDB_URI: "uri",
+  COSMOSDB_NAME: "cosmoname",
+  COSMOSDB_URI: "uri",
+  COSMOSDB_KEY: "key",
+  FUNCTIONS_PUBLIC_URL: "url",
+  PUBLIC_API_URL: "url",
+  PUBLIC_API_KEY: "key",
+  MAILHOG_HOSTNAME: "mailhog",
+  MAIL_FROM: "mail@example.it",
+  NODE_ENV: "dev",
+  REQ_SERVICE_ID: "req_id_dev",
+  SPID_LOGS_PUBLIC_KEY: "key"
 };
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";

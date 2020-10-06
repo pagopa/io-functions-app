@@ -18,6 +18,8 @@ import * as NodeMailer from "nodemailer";
 import nodemailerSendgrid = require("nodemailer-sendgrid");
 import Mail = require("nodemailer/lib/mailer");
 
+import { getConfigOrThrow } from "../utils/config";
+
 // 5 seconds timeout by default
 const DEFAULT_EMAIL_REQUEST_TIMEOUT_MS = 5000;
 
@@ -27,6 +29,8 @@ const fetchWithTimeout = setFetchTimeout(
   DEFAULT_EMAIL_REQUEST_TIMEOUT_MS as Millisecond,
   abortableFetch
 );
+
+const config = getConfigOrThrow();
 
 interface IMailUpOptions {
   mailupSecret: NonEmptyString;
@@ -60,7 +64,7 @@ export function getMailerTransporter(opts: MailTransportOptions): Mail {
     : // For development we use mailhog to intercept emails
       // Use the `docker-compose.yml` file to run the mailhog server
       NodeMailer.createTransport({
-        host: process.env.MAILHOG_HOSTNAME || "localhost",
+        host: config.MAILHOG_HOSTNAME || "localhost",
         port: 1025,
         secure: false
       });

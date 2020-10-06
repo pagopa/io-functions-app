@@ -8,17 +8,19 @@ import { createTableService, TableUtilities } from "azure-storage";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 
-import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
-
 import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
 
 import { isNone } from "fp-ts/lib/Option";
 import { deleteTableEntity, insertTableEntity } from "../utils/storage";
 
-const storageConnectionString = getRequiredStringEnv("QueueStorageConnection");
+import { getConfigOrThrow } from "../utils/config";
+
+const config = getConfigOrThrow();
+
+const storageConnectionString = config.QueueStorageConnection;
 const tableService = createTableService(storageConnectionString);
 
-const subscriptionsFeedTable = getRequiredStringEnv("SUBSCRIPTIONS_FEED_TABLE");
+const subscriptionsFeedTable = config.SUBSCRIPTIONS_FEED_TABLE;
 
 const insertEntity = insertTableEntity(tableService, subscriptionsFeedTable);
 const deleteEntity = deleteTableEntity(tableService, subscriptionsFeedTable);

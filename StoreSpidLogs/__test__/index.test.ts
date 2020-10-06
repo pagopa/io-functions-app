@@ -2,8 +2,10 @@
 /* tslint:disable:no-object-mutation */
 
 process.env = {
+  UBSCRIPTIONS_FEED_TABLE: "feed",
   APPINSIGHTS_INSTRUMENTATIONKEY: "foo",
   QueueStorageConnection: "foobar",
+  SUBSCRIPTIONS_FEED_TABLE: "feed",
   SPID_BLOB_CONTAINER_NAME: "spidblob",
   SPID_BLOB_STORAGE_CONNECTION_STRING: "foobar",
   SPID_LOGS_PUBLIC_KEY: `-----BEGIN PUBLIC KEY-----
@@ -11,7 +13,22 @@ MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDhiXpvLD8UMMUy1T2JCzo/Sj5E
 l09Fs0z2U4aA37BrXlSo1DwQ2O9i2XFxXGJmE83siSWEfRlMWlabMu7Yj6dkZvmj
 dGIO4gotO33TgiAQcwRo+4pwjoCN7Td47yssCcj9C727zBt+Br+XK7B1bRcqjc0J
 YdF4yiVtD7G4RDXmRQIDAQAB
------END PUBLIC KEY-----`
+-----END PUBLIC KEY-----`,
+  MESSAGE_CONTAINER_NAME: "msg",
+  CUSTOMCONNSTR_COSMOSDB_URI: "uri",
+  CUSTOMCONNSTR_COSMOSDB_KEY: "key",
+  COSMOSDB_NAME: "cosmoname",
+  COSMOSDB_URI: "uri",
+  COSMOSDB_KEY: "key",
+  FUNCTIONS_PUBLIC_URL: "url",
+  PUBLIC_API_URL: "url",
+  PUBLIC_API_KEY: "key",
+  MAILHOG_HOSTNAME: "mailhog",
+  MAIL_FROM: "mail@example.it",
+  NODE_ENV: "dev",
+  REQ_SERVICE_ID: "req_id_dev",
+  AZURE_NH_HUB_NAME: "azhub",
+  AZURE_NH_ENDPOINT: "azendpoint",
 };
 
 import { format } from "date-fns";

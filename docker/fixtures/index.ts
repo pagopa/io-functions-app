@@ -18,11 +18,14 @@ import {
 
 import { sequenceT } from "fp-ts/lib/Apply";
 import { TaskEither, taskEitherSeq, tryCatch } from "fp-ts/lib/TaskEither";
-import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 
-const cosmosDbKey = getRequiredStringEnv("CUSTOMCONNSTR_COSMOSDB_KEY");
-const cosmosDbUri = getRequiredStringEnv("CUSTOMCONNSTR_COSMOSDB_URI");
-const cosmosDbName = getRequiredStringEnv("COSMOSDB_NAME");
+import { getConfigOrThrow } from "../../utils/config";
+
+const config = getConfigOrThrow();
+
+const cosmosDbKey = config.CUSTOMCONNSTR_COSMOSDB_KEY;
+const cosmosDbUri = config.CUSTOMCONNSTR_COSMOSDB_URI;
+const cosmosDbName = config.COSMOSDB_NAME;
 
 export const cosmosdbClient = new CosmosClient({
   endpoint: cosmosDbUri,
@@ -56,7 +59,7 @@ const aService: Service = Service.decode({
   organizationFiscalCode: "01234567890",
   organizationName: "Organization name",
   requireSecureChannels: false,
-  serviceId: process.env.REQ_SERVICE_ID,
+  serviceId: config.REQ_SERVICE_ID,
   serviceName: "MyServiceName"
 }).getOrElseL(() => {
   throw new Error("Cannot decode service payload.");

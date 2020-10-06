@@ -1,3 +1,4 @@
+import { nonEmptyArray } from "fp-ts/lib/NonEmptyArray2v";
 /**
  * Config module
  *
@@ -86,6 +87,19 @@ export const MailerConfig = t.intersection([
   ])
 ]);
 
+// configuration for REQ_SERVICE_ID in dev
+export type ReqServiceIdConfig = t.TypeOf<typeof ReqServiceIdConfig>;
+export const ReqServiceIdConfig = t.union([
+  t.interface({
+    REQ_SERVICE_ID: t.undefined,
+    NODE_ENV: t.literal("production")
+  }),
+  t.interface({
+    REQ_SERVICE_ID: NonEmptyString,
+    NODE_ENV: AnyBut("production", t.string),
+  })
+]);
+
 // global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -97,8 +111,10 @@ export const IConfig = t.intersection([
     CUSTOMCONNSTR_COSMOSDB_KEY: NonEmptyString,
     CUSTOMCONNSTR_COSMOSDB_URI: NonEmptyString,
     COSMOSDB_NAME: NonEmptyString,
+    COSMOSDB_URI: NonEmptyString,
+    COSMOSDB_KEY: NonEmptyString,
 
-    FUNCTION_PUBLIC_URL: NonEmptyString,
+    FUNCTIONS_PUBLIC_URL: NonEmptyString,
     PUBLIC_API_URL: NonEmptyString,
     PUBLIC_API_KEY: NonEmptyString,
 
@@ -107,11 +123,10 @@ export const IConfig = t.intersection([
     AZURE_NH_HUB_NAME: NonEmptyString,
     AZURE_NH_ENDPOINT: NonEmptyString,
 
-    REQ_SERVICE_ID: t.undefined,
-
     isProduction: t.boolean
   }),
-  MailerConfig
+  MailerConfig,
+  ReqServiceIdConfig
 ]);
 
 // No need to re-evaluate this object for each call
