@@ -109,6 +109,89 @@ describe("UpdateProfileHandler", () => {
     }
   });
 
+  it.each([
+    [
+      false,
+      false,
+      true,
+      true,
+      undefined,
+      "should autoset isInboxEnabled and isWebhookEnabled to true if user accept ToS for the first time"
+    ],
+    [
+      true,
+      false,
+      true,
+      false,
+      1,
+      "should set isInboxEnabled to true if user as already accepted ToS"
+    ],
+    [
+      false,
+      true,
+      false,
+      true,
+      1,
+      "should set isInboxEnabled to true if user as already accepted ToS"
+    ],
+    [
+      undefined,
+      true,
+      false,
+      true,
+      1,
+      "should keep isInboxEnabled value if not provided and user as already accepted ToS"
+    ],
+    [
+      true,
+      undefined,
+      true,
+      false,
+      1,
+      "should keep isWebhookEnabled value if not provided and user as already accepted ToS"
+    ]
+  ])(
+    "%s, %s, %s, %s, %s",
+    async (
+      isInboxEnabled,
+      isWebhookEnabled,
+      expectedIsInboxEnabled,
+      expectedIsWebHookEnabled,
+      acceptedTosVersion
+    ) => {
+      const profileModelMock = {
+        findLastVersionByModelId: jest.fn(() =>
+          taskEither.of(some({ ...aRetrievedProfile, acceptedTosVersion }))
+        ),
+        update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+      };
+      const updateProfileHandler = UpdateProfileHandler(
+        profileModelMock as any
+      );
+      const newProfile = {
+        ...aProfile,
+        accepted_tos_version: 1,
+        is_inbox_enabled: isInboxEnabled as boolean,
+        is_webhook_enabled: isWebhookEnabled as boolean
+      };
+      const result = await updateProfileHandler(
+        contextMock as any,
+        aFiscalCode,
+        newProfile
+      );
+
+      expect(result.kind).toBe("IResponseSuccessJson");
+      if (result.kind === "IResponseSuccessJson") {
+        expect(result.value).toEqual(
+          expect.objectContaining({
+            is_inbox_enabled: expectedIsInboxEnabled,
+            is_webhook_enabled: expectedIsWebHookEnabled
+          })
+        );
+      }
+    }
+  );
+
   it("should start the orchestrator with the appropriate input after the profile has been created", async () => {
     const updatedProfile = {
       ...aRetrievedProfile,
