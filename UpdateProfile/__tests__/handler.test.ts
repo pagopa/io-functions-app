@@ -116,7 +116,7 @@ describe("UpdateProfileHandler", () => {
       true,
       true,
       undefined,
-      "should autoset isInboxEnabled and isWebhookEnabled to true if user accept ToS for the first time"
+      "should set isInboxEnabled and isWebhookEnabled to true if user accept ToS for the first time"
     ],
     [
       true,
@@ -124,7 +124,7 @@ describe("UpdateProfileHandler", () => {
       true,
       false,
       1,
-      "should set isInboxEnabled to true if user as already accepted ToS"
+      "should set isInboxEnabled to true if user has already accepted ToS"
     ],
     [
       false,
@@ -132,7 +132,7 @@ describe("UpdateProfileHandler", () => {
       false,
       true,
       1,
-      "should set isInboxEnabled to true if user as already accepted ToS"
+      "should set isInboxEnabled to true if user has already accepted ToS"
     ],
     [
       undefined,
@@ -140,7 +140,7 @@ describe("UpdateProfileHandler", () => {
       false,
       true,
       1,
-      "should keep isInboxEnabled value if not provided and user as already accepted ToS"
+      "should keep isInboxEnabled value if not provided and user has already accepted ToS"
     ],
     [
       true,
@@ -148,7 +148,7 @@ describe("UpdateProfileHandler", () => {
       true,
       false,
       1,
-      "should keep isWebhookEnabled value if not provided and user as already accepted ToS"
+      "should keep isWebhookEnabled value if not provided and user has already accepted ToS"
     ]
   ])(
     "%s, %s, %s, %s, %s",
