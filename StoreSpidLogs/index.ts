@@ -14,8 +14,7 @@ import { initTelemetryClient } from "../utils/appinsights";
 import { getConfigOrThrow } from "../utils/config";
 
 const config = getConfigOrThrow();
-const rsaPublicKey = config.SPID_LOGS_PUBLIC_KEY;
-const encrypt = curry(toEncryptedPayload)(rsaPublicKey);
+const encrypt = curry(toEncryptedPayload)(config.SPID_LOGS_PUBLIC_KEY);
 
 /**
  * Payload of the stored blob item

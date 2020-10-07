@@ -37,12 +37,9 @@ export enum APNSPushType {
 
 const config = getConfigOrThrow();
 
-const hubName = config.AZURE_NH_HUB_NAME;
-const endpointOrConnectionString = config.AZURE_NH_ENDPOINT;
-
 const notificationHubService = azure.createNotificationHubService(
-  hubName,
-  endpointOrConnectionString
+  config.AZURE_NH_HUB_NAME,
+  config.AZURE_NH_ENDPOINT
 );
 
 /**

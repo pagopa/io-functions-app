@@ -18,8 +18,7 @@ secureExpressApp(app);
 
 const config = getConfigOrThrow();
 
-const storageConnectionString = config.QueueStorageConnection;
-const blobService = createBlobService(storageConnectionString);
+const blobService = createBlobService(config.QueueStorageConnection);
 
 app.get("/api/v1/services", GetVisibleServices(blobService));
 

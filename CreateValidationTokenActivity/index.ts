@@ -17,9 +17,8 @@ const TOKEN_INVALID_AFTER_MS = (1000 * 60 * 60 * 24 * 30) as Millisecond; // 30 
 
 // TODO: Rename this env to `StorageConnection`
 // https://www.pivotaltracker.com/story/show/169591817
-const storageConnectionString = config.QueueStorageConnection;
 
-const tableService = createTableService(storageConnectionString);
+const tableService = createTableService(config.QueueStorageConnection);
 
 const randomBytesGenerator = (size: number) =>
   crypto.randomBytes(size).toString("hex");

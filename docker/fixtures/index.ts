@@ -23,13 +23,9 @@ import { getConfigOrThrow } from "../../utils/config";
 
 const config = getConfigOrThrow();
 
-const cosmosDbKey = config.CUSTOMCONNSTR_COSMOSDB_KEY;
-const cosmosDbUri = config.CUSTOMCONNSTR_COSMOSDB_URI;
-const cosmosDbName = config.COSMOSDB_NAME;
-
 export const cosmosdbClient = new CosmosClient({
-  endpoint: cosmosDbUri,
-  key: cosmosDbKey
+  endpoint: config.CUSTOMCONNSTR_COSMOSDB_URI,
+  key: config.CUSTOMCONNSTR_COSMOSDB_KEY
 });
 
 function createDatabase(databaseName: string): TaskEither<Error, Database> {
@@ -91,7 +87,7 @@ const aNewProfile = NewProfile.decode({
   throw new Error("Cannot decode new profile.");
 });
 
-createDatabase(cosmosDbName)
+createDatabase(config.COSMOSDB_NAME)
   .chain(db =>
     sequenceT(taskEitherSeq)(
       createCollection(db, "message-status", "messageId"),

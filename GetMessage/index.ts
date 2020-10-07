@@ -30,8 +30,7 @@ const messageModel = new MessageModel(
   config.MESSAGE_CONTAINER_NAME
 );
 
-const storageConnectionString = config.QueueStorageConnection;
-const blobService = createBlobService(storageConnectionString);
+const blobService = createBlobService(config.QueueStorageConnection);
 
 app.get(
   "/api/v1/messages/:fiscalcode/:id",

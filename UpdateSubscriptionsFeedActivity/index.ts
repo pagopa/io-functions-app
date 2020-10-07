@@ -17,13 +17,17 @@ import { getConfigOrThrow } from "../utils/config";
 
 const config = getConfigOrThrow();
 
-const storageConnectionString = config.QueueStorageConnection;
-const tableService = createTableService(storageConnectionString);
+const tableService = createTableService(config.QueueStorageConnection);
 
-const subscriptionsFeedTable = config.SUBSCRIPTIONS_FEED_TABLE;
+const insertEntity = insertTableEntity(
+  tableService,
+  config.SUBSCRIPTIONS_FEED_TABLE
+);
 
-const insertEntity = insertTableEntity(tableService, subscriptionsFeedTable);
-const deleteEntity = deleteTableEntity(tableService, subscriptionsFeedTable);
+const deleteEntity = deleteTableEntity(
+  tableService,
+  config.SUBSCRIPTIONS_FEED_TABLE
+);
 
 const eg = TableUtilities.entityGenerator;
 
@@ -60,7 +64,7 @@ export type Input = t.TypeOf<typeof Input>;
 
 // When the function starts, attempt to create the table if it does not exist
 // Note that we cannot log anything just yet since we don't have a Context
-tableService.createTableIfNotExists(subscriptionsFeedTable, () => 0);
+tableService.createTableIfNotExists(config.SUBSCRIPTIONS_FEED_TABLE, () => 0);
 
 /**
  * Updates the subscrption status of a user.

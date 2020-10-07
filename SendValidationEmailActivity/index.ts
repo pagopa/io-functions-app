@@ -31,10 +31,6 @@ const mailupSecret = config.MAILUP_SECRET;
 
 // Email data
 const EMAIL_TITLE = "Valida l’indirizzo email che usi su IO";
-const mailFrom = config.MAIL_FROM;
-
-// Needed to construct the email validation url
-const functionsPublicUrl = config.FUNCTIONS_PUBLIC_URL;
 
 const HTML_TO_TEXT_OPTIONS: HtmlToTextOptions = {
   ignoreImage: true, // Ignore all document images
@@ -42,7 +38,7 @@ const HTML_TO_TEXT_OPTIONS: HtmlToTextOptions = {
 };
 
 const emailDefaults = {
-  from: mailFrom,
+  from: config.MAIL_FROM,
   htmlToTextOptions: HTML_TO_TEXT_OPTIONS,
   title: EMAIL_TITLE
 };
@@ -81,7 +77,7 @@ initTelemetryClient();
 const activityFunctionHandler = getSendValidationEmailActivityHandler(
   mailerTransporter,
   emailDefaults,
-  functionsPublicUrl
+  config.FUNCTIONS_PUBLIC_URL
 );
 
 export default activityFunctionHandler;
