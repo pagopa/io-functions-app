@@ -25,11 +25,9 @@ secureExpressApp(app);
 
 const config = getConfigOrThrow();
 
-const messageContainerName = config.MESSAGE_CONTAINER_NAME;
-
 const messageModel = new MessageModel(
   cosmosdbInstance.container(MESSAGE_COLLECTION_NAME),
-  messageContainerName
+  config.MESSAGE_CONTAINER_NAME
 );
 
 const storageConnectionString = config.QueueStorageConnection;
