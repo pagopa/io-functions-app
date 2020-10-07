@@ -1,36 +1,6 @@
 /* tslint:disable:no-any */
 /* tslint:disable:no-object-mutation */
 
-process.env = {
-  APPINSIGHTS_INSTRUMENTATIONKEY: "foo",
-  AZURE_NH_ENDPOINT: "azendpoint",
-  AZURE_NH_HUB_NAME: "azhub",
-  COSMOSDB_KEY: "key",
-  COSMOSDB_NAME: "cosmoname",
-  COSMOSDB_URI: "uri",
-  CUSTOMCONNSTR_COSMOSDB_KEY: "key",
-  CUSTOMCONNSTR_COSMOSDB_URI: "uri",
-  FUNCTIONS_PUBLIC_URL: "url",
-  MAILHOG_HOSTNAME: "mailhog",
-  MAIL_FROM: "mail@example.it",
-  MESSAGE_CONTAINER_NAME: "msg",
-  NODE_ENV: "dev",
-  PUBLIC_API_KEY: "key",
-  PUBLIC_API_URL: "url",
-  QueueStorageConnection: "foobar",
-  REQ_SERVICE_ID: "req_id_dev",
-  SPID_BLOB_CONTAINER_NAME: "spidblob",
-  SPID_BLOB_STORAGE_CONNECTION_STRING: "foobar",
-  SPID_LOGS_PUBLIC_KEY: `-----BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDhiXpvLD8UMMUy1T2JCzo/Sj5E
-l09Fs0z2U4aA37BrXlSo1DwQ2O9i2XFxXGJmE83siSWEfRlMWlabMu7Yj6dkZvmj
-dGIO4gotO33TgiAQcwRo+4pwjoCN7Td47yssCcj9C727zBt+Br+XK7B1bRcqjc0J
-YdF4yiVtD7G4RDXmRQIDAQAB
------END PUBLIC KEY-----`,
-  SUBSCRIPTIONS_FEED_TABLE: "feed",
-  UBSCRIPTIONS_FEED_TABLE: "feed"
-};
-
 import { format } from "date-fns";
 import { toPlainText } from "italia-ts-commons/lib/encrypt";
 import { IPString } from "italia-ts-commons/lib/strings";
@@ -109,6 +79,7 @@ describe("StoreSpidLogs", () => {
       }
     };
     const blobItem = await index(mockedContext as any, aSpidMsgItem);
+    console.log(blobItem);
     const blob = blobItem as IOutputBinding;
     const encryptedSpidBlobItem = blob.spidRequestResponse;
     const decryptedRequestPayload = toPlainText(
