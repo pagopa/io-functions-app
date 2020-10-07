@@ -79,7 +79,6 @@ describe("StoreSpidLogs", () => {
       }
     };
     const blobItem = await index(mockedContext as any, aSpidMsgItem);
-    console.log(blobItem);
     const blob = blobItem as IOutputBinding;
     const encryptedSpidBlobItem = blob.spidRequestResponse;
     const decryptedRequestPayload = toPlainText(
