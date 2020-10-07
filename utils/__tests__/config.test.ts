@@ -156,17 +156,28 @@ describe("MailerConfig", () => {
   });
 
   it("should not decode ambiguos configuration", () => {
-    const rawConf = {
+    const withMailUp = {
       MAILUP_SECRET: mailSecret,
-      MAILUP_USERNAME: mailUsername,
-      MAIL_FROM: aMailFrom,
-      MAIL_TRANSPORTS: "a-trasnport-name",
-      NODE_ENV: prodEnv,
+      MAILUP_USERNAME: mailUsername
+    };
+    const withSendGrid = {
       SENDGRID_API_KEY: "a-sg-key"
     };
+    const withMultiTransport = {
+      MAIL_TRANSPORTS: "a-trasnport-name"
+    };
+    const base = {
+      MAIL_FROM: aMailFrom,
+      NODE_ENV: prodEnv
+    };
 
-    const result = MailerConfig.decode(rawConf);
+    // tslint:disable-next-line readonly-array
+    const examples = [
+      { ...base, ...withMultiTransport, ...withSendGrid },
+      { ...base, ...withMailUp, ...withMultiTransport },
+      { ...base, ...withMailUp, ...withSendGrid, ...withMultiTransport }
+    ];
 
-    expectLeft(result);
+    examples.map(MailerConfig.decode).forEach(_ => expectLeft(_));
   });
 });
