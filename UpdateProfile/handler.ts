@@ -103,11 +103,21 @@ export function UpdateProfileHandler(
       emailChanged ? false : existingProfile.isEmailValidated
     );
 
+    // User inbox and webhook must be enabled after accepting the ToS for the first time
+    // https://www.pivotaltracker.com/story/show/175095963
+    const autoEnableInboxAndWebHook =
+      existingProfile.acceptedTosVersion === undefined &&
+      profile.acceptedTosVersion !== undefined;
+    const overriddenInboxAndWebhook = autoEnableInboxAndWebHook
+      ? { isInboxEnabled: true, isWebhookEnabled: true }
+      : {};
+
     const errorOrMaybeUpdatedProfile = await profileModel
       .update({
         ...existingProfile,
         // Remove undefined values to avoid overriding already existing profile properties
-        ...withoutUndefinedValues(profile)
+        ...withoutUndefinedValues(profile),
+        ...overriddenInboxAndWebhook
       })
       .run();
 
