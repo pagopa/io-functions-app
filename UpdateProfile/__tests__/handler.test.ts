@@ -132,7 +132,7 @@ describe("UpdateProfileHandler", () => {
       false,
       true,
       1,
-      "should set isInboxEnabled to true if user has already accepted ToS"
+      "should set isWebhookEnabled to true if user has already accepted ToS"
     ],
     [
       undefined,
