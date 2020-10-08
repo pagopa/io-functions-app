@@ -2,7 +2,6 @@ import { Context } from "@azure/functions";
 
 import * as express from "express";
 
-import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { secureExpressApp } from "io-functions-commons/dist/src/utils/express";
 import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
 
@@ -16,15 +15,17 @@ import createAzureFunctionHandler from "io-functions-express/dist/src/createAzur
 import { cosmosdbInstance } from "../utils/cosmosdb";
 import { GetMessages } from "./handler";
 
+import { getConfigOrThrow } from "../utils/config";
+
 // Setup Express
 const app = express();
 secureExpressApp(app);
 
-const messageContainerName = getRequiredStringEnv("MESSAGE_CONTAINER_NAME");
+const config = getConfigOrThrow();
 
 const messageModel = new MessageModel(
   cosmosdbInstance.container(MESSAGE_COLLECTION_NAME),
-  messageContainerName
+  config.MESSAGE_CONTAINER_NAME
 );
 
 app.get("/api/v1/messages/:fiscalcode", GetMessages(messageModel));

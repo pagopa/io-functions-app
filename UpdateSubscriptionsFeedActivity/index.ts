@@ -8,20 +8,26 @@ import { createTableService, TableUtilities } from "azure-storage";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 
-import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
-
 import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
 
 import { isNone } from "fp-ts/lib/Option";
 import { deleteTableEntity, insertTableEntity } from "../utils/storage";
 
-const storageConnectionString = getRequiredStringEnv("QueueStorageConnection");
-const tableService = createTableService(storageConnectionString);
+import { getConfigOrThrow } from "../utils/config";
 
-const subscriptionsFeedTable = getRequiredStringEnv("SUBSCRIPTIONS_FEED_TABLE");
+const config = getConfigOrThrow();
 
-const insertEntity = insertTableEntity(tableService, subscriptionsFeedTable);
-const deleteEntity = deleteTableEntity(tableService, subscriptionsFeedTable);
+const tableService = createTableService(config.QueueStorageConnection);
+
+const insertEntity = insertTableEntity(
+  tableService,
+  config.SUBSCRIPTIONS_FEED_TABLE
+);
+
+const deleteEntity = deleteTableEntity(
+  tableService,
+  config.SUBSCRIPTIONS_FEED_TABLE
+);
 
 const eg = TableUtilities.entityGenerator;
 
@@ -58,7 +64,7 @@ export type Input = t.TypeOf<typeof Input>;
 
 // When the function starts, attempt to create the table if it does not exist
 // Note that we cannot log anything just yet since we don't have a Context
-tableService.createTableIfNotExists(subscriptionsFeedTable, () => 0);
+tableService.createTableIfNotExists(config.SUBSCRIPTIONS_FEED_TABLE, () => 0);
 
 /**
  * Updates the subscrption status of a user.

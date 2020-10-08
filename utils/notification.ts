@@ -7,8 +7,8 @@ import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 import * as azure from "azure-sb";
 import { tryCatch } from "fp-ts/lib/TaskEither";
-import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { Platform, PlatformEnum } from "../generated/backend/Platform";
+import { getConfigOrThrow } from "../utils/config";
 
 /**
  * Notification template.
@@ -35,12 +35,11 @@ export enum APNSPushType {
   MDM = "mdm"
 }
 
-const hubName = getRequiredStringEnv("AZURE_NH_HUB_NAME");
-const endpointOrConnectionString = getRequiredStringEnv("AZURE_NH_ENDPOINT");
+const config = getConfigOrThrow();
 
 const notificationHubService = azure.createNotificationHubService(
-  hubName,
-  endpointOrConnectionString
+  config.AZURE_NH_HUB_NAME,
+  config.AZURE_NH_ENDPOINT
 );
 
 /**
