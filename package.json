@@ -1,6 +1,6 @@
 {
   "name": "io-functions-app",
-  "version": "1.29.0",
+  "version": "1.29.1",
   "license": "MIT",
   "scripts": {
     "prebuild": "yarn generate:backend-models",
