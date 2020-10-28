@@ -17,13 +17,8 @@ import {
 } from "../../__mocks__/mocks";
 import { AbortUserDataProcessingDeleteHandler } from "../handler";
 
-// tslint:disable-next-line: no-let
-let clock: any;
 beforeEach(() => {
   jest.clearAllMocks();
-});
-afterEach(() => {
-  clock = clock.uninstall();
 });
 
 const withStatus = (
