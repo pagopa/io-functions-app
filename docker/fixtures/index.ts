@@ -23,9 +23,12 @@ import { getConfigOrThrow } from "../../utils/config";
 
 const config = getConfigOrThrow();
 
+export const cosmosDbUri = config.COSMOSDB_URI;
+export const cosmosDbKey = config.COSMOSDB_KEY;
+
 export const cosmosdbClient = new CosmosClient({
-  endpoint: config.CUSTOMCONNSTR_COSMOSDB_URI,
-  key: config.CUSTOMCONNSTR_COSMOSDB_KEY
+  endpoint: cosmosDbUri,
+  key: cosmosDbKey
 });
 
 function createDatabase(databaseName: string): TaskEither<Error, Database> {
