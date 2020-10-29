@@ -50,10 +50,7 @@ const AbortableUserDataProcessing = t.intersection([
   t.interface({
     // abort makes sense only for DELETE as DOWNLOAD is processed straight away
     choice: t.literal(UserDataProcessingChoiceEnum.DELETE),
-    status: t.union([
-      t.literal(UserDataProcessingStatusEnum.PENDING),
-      t.literal(UserDataProcessingStatusEnum.ABORTED)
-    ])
+    status: t.literal(UserDataProcessingStatusEnum.PENDING)
   })
 ]);
 

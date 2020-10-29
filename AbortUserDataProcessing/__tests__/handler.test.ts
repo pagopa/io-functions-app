@@ -67,7 +67,6 @@ describe("AbortUserDataProcessingHandler", () => {
   it.each`
     choice                                 | previousStatus
     ${UserDataProcessingChoiceEnum.DELETE} | ${UserDataProcessingStatusEnum.PENDING}
-    ${UserDataProcessingChoiceEnum.DELETE} | ${UserDataProcessingStatusEnum.ABORTED}
   `(
     "should accept an abortion on $choice requests when previous status is $previousStatus",
     async ({ previousStatus, choice }) => {
@@ -100,6 +99,7 @@ describe("AbortUserDataProcessingHandler", () => {
     choice                                   | previousStatus
     ${UserDataProcessingChoiceEnum.DELETE}   | ${UserDataProcessingStatusEnum.WIP}
     ${UserDataProcessingChoiceEnum.DELETE}   | ${UserDataProcessingStatusEnum.CLOSED}
+    ${UserDataProcessingChoiceEnum.DELETE}   | ${UserDataProcessingStatusEnum.ABORTED}
     ${UserDataProcessingChoiceEnum.DOWNLOAD} | ${UserDataProcessingStatusEnum.PENDING}
     ${UserDataProcessingChoiceEnum.DOWNLOAD} | ${UserDataProcessingStatusEnum.WIP}
     ${UserDataProcessingChoiceEnum.DOWNLOAD} | ${UserDataProcessingStatusEnum.CLOSED}
