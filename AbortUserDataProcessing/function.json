@@ -5,7 +5,7 @@
       "name": "req",
       "type": "httpTrigger",
       "direction": "in",
-      "route": "v1/user-data-processing/{fiscalcode}",
+      "route": "v1/user-data-processing/{fiscalcode}/{choice}",
       "methods": [
         "delete"
       ]
@@ -16,5 +16,5 @@
       "direction": "out"
     }
   ],
-  "scriptFile": "../dist/AbortUserDataProcessingDelete/index.js"
+  "scriptFile": "../dist/AbortUserDataProcessing/index.js"
 }

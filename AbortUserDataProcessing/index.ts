@@ -13,7 +13,7 @@ import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/c
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
 import { cosmosdbInstance } from "../utils/cosmosdb";
-import { AbortUserDataProcessingDelete } from "./handler";
+import { AbortUserDataProcessing } from "./handler";
 
 const userDataProcessingModel = new UserDataProcessingModel(
   cosmosdbInstance.container(USER_DATA_PROCESSING_COLLECTION_NAME)
@@ -24,8 +24,8 @@ const app = express();
 secureExpressApp(app);
 
 app.delete(
-  "/api/v1/user-data-processing/:fiscalcode",
-  AbortUserDataProcessingDelete(userDataProcessingModel)
+  "/api/v1/user-data-processing/:fiscalcode/:choice",
+  AbortUserDataProcessing(userDataProcessingModel)
 );
 
 const azureFunctionHandler = createAzureFunctionHandler(app);

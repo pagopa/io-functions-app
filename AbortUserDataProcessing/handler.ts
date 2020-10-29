@@ -1,4 +1,5 @@
 import * as express from "express";
+import * as t from "io-ts";
 
 import { Context } from "@azure/functions";
 
@@ -26,17 +27,40 @@ import {
 } from "io-functions-commons/dist/src/utils/request_middleware";
 
 import { identity } from "fp-ts/lib/function";
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
-import { UserDataProcessing } from "io-functions-commons/dist/generated/definitions/UserDataProcessing";
-import { UserDataProcessingChoiceEnum } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
+import { fromEither, fromLeft, taskEither } from "fp-ts/lib/TaskEither";
+import {
+  UserDataProcessingChoice,
+  UserDataProcessingChoiceEnum
+} from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
 import { UserDataProcessingStatusEnum } from "io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
 import {
   makeUserDataProcessingId,
   RetrievedUserDataProcessing,
   UserDataProcessingModel
 } from "io-functions-commons/dist/src/models/user_data_processing";
+import { RequiredParamMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_param";
+import { readableReport } from "italia-ts-commons/lib/reporters";
 
-type IAbortUserDataProcessingDeleteHandlerResult =
+/**
+ * Defines the subset of UserDataProcessing entities which can be aborted
+ */
+type AbortableUserDataProcessing = t.TypeOf<typeof AbortableUserDataProcessing>;
+const AbortableUserDataProcessing = t.intersection([
+  RetrievedUserDataProcessing,
+  t.interface({
+    // abort makes sense only for DELETE as DOWNLOAD is processed straight away
+    choice: t.literal(UserDataProcessingChoiceEnum.DELETE),
+    status: t.union([
+      t.literal(UserDataProcessingStatusEnum.PENDING),
+      t.literal(UserDataProcessingStatusEnum.ABORTED)
+    ])
+  })
+]);
+
+/**
+ * Possible returned values of the handler
+ */
+type IAbortUserDataProcessingHandlerResult =
   | IResponseSuccessAccepted
   | IResponseErrorValidation
   | IResponseErrorNotFound
@@ -44,33 +68,25 @@ type IAbortUserDataProcessingDeleteHandlerResult =
   | IResponseErrorConflict;
 
 /**
- * Type of an AbortUserDataProcessingDelete handler.
+ * Type of an AbortUserDataProcessing handler.
  */
-type IAbortUserDataProcessingDeleteHandler = (
+type IAbortUserDataProcessingHandler = (
   context: Context,
-  fiscalCode: FiscalCode
-) => Promise<IAbortUserDataProcessingDeleteHandlerResult>;
+  fiscalCode: FiscalCode,
+  choice: UserDataProcessingChoice
+) => Promise<IAbortUserDataProcessingHandlerResult>;
 
-const canBeAborted = (udp: UserDataProcessing): boolean =>
-  [
-    UserDataProcessingStatusEnum.PENDING,
-    UserDataProcessingStatusEnum.ABORTED
-  ].includes(udp.status);
-
-export function AbortUserDataProcessingDeleteHandler(
+export function AbortUserDataProcessingHandler(
   userDataProcessingModel: UserDataProcessingModel
-): IAbortUserDataProcessingDeleteHandler {
-  return async (_, fiscalCode) => {
-    const id = makeUserDataProcessingId(
-      UserDataProcessingChoiceEnum.DELETE,
-      fiscalCode
-    );
+): IAbortUserDataProcessingHandler {
+  return async (_, fiscalCode, choice) => {
+    const id = makeUserDataProcessingId(choice, fiscalCode);
 
     return (
       // retrieve the eventual previous delete request
       userDataProcessingModel
         .findLastVersionByModelId([id, fiscalCode])
-        .mapLeft<IAbortUserDataProcessingDeleteHandlerResult>(
+        .mapLeft<IAbortUserDataProcessingHandlerResult>(
           errorUserDataProcessing =>
             ResponseErrorQuery(
               "Error while retrieving a previous version of user data processing",
@@ -78,7 +94,7 @@ export function AbortUserDataProcessingDeleteHandler(
             )
         )
         // check we have a previous request to abort
-        .chain<RetrievedUserDataProcessing>(maybeRetrievedUserDataProcessing =>
+        .chain(maybeRetrievedUserDataProcessing =>
           maybeRetrievedUserDataProcessing.fold(
             fromLeft(
               ResponseErrorNotFound(
@@ -90,14 +106,14 @@ export function AbortUserDataProcessingDeleteHandler(
           )
         )
         // check the request can be aborted
-        .chain<RetrievedUserDataProcessing>(retrievedUserDataProcessing =>
-          !canBeAborted(retrievedUserDataProcessing)
-            ? fromLeft(
-                ResponseErrorConflict(
-                  `Cannot abort the request because its current status is ${retrievedUserDataProcessing.status}`
-                )
-              )
-            : taskEither.of(retrievedUserDataProcessing)
+        .chain(retrievedUserDataProcessing =>
+          fromEither(
+            AbortableUserDataProcessing.decode(retrievedUserDataProcessing)
+          ).mapLeft(errors =>
+            ResponseErrorConflict(
+              `Cannot abort the request because: ${readableReport(errors)}`
+            )
+          )
         )
         // finally save the abortion
         .chain(retrievedUserDataProcessing =>
@@ -119,14 +135,15 @@ export function AbortUserDataProcessingDeleteHandler(
 /**
  * Wraps an AbortUserDataProcessingDelete handler inside an Express request handler.
  */
-export function AbortUserDataProcessingDelete(
+export function AbortUserDataProcessing(
   userDataProcessingModel: UserDataProcessingModel
 ): express.RequestHandler {
-  const handler = AbortUserDataProcessingDeleteHandler(userDataProcessingModel);
+  const handler = AbortUserDataProcessingHandler(userDataProcessingModel);
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
-    FiscalCodeMiddleware
+    FiscalCodeMiddleware,
+    RequiredParamMiddleware("choice", UserDataProcessingChoice)
   );
   return wrapRequestHandler(middlewaresWrap(handler));
 }
