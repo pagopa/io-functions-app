@@ -8,7 +8,7 @@ import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 export const WelcomeMessageKind = t.keyof({
   HOWTO: null,
-  WELCOME: null,
+  WELCOME: null
 });
 export type WelcomeMessageKind = t.TypeOf<typeof WelcomeMessageKind>;
 
@@ -62,9 +62,9 @@ IO è un progetto 100% open source. Se sei un designer o uno sviluppatore, puoi 
 Grazie di far parte del progetto IO!
 `,
 
-        subject: `Benvenuto su IO`,
-      },
-    }).getOrElseL((errs) => {
+        subject: `Benvenuto su IO`
+      }
+    }).getOrElseL(errs => {
       throw new Error(
         "Invalid MessageContent for welcome message: " + readableReport(errs)
       );
@@ -91,14 +91,14 @@ Infine, è importante sapere che per ora i messaggi inviati dagli enti tramite I
 
 Per approfondimenti ti invitiamo a consultare la sezione [servizi](ioit://SERVICES_HOME) di questa applicazione; per maggiori informazioni sull’avanzamento del progetto, visita il sito [io.italia.it](https://io.italia.it).
 `,
-        subject: `Quali servizi trovi su IO?`,
-      },
+        subject: `Quali servizi trovi su IO?`
+      }
       // tslint:disable-next-line:no-identical-functions
-    }).getOrElseL((errs) => {
+    }).getOrElseL(errs => {
       throw new Error(
         "Invalid MessageContent for welcome message: " + readableReport(errs)
       );
-    }),
+    })
 };
 
 /**
@@ -118,9 +118,9 @@ async function sendMessage(
       body: JSON.stringify(newMessage),
       headers: {
         "Content-Type": "application/json",
-        "Ocp-Apim-Subscription-Key": apiKey,
+        "Ocp-Apim-Subscription-Key": apiKey
       },
-      method: "POST",
+      method: "POST"
     }
   );
   return response.status;
@@ -128,27 +128,27 @@ async function sendMessage(
 
 // Activity result
 const ActivityResultSuccess = t.interface({
-  kind: t.literal("SUCCESS"),
+  kind: t.literal("SUCCESS")
 });
 
 type ActivityResultSuccess = t.TypeOf<typeof ActivityResultSuccess>;
 
 const ActivityResultFailure = t.interface({
   kind: t.literal("FAILURE"),
-  reason: t.string,
+  reason: t.string
 });
 
 type ActivityResultFailure = t.TypeOf<typeof ActivityResultFailure>;
 
 export const ActivityResult = t.taggedUnion("kind", [
   ActivityResultSuccess,
-  ActivityResultFailure,
+  ActivityResultFailure
 ]);
 export type ActivityResult = t.TypeOf<typeof ActivityResult>;
 
 export const ActivityInput = t.interface({
   messageKind: WelcomeMessageKind,
-  profile: RetrievedProfile,
+  profile: RetrievedProfile
 });
 export type ActivityInput = t.TypeOf<typeof ActivityInput>;
 
@@ -164,17 +164,17 @@ export const getActivityFunction = (
     context.log.error(reason);
     return ActivityResultFailure.encode({
       kind: "FAILURE",
-      reason,
+      reason
     });
   };
 
   const success = () =>
     ActivityResultSuccess.encode({
-      kind: "SUCCESS",
+      kind: "SUCCESS"
     });
 
   return ActivityInput.decode(input).fold<Promise<ActivityResult>>(
-    async (errs) =>
+    async errs =>
       failure(
         `SendWelcomeMessagesActivity|Cannot decode input profile|ERROR=${readableReport(
           errs
