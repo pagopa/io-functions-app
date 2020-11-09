@@ -8,7 +8,7 @@ import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 export const WelcomeMessageKind = t.keyof({
   HOWTO: null,
-  WELCOME: null
+  WELCOME: null,
 });
 export type WelcomeMessageKind = t.TypeOf<typeof WelcomeMessageKind>;
 
@@ -31,7 +31,7 @@ Rendendo IO disponibile per tutti, consentiamo agli enti pubblici di portare pro
 ### Scopri le funzioni di IO
 
 Ecco come potrai usare IO attraverso le diverse funzioni disponibili oggi nell’app: molte altre ne arriveranno nei prossimi mesi!  
-IO ti permetterà di richiedere e spendere il “[Bonus Vacanze](https://io.italia.it/bonus-vacanze/)”, che troverai nella sezione “Pagamenti” dell’app a partire dal 1° Luglio. IO ti avviserà con un aggiornamento quando il nuovo servizio sarà disponibile.
+IO ti permetterà di richiedere e spendere il “[Bonus Vacanze](https://io.italia.it/bonus-vacanze/)” e di partecipare al Bonus Cashback, che troverai nella sezione “Portafoglio” dell’app a partire dal 1° dicembre 2020. IO ti avviserà con un aggiornamento quando il nuovo servizio sarà disponibile.
 
 #### I messaggi
 
@@ -40,12 +40,12 @@ All’arrivo di ogni nuovo messaggio, IO ti informa attraverso una notifica e un
 
 #### I pagamenti
 
-IO integra [pagoPA](https://www.pagopa.gov.it/) per effettuare pagamenti sicuri verso la Pubblica Amministrazione. Se hai già usato pagoPA come utente registrato, nella sezione [Pagamenti](ioit://WALLET_HOME) potrai vedere lo storico delle transazioni effettuate e le tue carte di credito salvate. Puoi usare la sezione [Pagamenti](ioit://WALLET_HOME) per aggiungere i tuoi metodi di pagamento preferiti, procedere al pagamento di un avviso pagoPA (tramite scansione del codice QR o inserimento manuale del codice IUV) e tenere traccia di tutte le operazioni svolte.  
-Nella sezione [Pagamenti](ioit://WALLET_HOME) troverai la possibilità di richiedere il Bonus Vacanze, disponibile a partire dal 1° Luglio.
+IO integra [pagoPA](https://www.pagopa.gov.it/) per effettuare pagamenti sicuri verso la Pubblica Amministrazione. Se hai già usato pagoPA come utente registrato, nella sezione [Portafoglio](ioit://WALLET_HOME) potrai vedere lo storico delle transazioni effettuate e le tue carte di credito salvate. Puoi usare la sezione [Portafoglio](ioit://WALLET_HOME) per aggiungere i tuoi metodi di pagamento preferiti, procedere al pagamento di un avviso pagoPA (tramite scansione del codice QR o inserimento manuale del codice IUV) e tenere traccia di tutte le operazioni svolte.
+Nella sezione [Portafoglio](ioit://WALLET_HOME) troverai la possibilità di richiedere il [Bonus Vacanze](https://io.italia.it/bonus-vacanze/) e il Bonus Cashback, disponibile a partire dal 1° dicembre.
 
 #### I servizi
 
-Al momento del tuo primo accesso in IO, tutti i Servizi disponibili sono attivi. Nella sezione [servizi](ioit://SERVICES_HOME) puoi vedere quali sono i servizi locali e nazionali disponibili all’interno dell’app e decidere da quali essere contattato e come. Aggiungi le tue aree geografiche di interesse per essere sempre informato sui nuovi servizi in arrivo nel tuo Comune o nella tua Regione.
+Al momento del tuo primo accesso in IO, tutti i Servizi disponibili sono attivi. Nella sezione [servizi](ioit://SERVICES_HOME) puoi vedere quali sono i servizi locali e nazionali disponibili all’interno dell’app, e decidere da quali essere contattato e come. Aggiungi le tue aree geografiche di interesse per essere sempre informato sui nuovi servizi in arrivo nel tuo Comune o nella tua Regione.
 
 #### Serve aiuto ?
 
@@ -55,16 +55,16 @@ Se hai un problema e non trovi risposte utili nella pagina di aiuto, contatta il
 
 #### Come partecipare al progetto
 
-IO è un progetto che cresce e migliora giorno dopo giorno grazie al contributo degli utenti. Per questo ti chiediamo, se vorrai, di segnalarci ogni aspetto dal tuo punto di vista migliorabile, utilizzando l'apposita funzione con l’icona a coccinella (per segnalare errori di funzionamento) o la chat (per inviare suggerimenti o commentare la tua esperienza).
+IO è un progetto che cresce e migliora giorno dopo giorno grazie al contributo degli utenti. Per questo ti chiediamo, se vorrai, di segnalarci ogni aspetto dal tuo punto di vista migliorabile, cliccando sul bottone Scrivi al Team di IO con l’icona a coccinella (per segnalare errori di funzionamento) o la chat (per inviare suggerimenti o commentare la tua esperienza).
 
 IO è un progetto 100% open source. Se sei un designer o uno sviluppatore, puoi contribuire direttamente al design e sviluppo dell’applicazione: visita il sito [io.italia.it](https://io.italia.it) per trovare più informazioni su come dare il tuo contributo.
 
 Grazie di far parte del progetto IO!
 `,
 
-        subject: `Benvenuto su IO`
-      }
-    }).getOrElseL(errs => {
+        subject: `Benvenuto su IO`,
+      },
+    }).getOrElseL((errs) => {
       throw new Error(
         "Invalid MessageContent for welcome message: " + readableReport(errs)
       );
@@ -91,14 +91,14 @@ Infine, è importante sapere che per ora i messaggi inviati dagli enti tramite I
 
 Per approfondimenti ti invitiamo a consultare la sezione [servizi](ioit://SERVICES_HOME) di questa applicazione; per maggiori informazioni sull’avanzamento del progetto, visita il sito [io.italia.it](https://io.italia.it).
 `,
-        subject: `Quali servizi trovi su IO?`
-      }
+        subject: `Quali servizi trovi su IO?`,
+      },
       // tslint:disable-next-line:no-identical-functions
-    }).getOrElseL(errs => {
+    }).getOrElseL((errs) => {
       throw new Error(
         "Invalid MessageContent for welcome message: " + readableReport(errs)
       );
-    })
+    }),
 };
 
 /**
@@ -118,9 +118,9 @@ async function sendMessage(
       body: JSON.stringify(newMessage),
       headers: {
         "Content-Type": "application/json",
-        "Ocp-Apim-Subscription-Key": apiKey
+        "Ocp-Apim-Subscription-Key": apiKey,
       },
-      method: "POST"
+      method: "POST",
     }
   );
   return response.status;
@@ -128,27 +128,27 @@ async function sendMessage(
 
 // Activity result
 const ActivityResultSuccess = t.interface({
-  kind: t.literal("SUCCESS")
+  kind: t.literal("SUCCESS"),
 });
 
 type ActivityResultSuccess = t.TypeOf<typeof ActivityResultSuccess>;
 
 const ActivityResultFailure = t.interface({
   kind: t.literal("FAILURE"),
-  reason: t.string
+  reason: t.string,
 });
 
 type ActivityResultFailure = t.TypeOf<typeof ActivityResultFailure>;
 
 export const ActivityResult = t.taggedUnion("kind", [
   ActivityResultSuccess,
-  ActivityResultFailure
+  ActivityResultFailure,
 ]);
 export type ActivityResult = t.TypeOf<typeof ActivityResult>;
 
 export const ActivityInput = t.interface({
   messageKind: WelcomeMessageKind,
-  profile: RetrievedProfile
+  profile: RetrievedProfile,
 });
 export type ActivityInput = t.TypeOf<typeof ActivityInput>;
 
@@ -164,17 +164,17 @@ export const getActivityFunction = (
     context.log.error(reason);
     return ActivityResultFailure.encode({
       kind: "FAILURE",
-      reason
+      reason,
     });
   };
 
   const success = () =>
     ActivityResultSuccess.encode({
-      kind: "SUCCESS"
+      kind: "SUCCESS",
     });
 
   return ActivityInput.decode(input).fold<Promise<ActivityResult>>(
-    async errs =>
+    async (errs) =>
       failure(
         `SendWelcomeMessagesActivity|Cannot decode input profile|ERROR=${readableReport(
           errs
