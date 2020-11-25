@@ -31,7 +31,7 @@ Rendendo IO disponibile per tutti, consentiamo agli enti pubblici di portare pro
 ### Scopri le funzioni di IO
 
 Ecco come potrai usare IO attraverso le diverse funzioni disponibili oggi nell’app: molte altre ne arriveranno nei prossimi mesi!  
-IO ti permetterà di richiedere e spendere il “[Bonus Vacanze](https://io.italia.it/bonus-vacanze/)” e di partecipare al Bonus Cashback, che troverai nella sezione “Portafoglio” dell’app a partire dal 1° dicembre 2020. IO ti avviserà con un aggiornamento quando il nuovo servizio sarà disponibile.
+IO ti permette di richiedere e spendere il “[Bonus Vacanze](https://io.italia.it/bonus-vacanze/)” e a breve anche di partecipare al Bonus Cashback, in arrivo nella sezione “Portafoglio” dell’app. IO ti avviserà con un aggiornamento quando il nuovo servizio sarà disponibile.
 
 #### I messaggi
 
