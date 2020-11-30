@@ -66,7 +66,7 @@ export const IConfig = t.intersection([
     SPID_LOGS_PUBLIC_KEY: NonEmptyString,
     SUBSCRIPTIONS_FEED_TABLE: NonEmptyString,
 
-    IS_CASHBACK_ENBLED: t.boolean,
+    IS_CASHBACK_ENABLED: t.boolean,
 
     isProduction: t.boolean
   }),
@@ -77,7 +77,7 @@ export const IConfig = t.intersection([
 // No need to re-evaluate this object for each call
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   ...process.env,
-  IS_CASHBACK_ENBLED: fromNullable(process.env.IS_CASHBACK_ENBLED)
+  IS_CASHBACK_ENABLED: fromNullable(process.env.IS_CASHBACK_ENABLED)
     .map(_ => _.toLocaleLowerCase() === "true")
     .getOrElse(false),
   isProduction: process.env.NODE_ENV === "production"
