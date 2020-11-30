@@ -13,7 +13,7 @@ import {
   OrchestratorResult as EmailValidationProcessOrchestratorResult
 } from "../../EmailValidationProcessOrchestrator/handler";
 import {
-  handler,
+  getUpsertedProfileOrchestratorHandler,
   OrchestratorInput as UpsertedProfileOrchestratorInput
 } from "../handler";
 
@@ -43,7 +43,9 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     };
 
-    const orchestratorHandler = handler(contextMockWithDf as any);
+    const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
+      sendCashbackMessage: false
+    })(contextMockWithDf as any);
 
     orchestratorHandler.next();
 
@@ -94,7 +96,9 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     };
 
-    const orchestratorHandler = handler(contextMockWithDf as any);
+    const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
+      sendCashbackMessage: true
+    })(contextMockWithDf as any);
 
     const result = orchestratorHandler.next();
 
@@ -107,7 +111,7 @@ describe("UpsertedProfileOrchestrator", () => {
       })
     );
 
-    orchestratorHandler.next(result.value);
+    const result2 = orchestratorHandler.next(result.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -117,12 +121,22 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    orchestratorHandler.next();
+    orchestratorHandler.next(result2.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
       {
         messageKind: "HOWTO",
+        profile: upsertedProfileOrchestratorInput.newProfile
+      }
+    );
+
+    orchestratorHandler.next();
+    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
+      "SendWelcomeMessagesActivity",
+      someRetryOptions,
+      {
+        messageKind: "CASHBACK",
         profile: upsertedProfileOrchestratorInput.newProfile
       }
     );

@@ -1,7 +1,14 @@
 ﻿import * as df from "durable-functions";
+import { getConfigOrThrow } from "../utils/config";
 
-import { handler } from "./handler";
+import { getUpsertedProfileOrchestratorHandler } from "./handler";
 
-const orchestrator = df.orchestrator(handler);
+const config = getConfigOrThrow();
+
+const orchestrator = df.orchestrator(
+  getUpsertedProfileOrchestratorHandler({
+    sendCashbackMessage: config.IS_CASHBACK_ENBLED
+  })
+);
 
 export default orchestrator;

@@ -6,7 +6,14 @@ import * as t from "io-ts";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
+function throwInvalidMessageError(errs: t.Errors): never {
+  throw new Error(
+    "Invalid MessageContent for welcome message: " + readableReport(errs)
+  );
+}
+
 export const WelcomeMessageKind = t.keyof({
+  CASHBACK: null,
   HOWTO: null,
   WELCOME: null
 });
@@ -64,11 +71,7 @@ Grazie di far parte del progetto IO!
 
         subject: `Benvenuto su IO`
       }
-    }).getOrElseL(errs => {
-      throw new Error(
-        "Invalid MessageContent for welcome message: " + readableReport(errs)
-      );
-    }),
+    }).getOrElseL(throwInvalidMessageError),
   // tslint:disable-next-line: object-literal-sort-keys
   HOWTO: (_: RetrievedProfile) =>
     NewMessage.decode({
@@ -93,12 +96,32 @@ Per approfondimenti ti invitiamo a consultare la sezione [servizi](ioit://SERVIC
 `,
         subject: `Quali servizi trovi su IO?`
       }
-      // tslint:disable-next-line:no-identical-functions
-    }).getOrElseL(errs => {
-      throw new Error(
-        "Invalid MessageContent for welcome message: " + readableReport(errs)
-      );
-    })
+    }).getOrElseL(throwInvalidMessageError),
+  CASHBACK: (_: RetrievedProfile) =>
+    NewMessage.decode({
+      content: {
+        // TODO: Set the proprer message content
+        markdown: `## È arrivato il Cashback.
+
+L’app IO nasce per offrirti un unico punto di accesso, comodo, semplice e sicuro, verso tutti i servizi della Pubblica Amministrazione. Diversi enti nazionali e locali hanno già portato i loro servizi a bordo e molti se ne aggiungeranno in futuro. Siamo infatti solo all’inizio del percorso che, progressivamente, porterà i cittadini italiani ad avere nuovi servizi digitali messi a disposizione da tutti gli enti pubblici all’interno dell’app.
+
+Nella sezione [servizi](ioit://SERVICES_HOME) puoi indicare le aree geografiche di tuo interesse (dove vivi, dove lavori, o dove magari vai spesso) per essere sempre informato sui nuovi servizi in arrivo in quel Comune o in quella Regione.
+
+Se non vedi gli enti del tuo territorio tra quelli elencati, è perché i loro servizi sono ancora in corso di integrazione. Se vuoi saperne di più, chiedi al tuo Comune se hanno attivato il processo per essere presenti su IO e a che punto sono. La tua voce può essere un segnale importante!
+
+Tutti i servizi all’interno dell’app sono attivi: questo non vuol dire che ti contatteranno, anzi. Ti scriveranno solo i servizi che hanno qualcosa da dire proprio a te, in caso di comunicazioni rilevanti come ad esempio la scadenza di un documento, il promemoria per un pagamento o l’aggiornamento su una pratica in corso.
+Se, per un determinato servizio, preferisci utilizzare mezzi di comunicazione diversi dall’app IO, puoi in ogni momento disattivarlo: in quel caso, l’Ente continuerà a contattarti avvalendosi dei canali tradizionali (come ad esempio la posta cartacea).
+In particolare:
+- nella sezione [Servizi](ioit://SERVICES_HOME) ti viene data la possibilità di disattivare tutti i servizi, disattivare tutti i servizi per un singolo Ente, oppure disattivare singoli servizi. Inoltre cliccando su ciascun servizio e entrando nella relativa scheda, potrai disattivare le notifiche via email e/o push (che possono essere disabilitate anche tramite la funzionalità del tuo dispositivo);
+- nella Sezione [Preferenze](ioit://PROFILE_PREFERENCES_HOME) troverai la funzione "Inoltro dei messaggi via email" dove potrai abilitare/disabilitare tale modalità di notifica per tutti o singoli servizi.
+
+Infine, è importante sapere che per ora i messaggi inviati dagli enti tramite IO non hanno valore legale.
+
+Per approfondimenti ti invitiamo a consultare la sezione [servizi](ioit://SERVICES_HOME) di questa applicazione; per maggiori informazioni sull’avanzamento del progetto, visita il sito [io.italia.it](https://io.italia.it).
+`,
+        subject: `È arrivato il Cashback`
+      }
+    }).getOrElseL(throwInvalidMessageError)
 };
 
 /**
