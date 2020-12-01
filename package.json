@@ -18,7 +18,9 @@
     "generate:backend:notification-hub": "shx rm -rf generated/notifications && shx mkdir -p generated/notifications && gen-api-models --strict 0 --api-spec https://raw.githubusercontent.com/pagopa/io-backend/master/notification_queue_messages.yaml --out-dir generated/notifications",
     "deploy": "npm run build && func azure functionapp publish agid-functions-app-test",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
-    "predeploy": "npm-run-all build dist:modules"
+    "predeploy": "npm-run-all build dist:modules",
+    "preversion": "auto-changelog  --config .auto-changelog.json --unreleased --commit-limit false --stdout --template preview.hbs",
+    "version": "auto-changelog -p --config .auto-changelog.json --unreleased && git add CHANGELOG.md"
   },
   "description": "",
   "devDependencies": {
@@ -30,6 +32,7 @@
     "@types/jest": "^24.0.15",
     "@types/lolex": "^3.1.1",
     "@types/nodemailer": "^4.6.8",
+    "auto-changelog": "^2.2.1",
     "danger": "^4.0.2",
     "danger-plugin-digitalcitizenship": "^0.3.1",
     "dotenv": "^8.2.0",
@@ -42,7 +45,6 @@
     "modclean": "^3.0.0-beta.1",
     "npm-run-all": "^4.1.5",
     "prettier": "^1.18.2",
-    "release-it": "^12.5.0",
     "shx": "^0.3.2",
     "ts-jest": "^24.0.2",
     "tslint": "^5.17.0",
