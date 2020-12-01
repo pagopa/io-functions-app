@@ -117,6 +117,17 @@ Aggiungi subito i metodi **a te intestati** nella sezione [Portafoglio](ioit://W
 
 #### Come si aggiunge l'IBAN per ricevere il rimborso previsto?
 Attiva il Cashback e inserisci l’IBAN quando richiesto. Puoi inserirlo anche in un secondo momento, ma ricordati di farlo entro il termine del periodo per avere diritto al rimborso.
+
+---
+it:
+  cta_1:
+    text: "Attiva il cashback"
+    action: "ioit://CTA_START_BPD"
+en:
+  cta_1:
+    text: "Request cashback"
+    action: "ioit://CTA_START_BPD"
+---
 `,
         subject: `Attiva il Cashback!`
       }
