@@ -14,20 +14,15 @@ variables:
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=azure-devops&tabs=schema%2Cparameter-schema#pr-trigger
 trigger: none
 
-# This pipeline has been implemented to be run on hosted agent pools based both
-# on 'windows' and 'ubuntu' virtual machine images and using the scripts defined
-# in the package.json file. Since we are deploying on Azure functions on Windows
-# runtime, the pipeline is currently configured to use a Windows hosted image for
-# the build and deploy.
+# Execute agents (jobs) on latest Ubuntu version.
+# To change OS for a specific, ovverride "pool" attribute inside the job definition
 pool:
   vmImage: 'ubuntu-latest'
 
 stages:
-  # A) Build and code validation
   - stage: Build
     dependsOn: []
     jobs:
-      # A1) Checkout, install module and build code
       - job: make_build
         pool:
           # As we deploy on Wondows machines, we use Windows to build
@@ -36,26 +31,26 @@ stages:
         - template: azure-templates/make-build-steps.yml
           parameters:
             make: build
-            
-      # A2) Analyze source code to find errors with lint
+  
+  - stage: Static_analysis
+    dependsOn: []
+    jobs:
+
       - job: lint     
         steps:
         - template: azure-templates/make-build-steps.yml
           parameters:
             make: install_dependencies
-
         - script: |
             yarn lint
           displayName: 'Lint'
 
-      # A3) Validate API definition
-      - job: lint_api     
+      - job: validate_api_specification     
         steps:
         - script: |
             npx oval validate -p openapi/index.yaml
-          displayName: 'Validate openAPI'
+          displayName: 'Validate API specification'
 
-      # A4) Run Danger (skipping if not executing on a PR)
       - job: danger
         condition: 
           and(
@@ -86,6 +81,10 @@ stages:
         - template: azure-templates/make-build-steps.yml
           parameters:
             make: install_dependencies
+        
+        - script: |
+            yarn generate
+          displayName: 'Generate definitions'
 
         - script: |
             yarn test:coverage
