@@ -54,11 +54,8 @@ stages:
       - job: danger
         condition: 
           and(
-            succeeded(), 
-            and(
-              eq(variables['Build.Reason'], 'PullRequest'),
-              ne(variables['DANGER_GITHUB_API_TOKEN'], 'skip')
-            )
+            succeeded(),
+            ne(variables['DANGER_GITHUB_API_TOKEN'], 'skip')
           )
         steps:
           - template: azure-templates/make-build-steps.yml
