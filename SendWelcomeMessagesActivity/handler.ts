@@ -129,7 +129,9 @@ Aggiungi subito i metodi **a te intestati** nella sezione [Portafoglio](ioit://W
 Attiva il Cashback e inserisci l’IBAN quando richiesto. Puoi inserirlo anche in un secondo momento, ma ricordati di farlo entro il termine del periodo per avere diritto al rimborso.
 
 Per poter attivare il Cashback, devi avere aggiornato IO all'ultima versione disponibile. Scaricala adesso!
+
 [App Store](https://apps.apple.com/it/app/io/id1501681835)
+
 [Play Store](https://play.google.com/store/apps/details?id=it.pagopa.io.app)
 `,
         subject: `Attiva il Cashback!`
