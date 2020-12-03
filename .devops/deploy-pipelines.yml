@@ -110,8 +110,7 @@ stages:
                 !**/*.js.map
                 !**/*.ts
                 !.vscode/**/*
-                !azure-templates/**/*
-                !azure-pipelines.yml
+                !.devops/**/*
                 !.prettierrc
                 !.gitignore
                 !README.md
@@ -119,6 +118,11 @@ stages:
                 !local.settings.json
                 !test
                 !tsconfig.json
+                !tslint.json
+                !yarn.lock
+                !Dangerfile.js
+                !CODEOWNERS
+                !__*/**/*
             displayName: 'Copy deploy files'
             
           - task: AzureFunctionApp@1  
