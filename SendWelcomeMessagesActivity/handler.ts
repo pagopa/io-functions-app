@@ -100,7 +100,17 @@ Per approfondimenti ti invitiamo a consultare la sezione [servizi](ioit://SERVIC
   CASHBACK: (_: RetrievedProfile) =>
     NewMessage.decode({
       content: {
-        markdown: `Aderisci al “Cashback” tramite la sezione **Portafoglio** dell’app IO: puoi ottenere un rimborso sugli acquisti effettuati con carte, bancomat e app di pagamento. Il “Cashback” è una delle iniziative del Piano Italia Cashless promosso dal Governo allo scopo di incentivare un maggiore utilizzo di moneta elettronica nel Paese.
+        markdown: `---
+it:
+  cta_1:
+    text: "Attiva il cashback"
+    action: "ioit://CTA_START_BPD"
+en:
+  cta_1:
+    text: "Request cashback"
+    action: "ioit://CTA_START_BPD"
+---
+Aderisci al “Cashback” tramite la sezione **Portafoglio** dell’app IO: puoi ottenere un rimborso sugli acquisti effettuati con carte, bancomat e app di pagamento. Il “Cashback” è una delle iniziative del Piano Italia Cashless promosso dal Governo allo scopo di incentivare un maggiore utilizzo di moneta elettronica nel Paese.
 
 #### Chi può richiederlo?
 Se hai compiuto i 18 anni e risiedi in Italia, puoi ottenere un **rimborso in denaro** a fronte di acquisti personali e non per uso professionale con i tuoi **metodi di pagamento elettronici** presso **punti vendita fisici** (non online) situati sul territorio nazionale.
@@ -121,17 +131,6 @@ Attiva il Cashback e inserisci l’IBAN quando richiesto. Puoi inserirlo anche i
 Per poter attivare il Cashback, devi avere aggiornato IO all'ultima versione disponibile. Scaricala adesso!
 [App Store](https://apps.apple.com/it/app/io/id1501681835)
 [Play Store](https://play.google.com/store/apps/details?id=it.pagopa.io.app)
-
----
-it:
-  cta_1:
-    text: "Attiva il cashback"
-    action: "ioit://CTA_START_BPD"
-en:
-  cta_1:
-    text: "Request cashback"
-    action: "ioit://CTA_START_BPD"
----
 `,
         subject: `Attiva il Cashback!`
       }
