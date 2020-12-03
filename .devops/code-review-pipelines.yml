@@ -28,9 +28,10 @@ stages:
           # As we deploy on Wondows machines, we use Windows to build
           vmImage: 'windows-2019'         
         steps:
-        - template: azure-templates/make-build-steps.yml
-          parameters:
-            make: build
+        - template: azure-templates/setup-project.yml
+        - script: |
+            yarn build
+          displayName: 'Build'
   
   - stage: Static_analysis
     dependsOn: []
@@ -38,9 +39,7 @@ stages:
 
       - job: lint     
         steps:
-        - template: azure-templates/make-build-steps.yml
-          parameters:
-            make: install_dependencies
+        - template: azure-templates/setup-project.yml
         - script: |
             yarn lint
           displayName: 'Lint'
@@ -75,9 +74,7 @@ stages:
     jobs:
       - job: unit_tests
         steps:
-        - template: azure-templates/make-build-steps.yml
-          parameters:
-            make: install_dependencies
+        - template: azure-templates/setup-project.yml
         
         - script: |
             yarn generate
