@@ -76,25 +76,25 @@ Grazie di far parte del progetto IO!
   HOWTO: (_: RetrievedProfile) =>
     NewMessage.decode({
       content: {
-        markdown: `## Scopri quali enti e servizi puoi trovare all’interno di IO.
+        markdown: `L’app IO nasce per offrirti un unico punto di accesso, comodo, semplice e sicuro, verso tutti i servizi della Pubblica Amministrazione.
 
-L’app IO nasce per offrirti un unico punto di accesso, comodo, semplice e sicuro, verso tutti i servizi della Pubblica Amministrazione. Diversi enti nazionali e locali hanno già portato i loro servizi a bordo e molti se ne aggiungeranno in futuro. Siamo infatti solo all’inizio del percorso che, progressivamente, porterà i cittadini italiani ad avere nuovi servizi digitali messi a disposizione da tutti gli enti pubblici all’interno dell’app.
+Dall’8 dicembre 2020 parte il programma Cashback, con l’Extra Cashback di Natale. Con l’app IO potrai aderire al programma tramite la relativa scheda di servizio o dalla sezione **Portafoglio** dell’app: puoi ottenere un rimborso sugli acquisti effettuati con carte, bancomat e app di pagamento. Il “Cashback” è una delle iniziative del Piano Italia Cashless promosso dal Governo allo scopo di incentivare un maggiore utilizzo di moneta elettronica nel Paese.
 
-Nella sezione [servizi](ioit://SERVICES_HOME) puoi indicare le aree geografiche di tuo interesse (dove vivi, dove lavori, o dove magari vai spesso) per essere sempre informato sui nuovi servizi in arrivo in quel Comune o in quella Regione.
+Oltre al Cashback, promosso dal Ministero dell’Economia e delle Finanze, diversi enti nazionali e locali hanno già portato i loro servizi a bordo e molti se ne aggiungeranno in futuro. Nella sezione **[Servizi](ioit://SERVICES_HOME)** puoi indicare le aree geografiche di tuo interesse (dove vivi, dove lavori, o dove magari vai spesso) per ricevere aggiornamenti sui nuovi servizi in arrivo in quel Comune o in quella Regione.
 
 Se non vedi gli enti del tuo territorio tra quelli elencati, è perché i loro servizi sono ancora in corso di integrazione. Se vuoi saperne di più, chiedi al tuo Comune se hanno attivato il processo per essere presenti su IO e a che punto sono. La tua voce può essere un segnale importante!
 
-Tutti i servizi all’interno dell’app sono attivi: questo non vuol dire che ti contatteranno, anzi. Ti scriveranno solo i servizi che hanno qualcosa da dire proprio a te, in caso di comunicazioni rilevanti come ad esempio la scadenza di un documento, il promemoria per un pagamento o l’aggiornamento su una pratica in corso.
-Se, per un determinato servizio, preferisci utilizzare mezzi di comunicazione diversi dall’app IO, puoi in ogni momento disattivarlo: in quel caso, l’Ente continuerà a contattarti avvalendosi dei canali tradizionali (come ad esempio la posta cartacea).
+Tutti i servizi all’interno dell’app sono attivi: questo significa che ti scriveranno quando hanno qualcosa di rilevante da dire proprio a te, ad esempio: la scadenza di un documento, il promemoria per un pagamento o l’aggiornamento su una pratica in corso.
+Puoi disattivare ciascun servizio in qualsiasi momento: in quel caso, l’Ente continuerà a contattarti avvalendosi dei canali tradizionali (come ad esempio la posta cartacea).
 In particolare:
-- nella sezione [Servizi](ioit://SERVICES_HOME) ti viene data la possibilità di disattivare tutti i servizi, disattivare tutti i servizi per un singolo Ente, oppure disattivare singoli servizi. Inoltre cliccando su ciascun servizio e entrando nella relativa scheda, potrai disattivare le notifiche via email e/o push (che possono essere disabilitate anche tramite la funzionalità del tuo dispositivo);
+- nella sezione [Servizi](ioit://SERVICES_HOME) puoi disattivare un singolo servizio, tutti quelli di un singolo Ente o tutti i servizi in generale. Inoltre, dalla scheda di ciascun servizio, potrai disattivare le notifiche via email e/o push;
 - nella Sezione [Preferenze](ioit://PROFILE_PREFERENCES_HOME) troverai la funzione "Inoltro dei messaggi via email" dove potrai abilitare/disabilitare tale modalità di notifica per tutti o singoli servizi.
 
 Infine, è importante sapere che per ora i messaggi inviati dagli enti tramite IO non hanno valore legale.
 
-Per approfondimenti ti invitiamo a consultare la sezione [servizi](ioit://SERVICES_HOME) di questa applicazione; per maggiori informazioni sull’avanzamento del progetto, visita il sito [io.italia.it](https://io.italia.it).
+Per maggiori informazioni sull’avanzamento del progetto, visita il sito [io.italia.it](https://io.italia.it).
 `,
-        subject: `Quali servizi trovi su IO?`
+        subject: `Il Cashback e gli altri servizi su IO`
       }
     }).getOrElseL(throwInvalidMessageError),
   CASHBACK: (_: RetrievedProfile) =>
