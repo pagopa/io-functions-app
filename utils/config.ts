@@ -5,6 +5,7 @@
  * The configuration is evaluate eagerly at the first access to the module. The module exposes convenient methods to access such value.
  */
 
+import { fromNullable } from "fp-ts/lib/Option";
 import * as t from "io-ts";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
@@ -65,6 +66,8 @@ export const IConfig = t.intersection([
     SPID_LOGS_PUBLIC_KEY: NonEmptyString,
     SUBSCRIPTIONS_FEED_TABLE: NonEmptyString,
 
+    IS_CASHBACK_ENABLED: t.boolean,
+
     isProduction: t.boolean
   }),
   MailerConfig,
@@ -74,6 +77,9 @@ export const IConfig = t.intersection([
 // No need to re-evaluate this object for each call
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   ...process.env,
+  IS_CASHBACK_ENABLED: fromNullable(process.env.IS_CASHBACK_ENABLED)
+    .map(_ => _.toLocaleLowerCase() === "true")
+    .getOrElse(false),
   isProduction: process.env.NODE_ENV === "production"
 });
 
