@@ -3861,20 +3861,6 @@ italia-ts-commons@^7.0.1:
     node-fetch "^2.6.0"
     validator "^10.1.0"
 
-italia-ts-commons@^8.1.0:
-  version "8.1.0"
-  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-8.1.0.tgz#929c805a7d9e8877fef26436946bf3ee76a76c82"
-  integrity sha512-d03UKxjeIX+4otNgZaDoS8t1l+gVEHD/q/JsQox1CC3nAiKHQ9TFNv4BdHIiUIswgpx1szjT6lzeJQUCUL++YA==
-  dependencies:
-    abort-controller "^3.0.0"
-    agentkeepalive "^4.1.2"
-    applicationinsights "^1.7.4"
-    fp-ts "1.17.4"
-    io-ts "1.8.5"
-    json-set-map "^1.0.2"
-    node-fetch "^2.6.0"
-    validator "^10.1.0"
-
 italia-ts-commons@^8.6.0:
   version "8.6.0"
   resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-8.6.0.tgz#d0e944ae7fb52d63ec016e172e6950529924f2fb"
