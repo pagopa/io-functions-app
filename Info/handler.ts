@@ -18,7 +18,7 @@ type InfoHandler = () => Promise<
   IResponseSuccessJson<IInfo> | IResponseErrorInternal
 >;
 
-export function InfoHandler(healthCheck: HealthCheck): InfoHandler {
+export function InfoHandler(_: HealthCheck): InfoHandler {
   return () =>
     Promise.resolve(
       ResponseSuccessJson({
