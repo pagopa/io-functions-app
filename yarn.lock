@@ -660,14 +660,6 @@ agentkeepalive@^4.1.2:
     depd "^1.1.2"
     humanize-ms "^1.2.1"
 
-"agentkeepalive@https://github.com/pagopa/agentkeepalive#v4.1.1":
-  version "4.1.0"
-  resolved "https://github.com/pagopa/agentkeepalive#91309bcab216dccbd08631e227a974afbfe807fb"
-  dependencies:
-    debug "^4.1.0"
-    depd "^1.1.2"
-    humanize-ms "^1.2.1"
-
 ajv@^6.5.5:
   version "6.10.0"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.10.0.tgz#90d0d54439da587cd7e843bfb7045f50bd22bdf1"
@@ -3356,10 +3348,10 @@ invert-kv@^2.0.0:
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-2.0.0.tgz#7393f5afa59ec9ff5f67a27620d11c226e3eec02"
   integrity sha512-wPVv/y/QQ/Uiirj/vh3oP+1Ww+AWehmi1g5fFWGPF6IpCBCDVrhgHRMvrLfdYcwDh3QJbGXDW4JAuzxElLSqKA==
 
-io-functions-commons@^16.0.0:
-  version "16.1.0"
-  resolved "https://registry.yarnpkg.com/io-functions-commons/-/io-functions-commons-16.1.0.tgz#cf50145d1d9f6cf197e1fcfdbf9551c53047bc64"
-  integrity sha512-CT4aMqkRHbuG1vm99jNOcAfUhLZL8SynNSoI0mGFDxwf0bPupK4efz/0cV5zc6aZr1dA8kEThqhartk50V3wJQ==
+io-functions-commons@^17.1.0:
+  version "17.1.0"
+  resolved "https://registry.yarnpkg.com/io-functions-commons/-/io-functions-commons-17.1.0.tgz#1e0a6ed734bb177a4fa65a4938adad1ad516cfa7"
+  integrity sha512-/zo7XkqNez/7l1RXlC4Pr1BpUI9ZFuRJrqIOC+NpCm36xjmhp7RgPDokF3ffXjwTVXsK5XaaMbCyXH48zzB97g==
   dependencies:
     "@azure/cosmos" "^3.7.2"
     applicationinsights "^1.7.3"
@@ -3370,7 +3362,7 @@ io-functions-commons@^16.0.0:
     helmet-csp "^2.5.1"
     io-functions-express "^0.1.1"
     io-ts "1.8.5"
-    italia-ts-commons "^7.0.1"
+    italia-ts-commons "^8.6.0"
     node-fetch "^2.6.1"
     nodemailer "^6.4.13"
     nodemailer-sendgrid "^1.0.3"
@@ -3847,19 +3839,6 @@ istanbul-reports@^2.1.1:
   integrity sha512-SKi4rnMyLBKe0Jy2uUdx28h8oG7ph2PPuQPvIAh31d+Ci+lSiEu4C+h3oBPuJ9+mPKhOyW0M8gY4U5NM1WLeXA==
   dependencies:
     handlebars "^4.1.2"
-
-italia-ts-commons@^7.0.1:
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-7.0.1.tgz#7068643b09f069f4c96627e609d5dc578a64a04a"
-  integrity sha512-IIZYim8LydSA3nbeCxbR23marXhx3Z/FLUh7cV6XxNrB5OpKeVMmQhXV42oErP+g/vsrCQ/LRSrLX8cpi1Nghg==
-  dependencies:
-    agentkeepalive "https://github.com/pagopa/agentkeepalive#v4.1.1"
-    applicationinsights "^1.7.4"
-    fp-ts "1.17.4"
-    io-ts "1.8.5"
-    json-set-map "^1.0.2"
-    node-fetch "^2.6.0"
-    validator "^10.1.0"
 
 italia-ts-commons@^8.6.0:
   version "8.6.0"
