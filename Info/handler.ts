@@ -18,14 +18,18 @@ type InfoHandler = () => Promise<
   IResponseSuccessJson<IInfo> | IResponseErrorInternal
 >;
 
-export function InfoHandler(_: HealthCheck): InfoHandler {
+export function InfoHandler(healthCheck: HealthCheck): InfoHandler {
   return () =>
-    Promise.resolve(
-      ResponseSuccessJson({
-        name: packageJson.name,
-        version: packageJson.version
-      })
-    );
+    healthCheck
+      .fold<IResponseSuccessJson<IInfo> | IResponseErrorInternal>(
+        problems => ResponseErrorInternal(problems.join("\n\n")),
+        _ =>
+          ResponseSuccessJson({
+            name: packageJson.name,
+            version: packageJson.version
+          })
+      )
+      .run();
 }
 
 export function Info(): express.RequestHandler {
