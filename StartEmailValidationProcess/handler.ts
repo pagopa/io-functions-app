@@ -115,7 +115,7 @@ export function StartEmailValidationProcessHandler(
           IResponseSuccessAccepted
         >(fromLeft, _ =>
           _.isRunning
-            ? taskEither.of(ResponseSuccessAccepted())
+            ? taskEither.of(void 0)
             : tryCatch(
                 () =>
                   dfClient.startNew(
@@ -124,14 +124,14 @@ export function StartEmailValidationProcessHandler(
                     emailValidationProcessOrchestartorInput
                   ),
                 toError
-              ).map(() => ResponseSuccessAccepted())
+              )
         )
       )
       .mapLeft(err => {
         context.log.error(`${logPrefix}|ERROR=${String(err)}`);
         throw new Error(String(err));
       })
-      .fold<ReturnTypes>(identity, identity)
+      .fold<ReturnTypes>(identity, () => ResponseSuccessAccepted())
       .run();
   };
 }
