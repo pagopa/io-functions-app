@@ -6,11 +6,6 @@
       "name": "notificationHubMessage",
       "type": "queueTrigger",
       "direction": "in"
-    },
-    {
-      "name": "starter",
-      "type": "orchestrationClient",
-      "direction": "in"
     }
   ],
   "disabled": false,

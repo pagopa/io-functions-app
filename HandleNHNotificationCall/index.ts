@@ -1,9 +1,11 @@
 import { Context } from "@azure/functions";
-import * as df from "durable-functions";
 import * as t from "io-ts";
+import { readableReport } from "italia-ts-commons/lib/reporters";
 import { CreateOrUpdateInstallationMessage } from "../generated/notifications/CreateOrUpdateInstallationMessage";
 import { DeleteInstallationMessage } from "../generated/notifications/DeleteInstallationMessage";
 import { NotifyMessage } from "../generated/notifications/NotifyMessage";
+import { getCallNHServiceActivityHandler } from "../HandleNHNotificationCallActivity/handler";
+import { NhNotificationOrchestratorInput } from "../HandleNHNotificationCallOrchestrator/handler";
 import { initTelemetryClient } from "../utils/appinsights";
 
 export const NotificationMessage = t.union([
@@ -22,11 +24,21 @@ initTelemetryClient();
  */
 export async function index(
   context: Context,
-  notificationHubMessage: NotificationHubMessage
+  input: NotificationHubMessage
 ): Promise<void> {
-  await df
-    .getClient(context)
-    .startNew("HandleNHNotificationCallOrchestrator", undefined, {
-      message: notificationHubMessage
-    });
+  const logPrefix = `NHCallOrchestrator`;
+  // We don't start an orchestrator anymore (to improve performance)
+  // but since we must wait for the completion of all durable tasks,
+  // we keep it in place at least until the durable task queues are empty.
+  // @FIXME: naming
+  return NhNotificationOrchestratorInput.decode(input).fold(
+    err => {
+      context.log.error(`${logPrefix}|Error decoding input`);
+      context.log.verbose(
+        `${logPrefix}|Error decoding input|ERROR=${readableReport(err)}`
+      );
+    },
+    notificationActivityInput =>
+      getCallNHServiceActivityHandler()(context, notificationActivityInput)
+  );
 }
