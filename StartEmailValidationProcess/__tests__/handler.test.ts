@@ -1,19 +1,10 @@
 /* tslint:disable: no-any */
 
 import { some } from "fp-ts/lib/Option";
-
-import * as df from "durable-functions";
-
 import { taskEither } from "fp-ts/lib/TaskEither";
-import { context as contextMock } from "../../__mocks__/durable-functions";
+import { context as contextMock } from "../../__mocks__/durable-functions_bck";
 import { aRetrievedProfile } from "../../__mocks__/mocks";
-import { OrchestratorInput as EmailValidationProcessOrchestratorInput } from "../../EmailValidationProcessOrchestrator/handler";
 import { StartEmailValidationProcessHandler } from "../handler";
-
-beforeEach(() => {
-  (df.getClient as any).mockClear();
-  (df as any).mockStartNew.mockClear();
-});
 
 describe("StartEmailValidationProcessHandler", () => {
   it("should start the orchestrator with the right input and return an acceppted response", async () => {
@@ -30,22 +21,6 @@ describe("StartEmailValidationProcessHandler", () => {
       aRetrievedProfile.fiscalCode
     );
 
-    const emailValidationProcessOrchestratorInput = EmailValidationProcessOrchestratorInput.encode(
-      {
-        email: aRetrievedProfile.email,
-        fiscalCode: aRetrievedProfile.fiscalCode
-      }
-    );
-
-    expect(df.getClient).toHaveBeenCalledTimes(1);
-
-    const dfClient = df.getClient(contextMock);
-    expect(dfClient.startNew).toHaveBeenCalledWith(
-      "EmailValidationProcessOrchestrator",
-      undefined,
-      emailValidationProcessOrchestratorInput
-    );
-
     expect(result.kind).toBe("IResponseSuccessAccepted");
   });
 
@@ -59,7 +34,10 @@ describe("StartEmailValidationProcessHandler", () => {
     const handler = StartEmailValidationProcessHandler(profileModelMock as any);
 
     await handler(contextMock as any, aRetrievedProfile.fiscalCode);
-
-    expect(df.getClient).not.toHaveBeenCalledTimes(1);
+    const result = await handler(
+      contextMock as any,
+      aRetrievedProfile.fiscalCode
+    );
+    expect(result.kind).toBe("IResponseErrorValidation");
   });
 });
