@@ -38,7 +38,6 @@ import {
 
 import { identity } from "fp-ts/lib/function";
 import { taskEither, tryCatch } from "fp-ts/lib/TaskEither";
-import { fromLeft } from "fp-ts/lib/TaskEither";
 import { OrchestratorInput as EmailValidationProcessOrchestratorInput } from "../EmailValidationProcessOrchestrator/handler";
 import {
   isOrchestratorRunning,
