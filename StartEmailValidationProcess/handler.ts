@@ -124,7 +124,6 @@ export function StartEmailValidationProcessHandler(
         )
       )
       .mapLeft(err => {
-        context.log.error(`${logPrefix}|ERROR=${String(err)}`);
         throw new Error(String(err));
       })
       .fold<ReturnTypes>(identity, () => ResponseSuccessAccepted())
