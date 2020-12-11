@@ -13,10 +13,12 @@ import { isLeft, toError } from "fp-ts/lib/Either";
 import { isNone } from "fp-ts/lib/Option";
 
 import {
+  IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessAccepted,
   IResponseSuccessJson,
+  ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseErrorValidation,
   ResponseSuccessAccepted
@@ -36,8 +38,7 @@ import {
   wrapRequestHandler
 } from "io-functions-commons/dist/src/utils/request_middleware";
 
-import { identity } from "fp-ts/lib/function";
-import { taskEither, tryCatch } from "fp-ts/lib/TaskEither";
+import { fromPredicate, taskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import { OrchestratorInput as EmailValidationProcessOrchestratorInput } from "../EmailValidationProcessOrchestrator/handler";
 import {
   isOrchestratorRunning,
@@ -50,7 +51,8 @@ type ReturnTypes =
   | IResponseErrorValidation
   | IResponseErrorQuery
   | IResponseErrorNotFound
-  | IResponseSuccessAccepted;
+  | IResponseSuccessAccepted
+  | IResponseErrorInternal;
 
 /**
  * Type of an StartEmailValidationProcess handler.
@@ -109,10 +111,13 @@ export function StartEmailValidationProcessHandler(
     return taskEither
       .of(makeStartEmailValidationProcessOrchestratorId(fiscalCode, email))
       .chain(orchId =>
-        isOrchestratorRunning(dfClient, orchId).chain(_ =>
-          _.isRunning
-            ? taskEither.of(void 0)
-            : tryCatch(
+        isOrchestratorRunning(dfClient, orchId)
+          .chain(
+            fromPredicate(_ => _.isRunning, () => new Error("Not Running"))
+          )
+          .foldTaskEither(
+            () =>
+              tryCatch(
                 () =>
                   dfClient.startNew(
                     "EmailValidationProcessOrchestrator",
@@ -120,13 +125,14 @@ export function StartEmailValidationProcessHandler(
                     emailValidationProcessOrchestartorInput
                   ),
                 toError
-              )
-        )
+              ),
+            _ => taskEither.of(String(_.isRunning))
+          )
       )
-      .mapLeft(err => {
-        throw new Error(String(err));
-      })
-      .fold<ReturnTypes>(identity, () => ResponseSuccessAccepted())
+      .fold<ReturnTypes>(
+        e => ResponseErrorInternal(String(e)),
+        () => ResponseSuccessAccepted()
+      )
       .run();
   };
 }
