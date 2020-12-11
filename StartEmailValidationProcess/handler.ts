@@ -110,10 +110,7 @@ export function StartEmailValidationProcessHandler(
     return taskEither
       .of(makeStartEmailValidationProcessOrchestratorId(fiscalCode, email))
       .chain(orchId =>
-        isOrchestratorRunning(dfClient, orchId).foldTaskEither<
-          Error,
-          IResponseSuccessAccepted
-        >(fromLeft, _ =>
+        isOrchestratorRunning(dfClient, orchId).chain(_ =>
           _.isRunning
             ? taskEither.of(void 0)
             : tryCatch(
