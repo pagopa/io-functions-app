@@ -29,7 +29,7 @@ export type NhNotificationOrchestratorInput = t.TypeOf<
 initTelemetryClient();
 
 /**
- * Invoke Orchestrator to manage Notification Hub Service call with data provided by an enqued message
+ * Invoke Notification Hub Service call with data provided by an enqued message
  */
 export async function index(context: Context, input: unknown): Promise<void> {
   const logPrefix = `NHCallOrchestrator`;
