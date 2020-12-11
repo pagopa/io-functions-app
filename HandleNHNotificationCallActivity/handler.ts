@@ -109,7 +109,7 @@ export const getCallNHServiceActivityHandler = (
             .chainFirst(
               taskEither.of(
                 telemetryClient.trackEvent({
-                  name: "api.messages.notification.push",
+                  name: "api.messages.notification.push.sent",
                   properties: {
                     isSuccess: "true",
                     messageId: message.payload.message_id
