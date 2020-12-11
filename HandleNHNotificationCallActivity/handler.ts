@@ -16,6 +16,7 @@ import {
   deleteInstallation,
   notify
 } from "../utils/notification";
+
 import { initTelemetryClient } from "../utils/appinsights";
 
 // Activity input
