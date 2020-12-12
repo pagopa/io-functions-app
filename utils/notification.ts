@@ -13,6 +13,7 @@ import {
   newHttpsAgent,
   getKeepAliveAgentOptions
 } from "italia-ts-commons/lib/agent";
+import { NotificationHubService } from "azure-sb";
 
 /**
  * Notification template.
@@ -41,40 +42,41 @@ export enum APNSPushType {
 
 const config = getConfigOrThrow();
 
-const notificationHubService = azure.createNotificationHubService(
-  config.AZURE_NH_HUB_NAME,
-  config.AZURE_NH_ENDPOINT
-);
+const httpsAgent = newHttpsAgent(getKeepAliveAgentOptions(process.env));
 
 // Monkey patch azure-sb package in order to use agentkeepalive
 // when calling the Notification Hub API.
 // @FIXME: remove this part and upgrade to @azure/notification-hubs
 // once this goes upstream: https://github.com/Azure/azure-sdk-for-js/pull/11977
-const httpsAgent = newHttpsAgent(getKeepAliveAgentOptions(process.env));
+class ExtendedNotificationHubService extends NotificationHubService {
+  constructor(hubName: string, endpointOrConnectionString: string) {
+    super(hubName, endpointOrConnectionString, undefined, undefined);
+  }
+  private _buildRequestOptions(
+    webResource: any,
+    body: any,
+    options: any,
+    cb: Function
+  ) {
+    const patchedCallback = (err: any, cbOptions: any) => {
+      cb(err, {
+        ...cbOptions,
+        agent: httpsAgent
+      });
+    };
+    return super["_buildRequestOptions"](
+      webResource,
+      body,
+      options,
+      patchedCallback
+    );
+  }
+}
 
-const buildRequestOptions = (notificationHubService as any)
-  ._buildRequestOptions;
-
-(notificationHubService as any)._buildRequestOptions = (
-  webResource: any,
-  body: any,
-  options: any,
-  cb: Function
-) => {
-  const patchedCallback = (err: any, cbOptions: any) => {
-    cb(err, {
-      ...cbOptions,
-      agent: httpsAgent
-    });
-  };
-  return buildRequestOptions.call(
-    notificationHubService,
-    webResource,
-    body,
-    options,
-    patchedCallback
-  );
-};
+const notificationHubService = new ExtendedNotificationHubService(
+  config.AZURE_NH_HUB_NAME,
+  config.AZURE_NH_ENDPOINT
+);
 
 /**
  * A template suitable for Apple's APNs.
