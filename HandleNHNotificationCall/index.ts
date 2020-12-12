@@ -31,13 +31,18 @@ initTelemetryClient();
 /**
  * Invoke Notification Hub Service call with data provided by an enqued message
  */
-export async function index(context: Context, input: unknown): Promise<void> {
-  const logPrefix = `NHCallOrchestrator`;
+export async function index(
+  context: Context,
+  notificationHubMessage: unknown
+): Promise<void> {
+  const logPrefix = `HandleNHNotificationCall`;
   // We don't start an orchestrator anymore (to improve performance)
   // but since we must wait for the completion of all durable tasks,
   // we keep it in place at least until the durable task queues are empty.
   // @FIXME: naming
-  return NhNotificationOrchestratorInput.decode(input).fold(
+  return NhNotificationOrchestratorInput.decode({
+    message: notificationHubMessage
+  }).fold(
     err => {
       context.log.error(`${logPrefix}|Error decoding input`);
       context.log.verbose(
