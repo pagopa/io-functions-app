@@ -5,15 +5,14 @@
 import * as t from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
-import * as azure from "azure-sb";
+import { NotificationHubService } from "azure-sb";
 import { tryCatch } from "fp-ts/lib/TaskEither";
+import {
+  getKeepAliveAgentOptions,
+  newHttpsAgent
+} from "italia-ts-commons/lib/agent";
 import { Platform, PlatformEnum } from "../generated/backend/Platform";
 import { getConfigOrThrow } from "../utils/config";
-import {
-  newHttpsAgent,
-  getKeepAliveAgentOptions
-} from "italia-ts-commons/lib/agent";
-import { NotificationHubService } from "azure-sb";
 
 /**
  * Notification template.
@@ -52,18 +51,25 @@ class ExtendedNotificationHubService extends NotificationHubService {
   constructor(hubName: string, endpointOrConnectionString: string) {
     super(hubName, endpointOrConnectionString, undefined, undefined);
   }
+  // tslint:disable-next-line: typedef
   private _buildRequestOptions(
+    // tslint:disable-next-line: no-any
     webResource: any,
+    // tslint:disable-next-line: no-any
     body: any,
+    // tslint:disable-next-line: no-any
     options: any,
+    // tslint:disable-next-line: ban-types
     cb: Function
   ) {
+    // tslint:disable-next-line: no-any
     const patchedCallback = (err: any, cbOptions: any) => {
       cb(err, {
         ...cbOptions,
         agent: httpsAgent
       });
     };
+    // tslint:disable-next-line: no-string-literal
     return super["_buildRequestOptions"](
       webResource,
       body,

@@ -1,8 +1,9 @@
+// tslint:disable-next-line: no-object-mutation
 process.env = {
   ...process.env,
-  AZURE_NH_HUB_NAME: "io-notification-hub-mock",
   AZURE_NH_ENDPOINT:
     "Endpoint=sb://127.0.0.1:30000;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=foobar",
+  AZURE_NH_HUB_NAME: "io-notification-hub-mock",
   FETCH_KEEPALIVE_ENABLED: "true",
   FETCH_KEEPALIVE_FREE_SOCKET_TIMEOUT: "30000",
   FETCH_KEEPALIVE_MAX_FREE_SOCKETS: "10",
@@ -12,22 +13,27 @@ process.env = {
 };
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { notify } from "../notification";
 import * as nock from "nock";
+import { notify } from "../notification";
 
 describe("NotificationHubService", () => {
   it("should use agentkeepalive when calling notification hub", async () => {
     const responseSpy = jest.fn();
-    const scope = nock("https://127.0.0.1:30000")
+    nock("https://127.0.0.1:30000")
       .post(_ => true)
+      // tslint:disable-next-line: typedef
       .reply(function() {
-        responseSpy((this.req as any).options.agent.keepAlive);
+        // tslint:disable-next-line: no-tslint-disable-all
+        // tslint:disable-next-line
+        responseSpy((this.req as any).options.agent.options.maxSockets);
       });
     await notify("x" as NonEmptyString, {
       message: "foo",
       message_id: "bar",
       title: "beef"
     }).run();
-    expect(responseSpy).toHaveBeenCalledWith(true);
+    expect(responseSpy).toHaveBeenCalledWith(
+      parseInt(process.env.FETCH_KEEPALIVE_MAX_SOCKETS, 10)
+    );
   });
 });
