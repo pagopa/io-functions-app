@@ -19,9 +19,6 @@ describe("NotificationHubService", () => {
       .reply(function() {
         // tslint:disable-next-line: no-tslint-disable-all
         // tslint:disable-next-line
-        console.log((this.req as any).options.agent.options.maxSockets);
-        // tslint:disable-next-line: no-tslint-disable-all
-        // tslint:disable-next-line
         responseSpy((this.req as any).options.agent.options.maxSockets);
       });
     await notify("x" as NonEmptyString, {
