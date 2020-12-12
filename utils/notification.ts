@@ -52,13 +52,10 @@ class ExtendedNotificationHubService extends NotificationHubService {
     super(hubName, endpointOrConnectionString, undefined, undefined);
   }
   // tslint:disable-next-line: typedef
-  private _buildRequestOptions(
-    // tslint:disable-next-line: no-any
-    webResource: any,
-    // tslint:disable-next-line: no-any
-    body: any,
-    // tslint:disable-next-line: no-any
-    options: any,
+  public _buildRequestOptions(
+    webResource: unknown,
+    body: unknown,
+    options: unknown,
     // tslint:disable-next-line: ban-types
     cb: Function
   ) {
