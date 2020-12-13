@@ -6,7 +6,7 @@ import { toString } from "fp-ts/lib/function";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 
 import { toError } from "fp-ts/lib/Either";
-import { fromEither } from "fp-ts/lib/TaskEither";
+import { fromEither, taskEither } from "fp-ts/lib/TaskEither";
 import { KindEnum as CreateOrUpdateKind } from "../generated/notifications/CreateOrUpdateInstallationMessage";
 import { KindEnum as DeleteKind } from "../generated/notifications/DeleteInstallationMessage";
 import { KindEnum as NotifyKind } from "../generated/notifications/NotifyMessage";
@@ -16,6 +16,8 @@ import {
   deleteInstallation,
   notify
 } from "../utils/notification";
+
+import { initTelemetryClient } from "../utils/appinsights";
 
 // Activity input
 export const ActivityInput = t.interface({
@@ -72,6 +74,8 @@ const assertNever = (x: never): never => {
   throw new Error(`Unexpected object: ${toString(x)}`);
 };
 
+const telemetryClient = initTelemetryClient();
+
 /**
  * For each Notification Hub Message calls related Notification Hub service
  */
@@ -98,9 +102,22 @@ export const getCallNHServiceActivityHandler = (
             retryActivity(context, `${logPrefix}|ERROR=${toString(e)}`)
           );
         case NotifyKind.Notify:
-          return notify(message.installationId, message.payload).mapLeft(e =>
-            retryActivity(context, `${logPrefix}|ERROR=${toString(e)}`)
-          );
+          return notify(message.installationId, message.payload)
+            .mapLeft(e =>
+              retryActivity(context, `${logPrefix}|ERROR=${toString(e)}`)
+            )
+            .chainFirst(
+              taskEither.of(
+                telemetryClient.trackEvent({
+                  name: "api.messages.notification.push.sent",
+                  properties: {
+                    isSuccess: "true",
+                    messageId: message.payload.message_id
+                  },
+                  tagOverrides: { samplingEnabled: "false" }
+                })
+              )
+            );
         case DeleteKind.DeleteInstallation:
           return deleteInstallation(message.installationId).mapLeft(e => {
             // do not trigger a retry as delete may fail in case of 404
