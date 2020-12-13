@@ -108,6 +108,7 @@ export const getCallNHServiceActivityHandler = (
             )
             .chainFirst(
               taskEither.of(
+                // tslint:disable-next-line: no-use-of-empty-return-value
                 telemetryClient.trackEvent({
                   name: "api.messages.notification.push.sent",
                   properties: {
