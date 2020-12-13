@@ -47,8 +47,6 @@ export const ReqServiceIdConfig = t.union([
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
   t.interface({
-    APPINSIGHTS_INSTRUMENTATIONKEY: NonEmptyString,
-
     AZURE_NH_ENDPOINT: NonEmptyString,
     AZURE_NH_HUB_NAME: NonEmptyString,
 
