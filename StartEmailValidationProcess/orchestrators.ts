@@ -2,6 +2,7 @@ import * as crypto from "crypto";
 import * as df from "durable-functions";
 import { DurableOrchestrationClient } from "durable-functions/lib/src/durableorchestrationclient";
 
+import * as dateFns from "date-fns";
 import { toError } from "fp-ts/lib/Either";
 import { TaskEither, tryCatch } from "fp-ts/lib/TaskEither";
 
@@ -22,8 +23,12 @@ const hashCreator = (value: string) =>
  */
 export const makeStartEmailValidationProcessOrchestratorId = (
   fiscalCode: FiscalCode,
-  email: EmailAddress
-) => hashCreator(`${fiscalCode}-${email}`);
+  email: EmailAddress,
+  creationDate: Date = new Date()
+) =>
+  hashCreator(
+    `${dateFns.format(creationDate, "dd/MM/yyyy")}-${fiscalCode}-${email}`
+  );
 
 /**
  * Returns the status of the orchestrator augmented with an isRunning attribute
