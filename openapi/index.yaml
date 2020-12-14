@@ -280,6 +280,10 @@ paths:
           description: Not found
         "429":
           description: Too many requests
+        "500":
+          description: Server Error
+          schema:
+            $ref: "#/definitions/ProblemJson"
   "/user-data-processing/{fiscal_code}":
     post:
       operationId: upsertUserDataProcessing
