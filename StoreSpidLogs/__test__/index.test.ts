@@ -7,7 +7,7 @@ import { IPString } from "italia-ts-commons/lib/strings";
 import { aFiscalCode } from "../../__mocks__/mocks";
 import { index, IOutputBinding, SpidMsgItem } from "../index";
 
-const today = format(new Date(), "YYYY-MM-DD");
+const today = format(new Date(), "yyyy-MM-DD");
 const aDate = new Date();
 
 const aRSAPrivateKey = `-----BEGIN RSA PRIVATE KEY-----
