@@ -22,7 +22,6 @@ parameters:
   - name: 'PRODUCTION_APPS'
     displayName: ''
     type: object
-    readonly: true
     default:
       app1:
         appname: io-p-fn3-app1
