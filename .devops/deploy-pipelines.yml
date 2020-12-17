@@ -4,8 +4,8 @@ variables:
   NODE_VERSION: '10.14.1'
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
   # Configuration to run the healthcheck container
-  HEALTCHECK_CONTAINER_RG: 'io-d-rg-tdeploy'
-  HEALTCHECK_CONTAINER_VNET: 'io-d-vnet-tdeploy'
+  HEALTCHECK_CONTAINER_RG: 'io-p-rg-common'
+  HEALTCHECK_CONTAINER_VNET: 'io-p-vnet-common'
   HEALTCHECK_CONTAINER_SUBNET: 'azure-devops' 
 
 parameters:
