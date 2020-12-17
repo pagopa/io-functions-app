@@ -7,6 +7,7 @@ variables:
   HEALTCHECK_CONTAINER_RG: 'io-p-rg-common'
   HEALTCHECK_CONTAINER_VNET: 'io-p-vnet-common'
   HEALTCHECK_CONTAINER_SUBNET: 'azure-devops' 
+  HEALTCHECK_PATH: 'api/v1/info' 
 
 parameters:
   - name: 'RELEASE_SEMVER'
@@ -187,7 +188,7 @@ stages:
               parameters:
                 azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
                 appName: '${{ app.Value.appname }}'
-                endpoint: 'https://${{ app.Value.appname }}-staging.azurewebsites.net/info'
+                endpoint: 'https://${{ app.Value.appname }}-staging.azurewebsites.net/$(HEALTHCHECK_PATH)'
                 endpointType: 'private'
                 containerInstanceResourceGroup: '$(HEALTCHECK_CONTAINER_RG)'
                 containerInstanceVNet: '$(HEALTCHECK_CONTAINER_VNET)'
