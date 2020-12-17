@@ -165,10 +165,6 @@ stages:
             - download: current
               artifact: Bundle
             
-            - script: |
-                ls $(Pipeline.Workspace)/Bundle
-              displayName: 'ls'
-              
             - task: AzureFunctionApp@1  
               inputs:
                 azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
