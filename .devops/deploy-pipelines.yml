@@ -3,6 +3,10 @@
 variables:
   NODE_VERSION: '10.14.1'
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
+  # Configuration to run the healthcheck container
+  HEALTCHECK_CONTAINER_RG: 'io-d-rg-tdeploy'
+  HEALTCHECK_CONTAINER_VNET: 'io-d-vnet-tdeploy'
+  HEALTCHECK_CONTAINER_SUBNET: 'azure-devops' 
 
 parameters:
   - name: 'RELEASE_SEMVER'
@@ -185,9 +189,9 @@ stages:
                 appName: '${{ app.Value.appname }}'
                 endpoint: 'https://${{ app.Value.appname }}-staging.azurewebsites.net/info'
                 endpointType: 'private'
-                containerInstanceResourceGroup: 'io-d-rg-tdeploy'
-                containerInstanceVNet: 'io-d-vnet-tdeploy'
-                containerInstanceSubnet: 'azure-devops' 
+                containerInstanceResourceGroup: '$(HEALTCHECK_CONTAINER_RG)'
+                containerInstanceVNet: '$(HEALTCHECK_CONTAINER_VNET)'
+                containerInstanceSubnet: '$(HEALTCHECK_CONTAINER_SUBNET)'
 
   # Promote the staging instance to production
   - ${{ each app in parameters.PRODUCTION_APPS }}:
