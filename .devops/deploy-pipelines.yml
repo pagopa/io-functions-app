@@ -142,13 +142,6 @@ stages:
                 !CODEOWNERS
                 !__*/**/*
             displayName: 'Copy deploy files'
-
-          - script: |
-              ls $(System.DefaultWorkingDirectory)/bundle
-            displayName: 'ls System.DefaultWorkingDirectory/bundle'
-          - script: |
-              ls $(System.DefaultWorkingDirectory)
-            displayName: 'ls System.DefaultWorkingDirectory<'
           
           - publish: $(System.DefaultWorkingDirectory)/bundle
             artifact: Bundle
