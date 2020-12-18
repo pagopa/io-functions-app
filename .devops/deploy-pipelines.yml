@@ -4,10 +4,10 @@ variables:
   NODE_VERSION: '10.14.1'
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
   # Configuration to run the healthcheck container
-  HEALTCHECK_CONTAINER_RG: 'io-p-rg-common'
-  HEALTCHECK_CONTAINER_VNET: 'io-p-vnet-common'
-  HEALTCHECK_CONTAINER_SUBNET: 'azure-devops' 
-  HEALTCHECK_PATH: 'api/v1/info' 
+  HEALTHCHECK_CONTAINER_RG: 'io-p-rg-common'
+  HEALTHCHECK_CONTAINER_VNET: 'io-p-vnet-common'
+  HEALTHCHECK_CONTAINER_SUBNET: 'azure-devops' 
+  HEALTHCHECK_PATH: 'api/v1/info' 
 
 parameters:
   - name: 'RELEASE_SEMVER'
@@ -190,9 +190,9 @@ stages:
                 appName: '${{ app.Value.appname }}'
                 endpoint: 'https://${{ app.Value.appname }}-staging.azurewebsites.net/$(HEALTHCHECK_PATH)'
                 endpointType: 'private'
-                containerInstanceResourceGroup: '$(HEALTCHECK_CONTAINER_RG)'
-                containerInstanceVNet: '$(HEALTCHECK_CONTAINER_VNET)'
-                containerInstanceSubnet: '$(HEALTCHECK_CONTAINER_SUBNET)'
+                containerInstanceResourceGroup: '$(HEALTHCHECK_CONTAINER_RG)'
+                containerInstanceVNet: '$(HEALTHCHECK_CONTAINER_VNET)'
+                containerInstanceSubnet: '$(HEALTHCHECK_CONTAINER_SUBNET)'
 
   # Promote the staging instance to production
   - ${{ each app in parameters.PRODUCTION_APPS }}:
