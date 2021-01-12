@@ -1,7 +1,7 @@
 ﻿import { AzureFunction, Context } from "@azure/functions";
 import { toString } from "fp-ts/lib/function";
-import { NewMessage } from "io-functions-commons/dist/generated/definitions/NewMessage";
-import { RetrievedProfile } from "io-functions-commons/dist/src/models/profile";
+import { NewMessage } from "@pagopa/io-functions-commons/dist/generated/definitions/NewMessage";
+import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import * as t from "io-ts";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";

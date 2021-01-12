@@ -22,9 +22,9 @@ import { readableReport } from "italia-ts-commons/lib/reporters";
 import { EmailString, FiscalCode } from "italia-ts-commons/lib/strings";
 
 import { TableService } from "azure-storage";
-import { ValidationTokenEntity } from "io-functions-commons/dist/src/entities/validation_token";
-import { insertTableEntity } from "io-functions-commons/dist/src/utils/azure_storage";
-import { ObjectIdGenerator } from "io-functions-commons/dist/src/utils/strings";
+import { ValidationTokenEntity } from "@pagopa/io-functions-commons/dist/src/entities/validation_token";
+import { insertTableEntity } from "@pagopa/io-functions-commons/dist/src/utils/azure_storage";
+import { ObjectIdGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
 import { Millisecond } from "italia-ts-commons/lib/units";
 
 // Activity input

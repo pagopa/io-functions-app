@@ -8,13 +8,13 @@ import {
   Profile,
   PROFILE_COLLECTION_NAME,
   ProfileModel
-} from "io-functions-commons/dist/src/models/profile";
+} from "@pagopa/io-functions-commons/dist/src/models/profile";
 import {
   NewService,
   Service,
   SERVICE_COLLECTION_NAME,
   ServiceModel
-} from "io-functions-commons/dist/src/models/service";
+} from "@pagopa/io-functions-commons/dist/src/models/service";
 
 import { sequenceT } from "fp-ts/lib/Apply";
 import { TaskEither, taskEitherSeq, tryCatch } from "fp-ts/lib/TaskEither";
