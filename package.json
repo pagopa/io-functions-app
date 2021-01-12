@@ -1,6 +1,6 @@
 {
   "name": "io-functions-app",
-  "version": "1.39.9",
+  "version": "1.39.10",
   "license": "MIT",
   "io_backend_api_spec": "https://raw.githubusercontent.com/pagopa/io-backend/master/api_backend.yaml",
   "io_backend_notification_api_spec": "https://raw.githubusercontent.com/pagopa/io-backend/master/api_notifications.yaml",
