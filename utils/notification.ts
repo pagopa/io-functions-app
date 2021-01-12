@@ -5,8 +5,12 @@
 import * as t from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
-import * as azure from "azure-sb";
+import { NotificationHubService } from "azure-sb";
 import { tryCatch } from "fp-ts/lib/TaskEither";
+import {
+  getKeepAliveAgentOptions,
+  newHttpsAgent
+} from "italia-ts-commons/lib/agent";
 import { Platform, PlatformEnum } from "../generated/backend/Platform";
 import { getConfigOrThrow } from "../utils/config";
 
@@ -37,7 +41,42 @@ export enum APNSPushType {
 
 const config = getConfigOrThrow();
 
-const notificationHubService = azure.createNotificationHubService(
+const httpsAgent = newHttpsAgent(getKeepAliveAgentOptions(process.env));
+
+// Monkey patch azure-sb package in order to use agentkeepalive
+// when calling the Notification Hub API.
+// @FIXME: remove this part and upgrade to @azure/notification-hubs
+// once this goes upstream: https://github.com/Azure/azure-sdk-for-js/pull/11977
+class ExtendedNotificationHubService extends NotificationHubService {
+  constructor(hubName: string, endpointOrConnectionString: string) {
+    super(hubName, endpointOrConnectionString, undefined, undefined);
+  }
+  // tslint:disable-next-line: typedef
+  public _buildRequestOptions(
+    webResource: unknown,
+    body: unknown,
+    options: unknown,
+    // tslint:disable-next-line: ban-types
+    cb: Function
+  ) {
+    // tslint:disable-next-line: no-any
+    const patchedCallback = (err: any, cbOptions: any) => {
+      cb(err, {
+        ...cbOptions,
+        agent: httpsAgent
+      });
+    };
+    // tslint:disable-next-line: no-string-literal
+    return super["_buildRequestOptions"](
+      webResource,
+      body,
+      options,
+      patchedCallback
+    );
+  }
+}
+
+const notificationHubService = new ExtendedNotificationHubService(
   config.AZURE_NH_HUB_NAME,
   config.AZURE_NH_ENDPOINT
 );
