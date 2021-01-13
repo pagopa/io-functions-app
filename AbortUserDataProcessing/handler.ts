@@ -39,6 +39,7 @@ import { FiscalCode } from "italia-ts-commons/lib/strings";
 
 import { identity } from "fp-ts/lib/function";
 import { fromEither, fromLeft, taskEither } from "fp-ts/lib/TaskEither";
+
 import { readableReport } from "italia-ts-commons/lib/reporters";
 
 /**
