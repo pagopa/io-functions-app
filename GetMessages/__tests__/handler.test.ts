@@ -7,10 +7,10 @@ import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import {
   NewMessageWithoutContent,
   RetrievedMessageWithoutContent
-} from "io-functions-commons/dist/src/models/message";
+} from "@pagopa/io-functions-commons/dist/src/models/message";
 
-import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
-import { TimeToLiveSeconds } from "io-functions-commons/dist/generated/definitions/TimeToLiveSeconds";
+import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
+import { TimeToLiveSeconds } from "@pagopa/io-functions-commons/dist/generated/definitions/TimeToLiveSeconds";
 
 import { response as MockResponse } from "jest-mock-express";
 

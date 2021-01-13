@@ -17,13 +17,13 @@ import {
   VISIBLE_SERVICE_BLOB_ID,
   VISIBLE_SERVICE_CONTAINER,
   VisibleService
-} from "io-functions-commons/dist/src/models/visible_service";
+} from "@pagopa/io-functions-commons/dist/src/models/visible_service";
 
-import { getBlobAsObject } from "io-functions-commons/dist/src/utils/azure_storage";
-import { wrapRequestHandler } from "io-functions-commons/dist/src/utils/request_middleware";
+import { getBlobAsObject } from "@pagopa/io-functions-commons/dist/src/utils/azure_storage";
+import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 
-import { PaginatedServiceTupleCollection } from "io-functions-commons/dist/generated/definitions/PaginatedServiceTupleCollection";
-import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
+import { PaginatedServiceTupleCollection } from "@pagopa/io-functions-commons/dist/generated/definitions/PaginatedServiceTupleCollection";
+import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 
 type IGetVisibleServicesHandlerRet =
   | IResponseSuccessJson<PaginatedServiceTupleCollection>

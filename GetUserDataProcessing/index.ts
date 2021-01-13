@@ -5,10 +5,10 @@ import * as express from "express";
 import {
   USER_DATA_PROCESSING_COLLECTION_NAME,
   UserDataProcessingModel
-} from "io-functions-commons/dist/src/models/user_data_processing";
+} from "@pagopa/io-functions-commons/dist/src/models/user_data_processing";
 
-import { secureExpressApp } from "io-functions-commons/dist/src/utils/express";
-import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { secureExpressApp } from "@pagopa/io-functions-commons/dist/src/utils/express";
+import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 

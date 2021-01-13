@@ -8,8 +8,8 @@ import { IOrchestrationFunctionContext } from "durable-functions/lib/src/classes
 import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 
-import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
-import { RetrievedProfile } from "io-functions-commons/dist/src/models/profile";
+import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
+import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 
 import {
   OrchestratorInput as EmailValidationProcessOrchestratorInput,

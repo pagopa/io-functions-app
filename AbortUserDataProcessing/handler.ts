@@ -4,6 +4,29 @@ import * as t from "io-ts";
 import { Context } from "@azure/functions";
 
 import {
+  UserDataProcessingChoice,
+  UserDataProcessingChoiceEnum
+} from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
+import { UserDataProcessingStatusEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
+import {
+  makeUserDataProcessingId,
+  RetrievedUserDataProcessing,
+  UserDataProcessingModel
+} from "@pagopa/io-functions-commons/dist/src/models/user_data_processing";
+
+import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
+import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
+import {
+  withRequestMiddlewares,
+  wrapRequestHandler
+} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
+import {
+  IResponseErrorQuery,
+  ResponseErrorQuery
+} from "@pagopa/io-functions-commons/dist/src/utils/response";
+
+import {
   IResponseErrorConflict,
   IResponseErrorNotFound,
   IResponseErrorValidation,
@@ -14,31 +37,8 @@ import {
 } from "italia-ts-commons/lib/responses";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 
-import {
-  IResponseErrorQuery,
-  ResponseErrorQuery
-} from "io-functions-commons/dist/src/utils/response";
-
-import { ContextMiddleware } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
-import { FiscalCodeMiddleware } from "io-functions-commons/dist/src/utils/middlewares/fiscalcode";
-import {
-  withRequestMiddlewares,
-  wrapRequestHandler
-} from "io-functions-commons/dist/src/utils/request_middleware";
-
 import { identity } from "fp-ts/lib/function";
 import { fromEither, fromLeft, taskEither } from "fp-ts/lib/TaskEither";
-import {
-  UserDataProcessingChoice,
-  UserDataProcessingChoiceEnum
-} from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
-import { UserDataProcessingStatusEnum } from "io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
-import {
-  makeUserDataProcessingId,
-  RetrievedUserDataProcessing,
-  UserDataProcessingModel
-} from "io-functions-commons/dist/src/models/user_data_processing";
-import { RequiredParamMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_param";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 
 /**

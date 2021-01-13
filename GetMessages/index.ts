@@ -2,13 +2,13 @@ import { Context } from "@azure/functions";
 
 import * as express from "express";
 
-import { secureExpressApp } from "io-functions-commons/dist/src/utils/express";
-import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { secureExpressApp } from "@pagopa/io-functions-commons/dist/src/utils/express";
+import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 
 import {
   MESSAGE_COLLECTION_NAME,
   MessageModel
-} from "io-functions-commons/dist/src/models/message";
+} from "@pagopa/io-functions-commons/dist/src/models/message";
 
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 

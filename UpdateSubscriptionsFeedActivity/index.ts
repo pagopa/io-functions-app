@@ -8,7 +8,7 @@ import { createTableService, TableUtilities } from "azure-storage";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 
-import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
+import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 
 import { isNone } from "fp-ts/lib/Option";
 import { deleteTableEntity, insertTableEntity } from "../utils/storage";
