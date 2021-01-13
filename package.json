@@ -2,6 +2,10 @@
   "name": "io-functions-app",
   "version": "1.39.10",
   "license": "MIT",
+  
+  "io_backend_api_spec": "https://raw.githubusercontent.com/pagopa/io-backend/master/api_backend.yaml",
+  "io_backend_notification_api_spec": "https://raw.githubusercontent.com/pagopa/io-backend/master/api_notifications.yaml",
+  "io_backend_notification_queue_msg_api_spec": "https://raw.githubusercontent.com/pagopa/io-backend/master/notification_queue_messages.yaml",
   "scripts": {
     "prebuild": "yarn generate",
     "build": "tsc",
@@ -13,9 +17,9 @@
     "test:coverage": "jest --coverage",
     "lint": "tslint -p .",
     "generate": "npm-run-all generate:backend:*",
-    "generate:backend:api-models": "shx rm -rf generated/backend && shx mkdir -p generated/backend && gen-api-models --strict 0 --api-spec https://raw.githubusercontent.com/pagopa/io-backend/master/api_backend.yaml --out-dir generated/backend",
-    "generate:backend:notification-models": "shx rm -rf generated/notifications && shx mkdir -p generated/notifications && gen-api-models --strict 0 --api-spec https://raw.githubusercontent.com/pagopa/io-backend/master/api_notifications.yaml --out-dir generated/notifications",
-    "generate:backend:notification-hub": "shx rm -rf generated/notifications && shx mkdir -p generated/notifications && gen-api-models --strict 0 --api-spec https://raw.githubusercontent.com/pagopa/io-backend/master/notification_queue_messages.yaml --out-dir generated/notifications",
+    "generate:backend:api-models": "shx rm -rf generated/backend && shx mkdir -p generated/backend && gen-api-models --strict 0 --api-spec $npm_package_io_backend_api_spec --out-dir generated/backend",
+    "generate:backend:notification-models": "shx rm -rf generated/notifications && shx mkdir -p generated/notifications && gen-api-models --strict 0 --api-spec $npm_package_io_backend_notification_api_spec --out-dir generated/notifications",
+    "generate:backend:notification-hub": "shx rm -rf generated/notifications && shx mkdir -p generated/notifications && gen-api-models --strict 0 --api-spec $npm_package_io_backend_notification_queue_msg_api_spec --out-dir generated/notifications",
     "deploy": "npm run build && func azure functionapp publish agid-functions-app-test",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
     "predeploy": "npm-run-all build dist:modules",
