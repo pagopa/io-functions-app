@@ -1,6 +1,6 @@
 import { Tuple2 } from "italia-ts-commons/lib/tuples";
 
-import { BlockedInboxOrChannelEnum } from "io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
+import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
 
 import { diffBlockedServices } from "../profiles";
 

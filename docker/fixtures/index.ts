@@ -2,21 +2,21 @@
  * Insert fake data into CosmosDB database emulator.
  */
 import { ContainerResponse, CosmosClient, Database } from "@azure/cosmos";
-import { toError } from "fp-ts/lib/Either";
 import {
   NewProfile,
   Profile,
   PROFILE_COLLECTION_NAME,
   ProfileModel
-} from "io-functions-commons/dist/src/models/profile";
+} from "@pagopa/io-functions-commons/dist/src/models/profile";
 import {
   NewService,
   Service,
   SERVICE_COLLECTION_NAME,
   ServiceModel
-} from "io-functions-commons/dist/src/models/service";
+} from "@pagopa/io-functions-commons/dist/src/models/service";
 
 import { sequenceT } from "fp-ts/lib/Apply";
+import { toError } from "fp-ts/lib/Either";
 import { TaskEither, taskEitherSeq, tryCatch } from "fp-ts/lib/TaskEither";
 
 import { getConfigOrThrow } from "../../utils/config";

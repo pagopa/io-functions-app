@@ -13,30 +13,29 @@ import {
 } from "italia-ts-commons/lib/responses";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 
-import { ExtendedProfile } from "io-functions-commons/dist/generated/definitions/ExtendedProfile";
-import { NewProfile } from "io-functions-commons/dist/generated/definitions/NewProfile";
+import { ExtendedProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/ExtendedProfile";
+import { NewProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/NewProfile";
 import {
   NewProfile as INewProfile,
   Profile,
   ProfileModel
-} from "io-functions-commons/dist/src/models/profile";
-import {
-  IResponseErrorQuery,
-  ResponseErrorQuery
-} from "io-functions-commons/dist/src/utils/response";
-
-import { ContextMiddleware } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
-import { FiscalCodeMiddleware } from "io-functions-commons/dist/src/utils/middlewares/fiscalcode";
-import {
-  withRequestMiddlewares,
-  wrapRequestHandler
-} from "io-functions-commons/dist/src/utils/request_middleware";
-
-import { fromEither } from "fp-ts/lib/TaskEither";
+} from "@pagopa/io-functions-commons/dist/src/models/profile";
 import {
   CosmosDecodingError,
   CosmosErrors
-} from "io-functions-commons/dist/src/utils/cosmosdb_model";
+} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
+import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
+import {
+  withRequestMiddlewares,
+  wrapRequestHandler
+} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
+import {
+  IResponseErrorQuery,
+  ResponseErrorQuery
+} from "@pagopa/io-functions-commons/dist/src/utils/response";
+
+import { fromEither } from "fp-ts/lib/TaskEither";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { NewProfileMiddleware } from "../utils/middlewares/profile";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";

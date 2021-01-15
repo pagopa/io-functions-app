@@ -1,6 +1,6 @@
 import * as t from "io-ts";
 
-import { RetrievedProfile } from "io-functions-commons/dist/src/models/profile";
+import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 
 /**
  * Carries information about created or updated profiles.
