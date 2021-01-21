@@ -4,7 +4,7 @@ import { initTelemetryClient } from "../utils/appinsights";
 
 import { getConfigOrThrow } from "../utils/config";
 
-import { getMailerTransporter } from "io-functions-commons/dist/src/mailer";
+import { getMailerTransporter } from "@pagopa/io-functions-commons/dist/src/mailer";
 
 const config = getConfigOrThrow();
 

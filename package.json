@@ -1,6 +1,6 @@
 {
   "name": "io-functions-app",
-  "version": "1.39.9",
+  "version": "1.39.10",
   "license": "MIT",
   "scripts": {
     "prebuild": "yarn generate",
@@ -52,6 +52,7 @@
     "typescript": "^3.9.5"
   },
   "dependencies": {
+    "@pagopa/io-functions-commons": "^18.0.7",
     "abort-controller": "^3.0.0",
     "applicationinsights": "^1.7.4",
     "azure-sb": "^0.11.1",
@@ -62,7 +63,6 @@
     "express": "^4.15.3",
     "fp-ts": "1.17.4",
     "html-to-text": "^5.1.1",
-    "io-functions-commons": "^17.2.0",
     "io-functions-express": "^0.1.0",
     "io-ts": "1.8.5",
     "italia-ts-commons": "^8.6.0",

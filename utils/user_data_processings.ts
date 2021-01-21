@@ -1,5 +1,5 @@
-import { UserDataProcessing } from "io-functions-commons/dist/generated/definitions/UserDataProcessing";
-import { RetrievedUserDataProcessing } from "io-functions-commons/dist/src/models/user_data_processing";
+import { UserDataProcessing } from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessing";
+import { RetrievedUserDataProcessing } from "@pagopa/io-functions-commons/dist/src/models/user_data_processing";
 
 /**
  * Converts a RetrievedUserDataProcessing model to an UserDataProcessing

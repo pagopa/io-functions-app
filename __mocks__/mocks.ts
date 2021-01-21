@@ -5,25 +5,25 @@ import {
   NonEmptyString
 } from "italia-ts-commons/lib/strings";
 
-import { NewProfile } from "io-functions-commons/dist/generated/definitions/NewProfile";
-import { Profile } from "io-functions-commons/dist/generated/definitions/Profile";
-import { UserDataProcessing as UserDataProcessingApi } from "io-functions-commons/dist/generated/definitions/UserDataProcessing";
+import { NewProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/NewProfile";
+import { Profile } from "@pagopa/io-functions-commons/dist/generated/definitions/Profile";
+import { UserDataProcessing as UserDataProcessingApi } from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessing";
 import {
   UserDataProcessingChoice,
   UserDataProcessingChoiceEnum
-} from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
-import { UserDataProcessingChoiceRequest } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoiceRequest";
+} from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
+import { UserDataProcessingChoiceRequest } from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessingChoiceRequest";
 import {
   UserDataProcessingStatus,
   UserDataProcessingStatusEnum
-} from "io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
-import { RetrievedProfile } from "io-functions-commons/dist/src/models/profile";
+} from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
+import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import {
   makeUserDataProcessingId,
   RetrievedUserDataProcessing,
   UserDataProcessingId
-} from "io-functions-commons/dist/src/models/user_data_processing";
-import { CosmosResource } from "io-functions-commons/dist/src/utils/cosmosdb_model";
+} from "@pagopa/io-functions-commons/dist/src/models/user_data_processing";
+import { CosmosResource } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 import { toUserDataProcessingApi } from "../utils/user_data_processings";
 

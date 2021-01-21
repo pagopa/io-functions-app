@@ -1,17 +1,17 @@
 import { ITuple2, Tuple2 } from "italia-ts-commons/lib/tuples";
 
-import { BlockedInboxOrChannelEnum } from "io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
-import { ExtendedProfile } from "io-functions-commons/dist/generated/definitions/ExtendedProfile";
-import { IsEmailValidated } from "io-functions-commons/dist/generated/definitions/IsEmailValidated";
-import { Profile as ApiProfile } from "io-functions-commons/dist/generated/definitions/Profile";
+import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
+import { ExtendedProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/ExtendedProfile";
+import { IsEmailValidated } from "@pagopa/io-functions-commons/dist/generated/definitions/IsEmailValidated";
+import { Profile as ApiProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/Profile";
 import {
   Profile,
   RetrievedProfile
-} from "io-functions-commons/dist/src/models/profile";
+} from "@pagopa/io-functions-commons/dist/src/models/profile";
 
 import { isObject } from "util";
 
-import { FiscalCode } from "io-functions-commons/dist/generated/definitions/FiscalCode";
+import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
 
 /**
  * Converts a ApiProfile in a Profile model

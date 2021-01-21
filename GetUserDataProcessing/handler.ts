@@ -1,8 +1,31 @@
-import * as express from "express";
-
 import { Context } from "@azure/functions";
 
+import {
+  IResponseErrorQuery,
+  ResponseErrorQuery
+} from "@pagopa/io-functions-commons/dist/src/utils/response";
+
+import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
+import {
+  withRequestMiddlewares,
+  wrapRequestHandler
+} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
+
+import { UserDataProcessing as UserDataProcessingApi } from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessing";
+import { UserDataProcessingChoice } from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
+import {
+  makeUserDataProcessingId,
+  UserDataProcessingModel
+} from "@pagopa/io-functions-commons/dist/src/models/user_data_processing";
+import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
+
+import { toUserDataProcessingApi } from "../utils/user_data_processings";
+
+import * as express from "express";
+
 import { isLeft } from "fp-ts/lib/Either";
+import { isSome } from "fp-ts/lib/Option";
 
 import {
   IResponseErrorNotFound,
@@ -11,28 +34,6 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
-
-import {
-  IResponseErrorQuery,
-  ResponseErrorQuery
-} from "io-functions-commons/dist/src/utils/response";
-
-import { ContextMiddleware } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
-import { FiscalCodeMiddleware } from "io-functions-commons/dist/src/utils/middlewares/fiscalcode";
-import {
-  withRequestMiddlewares,
-  wrapRequestHandler
-} from "io-functions-commons/dist/src/utils/request_middleware";
-
-import { isSome } from "fp-ts/lib/Option";
-import { UserDataProcessing as UserDataProcessingApi } from "io-functions-commons/dist/generated/definitions/UserDataProcessing";
-import { UserDataProcessingChoice } from "io-functions-commons/dist/generated/definitions/UserDataProcessingChoice";
-import {
-  makeUserDataProcessingId,
-  UserDataProcessingModel
-} from "io-functions-commons/dist/src/models/user_data_processing";
-import { RequiredParamMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_param";
-import { toUserDataProcessingApi } from "../utils/user_data_processings";
 
 /**
  * Type of a GetUserDataProcessing handler.

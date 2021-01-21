@@ -10,7 +10,7 @@ import * as t from "io-ts";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
-import { MailerConfig } from "io-functions-commons/dist/src/mailer";
+import { MailerConfig } from "@pagopa/io-functions-commons/dist/src/mailer";
 
 // exclude a specific value from a type
 // as strict equality is performed, allowed input types are constrained to be values not references (object, arrays, etc)
