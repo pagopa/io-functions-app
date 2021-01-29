@@ -85,7 +85,8 @@ describe("GetVisibleServicesHandler", () => {
       })
     };
     const getVisibleServicesHandler = GetVisibleServicesHandler(
-      blobStorageMock as any
+      blobStorageMock as any,
+      false
     );
     const response = await getVisibleServicesHandler();
     response.apply(MockResponse());
@@ -103,6 +104,6 @@ describe("GetVisibleServicesHandler", () => {
 
 describe("GetVisibleServices", () => {
   it("should set up authentication middleware", async () => {
-    GetVisibleServices({} as any);
+    GetVisibleServices({} as any, false);
   });
 });

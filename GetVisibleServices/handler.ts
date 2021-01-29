@@ -36,7 +36,8 @@ type IGetVisibleServicesHandler = () => Promise<IGetVisibleServicesHandlerRet>;
  * Returns all the visible services (is_visible = true).
  */
 export function GetVisibleServicesHandler(
-  blobService: BlobService
+  blobService: BlobService,
+  onlyNationalService: boolean
 ): IGetVisibleServicesHandler {
   return async () => {
     const errorOrMaybeVisibleServicesJson = await getBlobAsObject(
@@ -51,9 +52,11 @@ export function GetVisibleServicesHandler(
           `Error getting visible services list: ${error.message}`
         ),
       maybeVisibleServicesJson => {
-        const servicesTuples = toServicesTuple(
-          new StrMap(maybeVisibleServicesJson.getOrElse({}))
-        ).filter(_ => _.scope === ServiceScopeEnum.NATIONAL); // Temporary disable Local services
+        const servicesTuples = onlyNationalService
+          ? toServicesTuple(
+              new StrMap(maybeVisibleServicesJson.getOrElse({}))
+            ).filter(_ => _.scope === ServiceScopeEnum.NATIONAL)
+          : toServicesTuple(new StrMap(maybeVisibleServicesJson.getOrElse({})));
         return ResponseSuccessJson({
           items: servicesTuples,
           page_size: servicesTuples.length
@@ -67,8 +70,9 @@ export function GetVisibleServicesHandler(
  * Wraps a GetVisibleServices handler inside an Express request handler.
  */
 export function GetVisibleServices(
-  blobService: BlobService
+  blobService: BlobService,
+  onlyNationalService: boolean
 ): express.RequestHandler {
-  const handler = GetVisibleServicesHandler(blobService);
+  const handler = GetVisibleServicesHandler(blobService, onlyNationalService);
   return wrapRequestHandler(handler);
 }

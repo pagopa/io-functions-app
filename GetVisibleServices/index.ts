@@ -20,7 +20,10 @@ const config = getConfigOrThrow();
 
 const blobService = createBlobService(config.QueueStorageConnection);
 
-app.get("/api/v1/services", GetVisibleServices(blobService));
+app.get(
+  "/api/v1/services",
+  GetVisibleServices(blobService, config.FF_ONLY_NATIONAL_SERVICES)
+);
 
 const azureFunctionHandler = createAzureFunctionHandler(app);
 
