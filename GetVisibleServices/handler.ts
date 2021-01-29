@@ -24,6 +24,7 @@ import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/
 
 import { PaginatedServiceTupleCollection } from "@pagopa/io-functions-commons/dist/generated/definitions/PaginatedServiceTupleCollection";
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
+import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 
 type IGetVisibleServicesHandlerRet =
   | IResponseSuccessJson<PaginatedServiceTupleCollection>
@@ -52,7 +53,7 @@ export function GetVisibleServicesHandler(
       maybeVisibleServicesJson => {
         const servicesTuples = toServicesTuple(
           new StrMap(maybeVisibleServicesJson.getOrElse({}))
-        );
+        ).filter(_ => _.scope === ServiceScopeEnum.NATIONAL); // Temporary disable Local services
         return ResponseSuccessJson({
           items: servicesTuples,
           page_size: servicesTuples.length
