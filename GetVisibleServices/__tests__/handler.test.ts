@@ -23,6 +23,9 @@ import {
 
 import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
 
+import { PaginatedServiceTupleCollection } from "@pagopa/io-functions-commons/dist/generated/definitions/PaginatedServiceTupleCollection";
+import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
+import { IResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetVisibleServices, GetVisibleServicesHandler } from "../handler";
 
@@ -71,6 +74,13 @@ const aVisibleService: VisibleService = {
   version: aRetrievedService.version
 };
 
+const aLocalVisibleService: VisibleService = {
+  ...aVisibleService,
+  serviceMetadata: {
+    scope: ServiceScopeEnum.LOCAL
+  }
+};
+
 describe("GetVisibleServicesHandler", () => {
   it("should get all visible services", async () => {
     const blobStorageMock = {
@@ -99,6 +109,40 @@ describe("GetVisibleServicesHandler", () => {
       expect.any(Function)
     );
     expect(response.kind).toEqual("IResponseSuccessJson");
+  });
+
+  it("should return only NATIONAL scoped services", async () => {
+    const blobStorageMock = {
+      getBlobToText: jest.fn().mockImplementation((_, __, ___, cb) => {
+        cb(
+          undefined,
+          JSON.stringify({
+            localServiceId: aLocalVisibleService,
+            serviceId: aVisibleService,
+            serviceIdx: aVisibleService
+          })
+        );
+      })
+    };
+    const getVisibleServicesHandler = GetVisibleServicesHandler(
+      blobStorageMock as any,
+      true
+    );
+    const response = await getVisibleServicesHandler();
+    response.apply(MockResponse());
+
+    await Promise.resolve(); // needed to let the response promise complete
+    expect(blobStorageMock.getBlobToText).toHaveBeenCalledWith(
+      VISIBLE_SERVICE_CONTAINER,
+      VISIBLE_SERVICE_BLOB_ID,
+      {},
+      expect.any(Function)
+    );
+    expect(response.kind).toEqual("IResponseSuccessJson");
+    expect(
+      (response as IResponseSuccessJson<PaginatedServiceTupleCollection>).value
+        .items
+    ).toHaveLength(2);
   });
 });
 
