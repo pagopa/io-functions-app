@@ -22,7 +22,11 @@ const blobService = createBlobService(config.QueueStorageConnection);
 
 app.get(
   "/api/v1/services",
-  GetVisibleServices(blobService, config.FF_ONLY_NATIONAL_SERVICES)
+  GetVisibleServices(
+    blobService,
+    config.FF_ONLY_NATIONAL_SERVICES,
+    config.FF_LIMIT_LOCAL_SERVICES
+  )
 );
 
 const azureFunctionHandler = createAzureFunctionHandler(app);

@@ -144,6 +144,43 @@ describe("GetVisibleServicesHandler", () => {
         .items
     ).toHaveLength(2);
   });
+
+  it("should limit LOCAL scoped services", async () => {
+    const blobStorageMock = {
+      getBlobToText: jest.fn().mockImplementation((_, __, ___, cb) => {
+        cb(
+          undefined,
+          JSON.stringify({
+            localServiceId0: aLocalVisibleService,
+            localServiceId1: aLocalVisibleService,
+            serviceId: aVisibleService,
+            serviceIdx: aVisibleService,
+            xlocalServiceId2: aLocalVisibleService
+          })
+        );
+      })
+    };
+    const getVisibleServicesHandler = GetVisibleServicesHandler(
+      blobStorageMock as any,
+      false,
+      2 as NonNegativeInteger
+    );
+    const response = await getVisibleServicesHandler();
+    response.apply(MockResponse());
+
+    await Promise.resolve(); // needed to let the response promise complete
+    expect(blobStorageMock.getBlobToText).toHaveBeenCalledWith(
+      VISIBLE_SERVICE_CONTAINER,
+      VISIBLE_SERVICE_BLOB_ID,
+      {},
+      expect.any(Function)
+    );
+    expect(response.kind).toEqual("IResponseSuccessJson");
+    expect(
+      (response as IResponseSuccessJson<PaginatedServiceTupleCollection>).value
+        .items
+    ).toHaveLength(4);
+  });
 });
 
 describe("GetVisibleServices", () => {

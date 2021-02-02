@@ -25,6 +25,8 @@ import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/
 import { PaginatedServiceTupleCollection } from "@pagopa/io-functions-commons/dist/generated/definitions/PaginatedServiceTupleCollection";
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
+import { ServiceTuple } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceTuple";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 
 type IGetVisibleServicesHandlerRet =
   | IResponseSuccessJson<PaginatedServiceTupleCollection>
@@ -37,7 +39,8 @@ type IGetVisibleServicesHandler = () => Promise<IGetVisibleServicesHandlerRet>;
  */
 export function GetVisibleServicesHandler(
   blobService: BlobService,
-  onlyNationalService: boolean
+  onlyNationalService: boolean,
+  limitLocalServices?: NonNegativeInteger
 ): IGetVisibleServicesHandler {
   return async () => {
     const errorOrMaybeVisibleServicesJson = await getBlobAsObject(
@@ -52,11 +55,44 @@ export function GetVisibleServicesHandler(
           `Error getting visible services list: ${error.message}`
         ),
       maybeVisibleServicesJson => {
+        const allServicesTuples = toServicesTuple(
+          new StrMap(maybeVisibleServicesJson.getOrElse({}))
+        );
+        const scopedServicesTuples = allServicesTuples.reduce(
+          (acc, service) => {
+            if (service.scope === ServiceScopeEnum.LOCAL) {
+              return {
+                [ServiceScopeEnum.NATIONAL]: acc[ServiceScopeEnum.NATIONAL],
+                [ServiceScopeEnum.LOCAL]: [
+                  ...acc[ServiceScopeEnum.LOCAL],
+                  service
+                ]
+              };
+            }
+            return {
+              [ServiceScopeEnum.NATIONAL]: [
+                ...acc[ServiceScopeEnum.NATIONAL],
+                service
+              ],
+              [ServiceScopeEnum.LOCAL]: acc[ServiceScopeEnum.LOCAL]
+            };
+          },
+          {
+            [ServiceScopeEnum.NATIONAL]: [] as ReadonlyArray<ServiceTuple>,
+            [ServiceScopeEnum.LOCAL]: [] as ReadonlyArray<ServiceTuple>
+          }
+        );
         const servicesTuples = onlyNationalService
-          ? toServicesTuple(
-              new StrMap(maybeVisibleServicesJson.getOrElse({}))
-            ).filter(_ => _.scope === ServiceScopeEnum.NATIONAL)
-          : toServicesTuple(new StrMap(maybeVisibleServicesJson.getOrElse({})));
+          ? scopedServicesTuples[ServiceScopeEnum.NATIONAL]
+          : limitLocalServices === undefined
+          ? allServicesTuples
+          : [
+              ...scopedServicesTuples[ServiceScopeEnum.NATIONAL],
+              ...scopedServicesTuples[ServiceScopeEnum.LOCAL].slice(
+                0,
+                limitLocalServices
+              )
+            ];
         return ResponseSuccessJson({
           items: servicesTuples,
           page_size: servicesTuples.length
@@ -71,8 +107,13 @@ export function GetVisibleServicesHandler(
  */
 export function GetVisibleServices(
   blobService: BlobService,
-  onlyNationalService: boolean
+  onlyNationalService: boolean,
+  limitLocalServices?: NonNegativeInteger
 ): express.RequestHandler {
-  const handler = GetVisibleServicesHandler(blobService, onlyNationalService);
+  const handler = GetVisibleServicesHandler(
+    blobService,
+    onlyNationalService,
+    limitLocalServices
+  );
   return wrapRequestHandler(handler);
 }

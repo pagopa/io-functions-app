@@ -11,6 +11,7 @@ import { readableReport } from "italia-ts-commons/lib/reporters";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 import { MailerConfig } from "@pagopa/io-functions-commons/dist/src/mailer";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 
 // exclude a specific value from a type
 // as strict equality is performed, allowed input types are constrained to be values not references (object, arrays, etc)
@@ -73,12 +74,18 @@ export const IConfig = t.intersection([
     isProduction: t.boolean
   }),
   MailerConfig,
-  ReqServiceIdConfig
+  ReqServiceIdConfig,
+  t.partial({
+    FF_LIMIT_LOCAL_SERVICES: NonNegativeInteger
+  })
 ]);
 
 // No need to re-evaluate this object for each call
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   ...process.env,
+  FF_LIMIT_LOCAL_SERVICES: fromNullable(process.env.FF_LIMIT_LOCAL_SERVICES)
+    .map(_ => parseInt(_, 10))
+    .toUndefined(),
   FF_ONLY_NATIONAL_SERVICES: fromNullable(process.env.FF_ONLY_NATIONAL_SERVICES)
     .map(_ => _.toLocaleLowerCase() === "true")
     .getOrElse(false),
