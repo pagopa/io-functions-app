@@ -25,7 +25,7 @@ app.get(
   GetVisibleServices(
     blobService,
     config.FF_ONLY_NATIONAL_SERVICES,
-    config.FF_LIMIT_LOCAL_SERVICES
+    config.FF_LOCAL_SERVICES_LIMIT
   )
 );
 

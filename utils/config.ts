@@ -76,14 +76,14 @@ export const IConfig = t.intersection([
   MailerConfig,
   ReqServiceIdConfig,
   t.partial({
-    FF_LIMIT_LOCAL_SERVICES: NonNegativeInteger
+    FF_LOCAL_SERVICES_LIMIT: NonNegativeInteger
   })
 ]);
 
 // No need to re-evaluate this object for each call
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   ...process.env,
-  FF_LIMIT_LOCAL_SERVICES: fromNullable(process.env.FF_LIMIT_LOCAL_SERVICES)
+  FF_LOCAL_SERVICES_LIMIT: fromNullable(process.env.FF_LOCAL_SERVICES_LIMIT)
     .map(_ => parseInt(_, 10))
     .toUndefined(),
   FF_ONLY_NATIONAL_SERVICES: fromNullable(process.env.FF_ONLY_NATIONAL_SERVICES)

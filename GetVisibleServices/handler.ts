@@ -40,7 +40,7 @@ type IGetVisibleServicesHandler = () => Promise<IGetVisibleServicesHandlerRet>;
 export function GetVisibleServicesHandler(
   blobService: BlobService,
   onlyNationalService: boolean,
-  limitLocalServices?: NonNegativeInteger
+  localServicesLimit?: NonNegativeInteger
 ): IGetVisibleServicesHandler {
   return async () => {
     const errorOrMaybeVisibleServicesJson = await getBlobAsObject(
@@ -84,13 +84,13 @@ export function GetVisibleServicesHandler(
         );
         const servicesTuples = onlyNationalService
           ? scopedServicesTuples[ServiceScopeEnum.NATIONAL]
-          : limitLocalServices === undefined
+          : localServicesLimit === undefined
           ? allServicesTuples
           : [
               ...scopedServicesTuples[ServiceScopeEnum.NATIONAL],
               ...scopedServicesTuples[ServiceScopeEnum.LOCAL].slice(
                 0,
-                limitLocalServices
+                localServicesLimit
               )
             ];
         return ResponseSuccessJson({
@@ -108,12 +108,12 @@ export function GetVisibleServicesHandler(
 export function GetVisibleServices(
   blobService: BlobService,
   onlyNationalService: boolean,
-  limitLocalServices?: NonNegativeInteger
+  localServicesLimit?: NonNegativeInteger
 ): express.RequestHandler {
   const handler = GetVisibleServicesHandler(
     blobService,
     onlyNationalService,
-    limitLocalServices
+    localServicesLimit
   );
   return wrapRequestHandler(handler);
 }
