@@ -95,8 +95,7 @@ describe("GetVisibleServicesHandler", () => {
       })
     };
     const getVisibleServicesHandler = GetVisibleServicesHandler(
-      blobStorageMock as any,
-      false
+      blobStorageMock as any
     );
     const response = await getVisibleServicesHandler();
     response.apply(MockResponse());
@@ -126,7 +125,7 @@ describe("GetVisibleServicesHandler", () => {
     };
     const getVisibleServicesHandler = GetVisibleServicesHandler(
       blobStorageMock as any,
-      true
+      0 as NonNegativeInteger
     );
     const response = await getVisibleServicesHandler();
     response.apply(MockResponse());
@@ -162,7 +161,6 @@ describe("GetVisibleServicesHandler", () => {
     };
     const getVisibleServicesHandler = GetVisibleServicesHandler(
       blobStorageMock as any,
-      false,
       2 as NonNegativeInteger
     );
     const response = await getVisibleServicesHandler();
@@ -185,6 +183,6 @@ describe("GetVisibleServicesHandler", () => {
 
 describe("GetVisibleServices", () => {
   it("should set up authentication middleware", async () => {
-    GetVisibleServices({} as any, false);
+    GetVisibleServices({} as any);
   });
 });
