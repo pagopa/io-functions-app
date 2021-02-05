@@ -52,16 +52,16 @@ pool:
 
 resources:
   repositories:
-    - repository: pagopaCommons
+    - repository: pagopaCommonsLegacy
       type: github
       name: pagopa/azure-pipeline-templates
       ref: refs/tags/v4
       endpoint: 'pagopa'
     
-    - repository: templates
+    - repository: pagopaCommons
       type: github
       name: pagopa/azure-pipeline-templates
-      ref: refs/tags/v9
+      ref: refs/tags/v10
       endpoint: 'pagopa'
 
 stages:
@@ -88,7 +88,7 @@ stages:
       - job: make_release
         steps:
         - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
-          - template: templates/node-github-release/template.yaml@pagopaCommons 
+          - template: templates/node-github-release/template.yaml@pagopaCommonsLegacy 
             parameters:
               semver: '${{ parameters.RELEASE_SEMVER }}'
               gitEmail: $(GIT_EMAIL)
@@ -113,7 +113,7 @@ stages:
       - job: publish_SDK   
         steps:
         # Template for generating and deploying client SDk to NPM
-        - template: templates/client-sdk-publish/template.yaml@templates
+        - template: templates/client-sdk-publish/template.yaml@pagopaCommons
           parameters:
             openapiSpecPath: 'openapi/index.yaml'
             
@@ -205,7 +205,7 @@ stages:
         - job: 'do_healthcheck_${{ app.Key }}'       
           steps:  
             - checkout: none
-            - template: templates/rest-healthcheck/template.yaml@pagopaCommons 
+            - template: templates/rest-healthcheck/template.yaml@pagopaCommonsLegacy 
               parameters:
                 azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
                 appName: '${{ app.Value.appname }}'
