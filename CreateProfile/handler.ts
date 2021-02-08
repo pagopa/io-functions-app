@@ -13,24 +13,29 @@ import {
 } from "italia-ts-commons/lib/responses";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 
-import { ExtendedProfile } from "io-functions-commons/dist/generated/definitions/ExtendedProfile";
-import { NewProfile } from "io-functions-commons/dist/generated/definitions/NewProfile";
+import { ExtendedProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/ExtendedProfile";
+import { NewProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/NewProfile";
 import {
+  NewProfile as INewProfile,
   Profile,
   ProfileModel
-} from "io-functions-commons/dist/src/models/profile";
+} from "@pagopa/io-functions-commons/dist/src/models/profile";
 import {
-  IResponseErrorQuery,
-  ResponseErrorQuery
-} from "io-functions-commons/dist/src/utils/response";
-
-import { ContextMiddleware } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
-import { FiscalCodeMiddleware } from "io-functions-commons/dist/src/utils/middlewares/fiscalcode";
+  CosmosDecodingError,
+  CosmosErrors
+} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
+import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
 import {
   withRequestMiddlewares,
   wrapRequestHandler
-} from "io-functions-commons/dist/src/utils/request_middleware";
+} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
+import {
+  IResponseErrorQuery,
+  ResponseErrorQuery
+} from "@pagopa/io-functions-commons/dist/src/utils/response";
 
+import { fromEither } from "fp-ts/lib/TaskEither";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { NewProfileMiddleware } from "../utils/middlewares/profile";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
@@ -64,27 +69,32 @@ export function CreateProfileHandler(
       isWebhookEnabled: false
     };
 
-    const errorOrCreatedProfile = await profileModel.create(
-      profile,
-      profile.fiscalCode
-    );
+    const errorOrCreatedProfile = await fromEither(
+      INewProfile.decode({
+        ...profile,
+        kind: "INewProfile"
+      })
+    )
+      .mapLeft<CosmosErrors>(CosmosDecodingError)
+      .chain(newProfile => profileModel.create(newProfile))
+      .run();
 
     if (isLeft(errorOrCreatedProfile)) {
-      const { code, body } = errorOrCreatedProfile.value;
+      const failure = errorOrCreatedProfile.value;
 
-      context.log.error(`${logPrefix}|ERROR=${body}`);
+      context.log.error(`${logPrefix}|ERROR=${failure.kind}`);
 
       // Conflict, resource already exists
-      if (code === 409) {
+      if (
+        failure.kind === "COSMOS_ERROR_RESPONSE" &&
+        failure.error.code === 409
+      ) {
         return ResponseErrorConflict(
           "A profile with the requested fiscal_code already exists"
         );
       }
 
-      return ResponseErrorQuery(
-        "Error while creating a new profile",
-        errorOrCreatedProfile.value
-      );
+      return ResponseErrorQuery("Error while creating a new profile", failure);
     }
 
     const createdProfile = errorOrCreatedProfile.value;

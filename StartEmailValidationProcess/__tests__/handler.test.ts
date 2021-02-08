@@ -1,27 +1,37 @@
 /* tslint:disable: no-any */
-
-import { right } from "fp-ts/lib/Either";
+import * as durableFunction from "durable-functions";
 import { some } from "fp-ts/lib/Option";
-
-import * as df from "durable-functions";
-
-import { context as contextMock } from "../../__mocks__/durable-functions";
+import { taskEither } from "fp-ts/lib/TaskEither";
+import {
+  context as contextMock,
+  mockStartNew
+} from "../../__mocks__/durable-functions";
 import { aRetrievedProfile } from "../../__mocks__/mocks";
-import { OrchestratorInput as EmailValidationProcessOrchestratorInput } from "../../EmailValidationProcessOrchestrator/handler";
 import { StartEmailValidationProcessHandler } from "../handler";
+import * as orchUtil from "../orchestrators";
 
-beforeEach(() => {
-  (df.getClient as any).mockClear();
-  (df as any).mockStartNew.mockClear();
-});
+const getClientMock = {
+  startNew: mockStartNew
+} as any;
 
+const isOrchestratorRunningMock = jest.fn(() =>
+  taskEither.of({
+    isRunning: false
+  })
+);
+jest.spyOn(durableFunction, "getClient").mockImplementation(_ => getClientMock);
+jest
+  .spyOn(orchUtil, "isOrchestratorRunning")
+  .mockImplementation(isOrchestratorRunningMock as any);
 describe("StartEmailValidationProcessHandler", () => {
-  it("should start the orchestrator with the right input and return an acceppted response", async () => {
+  beforeEach(() => mockStartNew.mockClear());
+  it("should start the orchestrator with the right input and return an accepted response", async () => {
     const profileModelMock = {
-      findOneProfileByFiscalCode: jest.fn(() =>
-        right(some({ ...aRetrievedProfile, isEmailValidated: false }))
+      findLastVersionByModelId: jest.fn(() =>
+        taskEither.of(some({ ...aRetrievedProfile, isEmailValidated: false }))
       )
     };
+    mockStartNew.mockImplementationOnce(() => Promise.resolve("start"));
 
     const handler = StartEmailValidationProcessHandler(profileModelMock as any);
 
@@ -30,36 +40,46 @@ describe("StartEmailValidationProcessHandler", () => {
       aRetrievedProfile.fiscalCode
     );
 
-    const emailValidationProcessOrchestratorInput = EmailValidationProcessOrchestratorInput.encode(
-      {
-        email: aRetrievedProfile.email,
-        fiscalCode: aRetrievedProfile.fiscalCode
-      }
-    );
+    expect(result.kind).toBe("IResponseSuccessAccepted");
+  });
 
-    expect(df.getClient).toHaveBeenCalledTimes(1);
+  it("should not start a new orchestrator if there is an already running orchestrator and return an accepted response", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        taskEither.of(some({ ...aRetrievedProfile, isEmailValidated: false }))
+      )
+    };
 
-    const dfClient = df.getClient(contextMock);
-    expect(dfClient.startNew).toHaveBeenCalledWith(
-      "EmailValidationProcessOrchestrator",
-      undefined,
-      emailValidationProcessOrchestratorInput
+    isOrchestratorRunningMock.mockImplementationOnce(() =>
+      taskEither.of({
+        isRunning: true
+      })
     );
+    const handler = StartEmailValidationProcessHandler(profileModelMock as any);
+
+    const result = await handler(
+      contextMock as any,
+      aRetrievedProfile.fiscalCode
+    );
+    expect(mockStartNew).not.toHaveBeenCalled();
 
     expect(result.kind).toBe("IResponseSuccessAccepted");
   });
 
   it("should not start the orchestrator if the email is already validated", async () => {
     const profileModelMock = {
-      findOneProfileByFiscalCode: jest.fn(() =>
-        right(some({ ...aRetrievedProfile, isEmailValidated: true }))
+      findLastVersionByModelId: jest.fn(() =>
+        taskEither.of(some({ ...aRetrievedProfile, isEmailValidated: true }))
       )
     };
 
     const handler = StartEmailValidationProcessHandler(profileModelMock as any);
 
     await handler(contextMock as any, aRetrievedProfile.fiscalCode);
-
-    expect(df.getClient).not.toHaveBeenCalledTimes(1);
+    const result = await handler(
+      contextMock as any,
+      aRetrievedProfile.fiscalCode
+    );
+    expect(result.kind).toBe("IResponseErrorValidation");
   });
 });

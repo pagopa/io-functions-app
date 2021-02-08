@@ -12,26 +12,25 @@ import {
   IResponseErrorNotFound,
   IResponseSuccessJson,
   ResponseErrorConflict,
-  ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { withoutUndefinedValues } from "italia-ts-commons/lib/types";
 
-import { Profile as ApiProfile } from "io-functions-commons/dist/generated/definitions/Profile";
-import { ProfileModel } from "io-functions-commons/dist/src/models/profile";
+import { Profile as ApiProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/Profile";
+import { ProfileModel } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import {
   IResponseErrorQuery,
   ResponseErrorQuery
-} from "io-functions-commons/dist/src/utils/response";
+} from "@pagopa/io-functions-commons/dist/src/utils/response";
 
-import { ContextMiddleware } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
-import { FiscalCodeMiddleware } from "io-functions-commons/dist/src/utils/middlewares/fiscalcode";
+import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
 import {
   withRequestMiddlewares,
   wrapRequestHandler
-} from "io-functions-commons/dist/src/utils/request_middleware";
+} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { ProfileMiddleware } from "../utils/middlewares/profile";
@@ -62,9 +61,9 @@ export function UpdateProfileHandler(
   return async (context, fiscalCode, profilePayload) => {
     const logPrefix = `UpdateProfileHandler|FISCAL_CODE=${fiscalCode}`;
 
-    const errorOrMaybeExistingProfile = await profileModel.findOneProfileByFiscalCode(
-      fiscalCode
-    );
+    const errorOrMaybeExistingProfile = await profileModel
+      .findLastVersionByModelId([fiscalCode])
+      .run();
 
     if (isLeft(errorOrMaybeExistingProfile)) {
       return ResponseErrorQuery(
@@ -104,21 +103,27 @@ export function UpdateProfileHandler(
       emailChanged ? false : existingProfile.isEmailValidated
     );
 
-    // Remove undefined values to avoid overriding already existing profile properties
-    const profileWithoutUndefinedValues = withoutUndefinedValues(profile);
+    // User inbox and webhook must be enabled after accepting the ToS for the first time
+    // https://www.pivotaltracker.com/story/show/175095963
+    const autoEnableInboxAndWebHook =
+      existingProfile.acceptedTosVersion === undefined &&
+      profile.acceptedTosVersion !== undefined;
+    const overriddenInboxAndWebhook = autoEnableInboxAndWebHook
+      ? { isInboxEnabled: true, isWebhookEnabled: true }
+      : {};
 
-    const errorOrMaybeUpdatedProfile = await profileModel.update(
-      existingProfile.id,
-      existingProfile.fiscalCode,
-      p => ({
-        ...p,
-        ...profileWithoutUndefinedValues
+    const errorOrMaybeUpdatedProfile = await profileModel
+      .update({
+        ...existingProfile,
+        // Remove undefined values to avoid overriding already existing profile properties
+        ...withoutUndefinedValues(profile),
+        ...overriddenInboxAndWebhook
       })
-    );
+      .run();
 
     if (isLeft(errorOrMaybeUpdatedProfile)) {
       context.log.error(
-        `${logPrefix}|ERROR=${errorOrMaybeUpdatedProfile.value.body}`
+        `${logPrefix}|ERROR=${errorOrMaybeUpdatedProfile.value.kind}`
       );
       return ResponseErrorQuery(
         "Error while updating the existing profile",
@@ -126,17 +131,7 @@ export function UpdateProfileHandler(
       );
     }
 
-    const maybeUpdatedProfile = errorOrMaybeUpdatedProfile.value;
-
-    if (isNone(maybeUpdatedProfile)) {
-      // This should never happen since if the profile doesn't exist this function
-      // will never be called, but let's deal with this anyway, you never know
-      return ResponseErrorInternal(
-        "Error while updating the existing profile, the profile does not exist!"
-      );
-    }
-
-    const updateProfile = maybeUpdatedProfile.value;
+    const updateProfile = errorOrMaybeUpdatedProfile.value;
 
     // Start the Orchestrator
     const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.encode(

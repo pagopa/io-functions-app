@@ -1,6 +1,6 @@
 // tslint:disable:no-any
 
-import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import {
   NonEmptyString,
   OrganizationFiscalCode
@@ -14,15 +14,19 @@ import {
   Service,
   toAuthorizedCIDRs,
   toAuthorizedRecipients
-} from "io-functions-commons/dist/src/models/service";
+} from "@pagopa/io-functions-commons/dist/src/models/service";
 import {
   VISIBLE_SERVICE_BLOB_ID,
   VISIBLE_SERVICE_CONTAINER,
   VisibleService
-} from "io-functions-commons/dist/src/models/visible_service";
+} from "@pagopa/io-functions-commons/dist/src/models/visible_service";
 
-import { MaxAllowedPaymentAmount } from "io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
+import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
 
+import { PaginatedServiceTupleCollection } from "@pagopa/io-functions-commons/dist/generated/definitions/PaginatedServiceTupleCollection";
+import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
+import { IResponseSuccessJson } from "italia-ts-commons/lib/responses";
+import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetVisibleServices, GetVisibleServicesHandler } from "../handler";
 
 afterEach(() => {
@@ -47,19 +51,19 @@ const aService: Service = {
 
 const aNewService: NewService = {
   ...aService,
-  id: "123" as NonEmptyString,
-  kind: "INewService",
-  version: 1 as NonNegativeNumber
+  kind: "INewService"
 };
 
 const aRetrievedService: RetrievedService = {
   ...aNewService,
-  _self: "123",
-  _ts: 123,
-  kind: "IRetrievedService"
+  ...aCosmosResourceMetadata,
+  id: "123" as NonEmptyString,
+  kind: "IRetrievedService",
+  version: 1 as NonNegativeInteger
 };
 
 const aVisibleService: VisibleService = {
+  ...aCosmosResourceMetadata,
   departmentName: aRetrievedService.departmentName,
   id: aRetrievedService.id,
   organizationFiscalCode: aRetrievedService.organizationFiscalCode,
@@ -68,6 +72,13 @@ const aVisibleService: VisibleService = {
   serviceId: aRetrievedService.serviceId,
   serviceName: aRetrievedService.serviceName,
   version: aRetrievedService.version
+};
+
+const aLocalVisibleService: VisibleService = {
+  ...aVisibleService,
+  serviceMetadata: {
+    scope: ServiceScopeEnum.LOCAL
+  }
 };
 
 describe("GetVisibleServicesHandler", () => {
@@ -84,7 +95,8 @@ describe("GetVisibleServicesHandler", () => {
       })
     };
     const getVisibleServicesHandler = GetVisibleServicesHandler(
-      blobStorageMock as any
+      blobStorageMock as any,
+      false
     );
     const response = await getVisibleServicesHandler();
     response.apply(MockResponse());
@@ -98,10 +110,44 @@ describe("GetVisibleServicesHandler", () => {
     );
     expect(response.kind).toEqual("IResponseSuccessJson");
   });
+
+  it("should return only NATIONAL scoped services", async () => {
+    const blobStorageMock = {
+      getBlobToText: jest.fn().mockImplementation((_, __, ___, cb) => {
+        cb(
+          undefined,
+          JSON.stringify({
+            localServiceId: aLocalVisibleService,
+            serviceId: aVisibleService,
+            serviceIdx: aVisibleService
+          })
+        );
+      })
+    };
+    const getVisibleServicesHandler = GetVisibleServicesHandler(
+      blobStorageMock as any,
+      true
+    );
+    const response = await getVisibleServicesHandler();
+    response.apply(MockResponse());
+
+    await Promise.resolve(); // needed to let the response promise complete
+    expect(blobStorageMock.getBlobToText).toHaveBeenCalledWith(
+      VISIBLE_SERVICE_CONTAINER,
+      VISIBLE_SERVICE_BLOB_ID,
+      {},
+      expect.any(Function)
+    );
+    expect(response.kind).toEqual("IResponseSuccessJson");
+    expect(
+      (response as IResponseSuccessJson<PaginatedServiceTupleCollection>).value
+        .items
+    ).toHaveLength(2);
+  });
 });
 
 describe("GetVisibleServices", () => {
   it("should set up authentication middleware", async () => {
-    GetVisibleServices({} as any);
+    GetVisibleServices({} as any, false);
   });
 });

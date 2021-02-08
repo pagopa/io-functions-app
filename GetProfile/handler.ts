@@ -1,8 +1,4 @@
 import * as express from "express";
-
-import { isRight } from "fp-ts/lib/Either";
-import { isSome } from "fp-ts/lib/Option";
-
 import {
   IResponseErrorNotFound,
   IResponseSuccessJson,
@@ -11,20 +7,25 @@ import {
 } from "italia-ts-commons/lib/responses";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 
-import { ProfileModel } from "io-functions-commons/dist/src/models/profile";
+import { ProfileModel } from "@pagopa/io-functions-commons/dist/src/models/profile";
 
-import { ExtendedProfile } from "io-functions-commons/dist/generated/definitions/ExtendedProfile";
-import { FiscalCodeMiddleware } from "io-functions-commons/dist/src/utils/middlewares/fiscalcode";
+import { ExtendedProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/ExtendedProfile";
+import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
 import {
   withRequestMiddlewares,
   wrapRequestHandler
-} from "io-functions-commons/dist/src/utils/request_middleware";
+} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
   IResponseErrorQuery,
   ResponseErrorQuery
-} from "io-functions-commons/dist/src/utils/response";
+} from "@pagopa/io-functions-commons/dist/src/utils/response";
 
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
+
+type IGetProfileHandlerResult =
+  | IResponseSuccessJson<ExtendedProfile>
+  | IResponseErrorNotFound
+  | IResponseErrorQuery;
 
 /**
  * Type of a GetProfile handler.
@@ -34,11 +35,7 @@ import { retrievedProfileToExtendedProfile } from "../utils/profiles";
  */
 type IGetProfileHandler = (
   fiscalCode: FiscalCode
-) => Promise<
-  | IResponseSuccessJson<ExtendedProfile>
-  | IResponseErrorNotFound
-  | IResponseErrorQuery
->;
+) => Promise<IGetProfileHandlerResult>;
 
 /**
  * Return a type safe GetProfile handler.
@@ -46,30 +43,23 @@ type IGetProfileHandler = (
 export function GetProfileHandler(
   profileModel: ProfileModel
 ): IGetProfileHandler {
-  return async fiscalCode => {
-    const errorOrMaybeProfile = await profileModel.findOneProfileByFiscalCode(
-      fiscalCode
-    );
-    if (isRight(errorOrMaybeProfile)) {
-      const maybeProfile = errorOrMaybeProfile.value;
-      if (isSome(maybeProfile)) {
-        const profile = maybeProfile.value;
-        // if the client is a trusted application we return the
-        // extended profile
-        return ResponseSuccessJson(retrievedProfileToExtendedProfile(profile));
-      } else {
-        return ResponseErrorNotFound(
-          "Profile not found",
-          "The profile you requested was not found in the system."
-        );
-      }
-    } else {
-      return ResponseErrorQuery(
-        "Error while retrieving the profile",
-        errorOrMaybeProfile.value
-      );
-    }
-  };
+  return async fiscalCode =>
+    profileModel
+      .findLastVersionByModelId([fiscalCode])
+      .fold(
+        failure =>
+          ResponseErrorQuery("Error while retrieving the profile", failure),
+        maybeProfile =>
+          maybeProfile.fold<IGetProfileHandlerResult>(
+            ResponseErrorNotFound(
+              "Profile not found",
+              "The profile you requested was not found in the system."
+            ),
+            profile =>
+              ResponseSuccessJson(retrievedProfileToExtendedProfile(profile))
+          )
+      )
+      .run();
 }
 
 /**

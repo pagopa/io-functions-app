@@ -12,10 +12,10 @@ import * as ai from "applicationinsights";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { EmailString } from "italia-ts-commons/lib/strings";
 
-import { sendMail } from "io-functions-commons/dist/src/utils/email";
-
 import { EmailDefaults } from "./";
 import { getEmailHtmlFromTemplate } from "./template";
+
+import { sendMail } from "@pagopa/io-functions-commons/dist/src/mailer";
 
 // Activity input
 export const ActivityInput = t.interface({
@@ -78,31 +78,34 @@ export const getSendValidationEmailActivityHandler = (
   const emailText = HtmlToText.fromString(emailHtml, htmlToTextOptions);
 
   // Send email with the validation link
-  const errorOrSentMessageInfo = await sendMail(mailerTransporter, {
+  await sendMail(mailerTransporter, {
     from,
     html: emailHtml,
     subject: title,
     text: emailText,
     to: email
-  });
+  })
+    .bimap(
+      e => {
+        const error = Error(
+          `${logPrefix}|Error sending validation email|ERROR=${e.message}`
+        );
+        context.log.error(error.message);
+        throw error;
+      },
+      result => {
+        const messageInfo = result.value;
 
-  if (isLeft(errorOrSentMessageInfo)) {
-    const error = Error(
-      `${logPrefix}|Error sending validation email|ERROR=${errorOrSentMessageInfo.value.message}`
-    );
-    context.log.error(error.message);
-    throw error;
-  }
-
-  const messageInfo = errorOrSentMessageInfo.value;
-
-  // on success, track a custom event with properties of transport used
-  // see https://github.com/pagopa/io-functions-commons/blob/master/src/utils/nodemailer.ts
-  // note: the extra properties will be defined only when using a MultiTransport
-  ai.defaultClient.trackEvent({
-    name: `SendValidationEmailActivity.success`,
-    properties: typeof messageInfo === "object" ? messageInfo : {}
-  });
+        // on success, track a custom event with properties of transport used
+        // see https://github.com/pagopa/io-functions-commons/blob/master/src/utils/nodemailer.ts
+        // note: the extra properties will be defined only when using a MultiTransport
+        ai.defaultClient.trackEvent({
+          name: `SendValidationEmailActivity.success`,
+          properties: typeof messageInfo === "object" ? messageInfo : {}
+        });
+      }
+    )
+    .run();
 
   return ActivityResultSuccess.encode({
     kind: "SUCCESS"

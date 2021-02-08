@@ -9,34 +9,50 @@ import * as express from "express";
 import { Context } from "@azure/functions";
 import * as df from "durable-functions";
 
-import { isLeft } from "fp-ts/lib/Either";
+import { isLeft, toError } from "fp-ts/lib/Either";
 import { isNone } from "fp-ts/lib/Option";
 
 import {
+  IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessAccepted,
   IResponseSuccessJson,
+  ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseErrorValidation,
   ResponseSuccessAccepted
 } from "italia-ts-commons/lib/responses";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 
-import { ProfileModel } from "io-functions-commons/dist/src/models/profile";
+import { ProfileModel } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import {
   IResponseErrorQuery,
   ResponseErrorQuery
-} from "io-functions-commons/dist/src/utils/response";
+} from "@pagopa/io-functions-commons/dist/src/utils/response";
 
-import { ContextMiddleware } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
-import { FiscalCodeMiddleware } from "io-functions-commons/dist/src/utils/middlewares/fiscalcode";
+import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
 import {
   withRequestMiddlewares,
   wrapRequestHandler
-} from "io-functions-commons/dist/src/utils/request_middleware";
+} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 
+import { fromPredicate, taskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import { OrchestratorInput as EmailValidationProcessOrchestratorInput } from "../EmailValidationProcessOrchestrator/handler";
+import {
+  isOrchestratorRunning,
+  makeStartEmailValidationProcessOrchestratorId
+} from "./orchestrators";
+
+type ReturnTypes =
+  // tslint:disable-next-line: max-union-size
+  | IResponseSuccessJson<{}>
+  | IResponseErrorValidation
+  | IResponseErrorQuery
+  | IResponseErrorNotFound
+  | IResponseSuccessAccepted
+  | IResponseErrorInternal;
 
 /**
  * Type of an StartEmailValidationProcess handler.
@@ -44,14 +60,7 @@ import { OrchestratorInput as EmailValidationProcessOrchestratorInput } from "..
 type IStartEmailValidationProcessHandler = (
   context: Context,
   fiscalCode: FiscalCode
-) => Promise<
-  // tslint:disable-next-line: max-union-size
-  | IResponseSuccessJson<{}>
-  | IResponseErrorValidation
-  | IResponseErrorQuery
-  | IResponseErrorNotFound
-  | IResponseSuccessAccepted
->;
+) => Promise<ReturnTypes>;
 
 export function StartEmailValidationProcessHandler(
   profileModel: ProfileModel
@@ -59,9 +68,9 @@ export function StartEmailValidationProcessHandler(
   return async (context, fiscalCode) => {
     const logPrefix = `StartEmailValidationProcessHandler|FISCAL_CODE=${fiscalCode}`;
 
-    const errorOrMaybeExistingProfile = await profileModel.findOneProfileByFiscalCode(
-      fiscalCode
-    );
+    const errorOrMaybeExistingProfile = await profileModel
+      .findLastVersionByModelId([fiscalCode])
+      .run();
 
     if (isLeft(errorOrMaybeExistingProfile)) {
       return ResponseErrorQuery(
@@ -99,13 +108,32 @@ export function StartEmailValidationProcessHandler(
     );
 
     const dfClient = df.getClient(context);
-    await dfClient.startNew(
-      "EmailValidationProcessOrchestrator",
-      undefined,
-      emailValidationProcessOrchestartorInput
-    );
-
-    return ResponseSuccessAccepted();
+    return taskEither
+      .of(makeStartEmailValidationProcessOrchestratorId(fiscalCode, email))
+      .chain(orchId =>
+        isOrchestratorRunning(dfClient, orchId)
+          .chain(
+            fromPredicate(_ => _.isRunning, () => new Error("Not Running"))
+          )
+          .foldTaskEither(
+            () =>
+              tryCatch(
+                () =>
+                  dfClient.startNew(
+                    "EmailValidationProcessOrchestrator",
+                    orchId,
+                    emailValidationProcessOrchestartorInput
+                  ),
+                toError
+              ),
+            _ => taskEither.of(String(_.isRunning))
+          )
+      )
+      .fold<ReturnTypes>(
+        e => ResponseErrorInternal(String(e)),
+        () => ResponseSuccessAccepted()
+      )
+      .run();
   };
 }
 

@@ -18,26 +18,26 @@ import {
 import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import { withoutUndefinedValues } from "italia-ts-commons/lib/types";
 
-import { retrievedMessageToPublic } from "io-functions-commons/dist/src/utils/messages";
-import { FiscalCodeMiddleware } from "io-functions-commons/dist/src/utils/middlewares/fiscalcode";
-import { RequiredParamMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_param";
+import { retrievedMessageToPublic } from "@pagopa/io-functions-commons/dist/src/utils/messages";
+import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
+import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
 import {
   withRequestMiddlewares,
   wrapRequestHandler
-} from "io-functions-commons/dist/src/utils/request_middleware";
+} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
   IResponseErrorQuery,
   ResponseErrorQuery
-} from "io-functions-commons/dist/src/utils/response";
+} from "@pagopa/io-functions-commons/dist/src/utils/response";
 
-import { MessageModel } from "io-functions-commons/dist/src/models/message";
+import { MessageModel } from "@pagopa/io-functions-commons/dist/src/models/message";
 
 import { Context } from "@azure/functions";
-import { CreatedMessageWithContent } from "io-functions-commons/dist/generated/definitions/CreatedMessageWithContent";
-import { CreatedMessageWithoutContent } from "io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
-import { MessageResponseWithContent } from "io-functions-commons/dist/generated/definitions/MessageResponseWithContent";
-import { MessageResponseWithoutContent } from "io-functions-commons/dist/generated/definitions/MessageResponseWithoutContent";
-import { ContextMiddleware } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { CreatedMessageWithContent } from "@pagopa/io-functions-commons/dist/generated/definitions/CreatedMessageWithContent";
+import { CreatedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
+import { MessageResponseWithContent } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageResponseWithContent";
+import { MessageResponseWithoutContent } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageResponseWithoutContent";
+import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 
 /**
  * Type of a GetMessage handler.
@@ -71,8 +71,10 @@ export function GetMessageHandler(
 ): IGetMessageHandler {
   return async (context, fiscalCode, messageId) => {
     const [errorOrMaybeDocument, errorOrMaybeContent] = await Promise.all([
-      messageModel.findMessageForRecipient(fiscalCode, messageId),
-      messageModel.getContentFromBlob(blobService, messageId)
+      messageModel
+        .findMessageForRecipient(fiscalCode, messageId as NonEmptyString) // FIXME: decode instead of cast
+        .run(),
+      messageModel.getContentFromBlob(blobService, messageId).run()
     ]);
 
     if (isLeft(errorOrMaybeDocument)) {

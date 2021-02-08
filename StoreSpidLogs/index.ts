@@ -2,7 +2,6 @@ import { Context } from "@azure/functions";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { either } from "fp-ts/lib/Either";
 import { curry } from "fp-ts/lib/function";
-import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import * as t from "io-ts";
 import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
 import {
@@ -12,9 +11,10 @@ import {
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { IPString, PatternString } from "italia-ts-commons/lib/strings";
 import { initTelemetryClient } from "../utils/appinsights";
+import { getConfigOrThrow } from "../utils/config";
 
-const rsaPublicKey = getRequiredStringEnv("SPID_LOGS_PUBLIC_KEY");
-const encrypt = curry(toEncryptedPayload)(rsaPublicKey);
+const config = getConfigOrThrow();
+const encrypt = curry(toEncryptedPayload)(config.SPID_LOGS_PUBLIC_KEY);
 
 /**
  * Payload of the stored blob item

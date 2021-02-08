@@ -1,6 +1,7 @@
 /* tslint:disable:no-any */
 
 import * as df from "durable-functions";
+import { readableReport } from "italia-ts-commons/lib/reporters";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aEmailChanged,
@@ -12,7 +13,7 @@ import {
   OrchestratorResult as EmailValidationProcessOrchestratorResult
 } from "../../EmailValidationProcessOrchestrator/handler";
 import {
-  handler,
+  getUpsertedProfileOrchestratorHandler,
   OrchestratorInput as UpsertedProfileOrchestratorInput
 } from "../handler";
 
@@ -22,12 +23,16 @@ someRetryOptions.backoffCoefficient = 1.5;
 
 describe("UpsertedProfileOrchestrator", () => {
   it("should not start the EmailValidationProcessOrchestrator if the email is not changed", () => {
-    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.encode(
+    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.decode(
       {
         newProfile: { ...aRetrievedProfile, isWebhookEnabled: true },
         oldProfile: aRetrievedProfile,
         updatedAt: new Date()
       }
+    ).getOrElseL(_ =>
+      fail(
+        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(_)}`
+      )
     );
 
     const contextMockWithDf = {
@@ -38,7 +43,9 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     };
 
-    const orchestratorHandler = handler(contextMockWithDf as any);
+    const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
+      sendCashbackMessage: false
+    })(contextMockWithDf as any);
 
     orchestratorHandler.next();
 
@@ -46,7 +53,7 @@ describe("UpsertedProfileOrchestrator", () => {
   });
 
   it("should start the activities with the right inputs", async () => {
-    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.encode(
+    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.decode(
       {
         newProfile: {
           ...aRetrievedProfile,
@@ -56,12 +63,22 @@ describe("UpsertedProfileOrchestrator", () => {
         oldProfile: aRetrievedProfile,
         updatedAt: new Date()
       }
+    ).getOrElseL(_ =>
+      fail(
+        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(_)}`
+      )
     );
 
-    const emailValidationProcessOrchestratorResult = EmailValidationProcessOrchestratorResult.encode(
+    const emailValidationProcessOrchestratorResult = EmailValidationProcessOrchestratorResult.decode(
       {
         kind: "SUCCESS"
       }
+    ).getOrElseL(_ =>
+      fail(
+        `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
+          _
+        )}`
+      )
     );
 
     const sendWelcomeMessagesActivityResult = "SUCCESS";
@@ -79,7 +96,9 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     };
 
-    const orchestratorHandler = handler(contextMockWithDf as any);
+    const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
+      sendCashbackMessage: true
+    })(contextMockWithDf as any);
 
     const result = orchestratorHandler.next();
 
@@ -92,7 +111,7 @@ describe("UpsertedProfileOrchestrator", () => {
       })
     );
 
-    orchestratorHandler.next(result.value);
+    const result2 = orchestratorHandler.next(result.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -102,12 +121,22 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    orchestratorHandler.next();
+    orchestratorHandler.next(result2.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
       {
         messageKind: "HOWTO",
+        profile: upsertedProfileOrchestratorInput.newProfile
+      }
+    );
+
+    orchestratorHandler.next();
+    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
+      "SendWelcomeMessagesActivity",
+      someRetryOptions,
+      {
+        messageKind: "CASHBACK",
         profile: upsertedProfileOrchestratorInput.newProfile
       }
     );

@@ -1,11 +1,5 @@
 /* tslint:disable:no-any */
 // tslint:disable-next-line: no-object-mutation
-process.env = {
-  ...process.env,
-  AZURE_NH_ENDPOINT:
-    "Endpoint=sb://anendpoint.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=C4xIzNZv4VrUnu5jkmPH635MApRUj8wABky8VfduYqg=",
-  AZURE_NH_HUB_NAME: "AZURE_NH_HUB_NAME"
-};
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import { PlatformEnum } from "../../generated/backend/Platform";

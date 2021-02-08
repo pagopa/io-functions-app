@@ -1,30 +1,29 @@
 // tslint:disable:no-any
-
-import { none, some } from "fp-ts/lib/Option";
-
-import { left, right } from "fp-ts/lib/Either";
-import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
-import {
-  NonEmptyString,
-  OrganizationFiscalCode
-} from "italia-ts-commons/lib/strings";
-
 import {
   NewService,
   RetrievedService,
   Service,
   toAuthorizedCIDRs,
   toAuthorizedRecipients
-} from "io-functions-commons/dist/src/models/service";
+} from "@pagopa/io-functions-commons/dist/src/models/service";
 
-import { MaxAllowedPaymentAmount } from "io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
-import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
+import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
+import { ServicePublic } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePublic";
 
-import { NotificationChannelEnum } from "io-functions-commons/dist/generated/definitions/NotificationChannel";
+import { NotificationChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/NotificationChannel";
+import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import {
   GetServiceHandler,
   serviceAvailableNotificationChannels
 } from "../handler";
+
+import { none, some } from "fp-ts/lib/Option";
+import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import {
+  NonEmptyString,
+  OrganizationFiscalCode
+} from "italia-ts-commons/lib/strings";
 
 afterEach(() => {
   jest.resetAllMocks();
@@ -57,16 +56,15 @@ const aService: Service = {
 
 const aNewService: NewService = {
   ...aService,
-  id: "123" as NonEmptyString,
-  kind: "INewService",
-  version: 1 as NonNegativeNumber
+  kind: "INewService"
 };
 
 const aRetrievedService: RetrievedService = {
   ...aNewService,
-  _self: "123",
-  _ts: 123,
-  kind: "IRetrievedService"
+  ...aCosmosResourceMetadata,
+  id: "123" as NonEmptyString,
+  kind: "IRetrievedService",
+  version: 1 as NonNegativeInteger
 };
 
 const aSeralizedService: ServicePublic = {
@@ -75,7 +73,7 @@ const aSeralizedService: ServicePublic = {
     NotificationChannelEnum.EMAIL,
     NotificationChannelEnum.WEBHOOK
   ],
-  version: 1 as NonNegativeNumber
+  version: 1 as NonNegativeInteger
 };
 
 describe("serviceAvailableNotificationChannels", () => {
@@ -98,7 +96,7 @@ describe("GetServiceHandler", () => {
   it("should get an existing service", async () => {
     const serviceModelMock = {
       findOneByServiceId: jest.fn(() => {
-        return Promise.resolve(right(some(aRetrievedService)));
+        return taskEither.of(some(aRetrievedService));
       })
     };
     const aServiceId = "1" as NonEmptyString;
@@ -115,7 +113,7 @@ describe("GetServiceHandler", () => {
   it("should fail on errors during get", async () => {
     const serviceModelMock = {
       findOneByServiceId: jest.fn(() => {
-        return Promise.resolve(left(none));
+        return fromLeft(none);
       })
     };
     const aServiceId = "1" as NonEmptyString;
@@ -129,7 +127,7 @@ describe("GetServiceHandler", () => {
   it("should return not found if the service does not exist", async () => {
     const serviceModelMock = {
       findOneByServiceId: jest.fn(() => {
-        return Promise.resolve(right(none));
+        return taskEither.of(none);
       })
     };
     const aServiceId = "1" as NonEmptyString;

@@ -1,6 +1,5 @@
 // tslint:disable:no-any no-duplicate-string no-big-function
 
-import { left, right } from "fp-ts/lib/Either";
 import { none, some } from "fp-ts/lib/Option";
 
 import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
@@ -8,14 +7,16 @@ import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import {
   NewMessageWithoutContent,
   RetrievedMessageWithoutContent
-} from "io-functions-commons/dist/src/models/message";
+} from "@pagopa/io-functions-commons/dist/src/models/message";
 
-import { CreatedMessageWithoutContent } from "io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
-import { MessageResponseWithoutContent } from "io-functions-commons/dist/generated/definitions/MessageResponseWithoutContent";
-import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
-import { TimeToLiveSeconds } from "io-functions-commons/dist/generated/definitions/TimeToLiveSeconds";
+import { CreatedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
+import { MessageResponseWithoutContent } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageResponseWithoutContent";
+import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
+import { TimeToLiveSeconds } from "@pagopa/io-functions-commons/dist/generated/definitions/TimeToLiveSeconds";
 
+import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { context as contextMock } from "../../__mocks__/durable-functions";
+import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetMessageHandler } from "../handler";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
@@ -35,8 +36,7 @@ const aNewMessageWithoutContent: NewMessageWithoutContent = {
 
 const aRetrievedMessageWithoutContent: RetrievedMessageWithoutContent = {
   ...aNewMessageWithoutContent,
-  _self: "xyz",
-  _ts: 1,
+  ...aCosmosResourceMetadata,
   kind: "IRetrievedMessageWithoutContent"
 };
 
@@ -55,9 +55,9 @@ describe("GetMessageHandler", () => {
   it("should fail if any error occurs trying to retrieve the message content", async () => {
     const mockMessageModel = {
       findMessageForRecipient: jest.fn(() =>
-        right(some(aRetrievedMessageWithoutContent))
+        taskEither.of(some(aRetrievedMessageWithoutContent))
       ),
-      getContentFromBlob: jest.fn(() => left(new Error()))
+      getContentFromBlob: jest.fn(() => fromLeft(new Error()))
     };
 
     const getMessageHandler = GetMessageHandler(
@@ -84,9 +84,9 @@ describe("GetMessageHandler", () => {
   it("should respond with a message", async () => {
     const mockMessageModel = {
       findMessageForRecipient: jest.fn(() =>
-        right(some(aRetrievedMessageWithoutContent))
+        taskEither.of(some(aRetrievedMessageWithoutContent))
       ),
-      getContentFromBlob: jest.fn(() => right(none))
+      getContentFromBlob: jest.fn(() => taskEither.of(none))
     };
 
     const getMessageHandler = GetMessageHandler(
@@ -115,8 +115,8 @@ describe("GetMessageHandler", () => {
 
   it("should respond with not found a message doesn not exist", async () => {
     const mockMessageModel = {
-      findMessageForRecipient: jest.fn(() => right(none)),
-      getContentFromBlob: jest.fn(() => right(none))
+      findMessageForRecipient: jest.fn(() => taskEither.of(none)),
+      getContentFromBlob: jest.fn(() => taskEither.of(none))
     };
 
     const getMessageHandler = GetMessageHandler(

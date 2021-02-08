@@ -13,27 +13,28 @@ import {
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
-import { RequiredParamMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_param";
+import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
 import {
   withRequestMiddlewares,
   wrapRequestHandler
-} from "io-functions-commons/dist/src/utils/request_middleware";
+} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
   IResponseErrorQuery,
   ResponseErrorQuery
-} from "io-functions-commons/dist/src/utils/response";
+} from "@pagopa/io-functions-commons/dist/src/utils/response";
 
 import {
   RetrievedService,
   ServiceModel
-} from "io-functions-commons/dist/src/models/service";
+} from "@pagopa/io-functions-commons/dist/src/models/service";
 
 import {
   NotificationChannel,
   NotificationChannelEnum
-} from "io-functions-commons/dist/generated/definitions/NotificationChannel";
-import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
-import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
+} from "@pagopa/io-functions-commons/dist/generated/definitions/NotificationChannel";
+import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
+import { ServicePublic } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePublic";
+import { toApiServiceMetadata } from "@pagopa/io-functions-commons/dist/src/utils/service_metadata";
 
 type IGetServiceHandlerRet =
   | IResponseSuccessJson<ServicePublic>
@@ -67,19 +68,9 @@ function retrievedServiceToPublic(
     organization_fiscal_code: retrievedService.organizationFiscalCode,
     organization_name: retrievedService.organizationName,
     service_id: retrievedService.serviceId,
-    service_metadata: retrievedService.serviceMetadata && {
-      address: retrievedService.serviceMetadata.address,
-      app_android: retrievedService.serviceMetadata.appAndroid,
-      app_ios: retrievedService.serviceMetadata.appIos,
-      description: retrievedService.serviceMetadata.description,
-      email: retrievedService.serviceMetadata.email,
-      pec: retrievedService.serviceMetadata.pec,
-      phone: retrievedService.serviceMetadata.phone,
-      privacy_url: retrievedService.serviceMetadata.privacyUrl,
-      scope: retrievedService.serviceMetadata.scope,
-      tos_url: retrievedService.serviceMetadata.tosUrl,
-      web_url: retrievedService.serviceMetadata.webUrl
-    },
+    service_metadata: retrievedService.serviceMetadata
+      ? toApiServiceMetadata(retrievedService.serviceMetadata)
+      : undefined,
     service_name: retrievedService.serviceName,
     version: retrievedService.version
   };
@@ -97,7 +88,7 @@ export function GetServiceHandler(
   serviceModel: ServiceModel
 ): IGetServiceHandler {
   return async serviceId =>
-    (await serviceModel.findOneByServiceId(serviceId)).fold<
+    (await serviceModel.findOneByServiceId(serviceId).run()).fold<
       IGetServiceHandlerRet
     >(
       error => ResponseErrorQuery("Error while retrieving the service", error),

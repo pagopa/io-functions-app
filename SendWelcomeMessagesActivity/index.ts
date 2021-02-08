@@ -1,4 +1,3 @@
-import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { agent } from "italia-ts-commons";
 import {
   AbortableFetch,
@@ -8,12 +7,12 @@ import {
 import { Millisecond } from "italia-ts-commons/lib/units";
 import { getActivityFunction } from "./handler";
 
+import { getConfigOrThrow } from "../utils/config";
+
 // HTTP external requests timeout in milliseconds
 const DEFAULT_REQUEST_TIMEOUT_MS = 10000;
 
-// Needed to call notifications API
-const publicApiUrl = getRequiredStringEnv("PUBLIC_API_URL");
-const publicApiKey = getRequiredStringEnv("PUBLIC_API_KEY");
+const config = getConfigOrThrow();
 
 // HTTP-only fetch with optional keepalive agent
 // @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
@@ -25,6 +24,11 @@ const timeoutFetch = toFetch(
   setFetchTimeout(DEFAULT_REQUEST_TIMEOUT_MS as Millisecond, abortableFetch)
 );
 
-const index = getActivityFunction(publicApiUrl, publicApiKey, timeoutFetch);
+// Needed to call notifications API
+const index = getActivityFunction(
+  config.PUBLIC_API_URL,
+  config.PUBLIC_API_KEY,
+  timeoutFetch
+);
 
 export default index;
