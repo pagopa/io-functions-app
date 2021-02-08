@@ -1,15 +1,15 @@
 /* tslint:disable: no-any */
 
-import { none, some } from "fp-ts/lib/Option";
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import {
   UserDataProcessingStatus,
   UserDataProcessingStatusEnum
-} from "io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
+} from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessingStatus";
 import {
   RetrievedUserDataProcessing,
   UserDataProcessingModel
-} from "io-functions-commons/dist/src/models/user_data_processing";
+} from "@pagopa/io-functions-commons/dist/src/models/user_data_processing";
+import { none, some } from "fp-ts/lib/Option";
+import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aFiscalCode,

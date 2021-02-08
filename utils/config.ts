@@ -10,7 +10,7 @@ import * as t from "io-ts";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
-import { MailerConfig } from "io-functions-commons/dist/src/mailer";
+import { MailerConfig } from "@pagopa/io-functions-commons/dist/src/mailer";
 
 // exclude a specific value from a type
 // as strict equality is performed, allowed input types are constrained to be values not references (object, arrays, etc)
@@ -68,6 +68,8 @@ export const IConfig = t.intersection([
 
     IS_CASHBACK_ENABLED: t.boolean,
 
+    FF_ONLY_NATIONAL_SERVICES: t.boolean,
+
     isProduction: t.boolean
   }),
   MailerConfig,
@@ -77,6 +79,9 @@ export const IConfig = t.intersection([
 // No need to re-evaluate this object for each call
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   ...process.env,
+  FF_ONLY_NATIONAL_SERVICES: fromNullable(process.env.FF_ONLY_NATIONAL_SERVICES)
+    .map(_ => _.toLocaleLowerCase() === "true")
+    .getOrElse(false),
   IS_CASHBACK_ENABLED: fromNullable(process.env.IS_CASHBACK_ENABLED)
     .map(_ => _.toLocaleLowerCase() === "true")
     .getOrElse(false),

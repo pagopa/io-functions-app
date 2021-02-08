@@ -1,35 +1,35 @@
-import * as express from "express";
-import * as t from "io-ts";
-
-import { IResponseErrorValidation } from "italia-ts-commons/lib/responses";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
-
-import { mapAsyncIterator } from "io-functions-commons/dist/src/utils/async";
-import { retrievedMessageToPublic } from "io-functions-commons/dist/src/utils/messages";
-import { FiscalCodeMiddleware } from "io-functions-commons/dist/src/utils/middlewares/fiscalcode";
+import { mapAsyncIterator } from "@pagopa/io-functions-commons/dist/src/utils/async";
+import { retrievedMessageToPublic } from "@pagopa/io-functions-commons/dist/src/utils/messages";
+import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
 import {
   withRequestMiddlewares,
   wrapRequestHandler
-} from "io-functions-commons/dist/src/utils/request_middleware";
+} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
   IResponseErrorQuery,
   IResponseSuccessJsonIterator,
   ResponseErrorQuery,
   ResponseJsonIterator
-} from "io-functions-commons/dist/src/utils/response";
+} from "@pagopa/io-functions-commons/dist/src/utils/response";
 
 import {
   filterAsyncIterator,
   flattenAsyncIterator
-} from "io-functions-commons/dist/src/utils/async";
+} from "@pagopa/io-functions-commons/dist/src/utils/async";
 
 import {
   MessageModel,
   RetrievedMessage
-} from "io-functions-commons/dist/src/models/message";
+} from "@pagopa/io-functions-commons/dist/src/models/message";
 
+import { CreatedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
+
+import * as express from "express";
 import { isRight } from "fp-ts/lib/Either";
-import { CreatedMessageWithoutContent } from "io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
+import * as t from "io-ts";
+
+import { IResponseErrorValidation } from "italia-ts-commons/lib/responses";
+import { FiscalCode } from "italia-ts-commons/lib/strings";
 
 type RetrievedNotPendingMessage = t.TypeOf<typeof RetrievedNotPendingMessage>;
 const RetrievedNotPendingMessage = t.intersection([

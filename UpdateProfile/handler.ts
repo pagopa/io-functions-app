@@ -18,19 +18,19 @@ import {
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { withoutUndefinedValues } from "italia-ts-commons/lib/types";
 
-import { Profile as ApiProfile } from "io-functions-commons/dist/generated/definitions/Profile";
-import { ProfileModel } from "io-functions-commons/dist/src/models/profile";
+import { Profile as ApiProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/Profile";
+import { ProfileModel } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import {
   IResponseErrorQuery,
   ResponseErrorQuery
-} from "io-functions-commons/dist/src/utils/response";
+} from "@pagopa/io-functions-commons/dist/src/utils/response";
 
-import { ContextMiddleware } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
-import { FiscalCodeMiddleware } from "io-functions-commons/dist/src/utils/middlewares/fiscalcode";
+import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
 import {
   withRequestMiddlewares,
   wrapRequestHandler
-} from "io-functions-commons/dist/src/utils/request_middleware";
+} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { ProfileMiddleware } from "../utils/middlewares/profile";

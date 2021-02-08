@@ -15,7 +15,7 @@ import { EmailString } from "italia-ts-commons/lib/strings";
 import { EmailDefaults } from "./";
 import { getEmailHtmlFromTemplate } from "./template";
 
-import { sendMail } from "io-functions-commons/dist/src/mailer";
+import { sendMail } from "@pagopa/io-functions-commons/dist/src/mailer";
 
 // Activity input
 export const ActivityInput = t.interface({

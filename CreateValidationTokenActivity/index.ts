@@ -4,8 +4,8 @@ import { createTableService } from "azure-storage";
 
 import { Millisecond } from "italia-ts-commons/lib/units";
 
-import { VALIDATION_TOKEN_TABLE_NAME } from "io-functions-commons/dist/src/entities/validation_token";
-import { ulidGenerator } from "io-functions-commons/dist/src/utils/strings";
+import { VALIDATION_TOKEN_TABLE_NAME } from "@pagopa/io-functions-commons/dist/src/entities/validation_token";
+import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
 
 import { getCreateValidationTokenActivityHandler } from "./handler";
 

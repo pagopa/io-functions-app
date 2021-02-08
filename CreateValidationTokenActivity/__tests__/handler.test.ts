@@ -2,8 +2,8 @@
 
 import * as lolex from "lolex";
 
-import { VALIDATION_TOKEN_TABLE_NAME } from "io-functions-commons/dist/src/entities/validation_token";
-import { ulidGenerator } from "io-functions-commons/dist/src/utils/strings";
+import { VALIDATION_TOKEN_TABLE_NAME } from "@pagopa/io-functions-commons/dist/src/entities/validation_token";
+import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
 
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {

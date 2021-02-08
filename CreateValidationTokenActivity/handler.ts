@@ -17,15 +17,15 @@ import * as t from "io-ts";
 import { isLeft } from "fp-ts/lib/Either";
 
 import { Context } from "@azure/functions";
+import { TableService } from "azure-storage";
 
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { EmailString, FiscalCode } from "italia-ts-commons/lib/strings";
-
-import { TableService } from "azure-storage";
-import { ValidationTokenEntity } from "io-functions-commons/dist/src/entities/validation_token";
-import { insertTableEntity } from "io-functions-commons/dist/src/utils/azure_storage";
-import { ObjectIdGenerator } from "io-functions-commons/dist/src/utils/strings";
 import { Millisecond } from "italia-ts-commons/lib/units";
+
+import { ValidationTokenEntity } from "@pagopa/io-functions-commons/dist/src/entities/validation_token";
+import { insertTableEntity } from "@pagopa/io-functions-commons/dist/src/utils/azure_storage";
+import { ObjectIdGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
 
 // Activity input
 export const ActivityInput = t.interface({
