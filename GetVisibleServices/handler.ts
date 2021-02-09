@@ -26,6 +26,7 @@ import { PaginatedServiceTupleCollection } from "@pagopa/io-functions-commons/di
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 import { ServiceTuple } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceTuple";
+import { fromNullable } from "fp-ts/lib/Option";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 
 type IGetVisibleServicesHandlerRet =
@@ -33,6 +34,76 @@ type IGetVisibleServicesHandlerRet =
   | IResponseErrorInternal;
 
 type IGetVisibleServicesHandler = () => Promise<IGetVisibleServicesHandlerRet>;
+
+const NationalServiceTuple = t.intersection([
+  ServiceTuple,
+  t.interface({
+    scope: t.literal(ServiceScopeEnum.NATIONAL)
+  })
+]);
+type NationalServiceTuple = t.TypeOf<typeof NationalServiceTuple>;
+
+const LocalServiceTuple = t.intersection([
+  ServiceTuple,
+  t.interface({
+    scope: t.literal(ServiceScopeEnum.LOCAL)
+  })
+]);
+type LocalServiceTuple = t.TypeOf<typeof LocalServiceTuple>;
+
+const ScopeGroupedServices = t.interface({
+  [ServiceScopeEnum.NATIONAL]: t.readonlyArray(NationalServiceTuple),
+  [ServiceScopeEnum.LOCAL]: t.readonlyArray(LocalServiceTuple)
+});
+type ScopeGroupedServices = t.TypeOf<typeof ScopeGroupedServices>;
+
+const VisibleServiceDictionary = t.dictionary(ServiceId, VisibleService);
+type VisibleServiceDictionary = t.TypeOf<typeof VisibleServiceDictionary>;
+
+/**
+ * Returns VisibleServices grouped by scope.
+ */
+const groupByScope = (
+  serviceJson: VisibleServiceDictionary
+): ScopeGroupedServices =>
+  toServicesTuple(new StrMap(serviceJson)).reduce(
+    (acc, service) => {
+      if (service.scope === ServiceScopeEnum.LOCAL) {
+        return {
+          [ServiceScopeEnum.NATIONAL]: acc[ServiceScopeEnum.NATIONAL],
+          [ServiceScopeEnum.LOCAL]: [
+            ...acc[ServiceScopeEnum.LOCAL],
+            service as LocalServiceTuple
+          ]
+        };
+      }
+      return {
+        [ServiceScopeEnum.NATIONAL]: [
+          ...acc[ServiceScopeEnum.NATIONAL],
+          service as NationalServiceTuple
+        ],
+        [ServiceScopeEnum.LOCAL]: acc[ServiceScopeEnum.LOCAL]
+      };
+    },
+    {
+      [ServiceScopeEnum.NATIONAL]: [],
+      [ServiceScopeEnum.LOCAL]: []
+    } as ScopeGroupedServices
+  );
+
+/**
+ * Returns and array of visible services limiting local scoped Services.
+ */
+const limitLocalServicesTuples = (
+  scopeGroupedServiceTuples: ScopeGroupedServices,
+  localServicesLimit: NonNegativeInteger
+): ReadonlyArray<ServiceTuple> => [
+  ...scopeGroupedServiceTuples[ServiceScopeEnum.NATIONAL],
+  ...scopeGroupedServiceTuples[ServiceScopeEnum.LOCAL].slice(
+    0,
+    localServicesLimit
+  )
+];
 
 /**
  * Returns all the visible services (is_visible = true).
@@ -43,7 +114,7 @@ export function GetVisibleServicesHandler(
 ): IGetVisibleServicesHandler {
   return async () => {
     const errorOrMaybeVisibleServicesJson = await getBlobAsObject(
-      t.dictionary(ServiceId, VisibleService),
+      VisibleServiceDictionary,
       blobService,
       VISIBLE_SERVICE_CONTAINER,
       VISIBLE_SERVICE_BLOB_ID
@@ -54,43 +125,16 @@ export function GetVisibleServicesHandler(
           `Error getting visible services list: ${error.message}`
         ),
       maybeVisibleServicesJson => {
-        const allServicesTuples = toServicesTuple(
-          new StrMap(maybeVisibleServicesJson.getOrElse({}))
-        );
-        const scopedServicesTuples = allServicesTuples.reduce(
-          (acc, service) => {
-            if (service.scope === ServiceScopeEnum.LOCAL) {
-              return {
-                [ServiceScopeEnum.NATIONAL]: acc[ServiceScopeEnum.NATIONAL],
-                [ServiceScopeEnum.LOCAL]: [
-                  ...acc[ServiceScopeEnum.LOCAL],
-                  service
-                ]
-              };
-            }
-            return {
-              [ServiceScopeEnum.NATIONAL]: [
-                ...acc[ServiceScopeEnum.NATIONAL],
-                service
-              ],
-              [ServiceScopeEnum.LOCAL]: acc[ServiceScopeEnum.LOCAL]
-            };
-          },
-          {
-            [ServiceScopeEnum.NATIONAL]: [] as ReadonlyArray<ServiceTuple>,
-            [ServiceScopeEnum.LOCAL]: [] as ReadonlyArray<ServiceTuple>
-          }
-        );
-        const servicesTuples =
-          localServicesLimit === undefined
-            ? allServicesTuples
-            : [
-                ...scopedServicesTuples[ServiceScopeEnum.NATIONAL],
-                ...scopedServicesTuples[ServiceScopeEnum.LOCAL].slice(
-                  0,
-                  localServicesLimit
-                )
-              ];
+        const servicesTuples = fromNullable(localServicesLimit)
+          .map(_ =>
+            limitLocalServicesTuples(
+              groupByScope(maybeVisibleServicesJson.getOrElse({})),
+              localServicesLimit
+            )
+          )
+          .getOrElseL(() =>
+            toServicesTuple(new StrMap(maybeVisibleServicesJson.getOrElse({})))
+          );
         return ResponseSuccessJson({
           items: servicesTuples,
           page_size: servicesTuples.length
