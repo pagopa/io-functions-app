@@ -1,6 +1,6 @@
 {
   "name": "io-functions-app",
-  "version": "1.40.0",
+  "version": "1.40.1",
   "license": "MIT",
   "scripts": {
     "prebuild": "yarn generate",
@@ -59,7 +59,7 @@
     "azure-storage": "^2.10.3",
     "date-fns": "^2.16.1",
     "documentdb": "^1.12.2",
-    "durable-functions": "^1.4.1",
+    "durable-functions": "^1.4.3",
     "express": "^4.15.3",
     "fp-ts": "1.17.4",
     "html-to-text": "^5.1.1",
