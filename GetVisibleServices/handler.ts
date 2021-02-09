@@ -67,21 +67,16 @@ const groupByScope = (
   serviceJson: VisibleServiceDictionary
 ): ScopeGroupedServices =>
   toServicesTuple(new StrMap(serviceJson)).reduce(
-    (acc, service) => {
-      if (LocalServiceTuple.is(service)) {
-        return {
-          ...acc,
-          [ServiceScopeEnum.LOCAL]: [...acc[ServiceScopeEnum.LOCAL], service]
-        };
-      }
-      return {
-        ...acc,
-        [ServiceScopeEnum.NATIONAL]: [
-          ...acc[ServiceScopeEnum.NATIONAL],
-          (service as unknown) as NationalServiceTuple
-        ]
-      };
-    },
+    (acc, service) => ({
+      ...acc,
+      // toServicesTuple shouldn't return scopeless Services
+      // ref: https://github.com/pagopa/io-functions-commons/blob/v18.0.7/src/models/visible_service.ts#L100
+      // Return typings of toServiceTuple is inaccurate
+      [service.scope || ServiceScopeEnum.NATIONAL]: [
+        ...acc[service.scope || ServiceScopeEnum.NATIONAL],
+        service
+      ]
+    }),
     {
       [ServiceScopeEnum.NATIONAL]: [],
       [ServiceScopeEnum.LOCAL]: []
