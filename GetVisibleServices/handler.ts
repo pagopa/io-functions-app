@@ -68,21 +68,18 @@ const groupByScope = (
 ): ScopeGroupedServices =>
   toServicesTuple(new StrMap(serviceJson)).reduce(
     (acc, service) => {
-      if (service.scope === ServiceScopeEnum.LOCAL) {
+      if (LocalServiceTuple.is(service)) {
         return {
-          [ServiceScopeEnum.NATIONAL]: acc[ServiceScopeEnum.NATIONAL],
-          [ServiceScopeEnum.LOCAL]: [
-            ...acc[ServiceScopeEnum.LOCAL],
-            (service as unknown) as LocalServiceTuple
-          ]
+          ...acc,
+          [ServiceScopeEnum.LOCAL]: [...acc[ServiceScopeEnum.LOCAL], service]
         };
       }
       return {
+        ...acc,
         [ServiceScopeEnum.NATIONAL]: [
           ...acc[ServiceScopeEnum.NATIONAL],
           (service as unknown) as NationalServiceTuple
-        ],
-        [ServiceScopeEnum.LOCAL]: acc[ServiceScopeEnum.LOCAL]
+        ]
       };
     },
     {
