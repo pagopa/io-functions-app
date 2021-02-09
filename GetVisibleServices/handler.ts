@@ -73,14 +73,14 @@ const groupByScope = (
           [ServiceScopeEnum.NATIONAL]: acc[ServiceScopeEnum.NATIONAL],
           [ServiceScopeEnum.LOCAL]: [
             ...acc[ServiceScopeEnum.LOCAL],
-            service as LocalServiceTuple
+            (service as unknown) as LocalServiceTuple
           ]
         };
       }
       return {
         [ServiceScopeEnum.NATIONAL]: [
           ...acc[ServiceScopeEnum.NATIONAL],
-          service as NationalServiceTuple
+          (service as unknown) as NationalServiceTuple
         ],
         [ServiceScopeEnum.LOCAL]: acc[ServiceScopeEnum.LOCAL]
       };
