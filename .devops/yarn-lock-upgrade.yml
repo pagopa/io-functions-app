@@ -1,0 +1,39 @@
+# Azure DevOps pipeline to do periodic checks
+#
+
+# A pipeline with no CI trigger, just schedules
+trigger: none
+pr: none
+
+schedules:
+  - cron: "0/5 * * * *"
+    displayName: Daily midnight build
+    branches:
+      include:
+      - 176591290-test-upgrade-dependencies
+    always: true # Run always irrespective of changes
+
+
+resources:
+  repositories:
+    - repository: pagopaCommons
+      type: github
+      name: pagopa/azure-pipeline-templates
+      ref: refs/heads/yarn-lockfile-upgrade-template
+      endpoint: pagopa
+
+
+# Execute agents (jobs) on latest Ubuntu version.
+# To change OS for a specific, ovverride "pool" attribute inside the job definition
+pool:
+  vmImage: 'ubuntu-latest'
+
+
+
+jobs:
+  - job: do_upgrade
+    steps:
+      #Call the Yarn.lock updated the first time
+      - template: templates/yarn-lock-upgrade/template.yaml@pagopaCommons
+        parameters:
+          isTest: true
