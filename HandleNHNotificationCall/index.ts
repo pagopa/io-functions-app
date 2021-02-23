@@ -37,5 +37,6 @@ export async function index(
     context.log.error(
       `HandleNHNotificationCall|ERROR|Error starting the orchestator [${err}]`
     );
+    throw err;
   }
 }
