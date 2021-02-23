@@ -24,9 +24,18 @@ export async function index(
   context: Context,
   notificationHubMessage: NotificationHubMessage
 ): Promise<void> {
-  await df
-    .getClient(context)
-    .startNew("HandleNHNotificationCallOrchestrator", undefined, {
-      message: notificationHubMessage
-    });
+  try {
+    const instanceId = await df
+      .getClient(context)
+      .startNew("HandleNHNotificationCallOrchestrator", undefined, {
+        message: notificationHubMessage
+      });
+    context.log.info(
+      `HandleNHNotificationCall|info|Orchestrator instance ID: ${instanceId}`
+    );
+  } catch (err) {
+    context.log.error(
+      `HandleNHNotificationCall|ERROR|Error starting the orchestator [${err}]`
+    );
+  }
 }

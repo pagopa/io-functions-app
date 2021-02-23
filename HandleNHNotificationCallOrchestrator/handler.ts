@@ -23,6 +23,9 @@ export type NhNotificationOrchestratorInput = t.TypeOf<
 export const handler = function*(
   context: IOrchestrationFunctionContext
 ): Generator<unknown> {
+  context.log.info(
+    `NHNotificationOrchestrator Started|Instance ID [${context.df.instanceId}]`
+  );
   const logPrefix = `NHCallOrchestrator`;
 
   const retryOptions = new df.RetryOptions(5000, 10);
