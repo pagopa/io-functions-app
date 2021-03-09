@@ -6,5 +6,5 @@
       "direction": "in"
     }
   ],
-  "scriptFile": "../dist/HandleNHNotificationCallActivity/index.js"
+  "scriptFile": "../dist/HandleNHDeleteInstallationCallActivityLegacy/index.js"
 }

@@ -2,37 +2,34 @@
 // tslint:disable-next-line: no-object-mutation
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { context as contextMock } from "../../__mocks__/durable-functions";
-import { PlatformEnum } from "../../generated/backend/Platform";
+import { KindEnum as DeleteKind } from "../../generated/notifications/DeleteInstallationMessage";
+
+import { DeleteInstallationMessage } from "../../generated/notifications/DeleteInstallationMessage";
+import { ActivityInput as NHCallServiceActivityInput } from "../../HandleNHDeleteInstallationCallActivityLegacy/handler";
+import { ActivityResult } from "../../utils/activity";
 import {
-  CreateOrUpdateInstallationMessage,
-  KindEnum as CreateOrUpdateInstallationKind
-} from "../../generated/notifications/CreateOrUpdateInstallationMessage";
-import {
-  ActivityInput as NHCallServiceActivityInput,
-  ActivityResult
-} from "../../HandleNHNotificationCallActivity/handler";
-import { handler, NhNotificationOrchestratorInput } from "../handler";
+  handler,
+  NhDeleteInstallationOrchestratorCallLegacyInput
+} from "../handler";
 
 const aFiscalCodeHash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" as NonEmptyString;
-const aPushChannel =
-  "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p";
-const aNotificationHubMessage: CreateOrUpdateInstallationMessage = {
+
+const aDeleteNotificationHubMessage: DeleteInstallationMessage = {
   installationId: aFiscalCodeHash,
-  kind: CreateOrUpdateInstallationKind.CreateOrUpdateInstallation,
-  platform: PlatformEnum.apns,
-  pushChannel: aPushChannel,
-  tags: [aFiscalCodeHash]
+  kind: DeleteKind.DeleteInstallation
 };
 
 const retryOptions = {
   backoffCoefficient: 1.5
 };
 
-describe("HandleNHNotificationCallOrchestrator", () => {
+describe("HandleNHDeleteInstallationCallOrchestratorLegacy", () => {
   it("should start the activities with the right inputs", async () => {
-    const nhCallOrchestratorInput = NhNotificationOrchestratorInput.encode({
-      message: aNotificationHubMessage
-    });
+    const nhCallOrchestratorInput = NhDeleteInstallationOrchestratorCallLegacyInput.encode(
+      {
+        message: aDeleteNotificationHubMessage
+      }
+    );
 
     const callNHServiceActivityResult = ActivityResult.encode({
       kind: "SUCCESS"
@@ -53,10 +50,10 @@ describe("HandleNHNotificationCallOrchestrator", () => {
     orchestratorHandler.next();
 
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
-      "HandleNHNotificationCallActivity",
+      "HandleNHDeleteInstallationCallActivityLegacy",
       retryOptions,
       NHCallServiceActivityInput.encode({
-        message: aNotificationHubMessage
+        message: aDeleteNotificationHubMessage
       })
     );
   });
