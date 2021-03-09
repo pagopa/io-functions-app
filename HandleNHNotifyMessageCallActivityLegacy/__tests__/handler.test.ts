@@ -1,3 +1,5 @@
+// tslint:disable:no-any
+
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import { getCallNHNotifyMessageActivityHandler } from "../handler";

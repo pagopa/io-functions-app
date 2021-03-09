@@ -5,12 +5,10 @@ import { toString } from "fp-ts/lib/function";
 
 import { readableReport } from "italia-ts-commons/lib/reporters";
 
-import { toError } from "fp-ts/lib/Either";
-import { fromEither, taskEither } from "fp-ts/lib/TaskEither";
+import { fromEither } from "fp-ts/lib/TaskEither";
 import { DeleteInstallationMessage } from "../generated/notifications/DeleteInstallationMessage";
 import { deleteInstallation } from "../utils/notification";
 
-import { initTelemetryClient } from "../utils/appinsights";
 import {
   ActivityResult,
   ActivityResultFailure,
@@ -36,8 +34,6 @@ const failActivity = (context: Context, logPrefix: string) => (
     reason: errorMessage
   });
 };
-
-const telemetryClient = initTelemetryClient();
 
 /**
  * For each Notification Hub Message of type "Delete" calls related Notification Hub service

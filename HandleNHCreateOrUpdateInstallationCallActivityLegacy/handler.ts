@@ -6,18 +6,12 @@ import { toString } from "fp-ts/lib/function";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 
 import { fromEither } from "fp-ts/lib/TaskEither";
-import {
-  createOrUpdateInstallation,
-  deleteInstallation
-} from "../utils/notification";
-
-import { initTelemetryClient } from "../utils/appinsights";
+import { createOrUpdateInstallation } from "../utils/notification";
 
 import { CreateOrUpdateInstallationMessage } from "../generated/notifications/CreateOrUpdateInstallationMessage";
 
 import {
   ActivityResult,
-  ActivityResultFailure,
   ActivityResultSuccess,
   failActivity,
   retryActivity,
@@ -30,8 +24,6 @@ export const ActivityInput = t.interface({
 });
 
 export type ActivityInput = t.TypeOf<typeof ActivityInput>;
-
-const telemetryClient = initTelemetryClient();
 
 /**
  * For each Notification Hub Message of type "Delete" calls related Notification Hub service

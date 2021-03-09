@@ -1,4 +1,5 @@
-import { Context } from "@azure/functions";
+// tslint:disable:no-any
+
 import * as df from "durable-functions";
 import { DurableOrchestrationClient } from "durable-functions/lib/src/durableorchestrationclient";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";

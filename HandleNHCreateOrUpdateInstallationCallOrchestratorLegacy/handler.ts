@@ -23,6 +23,19 @@ export type NhCreateOrUpdateInstallationOrchestratorCallLegacyInput = t.TypeOf<
   typeof NhCreateOrUpdateInstallationOrchestratorCallLegacyInput
 >;
 
+const logError = (
+  context: IOrchestrationFunctionContext,
+  logPrefix: string,
+  errorOrNHCallOrchestratorInput
+) => {
+  context.log.error(`${logPrefix}|Error decoding input`);
+  context.log.verbose(
+    `${logPrefix}|Error decoding input|ERROR=${readableReport(
+      errorOrNHCallOrchestratorInput.value
+    )}`
+  );
+};
+
 export const handler = function*(
   context: IOrchestrationFunctionContext
 ): Generator<unknown> {
@@ -55,16 +68,3 @@ export const handler = function*(
 
   return true;
 };
-
-function logError(
-  context: IOrchestrationFunctionContext,
-  logPrefix: string,
-  errorOrNHCallOrchestratorInput
-) {
-  context.log.error(`${logPrefix}|Error decoding input`);
-  context.log.verbose(
-    `${logPrefix}|Error decoding input|ERROR=${readableReport(
-      errorOrNHCallOrchestratorInput.value
-    )}`
-  );
-}

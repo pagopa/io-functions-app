@@ -1,5 +1,5 @@
-/* tslint:disable:no-any */
-// tslint:disable-next-line: no-object-mutation
+// tslint:disable:no-any
+
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import { KindEnum as DeleteKind } from "../../generated/notifications/DeleteInstallationMessage";
