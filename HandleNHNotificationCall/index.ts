@@ -4,6 +4,8 @@ import { toString } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { initTelemetryClient } from "../utils/appinsights";
 
+import { orchestratorName as CreateOrUpdateOrchestratorName } from "../HandleNHCreateOrUpdateInstallationCallOrchestratorLegacy/index";
+
 import { CreateOrUpdateInstallationMessage } from "../generated/notifications/CreateOrUpdateInstallationMessage";
 import { DeleteInstallationMessage } from "../generated/notifications/DeleteInstallationMessage";
 import { NotifyMessage } from "../generated/notifications/NotifyMessage";
@@ -19,7 +21,6 @@ export const NotificationMessage = t.union([
 ]);
 
 export type NotificationHubMessage = t.TypeOf<typeof NotificationMessage>;
-
 const assertNever = (x: never): never => {
   throw new Error(`Unexpected object: ${toString(x)}`);
 };
@@ -43,13 +44,9 @@ export async function index(
       break;
     case CreateOrUpdateKind.CreateOrUpdateInstallation:
       const client2 = df.getClient(context);
-      await client2.startNew(
-        "HandleNHNotificationCallOrchestrator",
-        undefined,
-        {
-          message: notificationHubMessage
-        }
-      );
+      await client2.startNew(CreateOrUpdateOrchestratorName, undefined, {
+        message: notificationHubMessage
+      });
       break;
     case NotifyKind.Notify:
       const client3 = df.getClient(context);

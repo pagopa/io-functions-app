@@ -66,7 +66,7 @@ describe("HandleNHNotificationCall", () => {
     );
 
     expect(dfClient.startNew).toHaveBeenCalledWith(
-      "HandleNHNotificationCallOrchestrator",
+      "HandleNHCreateOrUpdateInstallationCallOrchestratorLegacy",
       undefined,
       {
         message: aCreateOrUpdateInstallationMessage
