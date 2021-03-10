@@ -37,7 +37,17 @@ export async function index(
   const client = df.getClient(context);
   switch (notificationHubMessage.kind) {
     case DeleteKind.DeleteInstallation:
+      await client.startNew("HandleNHNotificationCallOrchestrator", undefined, {
+        message: notificationHubMessage
+      });
+      break;
+    // tslint:disable-next-line: no-duplicated-branches
     case CreateOrUpdateKind.CreateOrUpdateInstallation:
+      await client.startNew("HandleNHNotificationCallOrchestrator", undefined, {
+        message: notificationHubMessage
+      });
+      break;
+    // tslint:disable-next-line: no-duplicated-branches
     case NotifyKind.Notify:
       await client.startNew("HandleNHNotificationCallOrchestrator", undefined, {
         message: notificationHubMessage
