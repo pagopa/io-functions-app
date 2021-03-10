@@ -36,26 +36,21 @@ export async function index(
   context: Context,
   notificationHubMessage: NotificationHubMessage
 ): Promise<void> {
+  const client = df.getClient(context);
   switch (notificationHubMessage.kind) {
     case DeleteKind.DeleteInstallation:
-      const client = df.getClient(context);
       await client.startNew("HandleNHNotificationCallOrchestrator", undefined, {
         message: notificationHubMessage
       });
       break;
+    // tslint:disable-next-line: no-duplicated-branches
     case CreateOrUpdateKind.CreateOrUpdateInstallation:
-      const client2 = df.getClient(context);
-      await client2.startNew(
-        "HandleNHNotificationCallOrchestrator",
-        undefined,
-        {
-          message: notificationHubMessage
-        }
-      );
+      await client.startNew("HandleNHNotificationCallOrchestrator", undefined, {
+        message: notificationHubMessage
+      });
       break;
     case NotifyKind.Notify:
-      const client3 = df.getClient(context);
-      await client3.startNew(NotifyMessageOrchestratorName, undefined, {
+      await client.startNew(NotifyMessageOrchestratorName, undefined, {
         message: notificationHubMessage
       });
       break;
