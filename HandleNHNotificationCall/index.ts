@@ -4,6 +4,8 @@ import { toString } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { initTelemetryClient } from "../utils/appinsights";
 
+import { orchestratorName as DeleteInstallationOrchestratorName } from "../HandleNHDeleteInstallationCallOrchestratorLegacy/index";
+
 import { CreateOrUpdateInstallationMessage } from "../generated/notifications/CreateOrUpdateInstallationMessage";
 import { DeleteInstallationMessage } from "../generated/notifications/DeleteInstallationMessage";
 import { NotifyMessage } from "../generated/notifications/NotifyMessage";
@@ -37,7 +39,7 @@ export async function index(
   switch (notificationHubMessage.kind) {
     case DeleteKind.DeleteInstallation:
       const client = df.getClient(context);
-      await client.startNew("HandleNHNotificationCallOrchestrator", undefined, {
+      await client.startNew(DeleteInstallationOrchestratorName, undefined, {
         message: notificationHubMessage
       });
       break;
