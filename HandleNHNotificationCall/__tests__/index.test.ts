@@ -78,7 +78,7 @@ describe("HandleNHNotificationCall", () => {
     await HandleNHNotificationCall(context as any, aNotifyMessage);
 
     expect(dfClient.startNew).toHaveBeenCalledWith(
-      "HandleNHNotificationCallOrchestrator",
+      "HandleNHNotifyMessageCallOrchestratorLegacy",
       undefined,
       {
         message: aNotifyMessage

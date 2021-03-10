@@ -4,6 +4,8 @@ import { toString } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { initTelemetryClient } from "../utils/appinsights";
 
+import { orchestratorName as NotifyMessageOrchestratorName } from "../HandleNHNotifyMessageCallOrchestratorLegacy/index";
+
 import { CreateOrUpdateInstallationMessage } from "../generated/notifications/CreateOrUpdateInstallationMessage";
 import { DeleteInstallationMessage } from "../generated/notifications/DeleteInstallationMessage";
 import { NotifyMessage } from "../generated/notifications/NotifyMessage";
@@ -53,13 +55,9 @@ export async function index(
       break;
     case NotifyKind.Notify:
       const client3 = df.getClient(context);
-      await client3.startNew(
-        "HandleNHNotificationCallOrchestrator",
-        undefined,
-        {
-          message: notificationHubMessage
-        }
-      );
+      await client3.startNew(NotifyMessageOrchestratorName, undefined, {
+        message: notificationHubMessage
+      });
       break;
     default:
       assertNever(notificationHubMessage);
