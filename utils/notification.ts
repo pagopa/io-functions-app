@@ -12,7 +12,6 @@ import {
   newHttpsAgent
 } from "italia-ts-commons/lib/agent";
 import { Platform, PlatformEnum } from "../generated/backend/Platform";
-import { getConfigOrThrow } from "../utils/config";
 
 /**
  * Notification template.
@@ -38,8 +37,6 @@ export enum APNSPushType {
   FILEPROVIDER = "fileprovider",
   MDM = "mdm"
 }
-
-const config = getConfigOrThrow();
 
 const httpsAgent = newHttpsAgent(getKeepAliveAgentOptions(process.env));
 
