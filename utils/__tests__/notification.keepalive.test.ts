@@ -14,10 +14,15 @@ process.env = {
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import * as nock from "nock";
-import { notify } from "../notification";
+import { ExtendedNotificationHubService, notify } from "../notification";
 
 describe("NotificationHubService", () => {
   it("should use agentkeepalive when calling notification hub", async () => {
+    const notificationHubService = new ExtendedNotificationHubService(
+      process.env.AZURE_NH_HUB_NAME,
+      process.env.AZURE_NH_ENDPOINT
+    );
+
     const responseSpy = jest.fn();
     nock("https://127.0.0.1:30000")
       .post(_ => true)
@@ -27,7 +32,7 @@ describe("NotificationHubService", () => {
         // tslint:disable-next-line
         responseSpy((this.req as any).options.agent.options.maxSockets);
       });
-    await notify("x" as NonEmptyString, {
+    await notify(notificationHubService, "x" as NonEmptyString, {
       message: "foo",
       message_id: "bar",
       title: "beef"

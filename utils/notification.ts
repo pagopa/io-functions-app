@@ -47,7 +47,7 @@ const httpsAgent = newHttpsAgent(getKeepAliveAgentOptions(process.env));
 // when calling the Notification Hub API.
 // @FIXME: remove this part and upgrade to @azure/notification-hubs
 // once this goes upstream: https://github.com/Azure/azure-sdk-for-js/pull/11977
-class ExtendedNotificationHubService extends NotificationHubService {
+export class ExtendedNotificationHubService extends NotificationHubService {
   constructor(hubName: string, endpointOrConnectionString: string) {
     super(hubName, endpointOrConnectionString, undefined, undefined);
   }
@@ -75,11 +75,6 @@ class ExtendedNotificationHubService extends NotificationHubService {
     );
   }
 }
-
-const notificationHubService = new ExtendedNotificationHubService(
-  config.AZURE_NH_HUB_NAME,
-  config.AZURE_NH_ENDPOINT
-);
 
 /**
  * A template suitable for Apple's APNs.
@@ -147,6 +142,7 @@ const successNH = () =>
   });
 
 export const notify = (
+  notificationHubService: NotificationHubService,
   installationId: NonEmptyString,
   payload: NotifyPayload
 ) => {
@@ -179,6 +175,7 @@ export const notify = (
 };
 
 export const createOrUpdateInstallation = (
+  notificationHubService: NotificationHubService,
   installationId: NonEmptyString,
   platform: Platform,
   pushChannel: string,
@@ -219,7 +216,10 @@ export const createOrUpdateInstallation = (
   );
 };
 
-export const deleteInstallation = (installationId: NonEmptyString) => {
+export const deleteInstallation = (
+  notificationHubService: NotificationHubService,
+  installationId: NonEmptyString
+) => {
   return tryCatch(
     () => {
       return new Promise<NHResultSuccess>((resolve, reject) =>

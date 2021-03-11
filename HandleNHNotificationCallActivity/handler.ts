@@ -6,6 +6,7 @@ import { toString } from "fp-ts/lib/function";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 
 import { toError } from "fp-ts/lib/Either";
+import { isSome } from "fp-ts/lib/Option";
 import { fromEither, taskEither } from "fp-ts/lib/TaskEither";
 import { KindEnum as CreateOrUpdateKind } from "../generated/notifications/CreateOrUpdateInstallationMessage";
 import { KindEnum as DeleteKind } from "../generated/notifications/DeleteInstallationMessage";
@@ -18,6 +19,7 @@ import {
 } from "../utils/notification";
 
 import { initTelemetryClient } from "../utils/appinsights";
+import { getNHService } from "../utils/notificationhubServicePartition";
 
 // Activity input
 export const ActivityInput = t.interface({
@@ -91,9 +93,20 @@ export const getCallNHServiceActivityHandler = (
       context.log.info(
         `${logPrefix}|${message.kind}|INSTALLATION_ID=${message.installationId}`
       );
+
+      const nhService = getNHService(message.installationId);
+
+      if (!isSome(nhService)) {
+        context.log.warn(
+          `${logPrefix}|${message.kind}|INSTALLATION_ID=${message.installationId}|No NH `
+        );
+        return;
+      }
+
       switch (message.kind) {
         case CreateOrUpdateKind.CreateOrUpdateInstallation:
           return createOrUpdateInstallation(
+            nhService.value,
             message.installationId,
             message.platform,
             message.pushChannel,
@@ -102,7 +115,11 @@ export const getCallNHServiceActivityHandler = (
             retryActivity(context, `${logPrefix}|ERROR=${toString(e)}`)
           );
         case NotifyKind.Notify:
-          return notify(message.installationId, message.payload)
+          return notify(
+            nhService.value,
+            message.installationId,
+            message.payload
+          )
             .mapLeft(e =>
               retryActivity(context, `${logPrefix}|ERROR=${toString(e)}`)
             )
@@ -119,7 +136,10 @@ export const getCallNHServiceActivityHandler = (
               )
             );
         case DeleteKind.DeleteInstallation:
-          return deleteInstallation(message.installationId).mapLeft(e => {
+          return deleteInstallation(
+            nhService.value,
+            message.installationId
+          ).mapLeft(e => {
             // do not trigger a retry as delete may fail in case of 404
             context.log.error(`${logPrefix}|ERROR=${toString(e)}`);
             return failure(e.message);
