@@ -49,7 +49,7 @@ const httpsAgent = newHttpsAgent(getKeepAliveAgentOptions(process.env));
 // once this goes upstream: https://github.com/Azure/azure-sdk-for-js/pull/11977
 class ExtendedNotificationHubService extends NotificationHubService {
   constructor(hubName: string, endpointOrConnectionString: string) {
-    super(hubName, endpointOrConnectionString, undefined, undefined);
+    super(hubName, endpointOrConnectionString, "", "");
   }
   // tslint:disable-next-line: typedef
   public _buildRequestOptions(
@@ -66,6 +66,7 @@ class ExtendedNotificationHubService extends NotificationHubService {
         agent: httpsAgent
       });
     };
+    // @ts-ignore -- although _buildRequestOptions is not defined in the Azure type NotificationHubService, we need to hack its internals to use keepalive feature. Compiling in strict mode would fail, so we prefer TS to just ignore this line
     // tslint:disable-next-line: no-string-literal
     return super["_buildRequestOptions"](
       webResource,

@@ -98,6 +98,13 @@ export function StartEmailValidationProcessHandler(
 
     const { email } = existingProfile;
 
+    if (email === undefined) {
+      return ResponseErrorValidation(
+        "Validation error",
+        "The email is missing for the profile with the provided fiscal code"
+      );
+    }
+
     // Start a orchestrator that handles the email validation process.
     context.log.verbose(`${logPrefix}|Starting the email validation process`);
     const emailValidationProcessOrchestartorInput = EmailValidationProcessOrchestratorInput.encode(

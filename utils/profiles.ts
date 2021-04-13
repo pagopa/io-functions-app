@@ -9,9 +9,8 @@ import {
   RetrievedProfile
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
 
-import { isObject } from "util";
-
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
+import { fromNullable } from "fp-ts/lib/Option";
 
 /**
  * Converts a ApiProfile in a Profile model
@@ -54,17 +53,22 @@ export function retrievedProfileToExtendedProfile(
   };
 }
 
+type NullableBlockedProfile =
+  | Profile["blockedInboxOrChannels"]
+  | undefined
+  | null;
+
 /**
  * Extracts the services that have inbox blocked
  */
 const getInboxBlockedServices = (
-  blocked: Profile["blockedInboxOrChannels"] | undefined | null
+  blocked: NullableBlockedProfile
 ): ReadonlyArray<string> =>
-  Object.keys(blocked)
-    .map(k =>
-      blocked[k].includes(BlockedInboxOrChannelEnum.INBOX) ? k : undefined
+  fromNullable(blocked)
+    .map(b =>
+      Object.keys(b).filter(k => b[k].includes(BlockedInboxOrChannelEnum.INBOX))
     )
-    .filter(k => k !== undefined);
+    .getOrElse([]);
 
 /**
  * Returns the services that exist in newServices but not in oldServices
@@ -87,17 +91,13 @@ const removedServices = (
  * that have been unblocked (2nd element) by this profile update
  */
 export const diffBlockedServices = (
-  oldBlocked: Profile["blockedInboxOrChannels"] | undefined | null,
-  newBlocked: Profile["blockedInboxOrChannels"] | undefined | null
+  oldBlocked: NullableBlockedProfile,
+  newBlocked: NullableBlockedProfile
 ): ITuple2<ReadonlyArray<string>, ReadonlyArray<string>> => {
   // we extract the services that have the inbox blocked from the old and the
   // new profile
-  const oldInboxBlocked = isObject(oldBlocked)
-    ? getInboxBlockedServices(oldBlocked)
-    : [];
-  const newInboxBlocked = isObject(newBlocked)
-    ? getInboxBlockedServices(newBlocked)
-    : [];
+  const oldInboxBlocked = getInboxBlockedServices(oldBlocked);
+  const newInboxBlocked = getInboxBlockedServices(newBlocked);
 
   // we take all the services that have inbox blocked in the new profile but
   // not in the old profile

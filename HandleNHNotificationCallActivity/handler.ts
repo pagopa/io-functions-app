@@ -70,9 +70,9 @@ const success = () =>
     kind: "SUCCESS"
   });
 
-const assertNever = (x: never): never => {
-  throw new Error(`Unexpected object: ${toString(x)}`);
-};
+// tslint:disable:no-any
+const createUnexpecterError = (x: any): Error =>
+  new Error(`Unexpected object: ${toString(x)}`);
 
 const telemetryClient = initTelemetryClient();
 
@@ -125,7 +125,7 @@ export const getCallNHServiceActivityHandler = (
             return failure(e.message);
           });
         default:
-          assertNever(message);
+          throw createUnexpecterError(message);
       }
     })
     .fold<ActivityResult>(err => err, _ => success())

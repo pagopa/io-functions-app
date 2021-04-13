@@ -32,8 +32,11 @@ describe("NotificationHubService", () => {
       message_id: "bar",
       title: "beef"
     }).run();
-    expect(responseSpy).toHaveBeenCalledWith(
-      parseInt(process.env.FETCH_KEEPALIVE_MAX_SOCKETS, 10)
-    );
+
+    const keepalive =
+      process.env.FETCH_KEEPALIVE_MAX_SOCKETS === undefined
+        ? "40"
+        : process.env.FETCH_KEEPALIVE_MAX_SOCKETS;
+    expect(responseSpy).toHaveBeenCalledWith(parseInt(keepalive, 10));
   });
 });
