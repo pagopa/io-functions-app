@@ -6,7 +6,10 @@ import {
   context as contextMock,
   mockStartNew
 } from "../../__mocks__/durable-functions";
-import { aRetrievedProfile } from "../../__mocks__/mocks";
+import {
+  aRetrievedProfile,
+  aRetrievedProfileWithEmail
+} from "../../__mocks__/mocks";
 import { StartEmailValidationProcessHandler } from "../handler";
 import * as orchUtil from "../orchestrators";
 
@@ -28,7 +31,9 @@ describe("StartEmailValidationProcessHandler", () => {
   it("should start the orchestrator with the right input and return an accepted response", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
-        taskEither.of(some({ ...aRetrievedProfile, isEmailValidated: false }))
+        taskEither.of(
+          some({ ...aRetrievedProfileWithEmail, isEmailValidated: false })
+        )
       )
     };
     mockStartNew.mockImplementationOnce(() => Promise.resolve("start"));
@@ -37,7 +42,7 @@ describe("StartEmailValidationProcessHandler", () => {
 
     const result = await handler(
       contextMock as any,
-      aRetrievedProfile.fiscalCode
+      aRetrievedProfileWithEmail.fiscalCode
     );
 
     expect(result.kind).toBe("IResponseSuccessAccepted");
@@ -46,7 +51,9 @@ describe("StartEmailValidationProcessHandler", () => {
   it("should not start a new orchestrator if there is an already running orchestrator and return an accepted response", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
-        taskEither.of(some({ ...aRetrievedProfile, isEmailValidated: false }))
+        taskEither.of(
+          some({ ...aRetrievedProfileWithEmail, isEmailValidated: false })
+        )
       )
     };
 
@@ -59,7 +66,7 @@ describe("StartEmailValidationProcessHandler", () => {
 
     const result = await handler(
       contextMock as any,
-      aRetrievedProfile.fiscalCode
+      aRetrievedProfileWithEmail.fiscalCode
     );
     expect(mockStartNew).not.toHaveBeenCalled();
 

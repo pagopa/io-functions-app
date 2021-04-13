@@ -1,4 +1,5 @@
 import * as ai from "applicationinsights";
+import { identity, toString } from "fp-ts/lib/function";
 import { initAppInsights } from "italia-ts-commons/lib/appinsights";
 import { IntegerFromString } from "italia-ts-commons/lib/numbers";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
@@ -20,4 +21,6 @@ export const initTelemetryClient = (env = process.env) =>
             ).getOrElse(DEFAULT_SAMPLING_PERCENTAGE)
           })
         )
-        .getOrElse(undefined);
+        .fold(l => {
+          throw new Error(`Can not init AppInsights: ${toString(l)}`);
+        }, identity);
