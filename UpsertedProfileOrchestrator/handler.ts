@@ -18,6 +18,7 @@ import {
 import { Input as UpdateServiceSubscriptionFeedActivityInput } from "../UpdateSubscriptionsFeedActivity/index";
 import { diffBlockedServices } from "../utils/profiles";
 
+import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { EnqueueProfileCreationEventActivityInput } from "../EnqueueProfileCreationEventActivity/handler";
 import { ActivityInput as SendWelcomeMessageActivityInput } from "../SendWelcomeMessagesActivity/handler";
@@ -42,7 +43,7 @@ export type OrchestratorInput = t.TypeOf<typeof OrchestratorInput>;
 
 export const getUpsertedProfileOrchestratorHandler = (params: {
   sendCashbackMessage: boolean;
-  notifyOn: ReadonlyArray<NonEmptyString>;
+  notifyOn?: NonEmptyArray<NonEmptyString>;
   // tslint:disable-next-line: no-big-function
 }) =>
   // tslint:disable-next-line: no-big-function
@@ -182,23 +183,25 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
         );
       }
       // Create messages on specific queues when a user profile become enabled
-      try {
-        yield context.df.Task.all(
-          params.notifyOn.map(serviceQueueName =>
-            context.df.callActivityWithRetry(
-              "EnqueueProfileCreationEventActivity",
-              retryOptions,
-              EnqueueProfileCreationEventActivityInput.encode({
-                fiscalCode: newProfile.fiscalCode,
-                queueName: serviceQueueName
-              })
+      if (params.notifyOn) {
+        try {
+          yield context.df.Task.all(
+            params.notifyOn.toArray().map(serviceQueueName =>
+              context.df.callActivityWithRetry(
+                "EnqueueProfileCreationEventActivity",
+                retryOptions,
+                EnqueueProfileCreationEventActivityInput.encode({
+                  fiscalCode: newProfile.fiscalCode,
+                  queueName: serviceQueueName
+                })
+              )
             )
-          )
-        );
-      } catch (e) {
-        context.log.error(
-          `${logPrefix}|Send Profile creation event max retry exeded|ERROR=${e}`
-        );
+          );
+        } catch (e) {
+          context.log.error(
+            `${logPrefix}|Send Profile creation event max retry exeded|ERROR=${e}`
+          );
+        }
       }
     }
 
