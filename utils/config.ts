@@ -7,10 +7,11 @@
 
 import { fromNullable } from "fp-ts/lib/Option";
 import * as t from "io-ts";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { MailerConfig } from "@pagopa/io-functions-commons/dist/src/mailer";
+
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 // exclude a specific value from a type
 // as strict equality is performed, allowed input types are constrained to be values not references (object, arrays, etc)

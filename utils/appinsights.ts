@@ -1,4 +1,5 @@
 import * as ai from "applicationinsights";
+
 import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
