@@ -113,6 +113,61 @@ describe("GetMessageHandler", () => {
     }
   });
 
+  it("should respond with a message with eu_covid_cert", async () => {
+    const aRetrievedMessageWithEuCovidCert = {
+      ...aRetrievedMessageWithoutContent,
+      content: {
+        eu_covid_cert: {
+          auth_code: "ACode"
+        },
+        markdown: "m".repeat(80),
+        subject: "e".repeat(80)
+      },
+      kind: "IRetrievedMessageWithContent"
+    };
+
+    const expected = {
+      ...aPublicExtendedMessage,
+      content: aRetrievedMessageWithEuCovidCert.content
+    };
+
+    const mockMessageModel = {
+      findMessageForRecipient: jest.fn(() =>
+        taskEither.of(some(aRetrievedMessageWithEuCovidCert))
+      ),
+      getContentFromBlob: jest.fn(() =>
+        taskEither.of(some(aRetrievedMessageWithEuCovidCert.content))
+      )
+    };
+
+    const getMessageHandler = GetMessageHandler(
+      mockMessageModel as any,
+      {} as any
+    );
+
+    const result = await getMessageHandler(
+      contextMock as any,
+      aFiscalCode,
+      aRetrievedMessageWithEuCovidCert.id
+    );
+
+    expect(mockMessageModel.getContentFromBlob).toHaveBeenCalledTimes(1);
+    expect(mockMessageModel.findMessageForRecipient).toHaveBeenCalledTimes(1);
+    expect(mockMessageModel.findMessageForRecipient).toHaveBeenCalledWith(
+      aRetrievedMessageWithEuCovidCert.fiscalCode,
+      aRetrievedMessageWithEuCovidCert.id
+    );
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value.message).toEqual(
+        expect.objectContaining({
+          ...expected
+        })
+      );
+    }
+  });
+
   it("should respond with not found a message doesn not exist", async () => {
     const mockMessageModel = {
       findMessageForRecipient: jest.fn(() => taskEither.of(none)),
