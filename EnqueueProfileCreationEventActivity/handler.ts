@@ -36,7 +36,9 @@ export const GetEnqueueProfileCreationEventActivityHandler: IEnqueueProfileCreat
       queueService
         .getQueueClient(decodedInputOrError.value.queueName)
         // Default message TTL is 7 days @ref https://docs.microsoft.com/it-it/azure/storage/queues/storage-nodejs-how-to-use-queues?tabs=javascript#queue-service-concepts
-        .sendMessage(decodedInputOrError.value.fiscalCode),
+        .sendMessage(
+          Buffer.from(decodedInputOrError.value.fiscalCode).toString("base64")
+        ),
     err => {
       context.log.error(
         `EnqueueProfileCreationEventActivity|Cannot send a message to the queue ${
