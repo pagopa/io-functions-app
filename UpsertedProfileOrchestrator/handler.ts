@@ -18,6 +18,8 @@ import {
 import { Input as UpdateServiceSubscriptionFeedActivityInput } from "../UpdateSubscriptionsFeedActivity/index";
 import { diffBlockedServices } from "../utils/profiles";
 
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { EnqueueProfileCreationEventActivityInput } from "../EnqueueProfileCreationEventActivity/handler";
 import { ActivityInput as SendWelcomeMessageActivityInput } from "../SendWelcomeMessagesActivity/handler";
 
 /**
@@ -40,6 +42,7 @@ export type OrchestratorInput = t.TypeOf<typeof OrchestratorInput>;
 
 export const getUpsertedProfileOrchestratorHandler = (params: {
   sendCashbackMessage: boolean;
+  notifyOn: ReadonlyArray<NonEmptyString>;
   // tslint:disable-next-line: no-big-function
 }) =>
   // tslint:disable-next-line: no-big-function
@@ -177,6 +180,23 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
             profile: newProfile
           } as SendWelcomeMessageActivityInput
         );
+      }
+      // Create messages on specific queues when a user profile become enabled
+      for (const serviceQueueName of params.notifyOn) {
+        try {
+          yield context.df.callActivityWithRetry(
+            "EnqueueProfileCreationEventActivity",
+            retryOptions,
+            EnqueueProfileCreationEventActivityInput.encode({
+              fiscalCode: newProfile.fiscalCode,
+              queueName: serviceQueueName
+            })
+          );
+        } catch (e) {
+          context.log.error(
+            `${logPrefix}|Send Profile creation event max retry exeded|QUEUE=${serviceQueueName}|ERROR=${e}`
+          );
+        }
       }
     }
 

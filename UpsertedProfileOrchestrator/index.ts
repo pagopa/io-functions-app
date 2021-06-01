@@ -7,6 +7,9 @@ const config = getConfigOrThrow();
 
 const orchestrator = df.orchestrator(
   getUpsertedProfileOrchestratorHandler({
+    notifyOn: config.IS_EUCOVIDCERT_ENABLED
+      ? [config.EUCOVIDCERT_NOTIFY_QUEUE_NAME]
+      : [],
     sendCashbackMessage: config.IS_CASHBACK_ENABLED
   })
 );
