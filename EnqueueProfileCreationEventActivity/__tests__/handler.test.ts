@@ -28,7 +28,9 @@ describe("GetEnqueueProfileCreationEventActivityHandler", () => {
       queueName: aQueueName
     });
     expect(result).toEqual("SUCCESS");
-    expect(mockSendMessage).toBeCalledWith(aFiscalCode);
+    expect(mockSendMessage).toBeCalledWith(
+      Buffer.from(aFiscalCode).toString("base64")
+    );
     expect(mockQueueService.getQueueClient).toBeCalledWith(aQueueName);
   });
 
@@ -61,7 +63,9 @@ describe("GetEnqueueProfileCreationEventActivityHandler", () => {
       })
     ).rejects.toEqual(expect.any(Error));
     expect(mockQueueService.getQueueClient).toBeCalledWith(aQueueName);
-    expect(mockSendMessage).toBeCalledWith(aFiscalCode);
+    expect(mockSendMessage).toBeCalledWith(
+      Buffer.from(aFiscalCode).toString("base64")
+    );
     expect(context.log.error).toBeCalled();
   });
 });
