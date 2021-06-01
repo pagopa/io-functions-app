@@ -431,6 +431,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.4.0/openapi/definitions.yaml#/ProblemJson"
   Profile:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.4.0/openapi/definitions.yaml#/Profile"
+  ServiceId:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.4.0/openapi/definitions.yaml#/ServiceId"
   ServicePublic:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.4.0/openapi/definitions.yaml#/ServicePublic"
   EmailAddress:
