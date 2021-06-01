@@ -1,7 +1,7 @@
 /* tslint:disable:no-any */
 
 import * as df from "durable-functions";
-import { readableReport } from "italia-ts-commons/lib/reporters";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aEmailChanged,

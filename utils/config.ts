@@ -7,8 +7,8 @@
 
 import { fromNullable } from "fp-ts/lib/Option";
 import * as t from "io-ts";
-import { readableReport } from "italia-ts-commons/lib/reporters";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { MailerConfig } from "@pagopa/io-functions-commons/dist/src/mailer";
 

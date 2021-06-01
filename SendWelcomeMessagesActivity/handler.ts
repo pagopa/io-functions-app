@@ -3,8 +3,8 @@ import { NewMessage } from "@pagopa/io-functions-commons/dist/generated/definiti
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { toString } from "fp-ts/lib/function";
 import * as t from "io-ts";
-import { readableReport } from "italia-ts-commons/lib/reporters";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 function throwInvalidMessageError(errs: t.Errors): never {
   throw new Error(

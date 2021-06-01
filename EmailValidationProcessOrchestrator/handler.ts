@@ -5,8 +5,8 @@ import { isLeft } from "fp-ts/lib/Either";
 import * as df from "durable-functions";
 import { IOrchestrationFunctionContext } from "durable-functions/lib/src/classes";
 
-import { readableReport } from "italia-ts-commons/lib/reporters";
-import { EmailString, FiscalCode } from "italia-ts-commons/lib/strings";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 import {
   ActivityInput as CreateValidationTokenActivityInput,

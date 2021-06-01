@@ -5,8 +5,8 @@ import * as t from "io-ts";
 import { AzureFunction, Context } from "@azure/functions";
 import { createTableService, TableUtilities } from "azure-storage";
 
-import { readableReport } from "italia-ts-commons/lib/reporters";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 

@@ -1,4 +1,4 @@
-import { ResponseErrorFromValidationErrors } from "italia-ts-commons/lib/responses";
+import { ResponseErrorFromValidationErrors } from "@pagopa/ts-commons/lib/responses";
 
 import { NewProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/NewProfile";
 import { Profile } from "@pagopa/io-functions-commons/dist/generated/definitions/Profile";

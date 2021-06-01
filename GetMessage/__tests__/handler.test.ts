@@ -2,7 +2,7 @@
 
 import { none, some } from "fp-ts/lib/Option";
 
-import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import {
   NewMessageWithoutContent,

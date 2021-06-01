@@ -3,7 +3,7 @@ import * as express from "express";
 import {
   IResponseSuccessJson,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 import * as packageJson from "../package.json";
 
 interface IPing {

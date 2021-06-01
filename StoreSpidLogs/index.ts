@@ -3,13 +3,13 @@ import { sequenceS } from "fp-ts/lib/Apply";
 import { either } from "fp-ts/lib/Either";
 import { curry } from "fp-ts/lib/function";
 import * as t from "io-ts";
-import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
+import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
 import {
   EncryptedPayload,
   toEncryptedPayload
-} from "italia-ts-commons/lib/encrypt";
-import { readableReport } from "italia-ts-commons/lib/reporters";
-import { IPString, PatternString } from "italia-ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/encrypt";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { IPString, PatternString } from "@pagopa/ts-commons/lib/strings";
 import { initTelemetryClient } from "../utils/appinsights";
 import { getConfigOrThrow } from "../utils/config";
 
