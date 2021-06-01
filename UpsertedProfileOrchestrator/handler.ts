@@ -182,21 +182,23 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
         );
       }
       // Create messages on specific queues when a user profile become enabled
-      for (const serviceQueueName of params.notifyOn) {
-        try {
-          yield context.df.callActivityWithRetry(
-            "EnqueueProfileCreationEventActivity",
-            retryOptions,
-            EnqueueProfileCreationEventActivityInput.encode({
-              fiscalCode: newProfile.fiscalCode,
-              queueName: serviceQueueName
-            })
-          );
-        } catch (e) {
-          context.log.error(
-            `${logPrefix}|Send Profile creation event max retry exeded|QUEUE=${serviceQueueName}|ERROR=${e}`
-          );
-        }
+      try {
+        yield context.df.Task.all(
+          params.notifyOn.map(serviceQueueName =>
+            context.df.callActivityWithRetry(
+              "EnqueueProfileCreationEventActivity",
+              retryOptions,
+              EnqueueProfileCreationEventActivityInput.encode({
+                fiscalCode: newProfile.fiscalCode,
+                queueName: serviceQueueName
+              })
+            )
+          )
+        );
+      } catch (e) {
+        context.log.error(
+          `${logPrefix}|Send Profile creation event max retry exeded|ERROR=${e}`
+        );
       }
     }
 
