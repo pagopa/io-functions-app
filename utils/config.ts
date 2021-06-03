@@ -47,9 +47,9 @@ export const ReqServiceIdConfig = t.union([
 export const EUCovidCertProfileQueueConfig = t.union([
   t.interface({
     EUCOVIDCERT_NOTIFY_QUEUE_NAME: NonEmptyString,
-    IS_EUCOVIDCERT_ENABLED: t.literal(true)
+    FF_NEW_USERS_EUCOVIDCERT_ENABLED: t.literal(true)
   }),
-  t.interface({ IS_EUCOVIDCERT_ENABLED: t.literal(false) })
+  t.interface({ FF_NEW_USERS_EUCOVIDCERT_ENABLED: t.literal(false) })
 ]);
 export type EUCovidCertProfileQueueConfig = t.TypeOf<
   typeof EUCovidCertProfileQueueConfig
@@ -77,8 +77,8 @@ export const IConfig = t.intersection([
     SUBSCRIPTIONS_FEED_TABLE: NonEmptyString,
 
     IS_CASHBACK_ENABLED: t.boolean,
-    IS_EUCOVIDCERT_ENABLED: t.boolean,
 
+    FF_NEW_USERS_EUCOVIDCERT_ENABLED: t.boolean,
     FF_ONLY_NATIONAL_SERVICES: t.boolean,
 
     isProduction: t.boolean
@@ -91,13 +91,15 @@ export const IConfig = t.intersection([
 // No need to re-evaluate this object for each call
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   ...process.env,
+  FF_NEW_USERS_EUCOVIDCERT_ENABLED: fromNullable(
+    process.env.FF_NEW_USERS_EUCOVIDCERT_ENABLED
+  )
+    .map(_ => _.toLocaleLowerCase() === "true")
+    .getOrElse(false),
   FF_ONLY_NATIONAL_SERVICES: fromNullable(process.env.FF_ONLY_NATIONAL_SERVICES)
     .map(_ => _.toLocaleLowerCase() === "true")
     .getOrElse(false),
   IS_CASHBACK_ENABLED: fromNullable(process.env.IS_CASHBACK_ENABLED)
-    .map(_ => _.toLocaleLowerCase() === "true")
-    .getOrElse(false),
-  IS_EUCOVIDCERT_ENABLED: fromNullable(process.env.IS_EUCOVIDCERT_ENABLED)
     .map(_ => _.toLocaleLowerCase() === "true")
     .getOrElse(false),
   isProduction: process.env.NODE_ENV === "production"

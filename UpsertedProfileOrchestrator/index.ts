@@ -8,7 +8,7 @@ const config = getConfigOrThrow();
 
 const orchestrator = df.orchestrator(
   getUpsertedProfileOrchestratorHandler({
-    notifyOn: config.IS_EUCOVIDCERT_ENABLED
+    notifyOn: config.FF_NEW_USERS_EUCOVIDCERT_ENABLED
       ? NonEmptyArray.fromArray([
           config.EUCOVIDCERT_NOTIFY_QUEUE_NAME
         ]).getOrElse(undefined)
