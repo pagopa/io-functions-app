@@ -3,12 +3,12 @@ import { getConfigOrThrow } from "../utils/config";
 import { GetEnqueueProfileCreationEventActivityHandler } from "./handler";
 
 const config = getConfigOrThrow();
-const queueServiceClient = QueueServiceClient.fromConnectionString(
-  config.QueueStorageConnection
+const eventsQueueServiceClient = QueueServiceClient.fromConnectionString(
+  config.EventsQueueStorageConnection
 );
 
 const activityFunction = GetEnqueueProfileCreationEventActivityHandler(
-  queueServiceClient
+  eventsQueueServiceClient
 );
 
 export default activityFunction;
