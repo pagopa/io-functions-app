@@ -7,7 +7,15 @@
   },
   "extensions": {
     "durableTask": {
-      "hubName": "%SLOT_TASK_HUBNAME%"
+      "hubName": "%SLOT_TASK_HUBNAME%",
+      "localRpcEndpointEnabled": false,
+      "storageProvider": {
+        "connectionStringName": "AzureWebJobsStorage"
+      },
+      "tracing": {
+        "traceInputsAndOutputs": false,
+        "traceReplayEvents": false
+      }
     }
   }
 }
