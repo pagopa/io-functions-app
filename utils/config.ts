@@ -46,7 +46,7 @@ export const ReqServiceIdConfig = t.union([
 
 export const EUCovidCertProfileQueueConfig = t.union([
   t.interface({
-    EUCOVIDCERT_NOTIFY_QUEUE_NAME: NonEmptyString,
+    EUCOVIDCERT_PROFILE_CREATED_QUEUE_NAME: NonEmptyString,
     FF_NEW_USERS_EUCOVIDCERT_ENABLED: t.literal(true)
   }),
   t.interface({ FF_NEW_USERS_EUCOVIDCERT_ENABLED: t.literal(false) })

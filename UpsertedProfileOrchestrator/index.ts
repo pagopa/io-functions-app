@@ -10,7 +10,7 @@ const orchestrator = df.orchestrator(
   getUpsertedProfileOrchestratorHandler({
     notifyOn: config.FF_NEW_USERS_EUCOVIDCERT_ENABLED
       ? NonEmptyArray.fromArray([
-          config.EUCOVIDCERT_NOTIFY_QUEUE_NAME
+          config.EUCOVIDCERT_PROFILE_CREATED_QUEUE_NAME
         ]).getOrElse(undefined)
       : undefined,
     sendCashbackMessage: config.IS_CASHBACK_ENABLED
