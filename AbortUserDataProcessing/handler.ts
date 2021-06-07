@@ -34,13 +34,13 @@ import {
   ResponseErrorConflict,
   ResponseErrorNotFound,
   ResponseSuccessAccepted
-} from "italia-ts-commons/lib/responses";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/responses";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 import { identity } from "fp-ts/lib/function";
 import { fromEither, fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 
-import { readableReport } from "italia-ts-commons/lib/reporters";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 
 /**
  * Defines the subset of UserDataProcessing entities which can be aborted

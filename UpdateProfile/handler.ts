@@ -14,9 +14,9 @@ import {
   ResponseErrorConflict,
   ResponseErrorNotFound,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
-import { withoutUndefinedValues } from "italia-ts-commons/lib/types";
+} from "@pagopa/ts-commons/lib/responses";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
 
 import { Profile as ApiProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/Profile";
 import { ProfileModel } from "@pagopa/io-functions-commons/dist/src/models/profile";
