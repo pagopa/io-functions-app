@@ -5,8 +5,8 @@ import { isLeft } from "fp-ts/lib/Either";
 import * as df from "durable-functions";
 import { IOrchestrationFunctionContext } from "durable-functions/lib/src/classes";
 
-import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
-import { readableReport } from "italia-ts-commons/lib/reporters";
+import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";

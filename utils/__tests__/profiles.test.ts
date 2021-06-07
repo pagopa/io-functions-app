@@ -1,4 +1,4 @@
-import { Tuple2 } from "italia-ts-commons/lib/tuples";
+import { Tuple2 } from "@pagopa/ts-commons/lib/tuples";
 
 import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
 

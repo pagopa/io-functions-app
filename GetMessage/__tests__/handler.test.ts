@@ -2,7 +2,7 @@
 
 import { none, some } from "fp-ts/lib/Option";
 
-import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import {
   NewMessageWithoutContent,
@@ -110,6 +110,61 @@ describe("GetMessageHandler", () => {
     expect(result.kind).toBe("IResponseSuccessJson");
     if (result.kind === "IResponseSuccessJson") {
       expect(result.value).toEqual(aPublicExtendedMessageResponse);
+    }
+  });
+
+  it("should respond with a message with eu_covid_cert", async () => {
+    const aRetrievedMessageWithEuCovidCert = {
+      ...aRetrievedMessageWithoutContent,
+      content: {
+        eu_covid_cert: {
+          auth_code: "ACode"
+        },
+        markdown: "m".repeat(80),
+        subject: "e".repeat(80)
+      },
+      kind: "IRetrievedMessageWithContent"
+    };
+
+    const expected = {
+      ...aPublicExtendedMessage,
+      content: aRetrievedMessageWithEuCovidCert.content
+    };
+
+    const mockMessageModel = {
+      findMessageForRecipient: jest.fn(() =>
+        taskEither.of(some(aRetrievedMessageWithEuCovidCert))
+      ),
+      getContentFromBlob: jest.fn(() =>
+        taskEither.of(some(aRetrievedMessageWithEuCovidCert.content))
+      )
+    };
+
+    const getMessageHandler = GetMessageHandler(
+      mockMessageModel as any,
+      {} as any
+    );
+
+    const result = await getMessageHandler(
+      contextMock as any,
+      aFiscalCode,
+      aRetrievedMessageWithEuCovidCert.id
+    );
+
+    expect(mockMessageModel.getContentFromBlob).toHaveBeenCalledTimes(1);
+    expect(mockMessageModel.findMessageForRecipient).toHaveBeenCalledTimes(1);
+    expect(mockMessageModel.findMessageForRecipient).toHaveBeenCalledWith(
+      aRetrievedMessageWithEuCovidCert.fiscalCode,
+      aRetrievedMessageWithEuCovidCert.id
+    );
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value.message).toEqual(
+        expect.objectContaining({
+          ...expected
+        })
+      );
     }
   });
 

@@ -9,8 +9,8 @@ import { Context } from "@azure/functions";
 
 import * as ai from "applicationinsights";
 
-import { readableReport } from "italia-ts-commons/lib/reporters";
-import { EmailString } from "italia-ts-commons/lib/strings";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { EmailString } from "@pagopa/ts-commons/lib/strings";
 
 import { EmailDefaults } from "./";
 import { getEmailHtmlFromTemplate } from "./template";

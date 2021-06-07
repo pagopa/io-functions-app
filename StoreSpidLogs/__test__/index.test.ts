@@ -1,9 +1,10 @@
 /* tslint:disable:no-any */
 /* tslint:disable:no-object-mutation */
 
+import { toPlainText } from "@pagopa/ts-commons/lib/encrypt";
+import { IPString } from "@pagopa/ts-commons/lib/strings";
+
 import { format } from "date-fns";
-import { toPlainText } from "italia-ts-commons/lib/encrypt";
-import { IPString } from "italia-ts-commons/lib/strings";
 import { aFiscalCode } from "../../__mocks__/mocks";
 import { index, IOutputBinding, SpidMsgItem } from "../index";
 

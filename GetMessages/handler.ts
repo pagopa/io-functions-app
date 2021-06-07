@@ -28,8 +28,8 @@ import * as express from "express";
 import { isRight } from "fp-ts/lib/Either";
 import * as t from "io-ts";
 
-import { IResponseErrorValidation } from "italia-ts-commons/lib/responses";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 type RetrievedNotPendingMessage = t.TypeOf<typeof RetrievedNotPendingMessage>;
 const RetrievedNotPendingMessage = t.intersection([
