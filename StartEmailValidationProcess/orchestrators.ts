@@ -6,8 +6,8 @@ import * as dateFns from "date-fns";
 import { toError } from "fp-ts/lib/Either";
 import { TaskEither, tryCatch } from "fp-ts/lib/TaskEither";
 
-import { FiscalCode } from "italia-ts-commons/lib/strings";
-import { PromiseType } from "italia-ts-commons/lib/types";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { PromiseType } from "@pagopa/ts-commons/lib/types";
 import { EmailAddress } from "../generated/backend/EmailAddress";
 
 const hashCreator = (value: string) =>

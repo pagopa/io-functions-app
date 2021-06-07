@@ -8,5 +8,12 @@
     "strict": false,
     "resolveJsonModule": true
   }, 
-  "exclude": ["__mocks__"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "__mocks__",
+    "docker",
+    "**/__tests__",
+    "Dangerfile.ts"
+  ]
 }

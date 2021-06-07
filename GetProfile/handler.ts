@@ -1,16 +1,9 @@
 import * as express from "express";
-import {
-  IResponseErrorNotFound,
-  IResponseSuccessJson,
-  ResponseErrorNotFound,
-  ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
-
-import { ProfileModel } from "@pagopa/io-functions-commons/dist/src/models/profile";
 
 import { ExtendedProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/ExtendedProfile";
+import { ProfileModel } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
+
 import {
   withRequestMiddlewares,
   wrapRequestHandler
@@ -19,6 +12,14 @@ import {
   IResponseErrorQuery,
   ResponseErrorQuery
 } from "@pagopa/io-functions-commons/dist/src/utils/response";
+
+import {
+  IResponseErrorNotFound,
+  IResponseSuccessJson,
+  ResponseErrorNotFound,
+  ResponseSuccessJson
+} from "@pagopa/ts-commons/lib/responses";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 

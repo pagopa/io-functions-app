@@ -7,10 +7,11 @@
 
 import { fromNullable } from "fp-ts/lib/Option";
 import * as t from "io-ts";
-import { readableReport } from "italia-ts-commons/lib/reporters";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 import { MailerConfig } from "@pagopa/io-functions-commons/dist/src/mailer";
+
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 // exclude a specific value from a type
 // as strict equality is performed, allowed input types are constrained to be values not references (object, arrays, etc)
@@ -47,9 +48,6 @@ export const ReqServiceIdConfig = t.union([
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
   t.interface({
-    AZURE_NH_ENDPOINT: NonEmptyString,
-    AZURE_NH_HUB_NAME: NonEmptyString,
-
     COSMOSDB_KEY: NonEmptyString,
     COSMOSDB_NAME: NonEmptyString,
     COSMOSDB_URI: NonEmptyString,
