@@ -18,8 +18,8 @@ import {
 import { Input as UpdateServiceSubscriptionFeedActivityInput } from "../UpdateSubscriptionsFeedActivity/index";
 import { diffBlockedServices } from "../utils/profiles";
 
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { EnqueueProfileCreationEventActivityInput } from "../EnqueueProfileCreationEventActivity/handler";
 import { ActivityInput as SendWelcomeMessageActivityInput } from "../SendWelcomeMessagesActivity/handler";
 

@@ -1,9 +1,9 @@
 /* tslint:disable:no-any */
 
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as df from "durable-functions";
 import { Task } from "durable-functions/lib/src/classes";
 import { fromArray } from "fp-ts/lib/NonEmptyArray";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aEmailChanged,

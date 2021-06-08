@@ -1,9 +1,9 @@
 import { Context } from "@azure/functions";
 import { QueueServiceClient } from "@azure/storage-queue";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { tryCatch } from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
-import { readableReport } from "italia-ts-commons/lib/reporters";
-import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 
 export const EnqueueProfileCreationEventActivityInput = t.interface({
   fiscalCode: FiscalCode,
