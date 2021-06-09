@@ -17,6 +17,11 @@ type IEnqueueProfileCreationEventActivityHandler = (
   queueService: QueueServiceClient
 ) => (context: Context, rawInput: unknown) => Promise<string>;
 
+export const NewProfileInput = t.interface({
+  fiscal_code: FiscalCode
+});
+export type NewProfileInput = t.TypeOf<typeof NewProfileInput>;
+
 export const GetEnqueueProfileCreationEventActivityHandler: IEnqueueProfileCreationEventActivityHandler = (
   queueService: QueueServiceClient
 ) => async (context: Context, rawInput: unknown): Promise<string> => {
@@ -31,13 +36,16 @@ export const GetEnqueueProfileCreationEventActivityHandler: IEnqueueProfileCreat
     );
     return "FAILURE";
   }
+  const newProfileMessage: NewProfileInput = {
+    fiscal_code: decodedInputOrError.value.fiscalCode
+  };
   return tryCatch(
     () =>
       queueService
         .getQueueClient(decodedInputOrError.value.queueName)
         // Default message TTL is 7 days @ref https://docs.microsoft.com/it-it/azure/storage/queues/storage-nodejs-how-to-use-queues?tabs=javascript#queue-service-concepts
         .sendMessage(
-          Buffer.from(decodedInputOrError.value.fiscalCode).toString("base64")
+          Buffer.from(JSON.stringify(newProfileMessage)).toString("base64")
         ),
     err => {
       context.log.error(

@@ -2,7 +2,10 @@ import { Context } from "@azure/functions";
 import { QueueServiceClient } from "@azure/storage-queue";
 import { context } from "../../__mocks__/durable-functions";
 import { aFiscalCode } from "../../__mocks__/mocks";
-import { GetEnqueueProfileCreationEventActivityHandler } from "../handler";
+import {
+  GetEnqueueProfileCreationEventActivityHandler,
+  NewProfileInput
+} from "../handler";
 
 const mockSendMessage = jest.fn();
 const mockQueueService = ({
@@ -12,6 +15,10 @@ const mockQueueService = ({
 } as unknown) as QueueServiceClient;
 
 const aQueueName = "queue_name";
+
+const expectedMessagePayload: NewProfileInput = {
+  fiscal_code: aFiscalCode
+};
 
 describe("GetEnqueueProfileCreationEventActivityHandler", () => {
   beforeEach(() => {
@@ -29,7 +36,7 @@ describe("GetEnqueueProfileCreationEventActivityHandler", () => {
     });
     expect(result).toEqual("SUCCESS");
     expect(mockSendMessage).toBeCalledWith(
-      Buffer.from(aFiscalCode).toString("base64")
+      Buffer.from(JSON.stringify(expectedMessagePayload)).toString("base64")
     );
     expect(mockQueueService.getQueueClient).toBeCalledWith(aQueueName);
   });
@@ -64,7 +71,7 @@ describe("GetEnqueueProfileCreationEventActivityHandler", () => {
     ).rejects.toEqual(expect.any(Error));
     expect(mockQueueService.getQueueClient).toBeCalledWith(aQueueName);
     expect(mockSendMessage).toBeCalledWith(
-      Buffer.from(aFiscalCode).toString("base64")
+      Buffer.from(JSON.stringify(expectedMessagePayload)).toString("base64")
     );
     expect(context.log.error).toBeCalled();
   });
