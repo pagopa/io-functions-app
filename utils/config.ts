@@ -44,6 +44,17 @@ export const ReqServiceIdConfig = t.union([
   })
 ]);
 
+export const EUCovidCertProfileQueueConfig = t.union([
+  t.interface({
+    EUCOVIDCERT_PROFILE_CREATED_QUEUE_NAME: NonEmptyString,
+    FF_NEW_USERS_EUCOVIDCERT_ENABLED: t.literal(true)
+  }),
+  t.interface({ FF_NEW_USERS_EUCOVIDCERT_ENABLED: t.literal(false) })
+]);
+export type EUCovidCertProfileQueueConfig = t.TypeOf<
+  typeof EUCovidCertProfileQueueConfig
+>;
+
 // global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -59,6 +70,7 @@ export const IConfig = t.intersection([
     PUBLIC_API_KEY: NonEmptyString,
     PUBLIC_API_URL: NonEmptyString,
 
+    EventsQueueStorageConnection: NonEmptyString,
     QueueStorageConnection: NonEmptyString,
 
     SPID_LOGS_PUBLIC_KEY: NonEmptyString,
@@ -66,17 +78,24 @@ export const IConfig = t.intersection([
 
     IS_CASHBACK_ENABLED: t.boolean,
 
+    FF_NEW_USERS_EUCOVIDCERT_ENABLED: t.boolean,
     FF_ONLY_NATIONAL_SERVICES: t.boolean,
 
     isProduction: t.boolean
   }),
   MailerConfig,
-  ReqServiceIdConfig
+  ReqServiceIdConfig,
+  EUCovidCertProfileQueueConfig
 ]);
 
 // No need to re-evaluate this object for each call
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   ...process.env,
+  FF_NEW_USERS_EUCOVIDCERT_ENABLED: fromNullable(
+    process.env.FF_NEW_USERS_EUCOVIDCERT_ENABLED
+  )
+    .map(_ => _.toLocaleLowerCase() === "true")
+    .getOrElse(false),
   FF_ONLY_NATIONAL_SERVICES: fromNullable(process.env.FF_ONLY_NATIONAL_SERVICES)
     .map(_ => _.toLocaleLowerCase() === "true")
     .getOrElse(false),

@@ -7,5 +7,10 @@
   "rules": {
     "no-submodule-imports": false
   },
-  "rulesDirectory": []
+  "rulesDirectory": [],
+  "linterOptions": {
+    "exclude": [
+      "./generated/**/*"
+    ]
+  }
 }
