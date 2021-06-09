@@ -182,27 +182,6 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
           } as SendWelcomeMessageActivityInput
         );
       }
-      // Create messages on specific queues when a user profile become enabled
-      if (params.notifyOn) {
-        try {
-          yield context.df.Task.all(
-            params.notifyOn.toArray().map(serviceQueueName =>
-              context.df.callActivityWithRetry(
-                "EnqueueProfileCreationEventActivity",
-                retryOptions,
-                EnqueueProfileCreationEventActivityInput.encode({
-                  fiscalCode: newProfile.fiscalCode,
-                  queueName: serviceQueueName
-                })
-              )
-            )
-          );
-        } catch (e) {
-          context.log.error(
-            `${logPrefix}|Send Profile creation event max retry exeded|ERROR=${e}`
-          );
-        }
-      }
     }
 
     // Update subscriptions feed
@@ -268,6 +247,29 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
             updatedAt: updatedAt.getTime(),
             version: newProfile.version
           } as UpdateServiceSubscriptionFeedActivityInput
+        );
+      }
+    }
+
+    // Create messages on specific queues when a user profile become enabled
+    // Moved at the end to mitigate orchestrator versioning https://docs.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-versioning
+    if (hasJustEnabledInbox && params.notifyOn) {
+      try {
+        yield context.df.Task.all(
+          params.notifyOn.toArray().map(serviceQueueName =>
+            context.df.callActivityWithRetry(
+              "EnqueueProfileCreationEventActivity",
+              retryOptions,
+              EnqueueProfileCreationEventActivityInput.encode({
+                fiscalCode: newProfile.fiscalCode,
+                queueName: serviceQueueName
+              })
+            )
+          )
+        );
+      } catch (e) {
+        context.log.error(
+          `${logPrefix}|Send Profile creation event max retry exeded|ERROR=${e}`
         );
       }
     }
