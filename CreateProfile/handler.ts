@@ -59,19 +59,15 @@ export function CreateProfileHandler(
   return async (context, fiscalCode, createProfilePayload) => {
     const logPrefix = `CreateProfileHandler|FISCAL_CODE=${fiscalCode}`;
 
-    const profile: Profile = {
-      email: createProfilePayload.email,
-      fiscalCode,
-      isEmailEnabled: true,
-      isEmailValidated: createProfilePayload.is_email_validated,
-      isInboxEnabled: false,
-      isTestProfile: createProfilePayload.is_test_profile,
-      isWebhookEnabled: false
-    };
-
     const errorOrCreatedProfile = await fromEither(
       INewProfile.decode({
-        ...profile,
+        email: createProfilePayload.email,
+        fiscalCode,
+        isEmailEnabled: true,
+        isEmailValidated: createProfilePayload.is_email_validated,
+        isInboxEnabled: false,
+        isTestProfile: createProfilePayload.is_test_profile,
+        isWebhookEnabled: false,
         kind: "INewProfile"
       })
     )

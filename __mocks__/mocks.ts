@@ -7,6 +7,7 @@ import {
 
 import { NewProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/NewProfile";
 import { Profile } from "@pagopa/io-functions-commons/dist/generated/definitions/Profile";
+import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { UserDataProcessing as UserDataProcessingApi } from "@pagopa/io-functions-commons/dist/generated/definitions/UserDataProcessing";
 import {
   UserDataProcessingChoice,
@@ -53,6 +54,11 @@ export const aProfile: Profile = {
   version: 0 as NonNegativeInteger
 };
 
+export const aServicePreferencesSettings: RetrievedProfile["servicePreferencesSettings"] = {
+  mode: ServicesPreferencesModeEnum.AUTO,
+  version: 0 as NonNegativeInteger
+};
+
 export const aRetrievedProfile: RetrievedProfile = {
   ...aCosmosResourceMetadata,
   fiscalCode: aFiscalCode,
@@ -63,6 +69,7 @@ export const aRetrievedProfile: RetrievedProfile = {
   isTestProfile: false,
   isWebhookEnabled: false,
   kind: "IRetrievedProfile",
+  servicePreferencesSettings: aServicePreferencesSettings,
   version: 0 as NonNegativeInteger
 };
 
@@ -75,6 +82,7 @@ export const aRetrievedProfileWithEmail: RetrievedProfile = {
   isInboxEnabled: false,
   isWebhookEnabled: false,
   kind: "IRetrievedProfile",
+  servicePreferencesSettings: aServicePreferencesSettings,
   version: 0 as NonNegativeInteger
 };
 

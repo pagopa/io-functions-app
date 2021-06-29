@@ -30,7 +30,8 @@ export function apiProfileToProfile(
     isEmailValidated,
     isInboxEnabled: apiProfile.is_inbox_enabled,
     isWebhookEnabled: apiProfile.is_webhook_enabled,
-    preferredLanguages: apiProfile.preferred_languages
+    preferredLanguages: apiProfile.preferred_languages,
+    servicePreferencesSettings: apiProfile.service_preferences_settings
   };
 }
 
@@ -50,6 +51,7 @@ export function retrievedProfileToExtendedProfile(
     is_test_profile: profile.isTestProfile === true,
     is_webhook_enabled: profile.isWebhookEnabled === true,
     preferred_languages: profile.preferredLanguages,
+    service_preferences_settings: profile.servicePreferencesSettings,
     version: profile.version
   };
 }
