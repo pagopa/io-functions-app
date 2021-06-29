@@ -17,7 +17,6 @@ import { ExtendedProfile } from "@pagopa/io-functions-commons/dist/generated/def
 import { NewProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/NewProfile";
 import {
   NewProfile as INewProfile,
-  Profile,
   ProfileModel
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import {
