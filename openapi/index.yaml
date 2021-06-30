@@ -1,6 +1,6 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
-  version: 1.1.0
+  version: 1.42.0
   title: IO API for App
   contact:
     name: Digital Transformation Team
@@ -10,37 +10,42 @@ info:
   description: >
     # Warning
 
-    **This is an experimental API that is (most probably) going to change as we evolve the IO platform.**
+    **This is an experimental API that is (most probably) going to change as we
+    evolve the IO platform.**
 
     # Introduction
 
     This is the documentation of the IO API for App.
-
 host: api.cd.italia.it
-basePath: "/api/v1"
+basePath: /api/v1
 schemes:
   - https
 security:
   - SubscriptionKey: []
 paths:
-  "/messages/{fiscal_code}":
+  /messages/{fiscal_code}:
     get:
       operationId: getMessagesByUser
       summary: GetMessages
-      description: |-
-        Returns the messages for the user identified by the provided fiscal code.
-        Messages will be returned in inverse acceptance order (from last to first).
-        The "next" field, when present, contains an URL pointing to the next page of results.
+      description: >-
+        Returns the messages for the user identified by the provided fiscal
+        code.
+
+        Messages will be returned in inverse acceptance order (from last to
+        first).
+
+        The "next" field, when present, contains an URL pointing to the next
+        page of results.
       tags:
         - restricted
       parameters:
-        - $ref: "#/parameters/FiscalCode"
-        - $ref: "#/parameters/PaginationRequest"
+        - $ref: '#/parameters/FiscalCode'
+        - $ref: '#/parameters/PaginationRequest'
       responses:
-        "200":
+        '200':
           description: Found.
           schema:
-            $ref: "#/definitions/PaginatedCreatedMessageWithoutContentCollection"
+            $ref: '#/definitions/PaginatedCreatedMessageWithoutContentCollection'
           examples:
             application/json:
               items:
@@ -49,35 +54,51 @@ paths:
                   time_to_live: 3600
                   content:
                     subject: amet sunt dolor nulla esseesseanim
-                    markdown: |-
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
-                      Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
-                      risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
-                      fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
-                      laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
+                    markdown: >-
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                      Maecenas et mollis felis.
+
+                      Vivamus orci nisl, commodo ut sodales ut, eleifend a
+                      libero. Donec dapibus, turpis in mattis tempor,
+
+                      risus nunc malesuada ex, non aliquet metus nunc a lacus.
+                      Aenean in arcu vitae nisl porta
+
+                      fermentum nec non nibh. Phasellus tortor tellus, semper in
+                      metus eget, eleifend
+
+                      laoreet nibh. Aenean feugiat lectus ut nisl eleifend
+                      gravida.
                   sender_service_id: 01BX9NSMKVXXS5PSP2FATZMZZZ
                 - id: 01BX9NSMKVXXS5PSP2FATZM123
                   fiscal_code: PKTINH4QDQUV696L
                   time_to_live: 3600
                   content:
                     subject: idUt quis tempor esseesseanim
-                    markdown: |-
-                      Nullam dapibus metus sed elementum efficitur. Curabitur facilisis sagittis risus nec sodales.
-                      Vestibulum in eros sapien. Donec ac odio sit amet dui semper ornare eget nec odio. Pellentesque habitant
-                      morbi tristique senectus et netus et malesuada fames ac turpis egestas. Praesent nibh ex, mattis sit amet
-                      felis id, sodales euismod velit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    markdown: >-
+                      Nullam dapibus metus sed elementum efficitur. Curabitur
+                      facilisis sagittis risus nec sodales.
+
+                      Vestibulum in eros sapien. Donec ac odio sit amet dui
+                      semper ornare eget nec odio. Pellentesque habitant
+
+                      morbi tristique senectus et netus et malesuada fames ac
+                      turpis egestas. Praesent nibh ex, mattis sit amet
+
+                      felis id, sodales euismod velit. Lorem ipsum dolor sit
+                      amet, consectetur adipiscing elit.
                   sender_service_id: 01BX9NSMKVXXS5PSP2FATZMWWW
               page_size: 2
               next: https://example.com/next
-        "401":
+        '401':
           description: Unauthorized
-        "404":
+        '404':
           description: No message found.
           schema:
-            $ref: "#/definitions/ProblemJson"
-        "429":
+            $ref: '#/definitions/ProblemJson'
+        '429':
           description: Too many requests
-  "/messages/{fiscal_code}/{id}":
+  /messages/{fiscal_code}/{id}:
     get:
       operationId: getMessage
       summary: GetMessage
@@ -88,17 +109,17 @@ paths:
         - public
         - restricted
       parameters:
-        - $ref: "#/parameters/FiscalCode"
+        - $ref: '#/parameters/FiscalCode'
         - name: id
           in: path
           type: string
           required: true
           description: The ID of the message.
       responses:
-        "200":
+        '200':
           description: Message found.
           schema:
-            $ref: "#/definitions/MessageResponseWithContent"
+            $ref: '#/definitions/MessageResponseWithContent'
           examples:
             application/json:
               message:
@@ -107,41 +128,51 @@ paths:
                 time_to_live: 3600
                 content:
                   subject: message subject, aliquip sint nulla in estinut
-                  markdown: |-
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
-                    Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
-                    risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
-                    fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
-                    laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
+                  markdown: >-
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    Maecenas et mollis felis.
+
+                    Vivamus orci nisl, commodo ut sodales ut, eleifend a libero.
+                    Donec dapibus, turpis in mattis tempor,
+
+                    risus nunc malesuada ex, non aliquet metus nunc a lacus.
+                    Aenean in arcu vitae nisl porta
+
+                    fermentum nec non nibh. Phasellus tortor tellus, semper in
+                    metus eget, eleifend
+
+                    laoreet nibh. Aenean feugiat lectus ut nisl eleifend
+                    gravida.
                 sender_service_id: 01BX9NSMKVXXS5PSP2FATZM6QX
               notification:
                 email: QUEUED
-        "401":
+        '401':
           description: Unauthorized
-        "404":
+        '404':
           description: No message found for the provided ID.
           schema:
-            $ref: "#/definitions/ProblemJson"
-        "429":
+            $ref: '#/definitions/ProblemJson'
+        '429':
           description: Too many requests
-  "/services":
+  /services:
     get:
       operationId: getVisibleServices
       summary: GetVisibleServices.
-      description: |-
-        Returns all the services that have the 'is_visibile' field value set to true.
+      description: >-
+        Returns all the services that have the 'is_visibile' field value set to
+        true.
       tags:
         - restricted
       responses:
-        "200":
+        '200':
           description: Found.
           schema:
-            $ref: "#/definitions/PaginatedServiceTupleCollection"
-        "401":
+            $ref: '#/definitions/PaginatedServiceTupleCollection'
+        '401':
           description: Unauthorized
-        "429":
+        '429':
           description: Too many requests
-  "/services/{service_id}":
+  /services/{service_id}:
     get:
       operationId: getService
       summary: GetService
@@ -155,10 +186,10 @@ paths:
           required: true
           description: The ID of an existing Service.
       responses:
-        "200":
+        '200':
           description: Service found.
           schema:
-            "$ref": "#/definitions/ServicePublic"
+            $ref: '#/definitions/ServicePublic'
           examples:
             application/json:
               department_name: dept
@@ -166,13 +197,13 @@ paths:
               service_id: 2b3e728c1a5d1efa035c
               service_name: service
               version: 1
-        "401":
+        '401':
           description: Unauthorized
-        "404":
+        '404':
           description: No service found for the provided ID.
-        "429":
+        '429':
           description: Too many requests
-  "/profiles/{fiscal_code}":
+  /profiles/{fiscal_code}:
     get:
       operationId: getProfile
       summary: GetProfile
@@ -180,83 +211,108 @@ paths:
       tags:
         - restricted
       parameters:
-        - $ref: "#/parameters/FiscalCode"
+        - $ref: '#/parameters/FiscalCode'
       responses:
-        "200":
+        '200':
           description: Profile created
           schema:
-            $ref: "#/definitions/ExtendedProfile"
-        "400":
+            $ref: '#/definitions/ExtendedProfile'
+        '400':
           description: Invalid request.
           schema:
-            $ref: "#/definitions/ProblemJson"
-        "401":
+            $ref: '#/definitions/ProblemJson'
+        '401':
           description: Unauthorized
-        "404":
+        '404':
           description: No message found.
           schema:
-            $ref: "#/definitions/ProblemJson"
-        "429":
+            $ref: '#/definitions/ProblemJson'
+        '429':
           description: Too many requests
     post:
       operationId: createProfile
       summary: CreateProfile
-      description: |-
-        Create a new user profile
+      description: Create a new user profile
       tags:
         - restricted
       parameters:
-        - $ref: "#/parameters/FiscalCode"
+        - $ref: '#/parameters/FiscalCode'
         - in: body
           name: body
           schema:
-            $ref: "#/definitions/NewProfile"
+            $ref: '#/definitions/NewProfile'
       responses:
-        "200":
+        '200':
           description: Profile created
           schema:
-            $ref: "#/definitions/ExtendedProfile"
-        "400":
+            $ref: '#/definitions/ExtendedProfile'
+        '400':
           description: Invalid request.
           schema:
-            $ref: "#/definitions/ProblemJson"
-        "401":
+            $ref: '#/definitions/ProblemJson'
+        '401':
           description: Unauthorized
-        "409":
+        '409':
           description: Conflict
-        "429":
+        '429':
           description: Too many requests
     put:
       operationId: updateProfile
       summary: UpdateProfile
-      description: |-
-        Update a user profile
+      description: Update a user profile
       tags:
         - restricted
       parameters:
-        - $ref: "#/parameters/FiscalCode"
+        - $ref: '#/parameters/FiscalCode'
         - in: body
           name: body
           schema:
-            $ref: "#/definitions/Profile"
+            $ref: '#/definitions/Profile'
       responses:
-        "200":
+        '200':
           description: Profile updated
           schema:
-            $ref: "#/definitions/ExtendedProfile"
-        "400":
+            $ref: '#/definitions/ExtendedProfile'
+        '400':
           description: Invalid request.
           schema:
-            $ref: "#/definitions/ProblemJson"
-        "401":
+            $ref: '#/definitions/ProblemJson'
+        '401':
           description: Unauthorized
-        "404":
+        '404':
           description: Not found
-        "409":
+        '409':
           description: Conflict
-        "429":
+        '429':
           description: Too many requests
-  "/email-validation-process/{fiscal_code}":
+  /profiles/{fiscal_code}/services/{service_id}/preferences:
+    get:
+      operationId: getServicePreferences
+      summary: getServicePreferences
+      description: Retrieve the User's preferences for a given Service Id
+      tags:
+        - restricted
+      parameters:
+        - $ref: '#/parameters/FiscalCode'
+        - $ref: '#/parameters/ServiceId'
+      responses:
+        '200':
+          description: The User's Service Preference
+          schema:
+            $ref: '#/definitions/ServicePreference'
+        '400':
+          description: Invalid request.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Profile or Service not found
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '429':
+          description: Too many requests
+  /email-validation-process/{fiscal_code}:
     post:
       operationId: startEmailValidationProcess
       summary: StartEmailValidationProcess
@@ -266,61 +322,60 @@ paths:
       tags:
         - restricted
       parameters:
-        - $ref: "#/parameters/FiscalCode"
+        - $ref: '#/parameters/FiscalCode'
       responses:
-        "202":
+        '202':
           description: Request accepted
-        "400":
+        '400':
           description: Invalid request.
           schema:
-            $ref: "#/definitions/ProblemJson"
-        "401":
+            $ref: '#/definitions/ProblemJson'
+        '401':
           description: Unauthorized
-        "404":
+        '404':
           description: Not found
-        "429":
+        '429':
           description: Too many requests
-        "500":
+        '500':
           description: Server Error
           schema:
-            $ref: "#/definitions/ProblemJson"
-  "/user-data-processing/{fiscal_code}":
+            $ref: '#/definitions/ProblemJson'
+  /user-data-processing/{fiscal_code}:
     post:
       operationId: upsertUserDataProcessing
       summary: UpsertUserDataProcessing
-      description: |-
-        Upsert a user data processing
+      description: Upsert a user data processing
       tags:
         - restricted
       parameters:
-        - $ref: "#/parameters/FiscalCode"
+        - $ref: '#/parameters/FiscalCode'
         - in: body
           name: body
           schema:
-            $ref: "#/definitions/UserDataProcessingChoiceRequest"
+            $ref: '#/definitions/UserDataProcessingChoiceRequest'
           description: The request wrapper of a user data processing choice.
       responses:
-        "200":
+        '200':
           description: UserDataProcessing created
           schema:
-            $ref: "#/definitions/UserDataProcessing"
-        "400":
+            $ref: '#/definitions/UserDataProcessing'
+        '400':
           description: Invalid request.
           schema:
-            $ref: "#/definitions/ProblemJson"
-        "401":
+            $ref: '#/definitions/ProblemJson'
+        '401':
           description: Unauthorized
-        "429":
-          description: Too many requests
-        "409":
+        '409':
           description: Conflict
           schema:
-            $ref: "#/definitions/ProblemJson"
-        "500":
+            $ref: '#/definitions/ProblemJson'
+        '429':
+          description: Too many requests
+        '500':
           description: Server Error
           schema:
-            $ref: "#/definitions/ProblemJson"
-  "/user-data-processing/{fiscal_code}/{choice}":  
+            $ref: '#/definitions/ProblemJson'
+  /user-data-processing/{fiscal_code}/{choice}:
     get:
       operationId: getUserDataProcessing
       summary: GetUserDataProcessing
@@ -328,56 +383,55 @@ paths:
       tags:
         - restricted
       parameters:
-        - $ref: "#/parameters/FiscalCode"
-        - $ref: "#/parameters/UserDataProcessingChoiceParam"
+        - $ref: '#/parameters/FiscalCode'
+        - $ref: '#/parameters/UserDataProcessingChoiceParam'
       responses:
-        "200":
+        '200':
           description: User data processing retrieved
           schema:
-            $ref: "#/definitions/UserDataProcessing"
-        "400":
+            $ref: '#/definitions/UserDataProcessing'
+        '400':
           description: Invalid request.
           schema:
-            $ref: "#/definitions/ProblemJson"
-        "401":
+            $ref: '#/definitions/ProblemJson'
+        '401':
           description: Unauthorized
-        "404":
+        '404':
           description: No message found.
           schema:
-            $ref: "#/definitions/ProblemJson"
-        "429":
+            $ref: '#/definitions/ProblemJson'
+        '429':
           description: Too many requests
     delete:
       operationId: abortUserDataProcessing
       summary: AbortUserDataProcessing
-      description: |-
-        Ask for a request to abort, if present
+      description: Ask for a request to abort, if present
       tags:
         - restricted
       parameters:
-        - $ref: "#/parameters/FiscalCode"
-        - $ref: "#/parameters/UserDataProcessingChoiceParam"
+        - $ref: '#/parameters/FiscalCode'
+        - $ref: '#/parameters/UserDataProcessingChoiceParam'
       responses:
-        "202":
+        '202':
           description: The abort request has been recorded
-        "400":
+        '400':
           description: Invalid request.
           schema:
-            $ref: "#/definitions/ProblemJson"
-        "401":
+            $ref: '#/definitions/ProblemJson'
+        '401':
           description: Unauthorized
-        "404":
+        '404':
           description: Not Found
-        "409":
+        '409':
           description: Conflict
           schema:
-            $ref: "#/definitions/ProblemJson"
-        "429":
+            $ref: '#/definitions/ProblemJson'
+        '429':
           description: Too many requests
-        "500":
+        '500':
           description: Server Error
           schema:
-            $ref: "#/definitions/ProblemJson"
+            $ref: '#/definitions/ProblemJson'
 consumes:
   - application/json
 produces:
@@ -397,8 +451,15 @@ parameters:
     minLength: 16
     required: true
     description: The fiscal code of the user, all upper case.
-    pattern: "[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]"
+    pattern: >-
+      [A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]
     x-example: SPNDNL80R13C555X
+  ServiceId:
+    name: service_id
+    in: path
+    type: string
+    required: true
+    description: The ID of an existing Service.
   PaginationRequest:
     name: cursor
     in: query
@@ -410,97 +471,696 @@ parameters:
     name: choice
     in: path
     type: string
-    enum: [DOWNLOAD, DELETE]
+    enum:
+      - DOWNLOAD
+      - DELETE
     description: A representation of a user data processing choice
     required: true
     x-example: DOWNLOAD
 definitions:
   ExtendedProfile:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/ExtendedProfile"
+    description: |-
+      Describes the citizen's profile, mostly interesting for preferences
+      attributes.
+    type: object
+    properties:
+      email:
+        $ref: '#/definitions/EmailAddress'
+      service_preferences_settings:
+        $ref: '#/definitions/ServicePreferencesSettings'
+      blocked_inbox_or_channels:
+        $ref: '#/definitions/BlockedInboxOrChannels'
+      preferred_languages:
+        $ref: '#/definitions/PreferredLanguages'
+      is_inbox_enabled:
+        $ref: '#/definitions/IsInboxEnabled'
+      accepted_tos_version:
+        $ref: '#/definitions/AcceptedTosVersion'
+      is_webhook_enabled:
+        $ref: '#/definitions/IsWebhookEnabled'
+      is_email_enabled:
+        $ref: '#/definitions/IsEmailEnabled'
+      is_email_validated:
+        $ref: '#/definitions/IsEmailValidated'
+      is_test_profile:
+        $ref: '#/definitions/IsTestProfile'
+      version:
+        type: integer
+    required:
+      - is_email_enabled
+      - is_email_validated
+      - is_inbox_enabled
+      - is_webhook_enabled
+      - service_preferences_settings
+      - version
   MessageResponseWithContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/MessageResponseWithContent"
+    type: object
+    properties:
+      message:
+        $ref: '#/definitions/CreatedMessageWithContent'
+      notification:
+        $ref: '#/definitions/MessageResponseNotificationStatus'
+      status:
+        $ref: '#/definitions/MessageStatusValue'
+    required:
+      - message
   NewMessage:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/NewMessage"
+    type: object
+    properties:
+      time_to_live:
+        $ref: '#/definitions/TimeToLiveSeconds'
+      content:
+        $ref: '#/definitions/MessageContent'
+      default_addresses:
+        type: object
+        description: |-
+          Default addresses for notifying the recipient of the message in case
+          no address for the related channel is set in his profile.
+        properties:
+          email:
+            $ref: '#/definitions/EmailAddress'
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+    required:
+      - content
   NewProfile:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/NewProfile"
+    type: object
+    description: |-
+      Describes a new citizen's profile.
+      Used for profile creation.
+    properties:
+      email:
+        $ref: '#/definitions/EmailAddress'
+      is_email_validated:
+        $ref: '#/definitions/IsEmailValidated'
+      is_test_profile:
+        $ref: '#/definitions/IsTestProfile'
+    required:
+      - is_email_validated
   PaginatedCreatedMessageWithoutContentCollection:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/PaginatedCreatedMessageWithoutContentCollection"
+    description: A paginated collection of messages
+    allOf:
+      - $ref: '#/definitions/CreatedMessageWithoutContentCollection'
+      - $ref: '#/definitions/PaginationResponse'
   PaginatedServiceTupleCollection:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
+    description: A paginated collection of services tuples
+    allOf:
+      - $ref: '#/definitions/ServiceTupleCollection'
+      - $ref: '#/definitions/PaginationResponse'
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/ProblemJson"
+    type: object
+    properties:
+      type:
+        type: string
+        format: uri
+        description: |-
+          An absolute URI that identifies the problem type. When dereferenced,
+          it SHOULD provide human-readable documentation for the problem type
+          (e.g., using HTML).
+        default: about:blank
+        example: https://example.com/problem/constraint-violation
+      title:
+        type: string
+        description: |-
+          A short, summary of the problem type. Written in english and readable
+          for engineers (usually not suited for non technical stakeholders and
+          not localized); example: Service Unavailable
+      status:
+        type: integer
+        format: int32
+        description: >-
+          The HTTP status code generated by the origin server for this
+          occurrence
+
+          of the problem.
+        minimum: 100
+        maximum: 600
+        exclusiveMaximum: true
+        example: 200
+      detail:
+        type: string
+        description: |-
+          A human readable explanation specific to this occurrence of the
+          problem.
+        example: There was an error processing the request
+      instance:
+        type: string
+        format: uri
+        description: >-
+          An absolute URI that identifies the specific occurrence of the
+          problem.
+
+          It may or may not yield further information if dereferenced.
   Profile:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/Profile"
+    type: object
+    description: |-
+      Describes the citizen's profile.
+      Used for profile update.
+    properties:
+      email:
+        $ref: '#/definitions/EmailAddress'
+      service_preferences_settings:
+        $ref: '#/definitions/ServicePreferencesSettings'
+      blocked_inbox_or_channels:
+        $ref: '#/definitions/BlockedInboxOrChannels'
+      preferred_languages:
+        $ref: '#/definitions/PreferredLanguages'
+      is_inbox_enabled:
+        $ref: '#/definitions/IsInboxEnabled'
+      accepted_tos_version:
+        $ref: '#/definitions/AcceptedTosVersion'
+      is_webhook_enabled:
+        $ref: '#/definitions/IsWebhookEnabled'
+      is_email_enabled:
+        $ref: '#/definitions/IsEmailEnabled'
+      version:
+        type: integer
+    required:
+      - version
   ServiceId:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/ServiceId"
+    type: string
+    description: |-
+      The ID of the Service. Equals the subscriptionId of a registered
+      API user.
+    minLength: 1
   ServicePublic:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/ServicePublic"
+    title: Service (public)
+    description: A Service associated to an user's subscription.
+    type: object
+    properties:
+      service_id:
+        $ref: '#/definitions/ServiceId'
+      service_name:
+        type: string
+        description: >-
+          The name of the service. Will be added to the content of sent
+          messages.
+        minLength: 1
+      organization_name:
+        type: string
+        description: |-
+          The organization that runs the service. Will be added to the content
+          of sent messages to identify the sender.
+        minLength: 1
+      department_name:
+        type: string
+        description: |-
+          The department inside the organization that runs the service. Will
+          be added to the content of sent messages.
+        minLength: 1
+      organization_fiscal_code:
+        type: string
+        description: Organization fiscal code.
+        format: OrganizationFiscalCode
+        x-import: '@pagopa/ts-commons/lib/strings'
+        example: '12345678901'
+      available_notification_channels:
+        description: All the notification channels available for a service.
+        type: array
+        items:
+          $ref: '#/definitions/NotificationChannel'
+      version:
+        type: integer
+      service_metadata:
+        type: object
+        description: A set of metadata properties related to this service.
+        properties:
+          description:
+            type: string
+            minLength: 1
+          web_url:
+            type: string
+            minLength: 1
+          app_ios:
+            type: string
+            minLength: 1
+          app_android:
+            type: string
+            minLength: 1
+          tos_url:
+            type: string
+            minLength: 1
+          privacy_url:
+            type: string
+            minLength: 1
+          address:
+            type: string
+            minLength: 1
+          phone:
+            type: string
+            minLength: 1
+          email:
+            type: string
+            minLength: 1
+          pec:
+            type: string
+            minLength: 1
+          cta:
+            type: string
+            minLength: 1
+          token_name:
+            type: string
+            minLength: 1
+          support_url:
+            type: string
+            minLength: 1
+          scope:
+            type: string
+            x-extensible-enum:
+              - NATIONAL
+              - LOCAL
+        required:
+          - scope
+    required:
+      - service_id
+      - service_name
+      - organization_name
+      - department_name
+      - organization_fiscal_code
+      - version
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/EmailAddress"
+    type: string
+    format: email
+    example: foobar@example.com
   BlockedInboxOrChannel:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/BlockedInboxOrChannel"
+    type: string
+    description: |-
+      All notification channels plus the message inbox.
+      These represent all the possible channels a user could block.
+    x-extensible-enum:
+      - EMAIL
+      - INBOX
+      - WEBHOOK
+    example: INBOX
   BlockedInboxOrChannels:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/BlockedInboxOrChannels"
+    type: object
+    additionalProperties:
+      type: array
+      items:
+        $ref: '#/definitions/BlockedInboxOrChannel'
+    description: |-
+      All the notification channels blocked by the user.
+      Each channel is related to a specific service (sender).
   PreferredLanguage:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/PreferredLanguage"
+    type: string
+    x-extensible-enum:
+      - it_IT
+      - en_GB
+      - es_ES
+      - de_DE
+      - fr_FR
+    example: it_IT
   PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/PreferredLanguages"
+    type: array
+    items:
+      $ref: '#/definitions/PreferredLanguage'
+    description: >-
+      Indicates the User's preferred written or spoken languages in order
+
+      of preference. Generally used for selecting a localized User interface.
+      Valid
+
+      values are concatenation of the ISO 639-1 two letter language code, an
+      underscore,
+
+      and the ISO 3166-1 2 letter country code; e.g., 'en_US' specifies the
+      language
+
+      English and country US.
   IsInboxEnabled:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/IsInboxEnabled"
+    type: boolean
+    description: |-
+      True if the recipient of a message wants to store its content for
+      later retrieval.
   IsEmailEnabled:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/IsEmailEnabled"
+    type: boolean
+    description: >-
+      True if the recipient of a message wants to forward the notifications to
+      his email address.
   AcceptedTosVersion:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/AcceptedTosVersion"
+    type: number
+    minimum: 1
+    description: Version of latest terms of service accepted by the user.
   IsWebhookEnabled:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/IsWebhookEnabled"
+    type: boolean
+    description: >-
+      True if the recipient of a message wants to forward the notifications to
+      the default webhook.
   IsEmailValidated:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/IsEmailValidated"
+    type: boolean
+    description: True if the user email has been validated.
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/FiscalCode"
+    type: string
+    description: User's fiscal code.
+    format: FiscalCode
+    x-import: '@pagopa/ts-commons/lib/strings'
+    example: SPNDNL80R13C555X
   TimeToLiveSeconds:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/TimeToLiveSeconds"
+    type: integer
+    default: 3600
+    minimum: 3600
+    maximum: 604800
+    description: |-
+      This parameter specifies for how long (in seconds) the system will
+      try to deliver the message to the channels configured by the user.
+    example: 3600
   Timestamp:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/Timestamp"
+    type: string
+    format: UTCISODateFromString
+    description: A date-time field in ISO-8601 format and UTC timezone.
+    x-import: '@pagopa/ts-commons/lib/dates'
+    example: '2018-10-13T00:00:00.000Z'
   MessageContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/MessageContent"
+    type: object
+    properties:
+      subject:
+        $ref: '#/definitions/MessageSubject'
+      markdown:
+        $ref: '#/definitions/MessageBodyMarkdown'
+      payment_data:
+        $ref: '#/definitions/PaymentData'
+      prescription_data:
+        type: object
+        description: Metadata needed to process medical prescriptions.
+        properties:
+          nre:
+            description: >-
+              The field *Numero ricetta elettronica* identifies the medical
+              prescription at national level.
+            type: string
+            minLength: 15
+            maxLength: 15
+          iup:
+            description: >-
+              The field *Identificativo Unico di Prescrizione* identifies the
+              medical prescription at regional level.
+            type: string
+            minLength: 1
+            maxLength: 16
+          prescriber_fiscal_code:
+            type: string
+            description: Fiscal code of the Doctor that made the prescription.
+            format: FiscalCode
+            x-import: '@pagopa/ts-commons/lib/strings'
+            example: TCNZRO80R13C555Y
+        required:
+          - nre
+      eu_covid_cert:
+        type: object
+        description: Paylod with access token to retrieve a EU Covid Certificate
+        properties:
+          auth_code:
+            type: string
+        required:
+          - auth_code
+      due_date:
+        $ref: '#/definitions/Timestamp'
+    required:
+      - subject
+      - markdown
   MessageSubject:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/MessageSubject"
+    type: string
+    description: |-
+      The (optional) subject of the message - note that only some notification
+      channels support the display of a subject. When a subject is not provided,
+      one gets generated from the client attributes.
+    minLength: 10
+    maxLength: 120
+    example: Welcome new user !
   MessageBodyMarkdown:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/MessageBodyMarkdown"
+    type: string
+    description: |-
+      The full version of the message, in plain text or Markdown format. The
+      content of this field will be delivered to channels that don't have any
+      limit in terms of content size (e.g. email, etc...).
+    minLength: 80
+    maxLength: 10000
+    example: |-
+      # This is a markdown header
+
+      to show how easily markdown can be converted to **HTML**
+
+      Remember: this has to be a long text.
   PaymentData:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/PaymentData"
+    type: object
+    description: Metadata needed to process pagoPA payments.
+    properties:
+      amount:
+        description: >-
+          Amount of payment in euro cent. PagoPA accepts up to 9999999999 euro
+          cents.
+        type: integer
+        minimum: 1
+        maximum: 9999999999
+      notice_number:
+        description: >-
+          The field ["Numero
+          Avviso"](https://pagopa-specifichepagamenti.readthedocs.io/it/latest/_docs/Capitolo7.html#il-numero-avviso-e-larchivio-dei-pagamenti-in-attesa)
+          of pagoPa, needed to identify the payment. Format is `<aux digit
+          (1n)>[<application code> (2n)]<codice IUV (15|17n)>`. See [pagoPa
+          specs](https://www.agid.gov.it/sites/default/files/repository_files/specifiche_attuative_pagamenti_1_3_1_0.pdf)
+          for more info on this field and the IUV.
+        type: string
+        pattern: ^[0123][0-9]{17}$
+      invalid_after_due_date:
+        type: boolean
+        default: false
+    required:
+      - amount
+      - notice_number
   CreatedMessageWithoutContentCollection:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/CreatedMessageWithoutContentCollection"
+    description: A collection of messages
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          $ref: '#/definitions/CreatedMessageWithoutContent'
+    required:
+      - items
   CreatedMessageWithoutContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/CreatedMessageWithoutContent"
+    type: object
+    properties:
+      id:
+        type: string
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+      time_to_live:
+        $ref: '#/definitions/TimeToLiveSeconds'
+      created_at:
+        $ref: '#/definitions/Timestamp'
+      sender_service_id:
+        $ref: '#/definitions/ServiceId'
+    required:
+      - id
+      - fiscal_code
+      - created_at
+      - sender_service_id
   CreatedMessageWithContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/CreatedMessageWithContent"
+    type: object
+    properties:
+      id:
+        type: string
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+      time_to_live:
+        $ref: '#/definitions/TimeToLiveSeconds'
+      created_at:
+        $ref: '#/definitions/Timestamp'
+      content:
+        $ref: '#/definitions/MessageContent'
+      sender_service_id:
+        $ref: '#/definitions/ServiceId'
+    required:
+      - id
+      - fiscal_code
+      - created_at
+      - content
+      - sender_service_id
   MessageResponseNotificationStatus:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/MessageResponseNotificationStatus"
+    type: object
+    properties:
+      email:
+        $ref: '#/definitions/NotificationChannelStatusValue'
+      webhook:
+        $ref: '#/definitions/NotificationChannelStatusValue'
   MessageStatusValue:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/MessageStatusValue"
+    type: string
+    description: >-
+      The processing status of a message.
+
+      "ACCEPTED": the message has been accepted and will be processed for
+      delivery;
+        we'll try to store its content in the user's inbox and notify him on his preferred channels
+      "THROTTLED": a temporary failure caused a retry during the message
+      processing;
+        any notification associated with this message will be delayed for a maximum of 7 days
+      "FAILED": a permanent failure caused the process to exit with an error, no
+      notification will be sent for this message
+
+      "PROCESSED": the message was succesfully processed and is now stored in
+      the user's inbox;
+        we'll try to send a notification for each of the selected channels
+      "REJECTED": either the recipient does not exist, or the sender has been
+      blocked
+    x-extensible-enum:
+      - ACCEPTED
+      - THROTTLED
+      - FAILED
+      - PROCESSED
+      - REJECTED
+    example: ACCEPTED
   ServiceTupleCollection:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/ServiceTupleCollection"
+    description: A collection of services tuples (service and version)
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          description: Service identifier and version used to return list of services.
+          type: object
+          properties:
+            service_id:
+              $ref: '#/definitions/ServiceId'
+            scope:
+              $ref: >-
+                #/definitions/ServicePublic/properties/service_metadata/properties/scope
+            version:
+              type: integer
+          required:
+            - service_id
+            - version
+    required:
+      - items
   PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/PaginationResponse"
+    type: object
+    description: Pagination response parameters.
+    properties:
+      page_size:
+        type: integer
+        minimum: 1
+        description: Number of items returned for each page.
+        example: 2
+      next:
+        type: string
+        description: |-
+          Contains an URL to GET the next results page in the
+          retrieved collection of items.
+        format: uri
+        example: https://example.com/?p=0XXX2
   NotificationChannel:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/NotificationChannel"
+    type: string
+    description: All notification channels.
+    x-extensible-enum:
+      - EMAIL
+      - WEBHOOK
+    example: EMAIL
   NotificationChannelStatusValue:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/NotificationChannelStatusValue"
+    type: string
+    description: >-
+      The status of a notification (one for each channel).
+
+      "SENT": the notification was succesfully sent to the channel (ie. email or
+      push notification)
+
+      "THROTTLED": a temporary failure caused a retry during the notification
+      processing;
+        the notification associated with this channel will be delayed for a maximum of 7 days or until the message expires
+      "EXPIRED": the message expired before the notification could be sent;
+        this means that the maximum message time to live was reached; no notification will be sent to this channel
+      "FAILED": a permanent failure caused the process to exit with an error, no
+      notification will be sent to this channel
+    x-extensible-enum:
+      - SENT
+      - THROTTLED
+      - EXPIRED
+      - FAILED
+    example: SENT
   UserDataProcessing:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/UserDataProcessing"
+    type: object
+    description: A representation of a single user data processing request
+    properties:
+      choice:
+        $ref: '#/definitions/UserDataProcessingChoice'
+      status:
+        $ref: '#/definitions/UserDataProcessingStatus'
+      created_at:
+        $ref: '#/definitions/Timestamp'
+      updated_at:
+        $ref: '#/definitions/Timestamp'
+      version:
+        type: integer
+    required:
+      - choice
+      - status
+      - version
   UserDataProcessingStatus:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/UserDataProcessingStatus"
+    type: string
+    description: The status of a user data processing request
+    enum:
+      - PENDING
+      - WIP
+      - CLOSED
+      - FAILED
+      - ABORTED
+    example: PENDING
   UserDataProcessingChoice:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/UserDataProcessingChoice"
+    type: string
+    description: User's choice to delete or download his own data.
+    enum:
+      - DOWNLOAD
+      - DELETE
+    example: DOWNLOAD
   UserDataProcessingChoiceRequest:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/UserDataProcessingChoiceRequest"
+    type: object
+    description: A request wrapper for User data processing choice
+    properties:
+      choice:
+        $ref: '#/definitions/UserDataProcessingChoice'
+    required:
+      - choice
   IsTestProfile:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/IsTestProfile"
+    type: boolean
+    description: True if the user's profile is only for test purpose.
+    default: false
   ServicePreferencesSettings:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/ServicePreferencesSettings"
+    description: |-
+      Describes the citizen's profile, mostly interesting for preferences
+      attributes.
+    type: object
+    properties:
+      mode:
+        $ref: '#/definitions/ServicesPreferencesMode'
+      version:
+        type: integer
+        minimum: 0
+    required:
+      - mode
+      - version
   ServicesPreferencesMode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/ServicesPreferencesMode"
+    type: string
+    enum:
+      - AUTO
+      - MANUAL
   ServicePreference:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.6.1/openapi/definitions.yaml#/ServicePreference"
- 
+    description: >-
+      Define a set of preferences of a Citizen for a given Service.
+
+      It's needed by Citizens to express how they want Services to get in touch
+      with them.
+    type: object
+    properties:
+      is_email_enabled:
+        type: boolean
+      is_inbox_enabled:
+        type: boolean
+      is_webhook_enabled:
+        type: boolean
+      settings_version:
+        type: integer
+        minimum: 0
+    required:
+      - is_email_enabled
+      - is_inbox_enabled
+      - is_webhook_enabled
+      - settings_version
