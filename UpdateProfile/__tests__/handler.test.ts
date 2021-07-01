@@ -127,13 +127,44 @@ describe("UpdateProfileHandler", () => {
       ...aProfile
     });
 
+    let expectedServicePreferencesSettingsVersion = aServicePreferencesSettings.version + 1;
+
     expect(result.kind).toBe("IResponseSuccessJson");
     if (result.kind === "IResponseSuccessJson") {
       expect(result.value).toEqual(
         expect.objectContaining({
           service_preferences_settings: {
             mode: changedServicePreferencesSettings.mode,
-            version: aServicePreferencesSettings.version + 1
+            version: expectedServicePreferencesSettingsVersion
+          }
+        })
+      );
+    }
+  });
+
+  it("should not increment service_preferences_settings.version if mode has not changed", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some({ ...aRetrievedProfile }))
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: aServicePreferencesSettings
+    });
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual(
+        expect.objectContaining({
+          service_preferences_settings: {
+            mode: aServicePreferencesSettings.mode,
+            version: aServicePreferencesSettings.version
           }
         })
       );
