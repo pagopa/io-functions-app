@@ -34,8 +34,9 @@ export function apiProfileToProfile(
     isWebhookEnabled: apiProfile.is_webhook_enabled,
     preferredLanguages: apiProfile.preferred_languages,
     servicePreferencesSettings:
+      apiProfile.service_preferences_settings === undefined ||
       apiProfile.service_preferences_settings.mode ===
-      ServicesPreferencesModeEnum.LEGACY
+        ServicesPreferencesModeEnum.LEGACY
         ? {
             mode: ServicesPreferencesModeEnum.LEGACY,
             version: 0
