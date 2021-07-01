@@ -32,14 +32,13 @@ import {
   wrapRequestHandler
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { ProfileMiddleware } from "../utils/middlewares/profile";
 import {
   apiProfileToProfile,
   retrievedProfileToExtendedProfile
 } from "../utils/profiles";
-import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 
 /**
  * Type of an UpdateProfile handler.
@@ -106,28 +105,29 @@ export function UpdateProfileHandler(
       profilePayload.service_preferences_settings.mode !==
         existingProfile.servicePreferencesSettings.mode;
 
-    if (servicePreferencesSettingsModeChanged) {
-      // check if user is sending LEGACY as mode
-      if(profilePayload.service_preferences_settings.mode === ServicesPreferencesModeEnum.LEGACY){
-        context.log.warn(
-          `${logPrefix}|REQUESTED_MODE=${profilePayload.service_preferences_settings.mode}|CURRENT_MODE=${existingProfile.servicePreferencesSettings.mode}|RESULT=CONFLICT`
-        );
-        return ResponseErrorConflict(
-          `Mode ${profilePayload.service_preferences_settings.mode} is not valid.`
-        );
-      }
-
-      // tslint:disable-next-line: no-object-mutation
-      profilePayload.service_preferences_settings.version = (Number(
-        existingProfile.servicePreferencesSettings.version
-      ) + 1) as NonNegativeInteger;
+    // check if user is sending LEGACY as mode
+    if (
+      servicePreferencesSettingsModeChanged &&
+      profilePayload.service_preferences_settings.mode ===
+        ServicesPreferencesModeEnum.LEGACY
+    ) {
+      context.log.warn(
+        `${logPrefix}|REQUESTED_MODE=${profilePayload.service_preferences_settings.mode}|CURRENT_MODE=${existingProfile.servicePreferencesSettings.mode}|RESULT=CONFLICT`
+      );
+      return ResponseErrorConflict(
+        `Mode ${profilePayload.service_preferences_settings.mode} is not valid.`
+      );
     }
+
+    const servicePreferencesSettingsVersion = servicePreferencesSettingsModeChanged
+      ? Number(existingProfile.servicePreferencesSettings.version) + 1
+      : existingProfile.servicePreferencesSettings.version;
 
     const profile = apiProfileToProfile(
       profilePayload,
       fiscalCode,
       emailChanged ? false : existingProfile.isEmailValidated,
-      existingProfile.servicePreferencesSettings.version
+      servicePreferencesSettingsVersion
     );
 
     // User inbox and webhook must be enabled after accepting the ToS for the first time

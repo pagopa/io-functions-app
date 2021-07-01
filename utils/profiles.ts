@@ -12,7 +12,6 @@ import {
 import { isObject } from "util";
 
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 
 /**

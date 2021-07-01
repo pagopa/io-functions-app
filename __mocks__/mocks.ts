@@ -46,9 +46,16 @@ export const aNewProfile: NewProfile = {
   is_email_validated: true
 };
 
-export const changedServicePreferencesSettings: Profile["service_preferences_settings"] = {
-  mode: ServicesPreferencesModeEnum.MANUAL,
-  version: 0 as NonNegativeInteger
+export const legacyApiProfileServicePreferencesSettings: Profile["service_preferences_settings"] = {
+  mode: ServicesPreferencesModeEnum.LEGACY
+};
+
+export const autoApiProfileServicePreferencesSettings: Profile["service_preferences_settings"] = {
+  mode: ServicesPreferencesModeEnum.AUTO
+};
+
+export const manualApiProfileServicePreferencesSettings: Profile["service_preferences_settings"] = {
+  mode: ServicesPreferencesModeEnum.MANUAL
 };
 
 export const aProfile: Profile = {
@@ -56,13 +63,23 @@ export const aProfile: Profile = {
   is_email_enabled: true,
   is_inbox_enabled: false,
   is_webhook_enabled: false,
-  service_preferences_settings: changedServicePreferencesSettings,
+  service_preferences_settings: legacyApiProfileServicePreferencesSettings,
   version: 0 as NonNegativeInteger
 };
 
-export const aServicePreferencesSettings: RetrievedProfile["servicePreferencesSettings"] = {
+export const legacyProfileServicePreferencesSettings: RetrievedProfile["servicePreferencesSettings"] = {
+  mode: ServicesPreferencesModeEnum.LEGACY,
+  version: 0
+};
+
+export const autoProfileServicePreferencesSettings: RetrievedProfile["servicePreferencesSettings"] = {
   mode: ServicesPreferencesModeEnum.AUTO,
-  version: 0 as NonNegativeInteger
+  version: 1
+};
+
+export const manualProfileServicePreferencesSettings: RetrievedProfile["servicePreferencesSettings"] = {
+  mode: ServicesPreferencesModeEnum.MANUAL,
+  version: 1
 };
 
 export const aRetrievedProfile: RetrievedProfile = {
@@ -75,7 +92,7 @@ export const aRetrievedProfile: RetrievedProfile = {
   isTestProfile: false,
   isWebhookEnabled: false,
   kind: "IRetrievedProfile",
-  servicePreferencesSettings: aServicePreferencesSettings,
+  servicePreferencesSettings: legacyProfileServicePreferencesSettings,
   version: 0 as NonNegativeInteger
 };
 
@@ -88,7 +105,7 @@ export const aRetrievedProfileWithEmail: RetrievedProfile = {
   isInboxEnabled: false,
   isWebhookEnabled: false,
   kind: "IRetrievedProfile",
-  servicePreferencesSettings: aServicePreferencesSettings,
+  servicePreferencesSettings: legacyProfileServicePreferencesSettings,
   version: 0 as NonNegativeInteger
 };
 
