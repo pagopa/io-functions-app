@@ -178,6 +178,27 @@ describe("UpdateProfileHandler", () => {
     expect(profileModelMock.update).not.toBeCalled();
   });
 
+  it("should return a conflict error if no service_preferences_settings is sent and profile mode is MANUAL", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some({ ...aRetrievedProfile, servicePreferencesSettings: manualProfileServicePreferencesSettings }))
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: undefined
+    });
+
+    expect(result.kind).toBe("IResponseErrorConflict");
+    expect(profileModelMock.findLastVersionByModelId).toBeCalled();
+    expect(profileModelMock.update).not.toBeCalled();
+  });
+
   it("should not increment service_preferences_settings.version if no service_preferences_settings is sent and profile mode is LEGACY", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
@@ -317,6 +338,37 @@ describe("UpdateProfileHandler", () => {
         expect.objectContaining({
           service_preferences_settings: {
             mode: manualProfileServicePreferencesSettings.mode,
+            version: expectedServicePreferencesSettingsVersion
+          }
+        })
+      );
+    }
+  });
+
+  it("should increment service_preferences_settings.version if mode has changed from LEGACY to AUTO", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some({ ...aRetrievedProfile }))
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: autoApiProfileServicePreferencesSettings
+    });
+
+    let expectedServicePreferencesSettingsVersion = legacyProfileServicePreferencesSettings.version + 1;
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual(
+        expect.objectContaining({
+          service_preferences_settings: {
+            mode: autoApiProfileServicePreferencesSettings.mode,
             version: expectedServicePreferencesSettingsVersion
           }
         })

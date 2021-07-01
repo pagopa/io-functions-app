@@ -4,7 +4,7 @@ import { Context } from "@azure/functions";
 import * as df from "durable-functions";
 
 import { isLeft } from "fp-ts/lib/Either";
-import { isNone } from "fp-ts/lib/Option";
+import { fromNullable, isNone } from "fp-ts/lib/Option";
 
 import {
   IResponseErrorConflict,
@@ -99,18 +99,23 @@ export function UpdateProfileHandler(
       profilePayload.email !== undefined &&
       profilePayload.email !== existingProfile.email;
 
-
     // Get servicePreferencesSettings mode from payload or default to LEGACY
-    // tslint:disable-next-line: prettier
-    const requestedServicePreferencesSettingsMode = profilePayload.service_preferences_settings?.mode ?? ServicesPreferencesModeEnum.LEGACY;
+    const requestedServicePreferencesSettingsMode = fromNullable(
+      profilePayload.service_preferences_settings
+    )
+      .map(_ => _.mode)
+      .getOrElse(ServicesPreferencesModeEnum.LEGACY);
 
     // Check if a mode change is requested
-    const servicePreferencesSettingsModeChanged = requestedServicePreferencesSettingsMode !== existingProfile.servicePreferencesSettings.mode;
+    const isServicePreferencesSettingsModeChanged =
+      requestedServicePreferencesSettingsMode !==
+      existingProfile.servicePreferencesSettings.mode;
 
     // return to LEGACY profile from updated ones is forbidden
     if (
-      servicePreferencesSettingsModeChanged &&
-      requestedServicePreferencesSettingsMode === ServicesPreferencesModeEnum.LEGACY
+      isServicePreferencesSettingsModeChanged &&
+      requestedServicePreferencesSettingsMode ===
+        ServicesPreferencesModeEnum.LEGACY
     ) {
       context.log.warn(
         `${logPrefix}|REQUESTED_MODE=${requestedServicePreferencesSettingsMode}|CURRENT_MODE=${existingProfile.servicePreferencesSettings.mode}|RESULT=CONFLICT`
@@ -120,7 +125,7 @@ export function UpdateProfileHandler(
       );
     }
 
-    const servicePreferencesSettingsVersion = servicePreferencesSettingsModeChanged
+    const servicePreferencesSettingsVersion = isServicePreferencesSettingsModeChanged
       ? Number(existingProfile.servicePreferencesSettings.version) + 1
       : existingProfile.servicePreferencesSettings.version;
 
