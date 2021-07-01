@@ -144,17 +144,27 @@ export const GetServicePreferencesHandler = (
         nonLegacyServicePreferences,
         ResponseErrorConflict("Legacy service preferences not allowed")
       )
-      .map(profile => ({
-        documentId: makeServicesPreferencesDocumentId(
-          fiscalCode,
-          serviceId,
-          // tslint:disable-next-line no-useless-cast
-          profile.servicePreferencesSettings.version as NonNegativeInteger
-        ),
-        fiscalCode,
-        mode: profile.servicePreferencesSettings.mode,
-        version: profile.servicePreferencesSettings.version
-      }))
+      .chain(profile =>
+        te
+          .fromEither(
+            NonNegativeInteger.decode(
+              profile.servicePreferencesSettings.version
+            )
+          )
+          .mapLeft(l =>
+            ResponseErrorConflict("Legacy service preferences not allowed")
+          )
+          .map(version => ({
+            documentId: makeServicesPreferencesDocumentId(
+              fiscalCode,
+              serviceId,
+              version
+            ),
+            fiscalCode,
+            mode: profile.servicePreferencesSettings.mode,
+            version
+          }))
+      )
       .chain(getUserServicePreferencesOrDefault(servicePreferencesModel))
       .fold<IGetServicePreferencesHandlerResult>(identity, ResponseSuccessJson)
       .run();
