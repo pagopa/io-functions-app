@@ -6,6 +6,7 @@ import { IsEmailValidated } from "@pagopa/io-functions-commons/dist/generated/de
 import { Profile as ApiProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/Profile";
 import {
   Profile,
+  PROFILE_SERVICE_PREFERENCES_SETTINGS_LEGACY_VERSION,
   RetrievedProfile
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
 
@@ -40,7 +41,7 @@ export function apiProfileToProfile(
         ServicesPreferencesModeEnum.LEGACY
         ? {
             mode: ServicesPreferencesModeEnum.LEGACY,
-            version: -1
+            version: PROFILE_SERVICE_PREFERENCES_SETTINGS_LEGACY_VERSION
           }
         : {
             mode: apiProfile.service_preferences_settings.mode,
