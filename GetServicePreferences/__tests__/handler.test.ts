@@ -2,7 +2,11 @@
 import { Context } from "@azure/functions";
 import { none, some } from "fp-ts/lib/Option";
 import { taskEither } from "fp-ts/lib/TaskEither";
-import { aFiscalCode, aRetrievedProfile } from "../../__mocks__/mocks";
+import {
+  aFiscalCode,
+  aLegacyServicePreferencesSettings,
+  aRetrievedProfile
+} from "../../__mocks__/mocks";
 import { context } from "../../__mocks__/durable-functions";
 import {
   aRetrievedServicePreference,
@@ -80,7 +84,7 @@ describe("GetServicePreferences", () => {
         is_email_enabled: true,
         is_inbox_enabled: true,
         is_webhook_enabled: true,
-        settings_version: 0
+        settings_version: 1
       }
     });
   });
@@ -189,6 +193,42 @@ describe("GetServicePreferences", () => {
 
     expect(response).toMatchObject({
       kind: "IResponseErrorQuery"
+    });
+
+    expect(servicePreferenceModelMock.find).not.toHaveBeenCalled();
+  });
+
+  it("should return IResponseErrorConflict if profile in in LEGACY mode", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() => {
+        return taskEither.of(
+          some({
+            ...aRetrievedProfile,
+            servicePreferencesSettings: aLegacyServicePreferencesSettings
+          })
+        );
+      })
+    };
+
+    const servicePreferenceModelMock = {
+      find: jest.fn(_ => {
+        return taskEither.fromEither(left({} as CosmosErrors));
+      })
+    };
+
+    const getServicePreferencesHandler = GetServicePreferencesHandler(
+      profileModelMock as any,
+      servicePreferenceModelMock as any
+    );
+
+    const response = await getServicePreferencesHandler(
+      // (context as any) as Context,
+      aFiscalCode,
+      aServiceId
+    );
+
+    expect(response).toMatchObject({
+      kind: "IResponseErrorConflict"
     });
 
     expect(servicePreferenceModelMock.find).not.toHaveBeenCalled();

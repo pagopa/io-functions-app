@@ -1,4 +1,6 @@
 import { ServicePreference } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePreference";
+import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
+import { Profile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { RetrievedServicePreference } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
 import { NonNegativeInteger } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/numbers";
 
@@ -49,3 +51,12 @@ export const toDefaultEnabledUserServicePreference = (
 export const toDefaultDisabledUserServicePreference = (
   version: NonNegativeInteger
 ): ServicePreference => toUserServicePreference(false, false, false, version);
+
+export const nonLegacyServicePreferences = (profile: Profile): boolean => {
+  return (
+    profile.servicePreferencesSettings.mode ===
+      ServicesPreferencesModeEnum.AUTO ||
+    profile.servicePreferencesSettings.mode ===
+      ServicesPreferencesModeEnum.MANUAL
+  );
+};

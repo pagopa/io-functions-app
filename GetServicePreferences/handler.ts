@@ -19,6 +19,7 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/response";
 
 import {
+  Profile,
   ProfileModel,
   RetrievedProfile
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
@@ -28,27 +29,29 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
 import {
+  IResponseErrorConflict,
   IResponseErrorNotFound,
   IResponseSuccessJson,
+  ResponseErrorConflict,
   ResponseErrorNotFound,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import {
+  nonLegacyServicePreferences,
   toDefaultDisabledUserServicePreference,
   toDefaultEnabledUserServicePreference,
   toUserServicePreferenceFromModel
 } from "../utils/service_preferences";
 
-import { ExtendedProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/ExtendedProfile";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { NonNegativeInteger } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/strings";
 import { identity } from "fp-ts/lib/function";
-import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 
 type IGetServicePreferencesHandlerResult =
   | IResponseSuccessJson<ServicePreference>
   | IResponseErrorNotFound
+  | IResponseErrorConflict
   | IResponseErrorQuery;
 
 /**
@@ -69,17 +72,15 @@ type IGetServicePreferencesHandler = (
  */
 const getProfileOrErrorResponse = (
   maybeProfile: o.Option<RetrievedProfile>
-): te.TaskEither<IResponseErrorNotFound, ExtendedProfile> =>
-  te
-    .fromEither(
-      e.fromOption(
-        ResponseErrorNotFound(
-          "Profile not found",
-          "The profile you requested was not found in the system."
-        )
-      )(maybeProfile)
-    )
-    .map(retrievedProfileToExtendedProfile);
+): te.TaskEither<IResponseErrorNotFound, Profile> =>
+  te.fromEither(
+    e.fromOption(
+      ResponseErrorNotFound(
+        "Profile not found",
+        "The profile you requested was not found in the system."
+      )
+    )(maybeProfile)
+  );
 
 /**
  * Return a function that returns the service preference for the
@@ -92,7 +93,9 @@ const getProfileOrErrorResponse = (
  */
 export declare type getUserServicePreferencesT = (params: {
   readonly documentId: NonEmptyString;
-  readonly mode: ServicesPreferencesModeEnum;
+  readonly mode:
+    | ServicesPreferencesModeEnum.AUTO
+    | ServicesPreferencesModeEnum.MANUAL;
   readonly version: NonNegativeInteger;
   readonly fiscalCode: FiscalCode;
 }) => te.TaskEither<IResponseErrorQuery, ServicePreference>;
@@ -108,10 +111,15 @@ const getUserServicePreferencesOrDefault = (
       )
     )
     .map(maybeServicePref =>
-      maybeServicePref.fold<ServicePreference>(
-        mode === ServicesPreferencesModeEnum.AUTO
-          ? toDefaultEnabledUserServicePreference(version)
-          : toDefaultDisabledUserServicePreference(version),
+      maybeServicePref.foldL<ServicePreference>(
+        () => {
+          switch (mode) {
+            case ServicesPreferencesModeEnum.AUTO:
+              return toDefaultEnabledUserServicePreference(version);
+            case ServicesPreferencesModeEnum.MANUAL:
+              return toDefaultDisabledUserServicePreference(version);
+          }
+        },
         pref => toUserServicePreferenceFromModel(pref)
       )
     );
@@ -126,19 +134,26 @@ export const GetServicePreferencesHandler = (
   return async (fiscalCode, serviceId) => {
     const p = profileModels
       .findLastVersionByModelId([fiscalCode])
-      .mapLeft<IResponseErrorQuery | IResponseErrorNotFound>(failure =>
+      .mapLeft<
+        IResponseErrorQuery | IResponseErrorNotFound | IResponseErrorConflict
+      >(failure =>
         ResponseErrorQuery("Error while retrieving the profile", failure)
       )
       .chain(getProfileOrErrorResponse)
+      .filterOrElse(
+        nonLegacyServicePreferences,
+        ResponseErrorConflict("Legacy service preferences not allowed")
+      )
       .map(profile => ({
         documentId: makeServicesPreferencesDocumentId(
           fiscalCode,
           serviceId,
-          profile.service_preferences_settings.version
+          // tslint:disable-next-line no-useless-cast
+          profile.servicePreferencesSettings.version as NonNegativeInteger
         ),
         fiscalCode,
-        mode: profile.service_preferences_settings.mode,
-        version: profile.service_preferences_settings.version
+        mode: profile.servicePreferencesSettings.mode,
+        version: profile.servicePreferencesSettings.version
       }))
       .chain(getUserServicePreferencesOrDefault(servicePreferencesModel))
       .fold<IGetServicePreferencesHandlerResult>(identity, ResponseSuccessJson);

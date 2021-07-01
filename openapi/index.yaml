@@ -310,6 +310,14 @@ paths:
           description: Profile or Service not found
           schema:
             $ref: '#/definitions/ProblemJson'
+        '409':
+          description: >-
+            Conflict. Either the provided preference setting version is not
+            consistent with the current version stored in the Profile
+
+            or the Profile is not in the correct preference mode.
+          schema:
+            $ref: '#/definitions/ProblemJson'
         '429':
           description: Too many requests
   /email-validation-process/{fiscal_code}:
@@ -1131,15 +1139,12 @@ definitions:
     properties:
       mode:
         $ref: '#/definitions/ServicesPreferencesMode'
-      version:
-        type: integer
-        minimum: 0
     required:
       - mode
-      - version
   ServicesPreferencesMode:
     type: string
     enum:
+      - LEGACY
       - AUTO
       - MANUAL
   ServicePreference:
