@@ -12,6 +12,8 @@ import {
 import { isObject } from "util";
 
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 
 /**
  * Converts a ApiProfile in a Profile model
@@ -19,7 +21,8 @@ import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definiti
 export function apiProfileToProfile(
   apiProfile: ApiProfile,
   fiscalCode: FiscalCode,
-  isEmailValidated: IsEmailValidated
+  isEmailValidated: IsEmailValidated,
+  servicePreferencesSettingsVersion: number
 ): Profile {
   return {
     acceptedTosVersion: apiProfile.accepted_tos_version,
@@ -31,7 +34,17 @@ export function apiProfileToProfile(
     isInboxEnabled: apiProfile.is_inbox_enabled,
     isWebhookEnabled: apiProfile.is_webhook_enabled,
     preferredLanguages: apiProfile.preferred_languages,
-    servicePreferencesSettings: apiProfile.service_preferences_settings
+    servicePreferencesSettings:
+      apiProfile.service_preferences_settings.mode ===
+      ServicesPreferencesModeEnum.LEGACY
+        ? {
+            mode: ServicesPreferencesModeEnum.LEGACY,
+            version: 0
+          }
+        : {
+            mode: apiProfile.service_preferences_settings.mode,
+            version: servicePreferencesSettingsVersion
+          }
   };
 }
 

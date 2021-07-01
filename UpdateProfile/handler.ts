@@ -100,7 +100,8 @@ export function UpdateProfileHandler(
     const profile = apiProfileToProfile(
       profilePayload,
       fiscalCode,
-      emailChanged ? false : existingProfile.isEmailValidated
+      emailChanged ? false : existingProfile.isEmailValidated,
+      existingProfile.servicePreferencesSettings.version
     );
 
     // User inbox and webhook must be enabled after accepting the ToS for the first time
