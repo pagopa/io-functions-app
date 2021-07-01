@@ -495,10 +495,10 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/context-base/-/context-base-0.10.2.tgz#55bea904b2b91aa8a8675df9eaba5961bddb1def"
   integrity sha512-hZNKjKOYsckoOEgBziGMnBcX0M7EtstnCmwz5jZUOUYwlZ+/xxX6z3jPu1XVO2Jivk0eLfuP9GP+vFD49CMetw==
 
-"@pagopa/io-functions-commons@^20.6.4":
-  version "20.6.4"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-20.6.4.tgz#76d24d302bce2f6352e9c05c5cc43c42f18e688b"
-  integrity sha512-lv4V0is6hXO1jSGq/Ggktnndq1S8e4RFyh2QDKS1Hl+aoOWMEIyHbTCX5kPUsQq94cA3lNDNqe+1IvX3OtfFNw==
+"@pagopa/io-functions-commons@^20.6.5":
+  version "20.6.5"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-20.6.5.tgz#ca57a1263d4951eccb26cab124d24154e001c2a3"
+  integrity sha512-1D9pM8nRaho0jO0cQBd36/Ar3FH4lCBAj1433rzz5nck+9AnG2tRtn/sav23BaLQV/BRHvgDCaJvZ3NNxQJQ7w==
   dependencies:
     "@azure/cosmos" "^3.11.5"
     "@pagopa/ts-commons" "^9.5.1"

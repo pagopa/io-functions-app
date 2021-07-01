@@ -54,7 +54,7 @@
   "dependencies": {
     "@azure/cosmos": "^3.7.2",
     "@azure/storage-queue": "^12.4.0",
-    "@pagopa/io-functions-commons": "^20.6.4",
+    "@pagopa/io-functions-commons": "^20.6.5",
     "@pagopa/ts-commons": "^9.4.0",
     "abort-controller": "^3.0.0",
     "applicationinsights": "^1.7.4",

@@ -39,6 +39,7 @@ import {
   apiProfileToProfile,
   retrievedProfileToExtendedProfile
 } from "../utils/profiles";
+import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 
 /**
  * Type of an UpdateProfile handler.
@@ -106,6 +107,16 @@ export function UpdateProfileHandler(
         existingProfile.servicePreferencesSettings.mode;
 
     if (servicePreferencesSettingsModeChanged) {
+      // check if user is sending LEGACY as mode
+      if(profilePayload.service_preferences_settings.mode === ServicesPreferencesModeEnum.LEGACY){
+        context.log.warn(
+          `${logPrefix}|REQUESTED_MODE=${profilePayload.service_preferences_settings.mode}|CURRENT_MODE=${existingProfile.servicePreferencesSettings.mode}|RESULT=CONFLICT`
+        );
+        return ResponseErrorConflict(
+          `Mode ${profilePayload.service_preferences_settings.mode} is not valid.`
+        );
+      }
+
       // tslint:disable-next-line: no-object-mutation
       profilePayload.service_preferences_settings.version = (Number(
         existingProfile.servicePreferencesSettings.version
