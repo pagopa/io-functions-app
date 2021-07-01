@@ -99,23 +99,24 @@ export function UpdateProfileHandler(
       profilePayload.email !== undefined &&
       profilePayload.email !== existingProfile.email;
 
-    // Check if servicePreferencesSettings mode changed
-    const servicePreferencesSettingsModeChanged =
-      profilePayload.service_preferences_settings !== undefined &&
-      profilePayload.service_preferences_settings.mode !==
-        existingProfile.servicePreferencesSettings.mode;
+
+    // Get servicePreferencesSettings mode from payload or default to LEGACY
+    // tslint:disable-next-line: prettier
+    const requestedServicePreferencesSettingsMode = profilePayload.service_preferences_settings?.mode ?? ServicesPreferencesModeEnum.LEGACY;
+
+    // Check if a mode change is requested
+    const servicePreferencesSettingsModeChanged = requestedServicePreferencesSettingsMode !== existingProfile.servicePreferencesSettings.mode;
 
     // return to LEGACY profile from updated ones is forbidden
     if (
       servicePreferencesSettingsModeChanged &&
-      profilePayload.service_preferences_settings.mode ===
-        ServicesPreferencesModeEnum.LEGACY
+      requestedServicePreferencesSettingsMode === ServicesPreferencesModeEnum.LEGACY
     ) {
       context.log.warn(
-        `${logPrefix}|REQUESTED_MODE=${profilePayload.service_preferences_settings.mode}|CURRENT_MODE=${existingProfile.servicePreferencesSettings.mode}|RESULT=CONFLICT`
+        `${logPrefix}|REQUESTED_MODE=${requestedServicePreferencesSettingsMode}|CURRENT_MODE=${existingProfile.servicePreferencesSettings.mode}|RESULT=CONFLICT`
       );
       return ResponseErrorConflict(
-        `Mode ${profilePayload.service_preferences_settings.mode} is not valid.`
+        `Mode ${requestedServicePreferencesSettingsMode} is not valid.`
       );
     }
 
