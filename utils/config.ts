@@ -10,6 +10,7 @@ import * as t from "io-ts";
 
 import { MailerConfig } from "@pagopa/io-functions-commons/dist/src/mailer";
 
+import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
@@ -75,6 +76,8 @@ export const IConfig = t.intersection([
 
     SPID_LOGS_PUBLIC_KEY: NonEmptyString,
     SUBSCRIPTIONS_FEED_TABLE: NonEmptyString,
+
+    EMAIL_MODE_SWITCH_LIMIT_DATE: UTCISODateFromString,
 
     IS_CASHBACK_ENABLED: t.boolean,
 
