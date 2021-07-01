@@ -26,6 +26,10 @@ afterEach(() => {
   clock = clock.uninstall();
 });
 
+const aTestProfileWithEmailDisabled = {
+  ...aRetrievedProfile,
+  isEmailEnabled: false
+};
 describe("CreateProfileHandler", () => {
   it("should return a query error when an error occurs creating the new profile", async () => {
     const profileModelMock = {
@@ -59,6 +63,28 @@ describe("CreateProfileHandler", () => {
     expect(result.kind).toBe("IResponseSuccessJson");
     if (result.kind === "IResponseSuccessJson") {
       expect(result.value).toEqual(aExtendedProfile);
+    }
+  });
+
+  it("should return the created profile with is_email_enabled set to false", async () => {
+    const profileModelMock = {
+      create: jest.fn(() => taskEither.of(aTestProfileWithEmailDisabled))
+    };
+
+    const createProfileHandler = CreateProfileHandler(profileModelMock as any);
+
+    const result = await createProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      aNewProfile
+    );
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual({
+        ...aExtendedProfile,
+        is_email_enabled: false
+      });
     }
   });
 

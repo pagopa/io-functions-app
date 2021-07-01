@@ -62,7 +62,7 @@ export function CreateProfileHandler(
     const profile: Profile = {
       email: createProfilePayload.email,
       fiscalCode,
-      isEmailEnabled: true,
+      isEmailEnabled: false,
       isEmailValidated: createProfilePayload.is_email_validated,
       isInboxEnabled: false,
       isTestProfile: createProfilePayload.is_test_profile,
