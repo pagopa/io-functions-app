@@ -4,8 +4,13 @@ import { none, some } from "fp-ts/lib/Option";
 import { taskEither } from "fp-ts/lib/TaskEither";
 import {
   aFiscalCode,
-  aLegacyServicePreferencesSettings,
-  aRetrievedProfile
+  legacyProfileServicePreferencesSettings,
+  aRetrievedProfile,
+  aProfile,
+  aRetrievedProfileWithEmail,
+  autoProfileServicePreferencesSettings,
+  manualApiProfileServicePreferencesSettings,
+  manualProfileServicePreferencesSettings
 } from "../../__mocks__/mocks";
 import { context } from "../../__mocks__/durable-functions";
 import {
@@ -19,11 +24,16 @@ import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { left } from "fp-ts/lib/Either";
 import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 
+const aRetrievedProfileInValidState = {
+  ...aRetrievedProfileWithEmail,
+  servicePreferencesSettings: autoProfileServicePreferencesSettings
+};
+
 describe("GetServicePreferences", () => {
   it("should return existing service preference for user", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(some(aRetrievedProfile));
+        return taskEither.of(some(aRetrievedProfileInValidState));
       })
     };
 
@@ -57,7 +67,7 @@ describe("GetServicePreferences", () => {
   it("should return default ENABLED preferences if no service preference is found for user and mode is AUTO", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(some(aRetrievedProfile));
+        return taskEither.of(some(aRetrievedProfileInValidState));
       })
     };
 
@@ -84,7 +94,7 @@ describe("GetServicePreferences", () => {
         is_email_enabled: true,
         is_inbox_enabled: true,
         is_webhook_enabled: true,
-        settings_version: 1
+        settings_version: 0
       }
     });
   });
@@ -94,11 +104,8 @@ describe("GetServicePreferences", () => {
       findLastVersionByModelId: jest.fn(() => {
         return taskEither.of(
           some({
-            ...aRetrievedProfile,
-            servicePreferencesSettings: {
-              mode: ServicesPreferencesModeEnum.MANUAL,
-              version: 0 as NonNegativeInteger
-            }
+            ...aRetrievedProfileInValidState,
+            servicePreferencesSettings: manualProfileServicePreferencesSettings
           })
         );
       })
@@ -127,7 +134,7 @@ describe("GetServicePreferences", () => {
         is_email_enabled: false,
         is_inbox_enabled: false,
         is_webhook_enabled: false,
-        settings_version: 0
+        settings_version: 1
       }
     });
   });
@@ -198,13 +205,13 @@ describe("GetServicePreferences", () => {
     expect(servicePreferenceModelMock.find).not.toHaveBeenCalled();
   });
 
-  it("should return IResponseErrorConflict if profile in in LEGACY mode", async () => {
+  it("should return IResponseErrorConflict if profile is in LEGACY mode", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
         return taskEither.of(
           some({
             ...aRetrievedProfile,
-            servicePreferencesSettings: aLegacyServicePreferencesSettings
+            servicePreferencesSettings: legacyProfileServicePreferencesSettings
           })
         );
       })
@@ -237,7 +244,7 @@ describe("GetServicePreferences", () => {
   it("should return IResponseErrorQuery if service preference model raise an error", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(some(aRetrievedProfile));
+        return taskEither.of(some(aRetrievedProfileInValidState));
       })
     };
 
