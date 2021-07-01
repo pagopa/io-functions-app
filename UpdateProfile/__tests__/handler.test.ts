@@ -12,7 +12,13 @@ import {
   aEmailChanged,
   aFiscalCode,
   aProfile,
-  aRetrievedProfile
+  aRetrievedProfile,
+  legacyApiProfileServicePreferencesSettings,
+  manualApiProfileServicePreferencesSettings,
+  autoApiProfileServicePreferencesSettings,
+  legacyProfileServicePreferencesSettings,
+  manualProfileServicePreferencesSettings,
+  autoProfileServicePreferencesSettings,
 } from "../../__mocks__/mocks";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../../UpsertedProfileOrchestrator/handler";
 import { UpdateProfileHandler } from "../handler";
@@ -104,6 +110,329 @@ describe("UpdateProfileHandler", () => {
         expect.objectContaining({
           email: aEmailChanged,
           is_email_validated: false
+        })
+      );
+    }
+  });
+
+  it("should return a conflict error if mode changes from AUTO to LEGACY", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some({ ...aRetrievedProfile, servicePreferencesSettings: autoProfileServicePreferencesSettings }))
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: legacyApiProfileServicePreferencesSettings
+    });
+
+    expect(result.kind).toBe("IResponseErrorConflict");
+    expect(profileModelMock.findLastVersionByModelId).toBeCalled();
+    expect(profileModelMock.update).not.toBeCalled();
+  });
+
+  it("should return a conflict error if mode changes from MANUAL to LEGACY", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some({ ...aRetrievedProfile, servicePreferencesSettings: manualProfileServicePreferencesSettings }))
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: legacyApiProfileServicePreferencesSettings
+    });
+
+    expect(result.kind).toBe("IResponseErrorConflict");
+    expect(profileModelMock.findLastVersionByModelId).toBeCalled();
+    expect(profileModelMock.update).not.toBeCalled();
+  });
+
+  it("should return a conflict error if no service_preferences_settings is sent and profile mode is AUTO", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some({ ...aRetrievedProfile, servicePreferencesSettings: autoProfileServicePreferencesSettings }))
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: undefined
+    });
+
+    expect(result.kind).toBe("IResponseErrorConflict");
+    expect(profileModelMock.findLastVersionByModelId).toBeCalled();
+    expect(profileModelMock.update).not.toBeCalled();
+  });
+
+  it("should return a conflict error if no service_preferences_settings is sent and profile mode is MANUAL", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some({ ...aRetrievedProfile, servicePreferencesSettings: manualProfileServicePreferencesSettings }))
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: undefined
+    });
+
+    expect(result.kind).toBe("IResponseErrorConflict");
+    expect(profileModelMock.findLastVersionByModelId).toBeCalled();
+    expect(profileModelMock.update).not.toBeCalled();
+  });
+
+  it("should not increment service_preferences_settings.version if no service_preferences_settings is sent and profile mode is LEGACY", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some({ ...aRetrievedProfile }))
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: undefined
+    });
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual(
+        expect.objectContaining({
+          service_preferences_settings: {
+            mode: legacyProfileServicePreferencesSettings.mode,
+            version: legacyProfileServicePreferencesSettings.version
+          }
+        })
+      );
+    }
+  });
+
+  it("should not increment service_preferences_settings.version if mode remains LEGACY", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some({ ...aRetrievedProfile }))
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile
+    });
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual(
+        expect.objectContaining({
+          service_preferences_settings: {
+            mode: legacyProfileServicePreferencesSettings.mode,
+            version: legacyProfileServicePreferencesSettings.version
+          }
+        })
+      );
+    }
+  });
+
+  it("should not increment service_preferences_settings.version if mode remains AUTO", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some({ ...aRetrievedProfile, servicePreferencesSettings: autoProfileServicePreferencesSettings }))
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: autoApiProfileServicePreferencesSettings
+    });
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual(
+        expect.objectContaining({
+          service_preferences_settings: {
+            mode: autoProfileServicePreferencesSettings.mode,
+            version: autoProfileServicePreferencesSettings.version
+          }
+        })
+      );
+    }
+  });
+
+  it("should not increment service_preferences_settings.version if mode remains MANUAL", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some({ ...aRetrievedProfile, servicePreferencesSettings: manualProfileServicePreferencesSettings }))
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: manualApiProfileServicePreferencesSettings
+    });
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual(
+        expect.objectContaining({
+          service_preferences_settings: {
+            mode: manualProfileServicePreferencesSettings.mode,
+            version: manualProfileServicePreferencesSettings.version
+          }
+        })
+      );
+    }
+  });
+
+  it("should increment service_preferences_settings.version if mode has changed from LEGACY to MANUAL", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some({ ...aRetrievedProfile }))
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: manualApiProfileServicePreferencesSettings
+    });
+
+    let expectedServicePreferencesSettingsVersion = legacyProfileServicePreferencesSettings.version + 1;
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual(
+        expect.objectContaining({
+          service_preferences_settings: {
+            mode: manualProfileServicePreferencesSettings.mode,
+            version: expectedServicePreferencesSettingsVersion
+          }
+        })
+      );
+    }
+  });
+
+  it("should increment service_preferences_settings.version if mode has changed from LEGACY to AUTO", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some({ ...aRetrievedProfile }))
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: autoApiProfileServicePreferencesSettings
+    });
+
+    let expectedServicePreferencesSettingsVersion = legacyProfileServicePreferencesSettings.version + 1;
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual(
+        expect.objectContaining({
+          service_preferences_settings: {
+            mode: autoApiProfileServicePreferencesSettings.mode,
+            version: expectedServicePreferencesSettingsVersion
+          }
+        })
+      );
+    }
+  });
+
+  it("should increment service_preferences_settings.version if mode has changed from AUTO to MANUAL", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some({ ...aRetrievedProfile, servicePreferencesSettings: autoProfileServicePreferencesSettings }))
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: manualApiProfileServicePreferencesSettings
+    });
+
+    let expectedServicePreferencesSettingsVersion = autoProfileServicePreferencesSettings.version + 1;
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual(
+        expect.objectContaining({
+          service_preferences_settings: {
+            mode: manualProfileServicePreferencesSettings.mode,
+            version: expectedServicePreferencesSettingsVersion
+          }
+        })
+      );
+    }
+  });
+
+  it("should increment service_preferences_settings.version if mode has changed from MANUAL to AUTO", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some({ ...aRetrievedProfile, servicePreferencesSettings: manualProfileServicePreferencesSettings }))
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: autoApiProfileServicePreferencesSettings
+    });
+
+    let expectedServicePreferencesSettingsVersion = manualProfileServicePreferencesSettings.version + 1;
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual(
+        expect.objectContaining({
+          service_preferences_settings: {
+            mode: autoProfileServicePreferencesSettings.mode,
+            version: expectedServicePreferencesSettingsVersion
+          }
         })
       );
     }

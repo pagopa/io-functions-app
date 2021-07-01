@@ -6,12 +6,15 @@ import { IsEmailValidated } from "@pagopa/io-functions-commons/dist/generated/de
 import { Profile as ApiProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/Profile";
 import {
   Profile,
+  PROFILE_SERVICE_PREFERENCES_SETTINGS_LEGACY_VERSION,
   RetrievedProfile
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
 
 import { isObject } from "util";
 
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
+import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 
 /**
  * Converts a ApiProfile in a Profile model
@@ -19,7 +22,8 @@ import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definiti
 export function apiProfileToProfile(
   apiProfile: ApiProfile,
   fiscalCode: FiscalCode,
-  isEmailValidated: IsEmailValidated
+  isEmailValidated: IsEmailValidated,
+  servicePreferencesSettingsVersion: number
 ): Profile {
   return {
     acceptedTosVersion: apiProfile.accepted_tos_version,
@@ -30,7 +34,19 @@ export function apiProfileToProfile(
     isEmailValidated,
     isInboxEnabled: apiProfile.is_inbox_enabled,
     isWebhookEnabled: apiProfile.is_webhook_enabled,
-    preferredLanguages: apiProfile.preferred_languages
+    preferredLanguages: apiProfile.preferred_languages,
+    servicePreferencesSettings:
+      apiProfile.service_preferences_settings === undefined ||
+      apiProfile.service_preferences_settings.mode ===
+        ServicesPreferencesModeEnum.LEGACY
+        ? {
+            mode: ServicesPreferencesModeEnum.LEGACY,
+            version: PROFILE_SERVICE_PREFERENCES_SETTINGS_LEGACY_VERSION
+          }
+        : {
+            mode: apiProfile.service_preferences_settings.mode,
+            version: servicePreferencesSettingsVersion as NonNegativeInteger
+          }
   };
 }
 
@@ -50,6 +66,7 @@ export function retrievedProfileToExtendedProfile(
     is_test_profile: profile.isTestProfile === true,
     is_webhook_enabled: profile.isWebhookEnabled === true,
     preferred_languages: profile.preferredLanguages,
+    service_preferences_settings: profile.servicePreferencesSettings,
     version: profile.version
   };
 }
