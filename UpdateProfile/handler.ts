@@ -32,6 +32,7 @@ import {
   wrapRequestHandler
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { ProfileMiddleware } from "../utils/middlewares/profile";
 import {
@@ -55,6 +56,7 @@ type IUpdateProfileHandler = (
   | IResponseErrorInternal
 >;
 
+// tslint:disable-next-line: cognitive-complexity
 export function UpdateProfileHandler(
   profileModel: ProfileModel
 ): IUpdateProfileHandler {
@@ -96,6 +98,19 @@ export function UpdateProfileHandler(
     const emailChanged =
       profilePayload.email !== undefined &&
       profilePayload.email !== existingProfile.email;
+
+    // Check if servicePreferencesSettings mode changed
+    const servicePreferencesSettingsModeChanged =
+      profilePayload.service_preferences_settings !== undefined &&
+      profilePayload.service_preferences_settings.mode !==
+        existingProfile.servicePreferencesSettings.mode;
+
+    if (servicePreferencesSettingsModeChanged) {
+      // tslint:disable-next-line: no-object-mutation
+      profilePayload.service_preferences_settings.version = (Number(
+        existingProfile.servicePreferencesSettings.version
+      ) + 1) as NonNegativeInteger;
+    }
 
     const profile = apiProfileToProfile(
       profilePayload,

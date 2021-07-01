@@ -46,11 +46,17 @@ export const aNewProfile: NewProfile = {
   is_email_validated: true
 };
 
+export const changedServicePreferencesSettings: Profile["service_preferences_settings"] = {
+  mode: ServicesPreferencesModeEnum.MANUAL,
+  version: 0 as NonNegativeInteger
+};
+
 export const aProfile: Profile = {
   email: aEmail,
   is_email_enabled: true,
   is_inbox_enabled: false,
   is_webhook_enabled: false,
+  service_preferences_settings: changedServicePreferencesSettings,
   version: 0 as NonNegativeInteger
 };
 

@@ -12,10 +12,13 @@ import {
   aEmailChanged,
   aFiscalCode,
   aProfile,
-  aRetrievedProfile
+  aRetrievedProfile,
+  aServicePreferencesSettings,
+  changedServicePreferencesSettings
 } from "../../__mocks__/mocks";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../../UpsertedProfileOrchestrator/handler";
 import { UpdateProfileHandler } from "../handler";
+import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 
 // tslint:disable-next-line: no-let
 let clock: any;
@@ -104,6 +107,34 @@ describe("UpdateProfileHandler", () => {
         expect.objectContaining({
           email: aEmailChanged,
           is_email_validated: false
+        })
+      );
+    }
+  });
+
+  it("should increment service_preferences_settings.version if mode has changed", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some({ ...aRetrievedProfile }))
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile
+    });
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual(
+        expect.objectContaining({
+          service_preferences_settings: {
+            mode: changedServicePreferencesSettings.mode,
+            version: aServicePreferencesSettings.version + 1
+          }
         })
       );
     }
