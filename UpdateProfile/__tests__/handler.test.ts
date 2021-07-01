@@ -132,6 +132,8 @@ describe("UpdateProfileHandler", () => {
     });
 
     expect(result.kind).toBe("IResponseErrorConflict");
+    expect(profileModelMock.findLastVersionByModelId).toBeCalled();
+    expect(profileModelMock.update).not.toBeCalled();
   });
 
   it("should return a conflict error if mode changes from MANUAL to LEGACY", async () => {
