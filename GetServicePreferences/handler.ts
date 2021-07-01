@@ -151,7 +151,7 @@ export const GetServicePreferencesHandler = (
               profile.servicePreferencesSettings.version
             )
           )
-          .mapLeft(l =>
+          .mapLeft(_ =>
             ResponseErrorConflict("Legacy service preferences not allowed")
           )
           .map(version => ({
