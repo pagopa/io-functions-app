@@ -131,8 +131,8 @@ export const GetServicePreferencesHandler = (
   profileModels: ProfileModel,
   servicePreferencesModel: ServicesPreferencesModel
 ): IGetServicePreferencesHandler => {
-  return async (fiscalCode, serviceId) => {
-    const p = profileModels
+  return async (fiscalCode, serviceId) =>
+    profileModels
       .findLastVersionByModelId([fiscalCode])
       .mapLeft<
         IResponseErrorQuery | IResponseErrorNotFound | IResponseErrorConflict
@@ -156,10 +156,8 @@ export const GetServicePreferencesHandler = (
         version: profile.servicePreferencesSettings.version
       }))
       .chain(getUserServicePreferencesOrDefault(servicePreferencesModel))
-      .fold<IGetServicePreferencesHandlerResult>(identity, ResponseSuccessJson);
-
-    return p.run();
-  };
+      .fold<IGetServicePreferencesHandlerResult>(identity, ResponseSuccessJson)
+      .run();
 };
 
 /**
