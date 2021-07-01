@@ -69,17 +69,17 @@ export const aProfile: Profile = {
 
 export const legacyProfileServicePreferencesSettings: RetrievedProfile["servicePreferencesSettings"] = {
   mode: ServicesPreferencesModeEnum.LEGACY,
-  version: 0
+  version: -1
 };
 
 export const autoProfileServicePreferencesSettings: RetrievedProfile["servicePreferencesSettings"] = {
   mode: ServicesPreferencesModeEnum.AUTO,
-  version: 1
+  version: 0 as NonNegativeInteger
 };
 
 export const manualProfileServicePreferencesSettings: RetrievedProfile["servicePreferencesSettings"] = {
   mode: ServicesPreferencesModeEnum.MANUAL,
-  version: 1
+  version: 1 as NonNegativeInteger
 };
 
 export const aRetrievedProfile: RetrievedProfile = {

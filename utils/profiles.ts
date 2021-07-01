@@ -13,6 +13,7 @@ import { isObject } from "util";
 
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 
 /**
  * Converts a ApiProfile in a Profile model
@@ -39,11 +40,11 @@ export function apiProfileToProfile(
         ServicesPreferencesModeEnum.LEGACY
         ? {
             mode: ServicesPreferencesModeEnum.LEGACY,
-            version: 0
+            version: -1
           }
         : {
             mode: apiProfile.service_preferences_settings.mode,
-            version: servicePreferencesSettingsVersion
+            version: servicePreferencesSettingsVersion as NonNegativeInteger
           }
   };
 }
