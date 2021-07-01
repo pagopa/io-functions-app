@@ -153,6 +153,8 @@ describe("UpdateProfileHandler", () => {
     });
 
     expect(result.kind).toBe("IResponseErrorConflict");
+    expect(profileModelMock.findLastVersionByModelId).toBeCalled();
+    expect(profileModelMock.update).not.toBeCalled();
   });
 
   it("should not increment service_preferences_settings.version if mode remains LEGACY", async () => {
