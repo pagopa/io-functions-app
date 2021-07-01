@@ -105,7 +105,7 @@ export function UpdateProfileHandler(
       profilePayload.service_preferences_settings.mode !==
         existingProfile.servicePreferencesSettings.mode;
 
-    // return to LEGACY profile from updated ones is forbidden 
+    // return to LEGACY profile from updated ones is forbidden
     if (
       servicePreferencesSettingsModeChanged &&
       profilePayload.service_preferences_settings.mode ===

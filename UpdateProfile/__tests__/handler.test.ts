@@ -157,6 +157,35 @@ describe("UpdateProfileHandler", () => {
     expect(profileModelMock.update).not.toBeCalled();
   });
 
+  it("should not increment service_preferences_settings.version if no service_preferences_settings is sent", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some({ ...aRetrievedProfile }))
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: undefined
+    });
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual(
+        expect.objectContaining({
+          service_preferences_settings: {
+            mode: legacyProfileServicePreferencesSettings.mode,
+            version: legacyProfileServicePreferencesSettings.version
+          }
+        })
+      );
+    }
+  });
+
   it("should not increment service_preferences_settings.version if mode remains LEGACY", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
