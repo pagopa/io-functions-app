@@ -1,9 +1,9 @@
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   EmailString,
   FiscalCode,
   NonEmptyString
-} from "italia-ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/strings";
 
 import { NewProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/NewProfile";
 import { Profile } from "@pagopa/io-functions-commons/dist/generated/definitions/Profile";

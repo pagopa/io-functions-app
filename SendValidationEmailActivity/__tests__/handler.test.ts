@@ -1,6 +1,6 @@
 /* tslint:disable: no-any */
 
-import { EmailString } from "italia-ts-commons/lib/strings";
+import { EmailString } from "@pagopa/ts-commons/lib/strings";
 
 import { EmailDefaults } from "../";
 import { context as contextMock } from "../../__mocks__/durable-functions";

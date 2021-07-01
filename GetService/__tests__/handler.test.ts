@@ -1,4 +1,10 @@
 // tslint:disable:no-any
+import { none, some } from "fp-ts/lib/Option";
+import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
+
+import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
+import { NotificationChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/NotificationChannel";
+import { ServicePublic } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePublic";
 import {
   NewService,
   RetrievedService,
@@ -7,23 +13,17 @@ import {
   toAuthorizedRecipients
 } from "@pagopa/io-functions-commons/dist/src/models/service";
 
-import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
-import { ServicePublic } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePublic";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import {
+  NonEmptyString,
+  OrganizationFiscalCode
+} from "@pagopa/ts-commons/lib/strings";
 
-import { NotificationChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/NotificationChannel";
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import {
   GetServiceHandler,
   serviceAvailableNotificationChannels
 } from "../handler";
-
-import { none, some } from "fp-ts/lib/Option";
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
-import {
-  NonEmptyString,
-  OrganizationFiscalCode
-} from "italia-ts-commons/lib/strings";
 
 afterEach(() => {
   jest.resetAllMocks();

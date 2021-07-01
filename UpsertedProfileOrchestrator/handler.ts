@@ -5,8 +5,8 @@ import { isLeft } from "fp-ts/lib/Either";
 import * as df from "durable-functions";
 import { IOrchestrationFunctionContext } from "durable-functions/lib/src/classes";
 
-import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
-import { readableReport } from "italia-ts-commons/lib/reporters";
+import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
@@ -18,6 +18,9 @@ import {
 import { Input as UpdateServiceSubscriptionFeedActivityInput } from "../UpdateSubscriptionsFeedActivity/index";
 import { diffBlockedServices } from "../utils/profiles";
 
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
+import { EnqueueProfileCreationEventActivityInput } from "../EnqueueProfileCreationEventActivity/handler";
 import { ActivityInput as SendWelcomeMessageActivityInput } from "../SendWelcomeMessagesActivity/handler";
 
 /**
@@ -40,6 +43,7 @@ export type OrchestratorInput = t.TypeOf<typeof OrchestratorInput>;
 
 export const getUpsertedProfileOrchestratorHandler = (params: {
   sendCashbackMessage: boolean;
+  notifyOn?: NonEmptyArray<NonEmptyString>;
   // tslint:disable-next-line: no-big-function
 }) =>
   // tslint:disable-next-line: no-big-function
@@ -243,6 +247,29 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
             updatedAt: updatedAt.getTime(),
             version: newProfile.version
           } as UpdateServiceSubscriptionFeedActivityInput
+        );
+      }
+    }
+
+    // Create messages on specific queues when a user profile become enabled
+    // Moved at the end to mitigate orchestrator versioning https://docs.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-versioning
+    if (hasJustEnabledInbox && params.notifyOn) {
+      try {
+        yield context.df.Task.all(
+          params.notifyOn.toArray().map(serviceQueueName =>
+            context.df.callActivityWithRetry(
+              "EnqueueProfileCreationEventActivity",
+              retryOptions,
+              EnqueueProfileCreationEventActivityInput.encode({
+                fiscalCode: newProfile.fiscalCode,
+                queueName: serviceQueueName
+              })
+            )
+          )
+        );
+      } catch (e) {
+        context.log.error(
+          `${logPrefix}|Send Profile creation event max retry exeded|ERROR=${e}`
         );
       }
     }

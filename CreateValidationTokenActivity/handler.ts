@@ -19,9 +19,9 @@ import { isLeft } from "fp-ts/lib/Either";
 import { Context } from "@azure/functions";
 import { TableService } from "azure-storage";
 
-import { readableReport } from "italia-ts-commons/lib/reporters";
-import { EmailString, FiscalCode } from "italia-ts-commons/lib/strings";
-import { Millisecond } from "italia-ts-commons/lib/units";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { Millisecond } from "@pagopa/ts-commons/lib/units";
 
 import { ValidationTokenEntity } from "@pagopa/io-functions-commons/dist/src/entities/validation_token";
 import { insertTableEntity } from "@pagopa/io-functions-commons/dist/src/utils/azure_storage";
