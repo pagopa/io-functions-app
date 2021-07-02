@@ -13,6 +13,8 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "lint": "tslint -p .",
+    "openapi:bundle": "bundle-api-spec -i openapi/index.yaml.template -o openapi/index.yaml -V $npm_package_version",
+    "pregenerate": "npm run openapi:bundle && rimraf ./generated",
     "generate": "npm-run-all generate:backend:*",
     "generate:backend:api-models": "shx rm -rf generated/backend && shx mkdir -p generated/backend && gen-api-models --strict 0 --api-spec https://raw.githubusercontent.com/pagopa/io-backend/v7.16.0/api_backend.yaml --out-dir generated/backend",
     "generate:backend:notification-models": "shx rm -rf generated/notifications && shx mkdir -p generated/notifications && gen-api-models --strict 0 --api-spec https://raw.githubusercontent.com/pagopa/io-backend/v7.16.0/api_notifications.yaml --out-dir generated/notifications",
@@ -21,7 +23,9 @@
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
     "predeploy": "npm-run-all build dist:modules",
     "preversion": "auto-changelog  --config .auto-changelog.json --unreleased --commit-limit false --stdout --template preview.hbs",
-    "version": "auto-changelog -p --config .auto-changelog.json --unreleased && git add CHANGELOG.md"
+    "version": "npm-run-all bump:*",
+    "bump:openapi": "bundle-api-spec -i openapi/index.yaml -o openapi/index.yaml -V $npm_package_version && git add openapi/index.yaml",
+    "bump:changelog": "auto-changelog -p --config .auto-changelog.json --unreleased && git add CHANGELOG.md"
   },
   "description": "",
   "devDependencies": {
