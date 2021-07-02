@@ -69,7 +69,7 @@
     "io-functions-express": "^0.1.1",
     "io-ts": "1.8.5",
     "node-fetch": "^2.6.1",
-    "nodemailer": "^4.7.0",
+    "nodemailer": "^6.4.16",
     "nodemailer-sendgrid": "^1.0.3"
   },
   "resolutions": {
