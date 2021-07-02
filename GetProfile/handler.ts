@@ -56,6 +56,7 @@ export function GetProfileHandler(
           maybeProfile
             .map(_ =>
               // if profile's timestamp is before email mode switch limit date we must force isEmailEnabled to false
+              // this map is valid for ever so this check cannot be removed
               isBefore(_._ts, emailModeSwitchLimitDate)
                 ? { ..._, isEmailEnabled: false }
                 : _
