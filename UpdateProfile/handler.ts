@@ -4,7 +4,7 @@ import { Context } from "@azure/functions";
 import * as df from "durable-functions";
 
 import { isLeft } from "fp-ts/lib/Either";
-import { isNone } from "fp-ts/lib/Option";
+import { fromNullable, isNone } from "fp-ts/lib/Option";
 
 import {
   IResponseErrorConflict,
@@ -32,6 +32,7 @@ import {
   wrapRequestHandler
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 
+import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { ProfileMiddleware } from "../utils/middlewares/profile";
 import {
@@ -55,6 +56,7 @@ type IUpdateProfileHandler = (
   | IResponseErrorInternal
 >;
 
+// tslint:disable-next-line: cognitive-complexity
 export function UpdateProfileHandler(
   profileModel: ProfileModel
 ): IUpdateProfileHandler {
@@ -97,10 +99,41 @@ export function UpdateProfileHandler(
       profilePayload.email !== undefined &&
       profilePayload.email !== existingProfile.email;
 
+    // Get servicePreferencesSettings mode from payload or default to LEGACY
+    const requestedServicePreferencesSettingsMode = fromNullable(
+      profilePayload.service_preferences_settings
+    )
+      .map(_ => _.mode)
+      .getOrElse(ServicesPreferencesModeEnum.LEGACY);
+
+    // Check if a mode change is requested
+    const isServicePreferencesSettingsModeChanged =
+      requestedServicePreferencesSettingsMode !==
+      existingProfile.servicePreferencesSettings.mode;
+
+    // return to LEGACY profile from updated ones is forbidden
+    if (
+      isServicePreferencesSettingsModeChanged &&
+      requestedServicePreferencesSettingsMode ===
+        ServicesPreferencesModeEnum.LEGACY
+    ) {
+      context.log.warn(
+        `${logPrefix}|REQUESTED_MODE=${requestedServicePreferencesSettingsMode}|CURRENT_MODE=${existingProfile.servicePreferencesSettings.mode}|RESULT=CONFLICT`
+      );
+      return ResponseErrorConflict(
+        `Mode ${requestedServicePreferencesSettingsMode} is not valid.`
+      );
+    }
+
+    const servicePreferencesSettingsVersion = isServicePreferencesSettingsModeChanged
+      ? Number(existingProfile.servicePreferencesSettings.version) + 1
+      : existingProfile.servicePreferencesSettings.version;
+
     const profile = apiProfileToProfile(
       profilePayload,
       fiscalCode,
-      emailChanged ? false : existingProfile.isEmailValidated
+      emailChanged ? false : existingProfile.isEmailValidated,
+      servicePreferencesSettingsVersion
     );
 
     // User inbox and webhook must be enabled after accepting the ToS for the first time
