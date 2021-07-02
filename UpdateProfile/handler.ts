@@ -4,7 +4,7 @@ import { Context } from "@azure/functions";
 import * as df from "durable-functions";
 
 import { isLeft } from "fp-ts/lib/Either";
-import { fromNullable, isNone } from "fp-ts/lib/Option";
+import { isNone } from "fp-ts/lib/Option";
 
 import {
   IResponseErrorConflict,
