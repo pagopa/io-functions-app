@@ -29,7 +29,7 @@ describe("GetProfileHandler", () => {
   it("should find an existing profile", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(some(aValidTimestampAfterLimitRetrievedProfile));
+        return taskEither.of(some(aRetrievedProfileWithTimestampAfterLimit));
       })
     };
 
@@ -52,7 +52,7 @@ describe("GetProfileHandler", () => {
   it("should find an existing profile overwriting isEmailEnabled property if cosmos timestamp is before email mode switch limit date", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(some(aValidTimestampBeforeLimitRetrievedProfile));
+        return taskEither.of(some(aRetrievedProfileWithTimestampBeforeLimit));
       })
     };
 
