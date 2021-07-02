@@ -4,6 +4,7 @@ import * as lolex from "lolex";
 
 import * as df from "durable-functions";
 
+import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
 import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
@@ -26,6 +27,10 @@ afterEach(() => {
   clock = clock.uninstall();
 });
 
+const anEmailModeSwitchLimitDate = UTCISODateFromString.decode(
+  "2021-07-08T23:59:59Z"
+).getOrElseL(() => fail("wrong date value"));
+
 const aTestProfileWithEmailDisabled = {
   ...aRetrievedProfile,
   isEmailEnabled: false
@@ -36,7 +41,10 @@ describe("CreateProfileHandler", () => {
       create: jest.fn(() => fromLeft({}))
     };
 
-    const createProfileHandler = CreateProfileHandler(profileModelMock as any);
+    const createProfileHandler = CreateProfileHandler(
+      profileModelMock as any,
+      anEmailModeSwitchLimitDate
+    );
 
     const result = await createProfileHandler(
       contextMock as any,
@@ -52,7 +60,10 @@ describe("CreateProfileHandler", () => {
       create: jest.fn(() => taskEither.of(aRetrievedProfile))
     };
 
-    const createProfileHandler = CreateProfileHandler(profileModelMock as any);
+    const createProfileHandler = CreateProfileHandler(
+      profileModelMock as any,
+      anEmailModeSwitchLimitDate
+    );
 
     const result = await createProfileHandler(
       contextMock as any,
@@ -71,7 +82,10 @@ describe("CreateProfileHandler", () => {
       create: jest.fn(() => taskEither.of(aTestProfileWithEmailDisabled))
     };
 
-    const createProfileHandler = CreateProfileHandler(profileModelMock as any);
+    const createProfileHandler = CreateProfileHandler(
+      profileModelMock as any,
+      anEmailModeSwitchLimitDate
+    );
 
     const result = await createProfileHandler(
       contextMock as any,
@@ -92,7 +106,10 @@ describe("CreateProfileHandler", () => {
     const profileModelMock = {
       create: jest.fn(() => taskEither.of(aRetrievedProfile))
     };
-    const createProfileHandler = CreateProfileHandler(profileModelMock as any);
+    const createProfileHandler = CreateProfileHandler(
+      profileModelMock as any,
+      anEmailModeSwitchLimitDate
+    );
 
     await createProfileHandler(contextMock as any, aFiscalCode, {} as any);
 

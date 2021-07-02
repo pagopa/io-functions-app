@@ -34,6 +34,7 @@ import {
   ResponseErrorQuery
 } from "@pagopa/io-functions-commons/dist/src/utils/response";
 
+import { isBefore } from "date-fns";
 import { fromEither } from "fp-ts/lib/TaskEither";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { NewProfileMiddleware } from "../utils/middlewares/profile";
@@ -53,7 +54,8 @@ type ICreateProfileHandler = (
 >;
 
 export function CreateProfileHandler(
-  profileModel: ProfileModel
+  profileModel: ProfileModel,
+  emailModeSwitchLimitDate: Date
 ): ICreateProfileHandler {
   return async (context, fiscalCode, createProfilePayload) => {
     const logPrefix = `CreateProfileHandler|FISCAL_CODE=${fiscalCode}`;
@@ -62,7 +64,7 @@ export function CreateProfileHandler(
       INewProfile.decode({
         email: createProfilePayload.email,
         fiscalCode,
-        isEmailEnabled: false,
+        isEmailEnabled: isBefore(new Date(), emailModeSwitchLimitDate),
         isEmailValidated: createProfilePayload.is_email_validated,
         isInboxEnabled: false,
         isTestProfile: createProfilePayload.is_test_profile,
@@ -119,9 +121,10 @@ export function CreateProfileHandler(
  * Wraps an CreateProfile handler inside an Express request handler.
  */
 export function CreateProfile(
-  profileModel: ProfileModel
+  profileModel: ProfileModel,
+  emailModeSwitchLimitDate: Date
 ): express.RequestHandler {
-  const handler = CreateProfileHandler(profileModel);
+  const handler = CreateProfileHandler(profileModel, emailModeSwitchLimitDate);
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
