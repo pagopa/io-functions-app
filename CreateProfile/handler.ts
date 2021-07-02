@@ -64,6 +64,7 @@ export function CreateProfileHandler(
       INewProfile.decode({
         email: createProfilePayload.email,
         fiscalCode,
+        // this check can be removed after the release date for emailModeSwitchLimitDate
         isEmailEnabled: isBefore(new Date(), emailModeSwitchLimitDate),
         isEmailValidated: createProfilePayload.is_email_validated,
         isInboxEnabled: false,
