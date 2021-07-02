@@ -93,7 +93,7 @@ export const IConfig = t.intersection([
   EUCovidCertProfileQueueConfig
 ]);
 
-const DEFAULT_EMAIL_MODE_SWITCH_LIMIT_DATE = new Date("1970-01-01T00:00:00Z");
+const DEFAULT_EMAIL_MODE_SWITCH_LIMIT_DATE = "1970-01-01T00:00:00Z";
 
 // No need to re-evaluate this object for each call
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
@@ -106,7 +106,7 @@ const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
         () => DEFAULT_EMAIL_MODE_SWITCH_LIMIT_DATE
       )
     )
-    .fold(identity, identity),
+    .fold(_ => new Date(_), identity),
   FF_NEW_USERS_EUCOVIDCERT_ENABLED: fromNullable(
     process.env.FF_NEW_USERS_EUCOVIDCERT_ENABLED
   )
