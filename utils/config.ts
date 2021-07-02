@@ -98,15 +98,9 @@ const DEFAULT_EMAIL_MODE_SWITCH_LIMIT_DATE = "1970-01-01T00:00:00Z";
 // No need to re-evaluate this object for each call
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   ...process.env,
-  EMAIL_MODE_SWITCH_LIMIT_DATE: fromNullableE(
-    DEFAULT_EMAIL_MODE_SWITCH_LIMIT_DATE
-  )(process.env.EMAIL_MODE_SWITCH_LIMIT_DATE)
-    .chain(_ =>
-      UTCISODateFromString.decode(_).mapLeft(
-        () => DEFAULT_EMAIL_MODE_SWITCH_LIMIT_DATE
-      )
-    )
-    .fold(_ => new Date(_), identity),
+  EMAIL_MODE_SWITCH_LIMIT_DATE: fromNullable(
+    process.env.EMAIL_MODE_SWITCH_LIMIT_DATE
+  ).getOrElse(DEFAULT_EMAIL_MODE_SWITCH_LIMIT_DATE),
   FF_NEW_USERS_EUCOVIDCERT_ENABLED: fromNullable(
     process.env.FF_NEW_USERS_EUCOVIDCERT_ENABLED
   )
