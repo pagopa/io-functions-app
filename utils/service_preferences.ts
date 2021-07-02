@@ -4,6 +4,8 @@ import { Profile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { RetrievedServicePreference } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
 import { NonNegativeInteger } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/numbers";
 
+import * as te from "fp-ts/lib/TaskEither";
+
 const toUserServicePreference = (
   emailEnabled: boolean,
   inboxEnabled: boolean,
@@ -52,6 +54,11 @@ export const toDefaultDisabledUserServicePreference = (
   version: NonNegativeInteger
 ): ServicePreference => toUserServicePreference(false, false, false, version);
 
+/**
+ *
+ * @param profile
+ * @returns
+ */
 export const nonLegacyServicePreferences = (profile: Profile): boolean => {
   return (
     profile.servicePreferencesSettings.mode ===
@@ -60,3 +67,20 @@ export const nonLegacyServicePreferences = (profile: Profile): boolean => {
       ServicesPreferencesModeEnum.MANUAL
   );
 };
+
+/**
+ * Get Service Preference Setting Version for giver profile,
+ * or fail if is negative
+ *
+ * @param profile
+ * @returns
+ */
+export function getServicePreferenceSettingsVersion(
+  profile
+): te.TaskEither<Error, NonNegativeInteger> {
+  return te
+    .fromEither(
+      NonNegativeInteger.decode(profile.servicePreferencesSettings.version)
+    )
+    .mapLeft(_ => Error("Service Preferences Version < 0 not allowed"));
+}

@@ -15,7 +15,8 @@ import {
 import { context } from "../../__mocks__/durable-functions";
 import {
   aRetrievedServicePreference,
-  aServiceId
+  aServiceId,
+  aServicePreferenceVersion
 } from "../../__mocks__/mocks.service_preference";
 
 import { GetServicePreferencesHandler } from "../handler";
@@ -59,7 +60,7 @@ describe("GetServicePreferences", () => {
         is_email_enabled: true,
         is_inbox_enabled: true,
         is_webhook_enabled: true,
-        settings_version: 2
+        settings_version: aServicePreferenceVersion
       }
     });
   });
