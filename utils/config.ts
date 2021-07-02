@@ -5,7 +5,6 @@
  * The configuration is evaluate eagerly at the first access to the module. The module exposes convenient methods to access such value.
  */
 
-import { fromNullable as fromNullableE } from "fp-ts/lib/Either";
 import { fromNullable } from "fp-ts/lib/Option";
 import * as t from "io-ts";
 
@@ -14,7 +13,6 @@ import { MailerConfig } from "@pagopa/io-functions-commons/dist/src/mailer";
 import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { identity } from "fp-ts/lib/function";
 
 // exclude a specific value from a type
 // as strict equality is performed, allowed input types are constrained to be values not references (object, arrays, etc)
