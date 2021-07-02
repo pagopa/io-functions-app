@@ -17,7 +17,6 @@ import { ExtendedProfile } from "@pagopa/io-functions-commons/dist/generated/def
 import { NewProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/NewProfile";
 import {
   NewProfile as INewProfile,
-  Profile,
   ProfileModel
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import {
@@ -59,19 +58,15 @@ export function CreateProfileHandler(
   return async (context, fiscalCode, createProfilePayload) => {
     const logPrefix = `CreateProfileHandler|FISCAL_CODE=${fiscalCode}`;
 
-    const profile: Profile = {
-      email: createProfilePayload.email,
-      fiscalCode,
-      isEmailEnabled: false,
-      isEmailValidated: createProfilePayload.is_email_validated,
-      isInboxEnabled: false,
-      isTestProfile: createProfilePayload.is_test_profile,
-      isWebhookEnabled: false
-    };
-
     const errorOrCreatedProfile = await fromEither(
       INewProfile.decode({
-        ...profile,
+        email: createProfilePayload.email,
+        fiscalCode,
+        isEmailEnabled: false,
+        isEmailValidated: createProfilePayload.is_email_validated,
+        isInboxEnabled: false,
+        isTestProfile: createProfilePayload.is_test_profile,
+        isWebhookEnabled: false,
         kind: "INewProfile"
       })
     )
