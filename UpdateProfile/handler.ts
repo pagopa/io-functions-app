@@ -99,29 +99,30 @@ export function UpdateProfileHandler(
       profilePayload.email !== undefined &&
       profilePayload.email !== existingProfile.email;
 
-    // Get servicePreferencesSettings mode from payload or default to LEGACY
-    const requestedServicePreferencesSettingsMode = fromNullable(
-      profilePayload.service_preferences_settings
-    )
-      .map(_ => _.mode)
-      .getOrElse(ServicesPreferencesModeEnum.LEGACY);
+    // Build a profile with requested changes to set defaults
+    const requestedChangedProfile = apiProfileToProfile(
+      profilePayload,
+      fiscalCode,
+      emailChanged ? false : existingProfile.isEmailValidated,
+      existingProfile.servicePreferencesSettings.version
+    );
 
     // Check if a mode change is requested
     const isServicePreferencesSettingsModeChanged =
-      requestedServicePreferencesSettingsMode !==
+      requestedChangedProfile.servicePreferencesSettings.mode !==
       existingProfile.servicePreferencesSettings.mode;
 
     // return to LEGACY profile from updated ones is forbidden
     if (
       isServicePreferencesSettingsModeChanged &&
-      requestedServicePreferencesSettingsMode ===
+      requestedChangedProfile.servicePreferencesSettings.mode ===
         ServicesPreferencesModeEnum.LEGACY
     ) {
       context.log.warn(
-        `${logPrefix}|REQUESTED_MODE=${requestedServicePreferencesSettingsMode}|CURRENT_MODE=${existingProfile.servicePreferencesSettings.mode}|RESULT=CONFLICT`
+        `${logPrefix}|REQUESTED_MODE=${requestedChangedProfile.servicePreferencesSettings.mode}|CURRENT_MODE=${existingProfile.servicePreferencesSettings.mode}|RESULT=CONFLICT`
       );
       return ResponseErrorConflict(
-        `Mode ${requestedServicePreferencesSettingsMode} is not valid.`
+        `Mode ${requestedChangedProfile.servicePreferencesSettings.mode} is not valid.`
       );
     }
 
