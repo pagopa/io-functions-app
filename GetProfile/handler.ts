@@ -21,7 +21,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
-import * as date_fns from "date-fns";
+import { isBefore } from "date-fns";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 
 type IGetProfileHandlerResult =
@@ -56,7 +56,7 @@ export function GetProfileHandler(
           maybeProfile
             .map(_ =>
               // if profile's timestamp is before email mode switch limit date we must force isEmailEnabled to false
-              date_fns.isBefore(_._ts, emailModeSwitchLimitDate)
+              isBefore(_._ts, emailModeSwitchLimitDate)
                 ? { ..._, isEmailEnabled: false }
                 : _
             )

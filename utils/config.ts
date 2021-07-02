@@ -5,6 +5,7 @@
  * The configuration is evaluate eagerly at the first access to the module. The module exposes convenient methods to access such value.
  */
 
+import { fromNullable as fromNullableE } from "fp-ts/lib/Either";
 import { fromNullable } from "fp-ts/lib/Option";
 import * as t from "io-ts";
 
@@ -13,6 +14,7 @@ import { MailerConfig } from "@pagopa/io-functions-commons/dist/src/mailer";
 import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { identity } from "fp-ts/lib/function";
 
 // exclude a specific value from a type
 // as strict equality is performed, allowed input types are constrained to be values not references (object, arrays, etc)
@@ -91,9 +93,20 @@ export const IConfig = t.intersection([
   EUCovidCertProfileQueueConfig
 ]);
 
+const DEFAULT_EMAIL_MODE_SWITCH_LIMIT_DATE = new Date("1970-01-01T00:00:00Z");
+
 // No need to re-evaluate this object for each call
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   ...process.env,
+  EMAIL_MODE_SWITCH_LIMIT_DATE: fromNullableE(
+    DEFAULT_EMAIL_MODE_SWITCH_LIMIT_DATE
+  )(process.env.EMAIL_MODE_SWITCH_LIMIT_DATE)
+    .chain(_ =>
+      UTCISODateFromString.decode(_).mapLeft(
+        () => DEFAULT_EMAIL_MODE_SWITCH_LIMIT_DATE
+      )
+    )
+    .fold(identity, identity),
   FF_NEW_USERS_EUCOVIDCERT_ENABLED: fromNullable(
     process.env.FF_NEW_USERS_EUCOVIDCERT_ENABLED
   )
