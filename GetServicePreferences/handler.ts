@@ -152,7 +152,7 @@ export const GetServicePreferencesHandler = (
             )
           )
           .mapLeft(_ =>
-            ResponseErrorConflict("Legacy service preferences not allowed")
+            ResponseErrorConflict("Service Preferences Version < 0 not allowed")
           )
           .map(version => ({
             documentId: makeServicesPreferencesDocumentId(
