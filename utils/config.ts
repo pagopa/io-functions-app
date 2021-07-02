@@ -10,6 +10,7 @@ import * as t from "io-ts";
 
 import { MailerConfig } from "@pagopa/io-functions-commons/dist/src/mailer";
 
+import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
@@ -76,6 +77,8 @@ export const IConfig = t.intersection([
     SPID_LOGS_PUBLIC_KEY: NonEmptyString,
     SUBSCRIPTIONS_FEED_TABLE: NonEmptyString,
 
+    EMAIL_MODE_SWITCH_LIMIT_DATE: UTCISODateFromString,
+
     IS_CASHBACK_ENABLED: t.boolean,
 
     FF_NEW_USERS_EUCOVIDCERT_ENABLED: t.boolean,
@@ -88,9 +91,14 @@ export const IConfig = t.intersection([
   EUCovidCertProfileQueueConfig
 ]);
 
+const DEFAULT_EMAIL_MODE_SWITCH_LIMIT_DATE = "1970-01-01T00:00:00Z";
+
 // No need to re-evaluate this object for each call
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   ...process.env,
+  EMAIL_MODE_SWITCH_LIMIT_DATE: fromNullable(
+    process.env.EMAIL_MODE_SWITCH_LIMIT_DATE
+  ).getOrElse(DEFAULT_EMAIL_MODE_SWITCH_LIMIT_DATE),
   FF_NEW_USERS_EUCOVIDCERT_ENABLED: fromNullable(
     process.env.FF_NEW_USERS_EUCOVIDCERT_ENABLED
   )

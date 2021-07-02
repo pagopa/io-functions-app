@@ -21,6 +21,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
+import { isBefore } from "date-fns";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 
 type IGetProfileHandlerResult =
@@ -42,7 +43,8 @@ type IGetProfileHandler = (
  * Return a type safe GetProfile handler.
  */
 export function GetProfileHandler(
-  profileModel: ProfileModel
+  profileModel: ProfileModel,
+  emailModeSwitchLimitDate: Date
 ): IGetProfileHandler {
   return async fiscalCode =>
     profileModel
@@ -51,14 +53,21 @@ export function GetProfileHandler(
         failure =>
           ResponseErrorQuery("Error while retrieving the profile", failure),
         maybeProfile =>
-          maybeProfile.fold<IGetProfileHandlerResult>(
-            ResponseErrorNotFound(
-              "Profile not found",
-              "The profile you requested was not found in the system."
-            ),
-            profile =>
-              ResponseSuccessJson(retrievedProfileToExtendedProfile(profile))
-          )
+          maybeProfile
+            .map(_ =>
+              // if profile's timestamp is before email mode switch limit date we must force isEmailEnabled to false
+              isBefore(_._ts, emailModeSwitchLimitDate)
+                ? { ..._, isEmailEnabled: false }
+                : _
+            )
+            .fold<IGetProfileHandlerResult>(
+              ResponseErrorNotFound(
+                "Profile not found",
+                "The profile you requested was not found in the system."
+              ),
+              profile =>
+                ResponseSuccessJson(retrievedProfileToExtendedProfile(profile))
+            )
       )
       .run();
 }
@@ -66,8 +75,11 @@ export function GetProfileHandler(
 /**
  * Wraps a GetProfile handler inside an Express request handler.
  */
-export function GetProfile(profileModel: ProfileModel): express.RequestHandler {
-  const handler = GetProfileHandler(profileModel);
+export function GetProfile(
+  profileModel: ProfileModel,
+  emailModeSwitchLimitDate: Date
+): express.RequestHandler {
+  const handler = GetProfileHandler(profileModel, emailModeSwitchLimitDate);
 
   const middlewaresWrap = withRequestMiddlewares(FiscalCodeMiddleware);
   return wrapRequestHandler(middlewaresWrap(handler));
