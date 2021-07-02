@@ -2,29 +2,37 @@
 /* tslint:disable:no-object-mutation */
 
 import { toPlainText } from "@pagopa/ts-commons/lib/encrypt";
-import { IPString } from "@pagopa/ts-commons/lib/strings";
+import { IPString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { format } from "date-fns";
 import { aFiscalCode } from "../../__mocks__/mocks";
-import { index, IOutputBinding, SpidMsgItem } from "../index";
+import { encryptAndStore, IOutputBinding } from "../handler";
+import { SpidMsgItem } from "../index";
 
 const today = format(new Date(), "yyyy-MM-dd");
 const aDate = new Date();
 
+const aPublicKey = `-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC76C3tOj7lPiJ5sg2lU6j2dZEa
+E9GW+v1YrOajfCHijBo6VLSMH6nrO3fZM3C8oNsYrH8jyeZlcu8ZdKMaRECegVUv
+YwCyICrs58l1pA0qCo+o/0jWUaCWQY5SAX2eAni7PQGzSTQRu93Ac4BnI0PDvqxY
+Q1mRn/iy0NVMMxhDUwIDAQAB
+-----END PUBLIC KEY-----` as NonEmptyString;
+
 const aRSAPrivateKey = `-----BEGIN RSA PRIVATE KEY-----
-MIICXAIBAAKBgQDhiXpvLD8UMMUy1T2JCzo/Sj5El09Fs0z2U4aA37BrXlSo1DwQ
-2O9i2XFxXGJmE83siSWEfRlMWlabMu7Yj6dkZvmjdGIO4gotO33TgiAQcwRo+4pw
-joCN7Td47yssCcj9C727zBt+Br+XK7B1bRcqjc0JYdF4yiVtD7G4RDXmRQIDAQAB
-AoGAJlqjyI4kuAFHN8rNqSWQpTyx9CYrI/ZG60jvAbGIpemnygI1qMPLierigN2u
-Gh/aEBSOncZMbBCc083IkmlzlKy3gJH0shgBQrfqGFbqh3i7f/lHkL+lZtXW+fF4
-bXo4vdaArHhQW1oKQOHA9BO8uuqCOEaA7OtVLWiZxqe9u80CQQDyuNWZLqlDZT8c
-yB6mnLh7KVGY1RYphY0HputmC3Z0qr+bAFT8plNB2SkJwsnD2YSpOj4jzzePZShP
-aDNS+LQzAkEA7d/6rtzYVqX4XEvmrdQwXKvq937MgRec7Q6jzmSHSHxBLcsvJ40n
-xiBoe1TJWGn866Ug/tBauF8Ws5SgCPVDpwJBAOZc9pzD5HHKjfPLGwwWgiCiPodG
-9hnCXu98RL488tgXlnKOBhsj4LEGYiSZctUmhPn4BTIHYTv/ThrPUqbU1HECQDAg
-/UucC3mcox+pi8boA9D8R9JDqYUFDg84wxPjayvTWCy3y5apDL8dl4Y8pXBqIW5c
-PszPw0tCkglLrQWi+kkCQDzR5FI2eGvXYdkJdAqofbEFDdP+N0ZMWdJITVntrhZO
-zsAyYUBrD/FpfHSA5UY9UsldiilvJeCzYbM6Rm1fpmc=
+MIICXQIBAAKBgQC76C3tOj7lPiJ5sg2lU6j2dZEaE9GW+v1YrOajfCHijBo6VLSM
+H6nrO3fZM3C8oNsYrH8jyeZlcu8ZdKMaRECegVUvYwCyICrs58l1pA0qCo+o/0jW
+UaCWQY5SAX2eAni7PQGzSTQRu93Ac4BnI0PDvqxYQ1mRn/iy0NVMMxhDUwIDAQAB
+AoGBAKmCGWwXTwWdt5vwcz7g6VrrU6oilr+MS17jGmwAXtDvcfmM0BJXvgDl9IeL
+T/fZY8wuT8MJLz31IJvmC/x19ZN7gsnp/Hi5L3gouQMQFGwaDUsO10gqGEoJXJCp
+kNS7PV8Zp1Z6aBg5zd4A0Hc271qOY5VUwKuT9zIzkDtHlq6BAkEA23J6jH3nEyom
+4oV/oRMpX6xHm6tciFvpVXK/kZNl8rXVUj9BHbyDG59q8eZ0HcJVt8dTFGtwmxnU
+Bs/v1DPlZQJBANs0yHV8wPr0Oj3dTVZ/zePMSYDXpJjWbbquM0kKcWAeyqiRC/hX
+rPaum46QWn978zLCOWLvg2FroFGYzLaqNlcCQQC4ILT83sMdTHf2BweQ0nAbq4Ul
+88GfVGdS4AYnEqMu5C0KZrKvTbZAXiGwuKnjMmUT37Yw4vlH2oMR+DUGO0kVAkBv
+qJBfwD9w1Y0BTEQDxrAy1DGwzqeKLtfQGsIG96nOw4CJovDM/KQfN8wHL6LZg2Lb
+PTIMImLy8ebFCadleIibAkBnlE+V7qUL+a/XBMazEffUVsMoPN9iv7G6UPUyOipN
+hG0enuvF/PmgeLYsbFtozTm2/mQNqBV6USME39kPoKY1
 -----END RSA PRIVATE KEY-----`;
 
 const aSpidMsgItem: SpidMsgItem = {
@@ -62,10 +70,14 @@ describe("StoreSpidLogs", () => {
         error: jest.fn()
       }
     };
-    const blobItem = await index(mockedContext as any, {
-      ...aSpidMsgItem,
-      ip: "XX" as IPString
-    });
+    const blobItem = await encryptAndStore(
+      mockedContext as any,
+      {
+        ...aSpidMsgItem,
+        ip: "XX" as IPString
+      },
+      aPublicKey
+    );
     expect(blobItem).toBeUndefined();
   });
 
@@ -79,7 +91,11 @@ describe("StoreSpidLogs", () => {
         error: jest.fn()
       }
     };
-    const blobItem = await index(mockedContext as any, aSpidMsgItem);
+    const blobItem = await encryptAndStore(
+      mockedContext as any,
+      aSpidMsgItem,
+      aPublicKey
+    );
     const blob = blobItem as IOutputBinding;
     const encryptedSpidBlobItem = blob.spidRequestResponse;
     const decryptedRequestPayload = toPlainText(
@@ -105,7 +121,11 @@ describe("StoreSpidLogs", () => {
         error: jest.fn()
       }
     };
-    const blobItem = await index(mockedContext as any, aSpidMsgItem);
+    const blobItem = await encryptAndStore(
+      mockedContext as any,
+      aSpidMsgItem,
+      aPublicKey
+    );
     const blob = blobItem as IOutputBinding;
     const encryptedSpidBlobItem = blob.spidRequestResponse;
     const decryptedRequestPayload = toPlainText(
@@ -130,9 +150,10 @@ describe("StoreSpidLogs", () => {
         error: jest.fn()
       }
     };
-    const secondBlobItem = await index(
+    const secondBlobItem = await encryptAndStore(
       anotherMockedContext as any,
-      anotherSpidMsgItem
+      anotherSpidMsgItem,
+      aPublicKey
     );
     const secondBlob = secondBlobItem as IOutputBinding;
     const secondEncryptedSpidBlobItem = secondBlob.spidRequestResponse;

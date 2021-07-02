@@ -12,9 +12,11 @@ import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middl
 
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
+import { getConfigOrThrow } from "../utils/config";
 import { cosmosdbInstance } from "../utils/cosmosdb";
 import { GetProfile } from "./handler";
 
+const config = getConfigOrThrow();
 // Setup Express
 const app = express();
 secureExpressApp(app);
@@ -23,7 +25,10 @@ const profileModel = new ProfileModel(
   cosmosdbInstance.container(PROFILE_COLLECTION_NAME)
 );
 
-app.get("/api/v1/profiles/:fiscalcode", GetProfile(profileModel));
+app.get(
+  "/api/v1/profiles/:fiscalcode",
+  GetProfile(profileModel, config.EMAIL_MODE_SWITCH_LIMIT_DATE)
+);
 
 const azureFunctionHandler = createAzureFunctionHandler(app);
 
