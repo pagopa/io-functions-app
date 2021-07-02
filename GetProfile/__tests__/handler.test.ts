@@ -12,19 +12,18 @@ import {
 } from "../../__mocks__/mocks";
 import { GetProfileHandler } from "../handler";
 
-const aTimestamp = 1625154182000;
-const aValidTimestampBeforeLimitRetrievedProfile = {
+const anEmailModeSwitchLimitDate = UTCISODateFromString.decode(
+  "2021-07-08T23:59:59Z"
+).getOrElseL(() => fail("wrong date value"));
+const aTimestamp = anEmailModeSwitchLimitDate.valueOf();
+const aRetrievedProfileWithTimestampBeforeLimit = {
+  ...aRetrievedProfile,
+  _ts: aTimestamp - 1
+};
+const aRetrievedProfileWithTimestampAfterLimit = {
   ...aRetrievedProfile,
   _ts: aTimestamp
 };
-
-const aValidTimestampAfterLimitRetrievedProfile = {
-  ...aRetrievedProfile,
-  _ts: 1626018182000
-};
-const anEmailModeSwitchLimitDate = UTCISODateFromString.decode(
-  "2021-07-08T23:59:59Z"
-).getOrElse(new Date());
 
 describe("GetProfileHandler", () => {
   it("should find an existing profile", async () => {
