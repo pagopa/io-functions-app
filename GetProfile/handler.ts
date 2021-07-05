@@ -58,7 +58,7 @@ export function GetProfileHandler(
             .map(_ =>
               // if profile's timestamp is before email opt out switch limit date we must force isEmailEnabled to false
               // this map is valid for ever so this check cannot be removed
-              isBefore(_._ts, optOutEmailSwitchDate) && isOptInEmailEnabled
+              isOptInEmailEnabled && isBefore(_._ts, optOutEmailSwitchDate) 
                 ? { ..._, isEmailEnabled: false }
                 : _
             )
