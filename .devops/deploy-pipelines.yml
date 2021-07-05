@@ -217,7 +217,6 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
-      - checkout: none
       - job: publish_SDK   
         steps:
         # Template for generating and deploying client SDk to NPM
