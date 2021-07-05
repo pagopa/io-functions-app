@@ -92,7 +92,7 @@ export const IConfig = t.intersection([
   EUCovidCertProfileQueueConfig
 ]);
 
-const DEFAULT_OPT_OUT_EMAIL_SWITCH_DATE = "1970-01-01T00:00:00Z";
+const DEFAULT_OPT_OUT_EMAIL_SWITCH_DATE = "2021-07-09T00:00:00Z";
 
 // No need to re-evaluate this object for each call
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
