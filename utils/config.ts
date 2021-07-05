@@ -83,6 +83,7 @@ export const IConfig = t.intersection([
 
     FF_NEW_USERS_EUCOVIDCERT_ENABLED: t.boolean,
     FF_ONLY_NATIONAL_SERVICES: t.boolean,
+    FF_OPT_IN_EMAIL_ENABLED: t.boolean,
 
     isProduction: t.boolean
   }),
@@ -91,7 +92,7 @@ export const IConfig = t.intersection([
   EUCovidCertProfileQueueConfig
 ]);
 
-const DEFAULT_OPT_OUT_EMAIL_SWITCH_DATE = "1970-01-01T00:00:00Z";
+const DEFAULT_OPT_OUT_EMAIL_SWITCH_DATE = "2021-07-09T00:00:00Z";
 
 // No need to re-evaluate this object for each call
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
@@ -102,6 +103,9 @@ const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
     .map(_ => _.toLocaleLowerCase() === "true")
     .getOrElse(false),
   FF_ONLY_NATIONAL_SERVICES: fromNullable(process.env.FF_ONLY_NATIONAL_SERVICES)
+    .map(_ => _.toLocaleLowerCase() === "true")
+    .getOrElse(false),
+  FF_OPT_IN_EMAIL_ENABLED: fromNullable(process.env.FF_OPT_IN_EMAIL_ENABLED)
     .map(_ => _.toLocaleLowerCase() === "true")
     .getOrElse(false),
   IS_CASHBACK_ENABLED: fromNullable(process.env.IS_CASHBACK_ENABLED)

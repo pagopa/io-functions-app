@@ -44,7 +44,8 @@ type IGetProfileHandler = (
  */
 export function GetProfileHandler(
   profileModel: ProfileModel,
-  optOutEmailSwitchDate: Date
+  optOutEmailSwitchDate: Date,
+  isOptInEmailEnabled: boolean
 ): IGetProfileHandler {
   return async fiscalCode =>
     profileModel
@@ -57,7 +58,7 @@ export function GetProfileHandler(
             .map(_ =>
               // if profile's timestamp is before email opt out switch limit date we must force isEmailEnabled to false
               // this map is valid for ever so this check cannot be removed
-              isBefore(_._ts, optOutEmailSwitchDate)
+              isOptInEmailEnabled && isBefore(_._ts, optOutEmailSwitchDate)
                 ? { ..._, isEmailEnabled: false }
                 : _
             )
@@ -78,9 +79,14 @@ export function GetProfileHandler(
  */
 export function GetProfile(
   profileModel: ProfileModel,
-  optOutEmailSwitchDate: Date
+  optOutEmailSwitchDate: Date,
+  isOptInEmailEnabled: boolean
 ): express.RequestHandler {
-  const handler = GetProfileHandler(profileModel, optOutEmailSwitchDate);
+  const handler = GetProfileHandler(
+    profileModel,
+    optOutEmailSwitchDate,
+    isOptInEmailEnabled
+  );
 
   const middlewaresWrap = withRequestMiddlewares(FiscalCodeMiddleware);
   return wrapRequestHandler(middlewaresWrap(handler));
