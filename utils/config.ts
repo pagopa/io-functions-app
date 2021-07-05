@@ -83,7 +83,7 @@ export const IConfig = t.intersection([
 
     FF_NEW_USERS_EUCOVIDCERT_ENABLED: t.boolean,
     FF_ONLY_NATIONAL_SERVICES: t.boolean,
-    FF_OPT_OUT_EMAIL_ENABLED: t.boolean,
+    FF_OPT_IN_EMAIL_ENABLED: t.boolean,
 
     isProduction: t.boolean
   }),
@@ -105,7 +105,7 @@ const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   FF_ONLY_NATIONAL_SERVICES: fromNullable(process.env.FF_ONLY_NATIONAL_SERVICES)
     .map(_ => _.toLocaleLowerCase() === "true")
     .getOrElse(false),
-  FF_OPT_OUT_EMAIL_ENABLED: fromNullable(process.env.FF_OPT_OUT_EMAIL_ENABLED)
+  FF_OPT_IN_EMAIL_ENABLED: fromNullable(process.env.FF_OPT_IN_EMAIL_ENABLED)
     .map(_ => _.toLocaleLowerCase() === "true")
     .getOrElse(false),
   IS_CASHBACK_ENABLED: fromNullable(process.env.IS_CASHBACK_ENABLED)

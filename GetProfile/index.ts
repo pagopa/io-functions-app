@@ -30,7 +30,7 @@ app.get(
   GetProfile(
     profileModel,
     config.OPT_OUT_EMAIL_SWITCH_DATE,
-    config.FF_OPT_OUT_EMAIL_ENABLED
+    config.FF_OPT_IN_EMAIL_ENABLED
   )
 );
 
