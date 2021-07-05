@@ -12,10 +12,10 @@ import {
 } from "../../__mocks__/mocks";
 import { GetProfileHandler } from "../handler";
 
-const anEmailModeSwitchLimitDate = UTCISODateFromString.decode(
+const anEmailOptOutEmailSwitchDate = UTCISODateFromString.decode(
   "2021-07-08T23:59:59Z"
 ).getOrElseL(() => fail("wrong date value"));
-const aTimestamp = anEmailModeSwitchLimitDate.valueOf();
+const aTimestamp = anEmailOptOutEmailSwitchDate.valueOf();
 const aRetrievedProfileWithTimestampBeforeLimit = {
   ...aRetrievedProfile,
   _ts: aTimestamp - 1
@@ -35,7 +35,7 @@ describe("GetProfileHandler", () => {
 
     const getProfileHandler = GetProfileHandler(
       profileModelMock as any,
-      anEmailModeSwitchLimitDate
+      anEmailOptOutEmailSwitchDate
     );
 
     const response = await getProfileHandler(aFiscalCode);
@@ -49,7 +49,7 @@ describe("GetProfileHandler", () => {
     }
   });
 
-  it("should find an existing profile overwriting isEmailEnabled property if cosmos timestamp is before email mode switch limit date", async () => {
+  it("should find an existing profile overwriting isEmailEnabled property if cosmos timestamp is before email opt out switch limit date", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
         return taskEither.of(some(aRetrievedProfileWithTimestampBeforeLimit));
@@ -58,7 +58,7 @@ describe("GetProfileHandler", () => {
 
     const getProfileHandler = GetProfileHandler(
       profileModelMock as any,
-      anEmailModeSwitchLimitDate
+      anEmailOptOutEmailSwitchDate
     );
 
     const response = await getProfileHandler(aFiscalCode);
@@ -84,7 +84,7 @@ describe("GetProfileHandler", () => {
 
     const getProfileHandler = GetProfileHandler(
       profileModelMock as any,
-      anEmailModeSwitchLimitDate
+      anEmailOptOutEmailSwitchDate
     );
 
     const response = await getProfileHandler(aFiscalCode);
@@ -103,7 +103,7 @@ describe("GetProfileHandler", () => {
 
     const getProfileHandler = GetProfileHandler(
       profileModelMock as any,
-      anEmailModeSwitchLimitDate
+      anEmailOptOutEmailSwitchDate
     );
 
     const result = await getProfileHandler(aFiscalCode);

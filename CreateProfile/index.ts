@@ -27,7 +27,7 @@ secureExpressApp(app);
 
 app.post(
   "/api/v1/profiles/:fiscalcode",
-  CreateProfile(profileModel, config.EMAIL_MODE_SWITCH_LIMIT_DATE)
+  CreateProfile(profileModel, config.OPT_OUT_EMAIL_SWITCH_DATE)
 );
 
 const azureFunctionHandler = createAzureFunctionHandler(app);

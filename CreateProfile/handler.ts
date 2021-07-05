@@ -55,7 +55,7 @@ type ICreateProfileHandler = (
 
 export function CreateProfileHandler(
   profileModel: ProfileModel,
-  emailModeSwitchLimitDate: Date
+  optOutEmailSwitchDate: Date
 ): ICreateProfileHandler {
   return async (context, fiscalCode, createProfilePayload) => {
     const logPrefix = `CreateProfileHandler|FISCAL_CODE=${fiscalCode}`;
@@ -64,8 +64,8 @@ export function CreateProfileHandler(
       INewProfile.decode({
         email: createProfilePayload.email,
         fiscalCode,
-        // this check can be removed after the release date for emailModeSwitchLimitDate
-        isEmailEnabled: isBefore(new Date(), emailModeSwitchLimitDate),
+        // this check can be removed after the release date for optOutEmailSwitchDate
+        isEmailEnabled: isBefore(new Date(), optOutEmailSwitchDate),
         isEmailValidated: createProfilePayload.is_email_validated,
         isInboxEnabled: false,
         isTestProfile: createProfilePayload.is_test_profile,
@@ -123,9 +123,9 @@ export function CreateProfileHandler(
  */
 export function CreateProfile(
   profileModel: ProfileModel,
-  emailModeSwitchLimitDate: Date
+  optOutEmailSwitchDate: Date
 ): express.RequestHandler {
-  const handler = CreateProfileHandler(profileModel, emailModeSwitchLimitDate);
+  const handler = CreateProfileHandler(profileModel, optOutEmailSwitchDate);
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
