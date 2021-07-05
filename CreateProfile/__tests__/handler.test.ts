@@ -6,6 +6,7 @@ import * as df from "durable-functions";
 
 import { NewProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
+import * as date_fns from "date-fns";
 import { identity } from "fp-ts/lib/function";
 import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { context as contextMock } from "../../__mocks__/durable-functions";
@@ -18,7 +19,6 @@ import {
 } from "../../__mocks__/mocks";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../../UpsertedProfileOrchestrator/handler";
 import { CreateProfileHandler } from "../handler";
-import * as date_fns from "date-fns";
 
 // tslint:disable-next-line: no-let
 let clock: any;
@@ -31,15 +31,15 @@ afterEach(() => {
   clock = clock.uninstall();
 });
 
-const anEmailModeSwitchLimitDate = UTCISODateFromString.decode(
+const anOptOutEmailSwitchDate = UTCISODateFromString.decode(
   "2021-07-08T23:59:59Z"
 ).getOrElseL(() => fail("wrong date value"));
 
-const aPastEmailModeSwitchLimitDate = UTCISODateFromString.decode(
+const aPastOptOutEmailSwitchDate = UTCISODateFromString.decode(
   "2000-07-08T23:59:59Z"
 ).getOrElseL(() => fail("wrong date value"));
 
-const aFutureEmailModeSwitchLimitDate = date_fns.addDays(aNewDate, 1);
+const aFutureOptOutEmailSwitchDate = date_fns.addDays(aNewDate, 1);
 
 const aTestProfileWithEmailDisabled = {
   ...aRetrievedProfile,
@@ -49,7 +49,6 @@ const aTestProfileWithEmailDisabled = {
 const expectedNewProfile = NewProfile.decode({
   email: aNewProfile.email,
   fiscalCode: aFiscalCode,
-  // this check can be removed after the release date for emailModeSwitchLimitDate
   isEmailEnabled: false,
   isEmailValidated: aNewProfile.is_email_validated,
   isInboxEnabled: false,
@@ -66,7 +65,7 @@ describe("CreateProfileHandler", () => {
 
     const createProfileHandler = CreateProfileHandler(
       profileModelMock as any,
-      anEmailModeSwitchLimitDate
+      anOptOutEmailSwitchDate
     );
 
     const result = await createProfileHandler(
@@ -85,7 +84,7 @@ describe("CreateProfileHandler", () => {
 
     const createProfileHandler = CreateProfileHandler(
       profileModelMock as any,
-      anEmailModeSwitchLimitDate
+      anOptOutEmailSwitchDate
     );
 
     const result = await createProfileHandler(
@@ -107,7 +106,7 @@ describe("CreateProfileHandler", () => {
 
     const createProfileHandler = CreateProfileHandler(
       profileModelMock as any,
-      aPastEmailModeSwitchLimitDate
+      aPastOptOutEmailSwitchDate
     );
 
     const result = await createProfileHandler(
@@ -133,7 +132,7 @@ describe("CreateProfileHandler", () => {
 
     const createProfileHandler = CreateProfileHandler(
       profileModelMock as any,
-      aFutureEmailModeSwitchLimitDate
+      aFutureOptOutEmailSwitchDate
     );
 
     const result = await createProfileHandler(
@@ -158,7 +157,7 @@ describe("CreateProfileHandler", () => {
     };
     const createProfileHandler = CreateProfileHandler(
       profileModelMock as any,
-      anEmailModeSwitchLimitDate
+      anOptOutEmailSwitchDate
     );
 
     await createProfileHandler(contextMock as any, aFiscalCode, {} as any);
