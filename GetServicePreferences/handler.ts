@@ -37,6 +37,7 @@ import {
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import {
+  getServicePreferenceSettingsVersion,
   nonLegacyServicePreferences,
   toDefaultDisabledUserServicePreference,
   toDefaultEnabledUserServicePreference,
@@ -45,7 +46,6 @@ import {
 
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { NonNegativeInteger } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/numbers";
-import { NonEmptyString } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/strings";
 import { identity } from "fp-ts/lib/function";
 
 type IGetServicePreferencesHandlerResult =
@@ -92,7 +92,7 @@ const getProfileOrErrorResponse = (
  * @returns
  */
 export declare type getUserServicePreferencesT = (params: {
-  readonly documentId: NonEmptyString;
+  readonly serviceId: ServiceId;
   readonly mode:
     | ServicesPreferencesModeEnum.AUTO
     | ServicesPreferencesModeEnum.MANUAL;
@@ -101,9 +101,12 @@ export declare type getUserServicePreferencesT = (params: {
 }) => te.TaskEither<IResponseErrorQuery, ServicePreference>;
 const getUserServicePreferencesOrDefault = (
   servicePreferencesModel: ServicesPreferencesModel
-): getUserServicePreferencesT => ({ fiscalCode, documentId, mode, version }) =>
+): getUserServicePreferencesT => ({ fiscalCode, serviceId, mode, version }) =>
   servicePreferencesModel
-    .find([documentId, fiscalCode])
+    .find([
+      makeServicesPreferencesDocumentId(fiscalCode, serviceId, version),
+      fiscalCode
+    ])
     .mapLeft(failure =>
       ResponseErrorQuery(
         "Error while retrieving the user's service preferences",
@@ -145,23 +148,14 @@ export const GetServicePreferencesHandler = (
         ResponseErrorConflict("Legacy service preferences not allowed")
       )
       .chain(profile =>
-        te
-          .fromEither(
-            NonNegativeInteger.decode(
-              profile.servicePreferencesSettings.version
-            )
-          )
+        getServicePreferenceSettingsVersion(profile)
           .mapLeft(_ =>
             ResponseErrorConflict("Service Preferences Version < 0 not allowed")
           )
           .map(version => ({
-            documentId: makeServicesPreferencesDocumentId(
-              fiscalCode,
-              serviceId,
-              version
-            ),
             fiscalCode,
             mode: profile.servicePreferencesSettings.mode,
+            serviceId,
             version
           }))
       )

@@ -1,4 +1,6 @@
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
+import { ServicePreference } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePreference";
+import { Service } from "@pagopa/io-functions-commons/dist/src/models/service";
 import {
   makeServicesPreferencesDocumentId,
   RetrievedServicePreference
@@ -7,7 +9,7 @@ import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { aCosmosResourceMetadata, aFiscalCode } from "./mocks";
 
 export const aServiceId = "aServiceId" as ServiceId;
-export const aServicePreferenceVersion = 2 as NonNegativeInteger;
+export const aServicePreferenceVersion = 0 as NonNegativeInteger;
 
 export const aRetrievedServicePreference: RetrievedServicePreference = {
   ...aCosmosResourceMetadata,
@@ -24,3 +26,16 @@ export const aRetrievedServicePreference: RetrievedServicePreference = {
     aServicePreferenceVersion
   )
 };
+
+export const aServicePreference: ServicePreference = {
+  is_email_enabled: true,
+  is_inbox_enabled: true,
+  is_webhook_enabled: true,
+  settings_version: aServicePreferenceVersion
+};
+
+export const aRetrievedService: Service = ({
+  ...aCosmosResourceMetadata,
+  serviceId: aServiceId,
+  isVisible: true
+} as any) as Service;
