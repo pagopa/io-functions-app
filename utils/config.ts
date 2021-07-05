@@ -5,14 +5,17 @@
  * The configuration is evaluate eagerly at the first access to the module. The module exposes convenient methods to access such value.
  */
 
+import { fromNullable as fromNullableE } from "fp-ts/lib/Either";
 import { fromNullable } from "fp-ts/lib/Option";
 import * as t from "io-ts";
 
 import { MailerConfig } from "@pagopa/io-functions-commons/dist/src/mailer";
 
-import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
+import { DateFromTimestamp } from "@pagopa/ts-commons/lib/dates";
+import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { identity } from "fp-ts/lib/function";
 
 // exclude a specific value from a type
 // as strict equality is performed, allowed input types are constrained to be values not references (object, arrays, etc)
@@ -77,7 +80,7 @@ export const IConfig = t.intersection([
     SPID_LOGS_PUBLIC_KEY: NonEmptyString,
     SUBSCRIPTIONS_FEED_TABLE: NonEmptyString,
 
-    OPT_OUT_EMAIL_SWITCH_DATE: UTCISODateFromString,
+    OPT_OUT_EMAIL_SWITCH_DATE: DateFromTimestamp,
 
     IS_CASHBACK_ENABLED: t.boolean,
 
@@ -92,7 +95,7 @@ export const IConfig = t.intersection([
   EUCovidCertProfileQueueConfig
 ]);
 
-const DEFAULT_OPT_OUT_EMAIL_SWITCH_DATE = "2021-07-09T00:00:00Z";
+const DEFAULT_OPT_OUT_EMAIL_SWITCH_DATE = 1625781600000;
 
 // No need to re-evaluate this object for each call
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
@@ -111,9 +114,15 @@ const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   IS_CASHBACK_ENABLED: fromNullable(process.env.IS_CASHBACK_ENABLED)
     .map(_ => _.toLocaleLowerCase() === "true")
     .getOrElse(false),
-  OPT_OUT_EMAIL_SWITCH_DATE: fromNullable(
+  OPT_OUT_EMAIL_SWITCH_DATE: fromNullableE(DEFAULT_OPT_OUT_EMAIL_SWITCH_DATE)(
     process.env.OPT_OUT_EMAIL_SWITCH_DATE
-  ).getOrElse(DEFAULT_OPT_OUT_EMAIL_SWITCH_DATE),
+  )
+    .chain(_ =>
+      NumberFromString.decode(_).mapLeft(
+        () => DEFAULT_OPT_OUT_EMAIL_SWITCH_DATE
+      )
+    )
+    .fold(identity, identity),
   isProduction: process.env.NODE_ENV === "production"
 });
 
