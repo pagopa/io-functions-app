@@ -27,7 +27,11 @@ const profileModel = new ProfileModel(
 
 app.get(
   "/api/v1/profiles/:fiscalcode",
-  GetProfile(profileModel, config.OPT_OUT_EMAIL_SWITCH_DATE)
+  GetProfile(
+    profileModel,
+    config.OPT_OUT_EMAIL_SWITCH_DATE,
+    config.FF_OPT_OUT_EMAIL_ENABLED
+  )
 );
 
 const azureFunctionHandler = createAzureFunctionHandler(app);
