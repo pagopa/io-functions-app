@@ -35,7 +35,8 @@ describe("GetProfileHandler", () => {
 
     const getProfileHandler = GetProfileHandler(
       profileModelMock as any,
-      anEmailOptOutEmailSwitchDate
+      anEmailOptOutEmailSwitchDate,
+      true
     );
 
     const response = await getProfileHandler(aFiscalCode);
@@ -58,7 +59,8 @@ describe("GetProfileHandler", () => {
 
     const getProfileHandler = GetProfileHandler(
       profileModelMock as any,
-      anEmailOptOutEmailSwitchDate
+      anEmailOptOutEmailSwitchDate,
+      true
     );
 
     const response = await getProfileHandler(aFiscalCode);
@@ -75,6 +77,30 @@ describe("GetProfileHandler", () => {
     }
   });
 
+  it("should find an existing profile by not overwriting isEmailEnabled property if cosmos timestamp is before email opt out switch limit date", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() => {
+        return taskEither.of(some(aRetrievedProfileWithTimestampBeforeLimit));
+      })
+    };
+
+    const getProfileHandler = GetProfileHandler(
+      profileModelMock as any,
+      anEmailOptOutEmailSwitchDate,
+      false
+    );
+
+    const response = await getProfileHandler(aFiscalCode);
+
+    expect(profileModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
+      aFiscalCode
+    ]);
+    expect(response.kind).toBe("IResponseSuccessJson");
+    if (response.kind === "IResponseSuccessJson") {
+      expect(response.value).toEqual(aExtendedProfile);
+    }
+  });
+
   it("should respond with NotFound if profile does not exist", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
@@ -84,7 +110,8 @@ describe("GetProfileHandler", () => {
 
     const getProfileHandler = GetProfileHandler(
       profileModelMock as any,
-      anEmailOptOutEmailSwitchDate
+      anEmailOptOutEmailSwitchDate,
+      true
     );
 
     const response = await getProfileHandler(aFiscalCode);
@@ -103,7 +130,8 @@ describe("GetProfileHandler", () => {
 
     const getProfileHandler = GetProfileHandler(
       profileModelMock as any,
-      anEmailOptOutEmailSwitchDate
+      anEmailOptOutEmailSwitchDate,
+      true
     );
 
     const result = await getProfileHandler(aFiscalCode);
