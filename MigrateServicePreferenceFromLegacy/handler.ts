@@ -14,6 +14,7 @@ import { NonNegativeInteger } from "@pagopa/io-functions-commons/node_modules/@p
 import { ResponseErrorFromValidationErrors } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/responses";
 import * as a from "fp-ts/lib/Array";
 import * as e from "fp-ts/lib/Either";
+import * as o from "fp-ts/lib/Option";
 import * as te from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 import { FiscalCode } from "../generated/backend/FiscalCode";
@@ -66,11 +67,22 @@ export const blockedsToServicesPreferences = (
   fiscalCode: FiscalCode,
   version: NonNegativeInteger
 ) =>
-  Object.entries(blocked)
-    .filter(i => ServiceId.is(i[0]))
-    .map(
-      i => createServicePreference(i[0] as ServiceId, i[1], fiscalCode, version) // cast required: ts do not identify filter as a guard
-    );
+  o
+    .fromNullable(blocked)
+    .map(b =>
+      Object.entries(b)
+        .filter(i => ServiceId.is(i[0]))
+        .map(
+          i =>
+            createServicePreference(
+              i[0] as ServiceId,
+              i[1],
+              fiscalCode,
+              version
+            ) // cast required: ts do not identify filter as a guard
+        )
+    )
+    .getOrElse([]);
 
 export const MigrateServicePreferenceFromLegacy = (
   servicePreferenceModel: ServicesPreferencesModel
@@ -80,7 +92,7 @@ export const MigrateServicePreferenceFromLegacy = (
     .mapLeft(
       ResponseErrorFromValidationErrors(MigrateServicesPreferencesQueueMessage)
     )
-    .mapLeft(e.toError)
+    .mapLeft(err => new Error(err.detail))
     .filterOrElse(
       migrateInput =>
         NonNegativeInteger.is(
