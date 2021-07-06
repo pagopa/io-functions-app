@@ -33,6 +33,7 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
+import { MigrateServicesPreferencesQueueMessage } from "../MigrateServicePreferenceFromLegacy/handler";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { ProfileMiddleware } from "../utils/middlewares/profile";
 import {
@@ -166,6 +167,8 @@ export function UpdateProfileHandler(
 
     const updateProfile = errorOrMaybeUpdatedProfile.value;
 
+    const dfClient = df.getClient(context);
+
     // Start the Orchestrator
     const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.encode(
       {
@@ -174,13 +177,28 @@ export function UpdateProfileHandler(
         updatedAt: new Date()
       }
     );
-
-    const dfClient = df.getClient(context);
     await dfClient.startNew(
       "UpsertedProfileOrchestrator",
       undefined,
       upsertedProfileOrchestratorInput
     );
+
+    // Queue services preferences migration
+    if (
+      existingProfile.servicePreferencesSettings.mode ===
+        ServicesPreferencesModeEnum.LEGACY &&
+      updateProfile.servicePreferencesSettings.mode ===
+        ServicesPreferencesModeEnum.AUTO
+    ) {
+      await dfClient.startNew(
+        "MigrateServicesPreferencesOrchestrator",
+        undefined,
+        MigrateServicesPreferencesQueueMessage.encode({
+          newProfile: updateProfile,
+          oldProfile: existingProfile
+        })
+      );
+    }
 
     return ResponseSuccessJson(
       retrievedProfileToExtendedProfile(updateProfile)
