@@ -117,15 +117,15 @@ export const MigrateServicePreferenceFromLegacy = (
             cosmosError =>
               isCosmosError(cosmosError) &&
               cosmosError.error.code === CONFLICT_CODE
-                ? taskEither.of(false)
+                ? te.taskEither.of(false)
                 : te.fromLeft(
-                      new Error(
-                        `Can not create the service profile: ${JSON.stringify(
-                          cosmosError
-                        )}`
-                      )
+                    new Error(
+                      `Can not create the service profile: ${JSON.stringify(
+                        cosmosError
+                      )}`
+                    )
                   ),
-            _ => te.fromEither(e.right(true))
+            _ => te.taskEither.of(true)
           )
       )
     )
