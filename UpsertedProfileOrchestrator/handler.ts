@@ -18,6 +18,7 @@ import {
 import { Input as UpdateServiceSubscriptionFeedActivityInput } from "../UpdateSubscriptionsFeedActivity/index";
 import { diffBlockedServices } from "../utils/profiles";
 
+import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import { EnqueueProfileCreationEventActivityInput } from "../EnqueueProfileCreationEventActivity/handler";
@@ -202,48 +203,89 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
         } as UpdateServiceSubscriptionFeedActivityInput
       );
     } else {
-      // When the profile gets updates, we extract the services that have been
-      // blocked and unblocked during this profile update.
-      // Blocked services get mapped to unsubscribe events, while unblocked ones
-      // get mapped to subscribe events.
-      const {
-        e1: unsubscribedServices,
-        e2: subscribedServices
-      } = diffBlockedServices(
-        oldProfile.blockedInboxOrChannels,
-        newProfile.blockedInboxOrChannels
-      );
+      const { newServicePreferencesMode, oldServicePreferenceMode } = {
+        newServicePreferencesMode: newProfile.servicePreferencesSettings.mode,
+        oldServicePreferenceMode: oldProfile.servicePreferencesSettings.mode
+      };
 
-      for (const s of subscribedServices) {
+      if (newServicePreferencesMode === ServicesPreferencesModeEnum.LEGACY) {
+        // When a LEGACY profile gets updates, we extract the services that have been
+        // blocked and unblocked during this profile update.
+        // Blocked services get mapped to unsubscribe events, while unblocked ones
+        // get mapped to subscribe events.
+        const {
+          e1: unsubscribedServices,
+          e2: subscribedServices
+        } = diffBlockedServices(
+          oldProfile.blockedInboxOrChannels,
+          newProfile.blockedInboxOrChannels
+        );
+
+        for (const s of subscribedServices) {
+          context.log.verbose(
+            `${logPrefix}|Calling UpdateSubscriptionsFeedActivity|OPERATION=SUBSCRIBED|SERVICE_ID=${s}`
+          );
+          yield context.df.callActivityWithRetry(
+            "UpdateSubscriptionsFeedActivity",
+            retryOptions,
+            {
+              fiscalCode: newProfile.fiscalCode,
+              operation: "SUBSCRIBED",
+              serviceId: s as ServiceId,
+              subscriptionKind: "SERVICE",
+              updatedAt: updatedAt.getTime(),
+              version: newProfile.version
+            } as UpdateServiceSubscriptionFeedActivityInput
+          );
+        }
+
+        for (const s of unsubscribedServices) {
+          context.log.verbose(
+            `${logPrefix}|Calling UpdateSubscriptionsFeedActivity|OPERATION=UNSUBSCRIBED|SERVICE_ID=${s}`
+          );
+          yield context.df.callActivityWithRetry(
+            "UpdateSubscriptionsFeedActivity",
+            retryOptions,
+            {
+              fiscalCode: newProfile.fiscalCode,
+              operation: "UNSUBSCRIBED",
+              serviceId: s as ServiceId,
+              subscriptionKind: "SERVICE",
+              updatedAt: updatedAt.getTime(),
+              version: newProfile.version
+            } as UpdateServiceSubscriptionFeedActivityInput
+          );
+        }
+        // we need to update Subscription Feed on Profile Upsert when:
+        // Service Preference Mode has changed from oldProfile to newProfile in upsert operation
+        // and mode transition causes an effective change (i.e when NOT going from LEGACY to AUTO)
+      } else if (
+        oldServicePreferenceMode !== newServicePreferencesMode &&
+        (oldServicePreferenceMode !== ServicesPreferencesModeEnum.LEGACY ||
+          newServicePreferencesMode !== ServicesPreferencesModeEnum.AUTO)
+      ) {
+        // | oldServicePreferenceMode | newServicePreferencesMode | Operation
+        // -------------------------------------------------------------------------
+        // | LEGACY                   | MANUAL                    | UNSUBSCRIBED
+        // | AUTO                     | MANUAL                    | UNSUBSCRIBED
+        // | MANUAL                   | AUTO                      | SUBSCRIBED
+        // When a profile Service preference mode is upserted from AUTO or LEGACY to MANUAL
+        // we must unsubscribe th entire profile, otherwise from MANUAL we can update mode only to AUTO
+        // so we must subscribe the entire profile.
+        const feedOperation =
+          newServicePreferencesMode === ServicesPreferencesModeEnum.MANUAL
+            ? "UNSUBSCRIBED"
+            : "SUBSCRIBED";
         context.log.verbose(
-          `${logPrefix}|Calling UpdateSubscriptionsFeedActivity|OPERATION=SUBSCRIBED|SERVICE_ID=${s}`
+          `${logPrefix}|Calling UpdateSubscriptionsFeedActivity|OPERATION=${feedOperation}`
         );
         yield context.df.callActivityWithRetry(
           "UpdateSubscriptionsFeedActivity",
           retryOptions,
           {
             fiscalCode: newProfile.fiscalCode,
-            operation: "SUBSCRIBED",
-            serviceId: s as ServiceId,
-            subscriptionKind: "SERVICE",
-            updatedAt: updatedAt.getTime(),
-            version: newProfile.version
-          } as UpdateServiceSubscriptionFeedActivityInput
-        );
-      }
-
-      for (const s of unsubscribedServices) {
-        context.log.verbose(
-          `${logPrefix}|Calling UpdateSubscriptionsFeedActivity|OPERATION=UNSUBSCRIBED|SERVICE_ID=${s}`
-        );
-        yield context.df.callActivityWithRetry(
-          "UpdateSubscriptionsFeedActivity",
-          retryOptions,
-          {
-            fiscalCode: newProfile.fiscalCode,
-            operation: "UNSUBSCRIBED",
-            serviceId: s as ServiceId,
-            subscriptionKind: "SERVICE",
+            operation: feedOperation,
+            subscriptionKind: "PROFILE",
             updatedAt: updatedAt.getTime(),
             version: newProfile.version
           } as UpdateServiceSubscriptionFeedActivityInput
