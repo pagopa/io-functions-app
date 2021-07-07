@@ -830,7 +830,7 @@ describe("UpsertedProfileOrchestrator", () => {
     );
   });
 
-  it("should call UpdateSubscriptionFeedActivity to subscribe the entire profile switching from AUTO to MANUAL", async () => {
+  it("should call UpdateSubscriptionFeedActivity to subscribe the entire profile switching from MANUAL to AUTO", async () => {
     const expectedQueueName = "queue_name" as NonEmptyString;
     const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.decode(
       {
