@@ -18,10 +18,7 @@ import {
 import { Input as UpdateServiceSubscriptionFeedActivityInput } from "../UpdateSubscriptionsFeedActivity/index";
 import { diffBlockedServices } from "../utils/profiles";
 
-import {
-  ServicesPreferencesMode,
-  ServicesPreferencesModeEnum
-} from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
+import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import { EnqueueProfileCreationEventActivityInput } from "../EnqueueProfileCreationEventActivity/handler";
