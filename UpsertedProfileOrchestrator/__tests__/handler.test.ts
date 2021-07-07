@@ -23,6 +23,7 @@ import {
 
 import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { consumeGenerator } from "../../utils/durable";
 
 const someRetryOptions = new df.RetryOptions(5000, 10);
 // tslint:disable-next-line: no-object-mutation
@@ -55,7 +56,7 @@ describe("UpsertedProfileOrchestrator", () => {
       sendCashbackMessage: false
     })(contextMockWithDf as any);
 
-    orchestratorHandler.next();
+    consumeGenerator(orchestratorHandler);
 
     expect(contextMockWithDf.df.callSubOrchestratorWithRetry).not.toBeCalled();
   });
@@ -108,7 +109,7 @@ describe("UpsertedProfileOrchestrator", () => {
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
-    const result = orchestratorHandler.next();
+    consumeGenerator(orchestratorHandler);
 
     expect(contextMockWithDf.df.callSubOrchestratorWithRetry).toBeCalledWith(
       "EmailValidationProcessOrchestrator",
@@ -119,7 +120,6 @@ describe("UpsertedProfileOrchestrator", () => {
       })
     );
 
-    const result2 = orchestratorHandler.next(result.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -129,7 +129,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    orchestratorHandler.next(result2.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -139,7 +138,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    orchestratorHandler.next();
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -203,7 +201,7 @@ describe("UpsertedProfileOrchestrator", () => {
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
-    const result = orchestratorHandler.next();
+    consumeGenerator(orchestratorHandler);
 
     expect(contextMockWithDf.df.callSubOrchestratorWithRetry).toBeCalledWith(
       "EmailValidationProcessOrchestrator",
@@ -214,7 +212,6 @@ describe("UpsertedProfileOrchestrator", () => {
       })
     );
 
-    const result2 = orchestratorHandler.next(result.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -224,7 +221,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    const result3 = orchestratorHandler.next(result2.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -234,7 +230,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    orchestratorHandler.next(result3.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -244,114 +239,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    orchestratorHandler.next();
-    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
-      "EnqueueProfileCreationEventActivity",
-      someRetryOptions,
-      {
-        fiscalCode: aFiscalCode,
-        queueName: expectedQueueName
-      }
-    );
-  });
-
-  it("should call UpdateSubscriptionFeedActivity when profile is created", async () => {
-    const expectedQueueName = "queue_name" as NonEmptyString;
-    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.decode(
-      {
-        newProfile: {
-          ...aRetrievedProfile,
-          email: aEmailChanged, // Email changed to start the EmailValidationProcessOrchestrator
-          isInboxEnabled: true // Enable inbox to start the SendWelcomeMessagesActivity
-        },
-        oldProfile: undefined,
-        updatedAt: new Date()
-      }
-    ).getOrElseL(_ =>
-      fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(_)}`
-      )
-    );
-
-    const emailValidationProcessOrchestratorResult = EmailValidationProcessOrchestratorResult.decode(
-      {
-        kind: "SUCCESS"
-      }
-    ).getOrElseL(_ =>
-      fail(
-        `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
-          _
-        )}`
-      )
-    );
-
-    const sendWelcomeMessagesActivityResult = "SUCCESS";
-
-    const contextMockWithDf = {
-      ...contextMock,
-      df: {
-        Task: {
-          all: (tasks: readonly Task[]) => tasks
-        },
-        callActivityWithRetry: jest
-          .fn()
-          .mockReturnValueOnce(sendWelcomeMessagesActivityResult),
-        callSubOrchestratorWithRetry: jest.fn(
-          () => emailValidationProcessOrchestratorResult
-        ),
-        getInput: jest.fn(() => upsertedProfileOrchestratorInput)
-      }
-    };
-
-    const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      notifyOn: fromArray([expectedQueueName]).getOrElseL(undefined),
-      sendCashbackMessage: true
-    })(contextMockWithDf as any);
-
-    const result = orchestratorHandler.next();
-    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
-      "SendWelcomeMessagesActivity",
-      someRetryOptions,
-      {
-        messageKind: "WELCOME",
-        profile: upsertedProfileOrchestratorInput.newProfile
-      }
-    );
-
-    const result3 = orchestratorHandler.next(result.value);
-    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
-      "SendWelcomeMessagesActivity",
-      someRetryOptions,
-      {
-        messageKind: "HOWTO",
-        profile: upsertedProfileOrchestratorInput.newProfile
-      }
-    );
-
-    const result4 = orchestratorHandler.next(result3.value);
-    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
-      "SendWelcomeMessagesActivity",
-      someRetryOptions,
-      {
-        messageKind: "CASHBACK",
-        profile: upsertedProfileOrchestratorInput.newProfile
-      }
-    );
-
-    const result5 = orchestratorHandler.next(result4.value);
-    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
-      "UpdateSubscriptionsFeedActivity",
-      someRetryOptions,
-      {
-        fiscalCode: aFiscalCode,
-        operation: "SUBSCRIBED",
-        subscriptionKind: "PROFILE",
-        updatedAt: upsertedProfileOrchestratorInput.updatedAt.getTime(),
-        version: upsertedProfileOrchestratorInput.newProfile.version
-      }
-    );
-
-    orchestratorHandler.next(result5.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "EnqueueProfileCreationEventActivity",
       someRetryOptions,
@@ -419,7 +306,7 @@ describe("UpsertedProfileOrchestrator", () => {
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
-    const result = orchestratorHandler.next();
+    consumeGenerator(orchestratorHandler);
 
     expect(contextMockWithDf.df.callSubOrchestratorWithRetry).toBeCalledWith(
       "EmailValidationProcessOrchestrator",
@@ -430,7 +317,6 @@ describe("UpsertedProfileOrchestrator", () => {
       })
     );
 
-    const result2 = orchestratorHandler.next(result.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -440,7 +326,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    const result3 = orchestratorHandler.next(result2.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -450,7 +335,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    orchestratorHandler.next(result3.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -460,7 +344,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    orchestratorHandler.next();
     expect(contextMockWithDf.df.callActivityWithRetry).not.toHaveBeenCalledWith(
       "UpdateSubscriptionsFeedActivity",
       someRetryOptions,
@@ -532,7 +415,7 @@ describe("UpsertedProfileOrchestrator", () => {
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
-    const result = orchestratorHandler.next();
+    consumeGenerator(orchestratorHandler);
 
     expect(contextMockWithDf.df.callSubOrchestratorWithRetry).toBeCalledWith(
       "EmailValidationProcessOrchestrator",
@@ -543,7 +426,6 @@ describe("UpsertedProfileOrchestrator", () => {
       })
     );
 
-    const result2 = orchestratorHandler.next(result.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -553,7 +435,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    const result3 = orchestratorHandler.next(result2.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -563,7 +444,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    orchestratorHandler.next(result3.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -573,7 +453,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    orchestratorHandler.next();
     expect(contextMockWithDf.df.callActivityWithRetry).not.toHaveBeenCalledWith(
       "UpdateSubscriptionsFeedActivity",
       someRetryOptions,
@@ -645,7 +524,7 @@ describe("UpsertedProfileOrchestrator", () => {
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
-    const result = orchestratorHandler.next();
+    consumeGenerator(orchestratorHandler);
 
     expect(contextMockWithDf.df.callSubOrchestratorWithRetry).toBeCalledWith(
       "EmailValidationProcessOrchestrator",
@@ -656,7 +535,6 @@ describe("UpsertedProfileOrchestrator", () => {
       })
     );
 
-    const result2 = orchestratorHandler.next(result.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -666,7 +544,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    const result3 = orchestratorHandler.next(result2.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -676,7 +553,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    const result4 = orchestratorHandler.next(result3.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -686,7 +562,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    const result5 = orchestratorHandler.next(result4.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "UpdateSubscriptionsFeedActivity",
       someRetryOptions,
@@ -698,7 +573,6 @@ describe("UpsertedProfileOrchestrator", () => {
         version: upsertedProfileOrchestratorInput.newProfile.version
       }
     );
-    orchestratorHandler.next(result5.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "EnqueueProfileCreationEventActivity",
       someRetryOptions,
@@ -766,7 +640,7 @@ describe("UpsertedProfileOrchestrator", () => {
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
-    const result = orchestratorHandler.next();
+    consumeGenerator(orchestratorHandler);
 
     expect(contextMockWithDf.df.callSubOrchestratorWithRetry).toBeCalledWith(
       "EmailValidationProcessOrchestrator",
@@ -777,7 +651,6 @@ describe("UpsertedProfileOrchestrator", () => {
       })
     );
 
-    const result2 = orchestratorHandler.next(result.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -787,7 +660,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    const result3 = orchestratorHandler.next(result2.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -797,7 +669,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    const result4 = orchestratorHandler.next(result3.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -807,7 +678,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    const result5 = orchestratorHandler.next(result4.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "UpdateSubscriptionsFeedActivity",
       someRetryOptions,
@@ -819,7 +689,6 @@ describe("UpsertedProfileOrchestrator", () => {
         version: upsertedProfileOrchestratorInput.newProfile.version
       }
     );
-    orchestratorHandler.next(result5.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "EnqueueProfileCreationEventActivity",
       someRetryOptions,
@@ -887,7 +756,7 @@ describe("UpsertedProfileOrchestrator", () => {
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
-    const result = orchestratorHandler.next();
+    consumeGenerator(orchestratorHandler);
 
     expect(contextMockWithDf.df.callSubOrchestratorWithRetry).toBeCalledWith(
       "EmailValidationProcessOrchestrator",
@@ -898,7 +767,6 @@ describe("UpsertedProfileOrchestrator", () => {
       })
     );
 
-    const result2 = orchestratorHandler.next(result.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -908,7 +776,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    const result3 = orchestratorHandler.next(result2.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -918,7 +785,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    const result4 = orchestratorHandler.next(result3.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -928,7 +794,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    const result5 = orchestratorHandler.next(result4.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "UpdateSubscriptionsFeedActivity",
       someRetryOptions,
@@ -940,7 +805,6 @@ describe("UpsertedProfileOrchestrator", () => {
         version: upsertedProfileOrchestratorInput.newProfile.version
       }
     );
-    orchestratorHandler.next(result5.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "EnqueueProfileCreationEventActivity",
       someRetryOptions,
@@ -1013,7 +877,7 @@ describe("UpsertedProfileOrchestrator", () => {
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
-    const result = orchestratorHandler.next();
+    consumeGenerator(orchestratorHandler);
 
     expect(contextMockWithDf.df.callSubOrchestratorWithRetry).toBeCalledWith(
       "EmailValidationProcessOrchestrator",
@@ -1024,7 +888,6 @@ describe("UpsertedProfileOrchestrator", () => {
       })
     );
 
-    const result2 = orchestratorHandler.next(result.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -1034,7 +897,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    const result3 = orchestratorHandler.next(result2.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -1044,7 +906,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    const result4 = orchestratorHandler.next(result3.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "SendWelcomeMessagesActivity",
       someRetryOptions,
@@ -1054,7 +915,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    const result5 = orchestratorHandler.next(result4.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "UpdateSubscriptionsFeedActivity",
       someRetryOptions,
@@ -1067,7 +927,7 @@ describe("UpsertedProfileOrchestrator", () => {
         version: upsertedProfileOrchestratorInput.newProfile.version
       }
     );
-    const result6 = orchestratorHandler.next(result5.value);
+
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "UpdateSubscriptionsFeedActivity",
       someRetryOptions,
@@ -1080,7 +940,7 @@ describe("UpsertedProfileOrchestrator", () => {
         version: upsertedProfileOrchestratorInput.newProfile.version
       }
     );
-    const result7 = orchestratorHandler.next(result6.value);
+
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "UpdateSubscriptionsFeedActivity",
       someRetryOptions,
@@ -1094,7 +954,6 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    orchestratorHandler.next(result7.value);
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
       "EnqueueProfileCreationEventActivity",
       someRetryOptions,

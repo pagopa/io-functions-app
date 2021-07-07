@@ -204,8 +204,8 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
       );
     } else {
       const { newServicePreferencesMode, oldServicePreferenceMode } = {
-        newServicePreferencesMode: newProfile.servicePreferencesSettings.mode.toString(),
-        oldServicePreferenceMode: oldProfile.servicePreferencesSettings.mode.toString()
+        newServicePreferencesMode: newProfile.servicePreferencesSettings.mode,
+        oldServicePreferenceMode: oldProfile.servicePreferencesSettings.mode
       };
 
       if (newServicePreferencesMode === ServicesPreferencesModeEnum.LEGACY) {
@@ -256,15 +256,13 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
             } as UpdateServiceSubscriptionFeedActivityInput
           );
         }
-        // If Service Preference Mode doesn't change from oldProfile to newProfile in upsert operation
-        // or even if mode transition cause a no effect change (i.e from LEGACY to AUTO)
-        // we don't need to update Subscription Feed
+        // we need to update Subscription Feed on Profile Upsert when:
+        // Service Preference Mode has changed from oldProfile to newProfile in upsert operation
+        // and mode transition causes an effective change (i.e when NOT going from LEGACY to AUTO)
       } else if (
         oldServicePreferenceMode !== newServicePreferencesMode &&
-        !(
-          oldServicePreferenceMode === ServicesPreferencesModeEnum.LEGACY &&
-          newServicePreferencesMode === ServicesPreferencesModeEnum.AUTO
-        )
+        (oldServicePreferenceMode !== ServicesPreferencesModeEnum.LEGACY ||
+          newServicePreferencesMode !== ServicesPreferencesModeEnum.AUTO)
       ) {
         // | oldServicePreferenceMode | newServicePreferencesMode | Operation
         // -------------------------------------------------------------------------
