@@ -117,7 +117,7 @@ export const MigrateServicePreferenceFromLegacy = (
             cosmosError =>
               isCosmosError(cosmosError) &&
               cosmosError.error.code === CONFLICT_CODE
-                ? te.fromEither(e.right(false))
+                ? taskEither.of(false)
                 : te.fromEither(
                     e.left(
                       new Error(
