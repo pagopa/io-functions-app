@@ -13,7 +13,6 @@ import {
 import { NonNegativeInteger } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/numbers";
 import { ResponseErrorFromValidationErrors } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/responses";
 import * as a from "fp-ts/lib/Array";
-import * as e from "fp-ts/lib/Either";
 import * as o from "fp-ts/lib/Option";
 import * as te from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
