@@ -38,9 +38,11 @@ describe("UpsertedProfileOrchestrator", () => {
         oldProfile: aRetrievedProfile,
         updatedAt: new Date()
       }
-    ).getOrElseL(_ =>
+    ).getOrElseL(errs =>
       fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(_)}`
+        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+          errs
+        )}`
       )
     );
 
@@ -72,9 +74,11 @@ describe("UpsertedProfileOrchestrator", () => {
         oldProfile: aRetrievedProfile,
         updatedAt: new Date()
       }
-    ).getOrElseL(_ =>
+    ).getOrElseL(errs =>
       fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(_)}`
+        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+          errs
+        )}`
       )
     );
 
@@ -82,10 +86,10 @@ describe("UpsertedProfileOrchestrator", () => {
       {
         kind: "SUCCESS"
       }
-    ).getOrElseL(_ =>
+    ).getOrElseL(errs =>
       fail(
         `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
-          _
+          errs
         )}`
       )
     );
@@ -160,9 +164,11 @@ describe("UpsertedProfileOrchestrator", () => {
         oldProfile: aRetrievedProfile,
         updatedAt: new Date()
       }
-    ).getOrElseL(_ =>
+    ).getOrElseL(errs =>
       fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(_)}`
+        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+          errs
+        )}`
       )
     );
 
@@ -170,10 +176,10 @@ describe("UpsertedProfileOrchestrator", () => {
       {
         kind: "SUCCESS"
       }
-    ).getOrElseL(_ =>
+    ).getOrElseL(errs =>
       fail(
         `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
-          _
+          errs
         )}`
       )
     );
@@ -265,9 +271,11 @@ describe("UpsertedProfileOrchestrator", () => {
         },
         updatedAt: new Date()
       }
-    ).getOrElseL(_ =>
+    ).getOrElseL(errs =>
       fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(_)}`
+        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+          errs
+        )}`
       )
     );
 
@@ -275,10 +283,10 @@ describe("UpsertedProfileOrchestrator", () => {
       {
         kind: "SUCCESS"
       }
-    ).getOrElseL(_ =>
+    ).getOrElseL(errs =>
       fail(
         `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
-          _
+          errs
         )}`
       )
     );
@@ -374,9 +382,11 @@ describe("UpsertedProfileOrchestrator", () => {
         },
         updatedAt: new Date()
       }
-    ).getOrElseL(_ =>
+    ).getOrElseL(errs =>
       fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(_)}`
+        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+          errs
+        )}`
       )
     );
 
@@ -384,10 +394,10 @@ describe("UpsertedProfileOrchestrator", () => {
       {
         kind: "SUCCESS"
       }
-    ).getOrElseL(_ =>
+    ).getOrElseL(errs =>
       fail(
         `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
-          _
+          errs
         )}`
       )
     );
@@ -483,9 +493,11 @@ describe("UpsertedProfileOrchestrator", () => {
         },
         updatedAt: new Date()
       }
-    ).getOrElseL(_ =>
+    ).getOrElseL(errs =>
       fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(_)}`
+        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+          errs
+        )}`
       )
     );
 
@@ -493,10 +505,10 @@ describe("UpsertedProfileOrchestrator", () => {
       {
         kind: "SUCCESS"
       }
-    ).getOrElseL(_ =>
+    ).getOrElseL(errs =>
       fail(
         `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
-          _
+          errs
         )}`
       )
     );
@@ -599,9 +611,11 @@ describe("UpsertedProfileOrchestrator", () => {
         },
         updatedAt: new Date()
       }
-    ).getOrElseL(_ =>
+    ).getOrElseL(errs =>
       fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(_)}`
+        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+          errs
+        )}`
       )
     );
 
@@ -609,10 +623,10 @@ describe("UpsertedProfileOrchestrator", () => {
       {
         kind: "SUCCESS"
       }
-    ).getOrElseL(_ =>
+    ).getOrElseL(errs =>
       fail(
         `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
-          _
+          errs
         )}`
       )
     );
@@ -715,9 +729,11 @@ describe("UpsertedProfileOrchestrator", () => {
         },
         updatedAt: new Date()
       }
-    ).getOrElseL(_ =>
+    ).getOrElseL(errs =>
       fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(_)}`
+        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+          errs
+        )}`
       )
     );
 
@@ -725,10 +741,10 @@ describe("UpsertedProfileOrchestrator", () => {
       {
         kind: "SUCCESS"
       }
-    ).getOrElseL(_ =>
+    ).getOrElseL(errs =>
       fail(
         `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
-          _
+          errs
         )}`
       )
     );
@@ -836,9 +852,11 @@ describe("UpsertedProfileOrchestrator", () => {
         },
         updatedAt: new Date()
       }
-    ).getOrElseL(_ =>
+    ).getOrElseL(errs =>
       fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(_)}`
+        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+          errs
+        )}`
       )
     );
 
@@ -846,10 +864,10 @@ describe("UpsertedProfileOrchestrator", () => {
       {
         kind: "SUCCESS"
       }
-    ).getOrElseL(_ =>
+    ).getOrElseL(errs =>
       fail(
         `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
-          _
+          errs
         )}`
       )
     );
