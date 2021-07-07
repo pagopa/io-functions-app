@@ -118,14 +118,12 @@ export const MigrateServicePreferenceFromLegacy = (
               isCosmosError(cosmosError) &&
               cosmosError.error.code === CONFLICT_CODE
                 ? taskEither.of(false)
-                : te.fromEither(
-                    e.left(
+                : te.fromLeft(
                       new Error(
                         `Can not create the service profile: ${JSON.stringify(
                           cosmosError
                         )}`
                       )
-                    )
                   ),
             _ => te.fromEither(e.right(true))
           )
