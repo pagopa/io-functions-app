@@ -148,10 +148,15 @@ export function UpdateProfileHandler(
     const overriddenInboxAndWebhook = autoEnableInboxAndWebHook
       ? { isInboxEnabled: true, isWebhookEnabled: true }
       : {};
+    // If the user profile was on LEGACY mode we update blockedInboxOrChannels
+    // Otherwise we remove the property
     const overrideBlockedInboxOrChannels =
-      profile.servicePreferencesSettings.mode !==
+      profile.servicePreferencesSettings.mode ===
       ServicesPreferencesModeEnum.LEGACY
-        ? profile.blockedInboxOrChannels
+        ? // To be compliant with the previous implementation if the provided blocked_inbox_or_channel
+          // is undefined the stored value remains unchanged
+          profile.blockedInboxOrChannels ||
+          existingProfile.blockedInboxOrChannels
         : undefined;
 
     const errorOrMaybeUpdatedProfile = await profileModel

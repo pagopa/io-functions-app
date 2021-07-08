@@ -665,6 +665,51 @@ describe("UpdateProfileHandler", () => {
     );
   });
 
+  it("should update blockedInboxOrChannels if the profile still in LEGACY mode and the migration message not be sent", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(
+          some({
+            ...aRetrievedProfile,
+            blockedInboxOrChannels: {
+              serviceId: [BlockedInboxOrChannelEnum.INBOX]
+            }
+          })
+        )
+      ),
+      update: jest.fn(p => taskEither.of(p))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
+
+    await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      blocked_inbox_or_channels: {
+        newService: [BlockedInboxOrChannelEnum.EMAIL],
+        serviceId: [BlockedInboxOrChannelEnum.INBOX]
+      },
+      service_preferences_settings: legacyApiProfileServicePreferencesSettings
+    });
+
+    expect(profileModelMock.update).toBeCalledWith(
+      expect.objectContaining({
+        blockedInboxOrChannels: {
+          newService: [BlockedInboxOrChannelEnum.EMAIL],
+          serviceId: [BlockedInboxOrChannelEnum.INBOX]
+        },
+        servicePreferencesSettings: {
+          mode: ServicesPreferencesModeEnum.LEGACY,
+          version: -1
+        }
+      })
+    );
+    expect(mockSendMessage).not.toBeCalled();
+  });
+
   it("GIVEN a valid profile with mode AUTO, WHEN the update is called with current profile mode LEGACY and empty blockedInboxOrChannel, THEN the handler not send the migration message", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
