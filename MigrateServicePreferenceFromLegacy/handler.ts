@@ -70,12 +70,12 @@ export const blockedsToServicesPreferences = (
     .fromNullable(blocked)
     .map(b =>
       Object.entries(b)
-        .filter(i => ServiceId.is(i[0]))
+        .filter(([serviceId, _]) => ServiceId.is(serviceId))
         .map(
-          i =>
+          ([serviceId, blockedInboxOrChannelsForService]) =>
             createServicePreference(
-              i[0] as ServiceId,
-              i[1],
+              serviceId as ServiceId,
+              blockedInboxOrChannelsForService,
               fiscalCode,
               version
             ) // cast required: ts do not identify filter as a guard
