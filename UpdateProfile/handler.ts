@@ -20,7 +20,10 @@ import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
 
 import { Profile as ApiProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/Profile";
-import { ProfileModel } from "@pagopa/io-functions-commons/dist/src/models/profile";
+import {
+  Profile,
+  ProfileModel
+} from "@pagopa/io-functions-commons/dist/src/models/profile";
 import {
   IResponseErrorQuery,
   ResponseErrorQuery
@@ -42,6 +45,33 @@ import {
   apiProfileToProfile,
   retrievedProfileToExtendedProfile
 } from "../utils/profiles";
+import {
+  BlockedInboxOrChannel,
+  BlockedInboxOrChannelEnum
+} from "@pagopa/io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
+import { ServicePreference } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
+
+const toServicePrefence = (
+  fiscalCode: FiscalCode,
+  settingsVersion: NonNegativeInteger,
+  b: Profile["blockedInboxOrChannels"]
+) =>
+  Object.entries(b)
+    .filter((x): x is [ServiceId, BlockedInboxOrChannelEnum[]] =>
+      ServiceId.is(x)
+    )
+    .map(([serviceId, bb]) =>
+      ServicePreference.encode({
+        fiscalCode,
+        isEmailEnabled: !bb.includes(BlockedInboxOrChannelEnum.EMAIL),
+        isInboxEnabled: !bb.includes(BlockedInboxOrChannelEnum.INBOX),
+        isWebhookEnabled: !bb.includes(BlockedInboxOrChannelEnum.WEBHOOK),
+        serviceId,
+        settingsVersion
+      })
+    );
 
 /**
  * Type of an UpdateProfile handler.
@@ -206,32 +236,30 @@ export function UpdateProfileHandler(
       updateProfile.servicePreferencesSettings.mode ===
         ServicesPreferencesModeEnum.AUTO
     ) {
-      await te.taskEither
-        .of(
-          MigrateServicesPreferencesQueueMessage.encode({
-            newProfile: updateProfile,
-            oldProfile: existingProfile
-          })
+      await Promise.all(
+        toServicePrefence(
+          existingProfile.fiscalCode,
+          updateProfile.servicePreferencesSettings.version,
+          existingProfile.blockedInboxOrChannels
         )
-        .chain(message =>
-          te.tryCatch(
-            () =>
-              queueClient
-                // Default message TTL is 7 days @ref https://docs.microsoft.com/it-it/azure/storage/queues/storage-nodejs-how-to-use-queues?tabs=javascript#queue-service-concepts
-                .sendMessage(
-                  Buffer.from(JSON.stringify(message)).toString("base64")
-                ),
-            err => {
+          .map(preference =>
+            MigrateServicesPreferencesQueueMessage.encode({ preference })
+          )
+          .map(preference =>
+            Buffer.from(JSON.stringify({ preference })).toString("base64")
+          )
+          .map(message => queueClient.sendMessage(message))
+          .map(promise =>
+            promise.catch(err => {
               context.log.error(
                 `${logPrefix}|Cannot send a message to the queue ${
                   queueClient.name
                 } |ERROR=${JSON.stringify(err)}`
               );
               return err;
-            }
+            })
           )
-        )
-        .run();
+      );
     }
 
     return ResponseSuccessJson(

@@ -1,130 +1,67 @@
 import { Context } from "@azure/functions";
-import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
-import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import {
   makeServicesPreferencesDocumentId,
+  ServicePreference
+} from "@pagopa/io-functions-commons/dist/src/models/service_preference";
+import {
   NewServicePreference,
   ServicesPreferencesModel
 } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
-import {
-  CosmosErrorResponse,
-  CosmosErrors
-} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
-import { NonNegativeInteger } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/numbers";
-import * as a from "fp-ts/lib/Array";
-import * as o from "fp-ts/lib/Option";
+import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import * as te from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
-import { FiscalCode } from "../generated/backend/FiscalCode";
-import { ServiceId } from "../generated/backend/ServiceId";
-import { errorsToError } from "../utils/conversions";
 
-const COSMOS_ERROR_KIND = "COSMOS_ERROR_RESPONSE";
 const CONFLICT_CODE = 409;
 const LOG_PREFIX = "MigrateServicePreferenceFromLegacy";
 
 export const MigrateServicesPreferencesQueueMessage = t.interface({
-  newProfile: RetrievedProfile,
-  oldProfile: RetrievedProfile
+  preference: ServicePreference
 });
 export type MigrateServicesPreferencesQueueMessage = t.TypeOf<
   typeof MigrateServicesPreferencesQueueMessage
 >;
 
-function isCosmosError(
-  ce: CosmosErrors
-): ce is ReturnType<typeof CosmosErrorResponse> {
-  return ce.kind === COSMOS_ERROR_KIND;
-}
-
-export const createServicePreference = (
-  serviceId: ServiceId,
-  blockedChannels: ReadonlyArray<BlockedInboxOrChannelEnum>,
-  fiscalCode: FiscalCode,
-  version: NonNegativeInteger
-): NewServicePreference => ({
-  fiscalCode,
-  id: makeServicesPreferencesDocumentId(fiscalCode, serviceId, version),
-  isEmailEnabled: !blockedChannels.includes(BlockedInboxOrChannelEnum.EMAIL),
-  isInboxEnabled: !blockedChannels.includes(BlockedInboxOrChannelEnum.INBOX),
-  isWebhookEnabled: !blockedChannels.includes(
-    BlockedInboxOrChannelEnum.WEBHOOK
-  ),
-  kind: "INewServicePreference",
-  serviceId,
-  settingsVersion: version
-});
-
-export const blockedsToServicesPreferences = (
-  blocked: {
-    [x: string]: readonly BlockedInboxOrChannelEnum[];
-  },
-  fiscalCode: FiscalCode,
-  version: NonNegativeInteger
-) =>
-  o
-    .fromNullable(blocked)
-    .map(b =>
-      Object.entries(b)
-        .filter(([serviceId, _]) => ServiceId.is(serviceId))
-        .map(
-          ([serviceId, blockedInboxOrChannelsForService]) =>
-            createServicePreference(
-              serviceId as ServiceId,
-              blockedInboxOrChannelsForService,
-              fiscalCode,
-              version
-            ) // cast required: ts do not identify filter as a guard
-        )
-    )
-    .getOrElse([]);
+type MigrateServicePreferenceFromLegacyErrors =
+  | CosmosErrors
+  | { kind: "INVALID_INPUT" };
 
 export const MigrateServicePreferenceFromLegacy = (
   servicePreferenceModel: ServicesPreferencesModel
 ) => async (context: Context, input: unknown) =>
-  te
-    .fromEither(
-      MigrateServicesPreferencesQueueMessage.decode(input).mapLeft(
-        errorsToError
+  // decode input
+  te.taskEither
+    .of<MigrateServicePreferenceFromLegacyErrors, unknown>(input)
+    .chain(i =>
+      te.fromEither(
+        MigrateServicesPreferencesQueueMessage.decode(i).mapLeft(x => ({
+          kind: "INVALID_INPUT"
+        }))
       )
     )
-    .filterOrElse(
-      migrateInput =>
-        NonNegativeInteger.is(
-          migrateInput.newProfile.servicePreferencesSettings.version
+    .map(({ preference }) =>
+      NewServicePreference.encode({
+        ...preference,
+        id: makeServicesPreferencesDocumentId(
+          preference.fiscalCode,
+          preference.serviceId,
+          preference.settingsVersion
         ),
-      new Error("Can not migrate to negative services preferences version.")
+        kind: "INewServicePreference"
+      })
     )
-    .map(migrateInput =>
-      blockedsToServicesPreferences(
-        migrateInput.oldProfile.blockedInboxOrChannels,
-        migrateInput.newProfile.fiscalCode,
-        /* tslint:disable-next-line no-useless-cast */
-        migrateInput.newProfile.servicePreferencesSettings
-          .version as NonNegativeInteger // cast required: ts do not identify filterOrElse as a guard
-      )
+    // save preference
+    .chain((preference: NewServicePreference) =>
+      servicePreferenceModel.create(preference)
     )
-    .map(preferences =>
-      preferences.map(preference =>
-        servicePreferenceModel
-          .create(preference)
-          .foldTaskEither<Error, boolean>(
-            cosmosError =>
-              isCosmosError(cosmosError) &&
-              cosmosError.error.code === CONFLICT_CODE
-                ? te.taskEither.of(false)
-                : te.fromLeft(
-                    new Error(
-                      `Can not create the service profile: ${JSON.stringify(
-                        cosmosError
-                      )}`
-                    )
-                  ),
-            _ => te.taskEither.of(true)
-          )
-      )
+    // if save fails because of primary key conflicts, it means the use saved the same preference meanwhile
+    // such case is not to be considered a failure, it's ok to discard the operation
+    .foldTaskEither(
+      _ =>
+        _.kind === "COSMOS_ERROR_RESPONSE" && _.error.code === CONFLICT_CODE
+          ? te.taskEither.of("ok" as const)
+          : te.fromLeft(_),
+      _ => te.taskEither.of("ok" as const)
     )
-    .chain(m => a.array.sequence(te.taskEither)(m))
     .getOrElseL(error => {
       context.log.error(`${LOG_PREFIX}|ERROR|${error}`);
       throw error;
