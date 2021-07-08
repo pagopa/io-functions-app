@@ -2,7 +2,7 @@
   "bindings": [
     {
       "queueName": "%MIGRATE_SERVICES_PREFERENCES_PROFILE_QUEUE_NAME%",
-      "connection": "QueueStorageConnection",
+      "connection": "FN_APP_STORAGE_CONNECTION_STRING",
       "name": "fiscalCode",
       "type": "queueTrigger",
       "direction": "in"
