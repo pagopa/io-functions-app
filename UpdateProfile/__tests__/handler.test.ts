@@ -25,6 +25,7 @@ import { UpdateProfileHandler } from "../handler";
 import { QueueClient } from "@azure/storage-queue";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
+import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
 
 const mockSendMessage = jest.fn().mockImplementation(() => Promise.resolve());
 const mockQueueClient = ({
@@ -664,55 +665,14 @@ describe("UpdateProfileHandler", () => {
     );
   });
 
-  /** */
-
-  const baseProfile = RetrievedProfile.decode({
-    _attachments: "attachments/",
-    _etag: '"3500cd83-0000-0d00-0000-60e305f90000"',
-    _rid: "tbAzALPWVGYLAAAAAAAAAA==",
-    _self: "dbs/tbAzAA==/colls/tbAzALPWVGY=/docs/tbAzALPWVGYLAAAAAAAAAA==/",
-    _ts: 1625490937,
-    email: "info@agid.gov.it",
-    fiscalCode: "QHBYBB58M51L494Q",
-    id: "QHBYBB58M51L494Q-0000000000000000",
-    isEmailEnabled: true,
-    isEmailValidated: true,
-    isInboxEnabled: false,
-    isTestProfile: false,
-    isWebhookEnabled: false,
-    version: 0
-  }).getOrElseL(() => {
-    throw Error("wrong dummy input!");
-  });
-
-  const legacyProfile = {
-    ...baseProfile,
-    servicePreferencesSettings: {
-      mode: ServicesPreferencesModeEnum.LEGACY,
-      version: -1
-    }
-  };
-
-  const autoProfile = {
-    ...baseProfile,
-    servicePreferencesSettings: {
-      mode: ServicesPreferencesModeEnum.AUTO,
-      version: 0
-    }
-  };
-
-  /** */
-  it("GIVEN a valid profile with mode AUTO, WHEN the update is called with current profile mode LEGACY, THEN the handler send the migration message", async () => {
+  it("GIVEN a valid profile with mode AUTO, WHEN the update is called with current profile mode LEGACY and empty blockedInboxOrChannel, THEN the handler not send the migration message", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
         taskEither.of(some(aRetrievedProfile))
       ),
-      update: jest.fn(p => taskEither.of({ ...aRetrievedProfile, ...p }))
+      update: jest.fn(p => taskEither.of(p))
     };
-
-    const expectedMessage =
-      "eyJuZXdQcm9maWxlIjp7Il9ldGFnIjoiX2V0YWciLCJfcmlkIjoiX3JpZCIsIl9zZWxmIjoiX3NlbGYiLCJfdHMiOjEsImZpc2NhbENvZGUiOiJTUE5ETkw4MEExM1k1NTVYIiwiaWQiOiIxMjMiLCJpc0VtYWlsRW5hYmxlZCI6dHJ1ZSwiaXNFbWFpbFZhbGlkYXRlZCI6ZmFsc2UsImlzSW5ib3hFbmFibGVkIjpmYWxzZSwiaXNUZXN0UHJvZmlsZSI6ZmFsc2UsImlzV2ViaG9va0VuYWJsZWQiOmZhbHNlLCJzZXJ2aWNlUHJlZmVyZW5jZXNTZXR0aW5ncyI6eyJtb2RlIjoiQVVUTyIsInZlcnNpb24iOjB9LCJ2ZXJzaW9uIjowLCJlbWFpbCI6ImVtYWlsQGV4YW1wbGUuY29tIn0sIm9sZFByb2ZpbGUiOnsiX2V0YWciOiJfZXRhZyIsIl9yaWQiOiJfcmlkIiwiX3NlbGYiOiJfc2VsZiIsIl90cyI6MSwiZmlzY2FsQ29kZSI6IlNQTkROTDgwQTEzWTU1NVgiLCJpZCI6IjEyMyIsImlzRW1haWxFbmFibGVkIjp0cnVlLCJpc0VtYWlsVmFsaWRhdGVkIjp0cnVlLCJpc0luYm94RW5hYmxlZCI6ZmFsc2UsImlzVGVzdFByb2ZpbGUiOmZhbHNlLCJpc1dlYmhvb2tFbmFibGVkIjpmYWxzZSwic2VydmljZVByZWZlcmVuY2VzU2V0dGluZ3MiOnsibW9kZSI6IkxFR0FDWSIsInZlcnNpb24iOi0xfSwidmVyc2lvbiI6MH19";
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
@@ -724,7 +684,53 @@ describe("UpdateProfileHandler", () => {
       service_preferences_settings: autoApiProfileServicePreferencesSettings
     });
 
-    expect(mockSendMessage).toBeCalledWith(expectedMessage);
+    expect(profileModelMock.update).toBeCalledWith(
+      expect.objectContaining({
+        servicePreferencesSettings: {
+          mode: ServicesPreferencesModeEnum.AUTO,
+          version: 0
+        }
+      })
+    );
+    expect(mockSendMessage).not.toBeCalled();
+  });
+
+  it("GIVEN a valid profile with mode AUTO, WHEN the update is called with current profile mode LEGACY, THEN the handler send the migration message", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(
+          some({
+            ...aRetrievedProfile,
+            blockedInboxOrChannels: {
+              serviceId: [BlockedInboxOrChannelEnum.INBOX]
+            }
+          })
+        )
+      ),
+      update: jest.fn(p => taskEither.of(p))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
+
+    await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: autoApiProfileServicePreferencesSettings
+    });
+
+    expect(profileModelMock.update).toBeCalledWith(
+      expect.objectContaining({
+        blockedInboxOrChannels: undefined,
+        servicePreferencesSettings: {
+          mode: ServicesPreferencesModeEnum.AUTO,
+          version: 0
+        }
+      })
+    );
+    expect(mockSendMessage).toBeCalled();
   });
 
   it("GIVEN a valid profile with mode AUTO, WHEN the update is called with current profile mode MANUAL, THEN the handler not send the migration message", async () => {

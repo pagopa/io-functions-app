@@ -148,13 +148,20 @@ export function UpdateProfileHandler(
     const overriddenInboxAndWebhook = autoEnableInboxAndWebHook
       ? { isInboxEnabled: true, isWebhookEnabled: true }
       : {};
+    const overrideBlockedInboxOrChannels =
+      profile.servicePreferencesSettings.mode !==
+      ServicesPreferencesModeEnum.LEGACY
+        ? profile.blockedInboxOrChannels
+        : undefined;
 
     const errorOrMaybeUpdatedProfile = await profileModel
       .update({
         ...existingProfile,
         // Remove undefined values to avoid overriding already existing profile properties
         ...withoutUndefinedValues(profile),
-        ...overriddenInboxAndWebhook
+        ...overriddenInboxAndWebhook,
+        // Override blockedInboxOrChannel when mode change from LEGACY to MANUAL or AUTO
+        blockedInboxOrChannels: overrideBlockedInboxOrChannels
       })
       .run();
 
@@ -188,6 +195,7 @@ export function UpdateProfileHandler(
 
     // Queue services preferences migration
     if (
+      existingProfile.blockedInboxOrChannels &&
       existingProfile.servicePreferencesSettings.mode ===
         ServicesPreferencesModeEnum.LEGACY &&
       updateProfile.servicePreferencesSettings.mode ===
