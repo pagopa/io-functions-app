@@ -11,13 +11,13 @@ import {
   CosmosErrors
 } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { NonNegativeInteger } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/numbers";
-import { ResponseErrorFromValidationErrors } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/responses";
 import * as a from "fp-ts/lib/Array";
 import * as o from "fp-ts/lib/Option";
 import * as te from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 import { FiscalCode } from "../generated/backend/FiscalCode";
 import { ServiceId } from "../generated/backend/ServiceId";
+import { errorsToError } from "../utils/conversions";
 
 const COSMOS_ERROR_KIND = "COSMOS_ERROR_RESPONSE";
 const CONFLICT_CODE = 409;
@@ -87,11 +87,11 @@ export const MigrateServicePreferenceFromLegacy = (
   servicePreferenceModel: ServicesPreferencesModel
 ) => async (context: Context, input: unknown) =>
   te
-    .fromEither(MigrateServicesPreferencesQueueMessage.decode(input))
-    .mapLeft(
-      ResponseErrorFromValidationErrors(MigrateServicesPreferencesQueueMessage)
+    .fromEither(
+      MigrateServicesPreferencesQueueMessage.decode(input).mapLeft(
+        errorsToError
+      )
     )
-    .mapLeft(err => new Error(err.detail))
     .filterOrElse(
       migrateInput =>
         NonNegativeInteger.is(
