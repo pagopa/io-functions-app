@@ -12,17 +12,29 @@ import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middl
 
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
+import { QueueServiceClient } from "@azure/storage-queue";
 import { cosmosdbInstance } from "../utils/cosmosdb";
+
+import { getConfigOrThrow } from "../utils/config";
 import { UpdateProfile } from "./handler";
+
+const config = getConfigOrThrow();
 
 const profileModel = new ProfileModel(
   cosmosdbInstance.container(PROFILE_COLLECTION_NAME)
 );
 
+const queueClient = QueueServiceClient.fromConnectionString(
+  config.FN_APP_STORAGE_CONNECTION_STRING
+).getQueueClient(config.MIGRATE_SERVICES_PREFERENCES_PROFILE_QUEUE_NAME);
+
 // Setup Express
 const app = express();
 secureExpressApp(app);
-app.put("/api/v1/profiles/:fiscalcode", UpdateProfile(profileModel));
+app.put(
+  "/api/v1/profiles/:fiscalcode",
+  UpdateProfile(profileModel, queueClient)
+);
 
 const azureFunctionHandler = createAzureFunctionHandler(app);
 

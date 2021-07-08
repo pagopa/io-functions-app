@@ -5,6 +5,7 @@ import * as df from "durable-functions";
 
 import { isLeft } from "fp-ts/lib/Either";
 import { fromNullable, isNone } from "fp-ts/lib/Option";
+import * as te from "fp-ts/lib/TaskEither";
 
 import {
   IResponseErrorConflict,
@@ -32,6 +33,7 @@ import {
   wrapRequestHandler
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 
+import { QueueClient } from "@azure/storage-queue";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { MigrateServicesPreferencesQueueMessage } from "../MigrateServicePreferenceFromLegacy/handler";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
@@ -59,7 +61,8 @@ type IUpdateProfileHandler = (
 
 // tslint:disable-next-line: cognitive-complexity
 export function UpdateProfileHandler(
-  profileModel: ProfileModel
+  profileModel: ProfileModel,
+  queueClient: QueueClient
 ): IUpdateProfileHandler {
   return async (context, fiscalCode, profilePayload) => {
     const logPrefix = `UpdateProfileHandler|FISCAL_CODE=${fiscalCode}`;
@@ -190,14 +193,32 @@ export function UpdateProfileHandler(
       updateProfile.servicePreferencesSettings.mode ===
         ServicesPreferencesModeEnum.AUTO
     ) {
-      await dfClient.startNew(
-        "MigrateServicesPreferencesOrchestrator",
-        undefined,
-        MigrateServicesPreferencesQueueMessage.encode({
-          newProfile: updateProfile,
-          oldProfile: existingProfile
-        })
-      );
+      await te.taskEither
+        .of(
+          MigrateServicesPreferencesQueueMessage.encode({
+            newProfile: updateProfile,
+            oldProfile: existingProfile
+          })
+        )
+        .chain(message =>
+          te.tryCatch(
+            () =>
+              queueClient
+                // Default message TTL is 7 days @ref https://docs.microsoft.com/it-it/azure/storage/queues/storage-nodejs-how-to-use-queues?tabs=javascript#queue-service-concepts
+                .sendMessage(
+                  Buffer.from(JSON.stringify(message)).toString("base64")
+                ),
+            err => {
+              context.log.error(
+                `${logPrefix}|Cannot send a message to the queue ${
+                  queueClient.name
+                } |ERROR=${JSON.stringify(err)}`
+              );
+              return err;
+            }
+          )
+        )
+        .run();
     }
 
     return ResponseSuccessJson(
@@ -210,9 +231,10 @@ export function UpdateProfileHandler(
  * Wraps an UpdateProfile handler inside an Express request handler.
  */
 export function UpdateProfile(
-  profileModel: ProfileModel
+  profileModel: ProfileModel,
+  queueClient: QueueClient
 ): express.RequestHandler {
-  const handler = UpdateProfileHandler(profileModel);
+  const handler = UpdateProfileHandler(profileModel, queueClient);
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
