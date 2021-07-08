@@ -187,9 +187,9 @@ describe("UpsertServicePreferences", () => {
         some({ ...aRetrievedServicePreference, isInboxEnabled: false })
       )
     );
-    updateSubscriptionFeedMock.mockImplementationOnce(() => {
-      throw new Error("Subscription Feed Error");
-    });
+    updateSubscriptionFeedMock.mockImplementationOnce(() =>
+      Promise.reject(new Error("Subscription Feed Error"))
+    );
     const response = await upsertServicePreferencesHandler(
       context as any,
       aFiscalCode,

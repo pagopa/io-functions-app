@@ -60,43 +60,39 @@ export const updateSubscriptionFeedTask = (
   input: UpdateSubscriptionFeedInput,
   logPrefix: string
 ): TaskEither<IResponseErrorQuery, boolean> =>
-  fromEither(
-    tryCatch2v(
-      () =>
-        updateSubscriptionFeed(
-          context,
-          input,
-          tableService,
-          subscriptionFeedTable
-        ),
-      toError
-    )
-  )
-    .chain(result => tryCatch(() => result, toError))
-    .foldTaskEither(
-      err => {
+  tryCatch(
+    () =>
+      updateSubscriptionFeed(
+        context,
+        input,
+        tableService,
+        subscriptionFeedTable
+      ),
+    toError
+  ).foldTaskEither(
+    err => {
+      trackSubscriptionFeedFailure(
+        context,
+        aiClient,
+        input,
+        "EXCEPTION",
+        logPrefix,
+        err.message
+      );
+      return taskEither.of(false);
+    },
+    result => {
+      const isSuccess = result === "SUCCESS";
+      if (!isSuccess) {
         trackSubscriptionFeedFailure(
           context,
           aiClient,
           input,
-          "EXCEPTION",
+          "FAILURE",
           logPrefix,
-          err.message
+          "FAILURE"
         );
-        return taskEither.of(false);
-      },
-      result => {
-        const isSuccess = result === "SUCCESS";
-        if (!isSuccess) {
-          trackSubscriptionFeedFailure(
-            context,
-            aiClient,
-            input,
-            "FAILURE",
-            logPrefix,
-            "FAILURE"
-          );
-        }
-        return taskEither.of(isSuccess);
       }
-    );
+      return taskEither.of(isSuccess);
+    }
+  );
