@@ -94,6 +94,20 @@ describe("MigrateServicePreferenceFromLegacy", () => {
       legacyToAutoRawInput
     );
     expect(mockServicesPreferencesModel.create).toHaveBeenCalledTimes(1);
+    expect(mockServicesPreferencesModel.create).toHaveBeenCalledWith({
+      fiscalCode: autoProfile.fiscalCode,
+      id: makeServicesPreferencesDocumentId(
+        autoProfile.fiscalCode as FiscalCode,
+        "MyServiceId" as ServiceId,
+        0 as NonNegativeInteger
+      ),
+      serviceId: "MyServiceId",
+      settingsVersion: 0,
+      kind: "INewServicePreference",
+      isEmailEnabled: true,
+      isInboxEnabled: false,
+      isWebhookEnabled: true
+    } as NewServicePreference);
     expect(result).toEqual([true]);
   });
 
