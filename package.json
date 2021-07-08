@@ -61,7 +61,7 @@
     "@pagopa/io-functions-commons": "^20.6.6",
     "@pagopa/ts-commons": "^9.6.0",
     "abort-controller": "^3.0.0",
-    "applicationinsights": "^1.7.4",
+    "applicationinsights": "^1.8.10",
     "azure-storage": "^2.10.3",
     "date-fns": "^2.16.1",
     "dependency-check": "^4.1.0",

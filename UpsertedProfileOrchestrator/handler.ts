@@ -15,7 +15,7 @@ import {
   OrchestratorInput as EmailValidationProcessOrchestratorInput,
   OrchestratorResult as EmailValidationProcessOrchestratorResult
 } from "../EmailValidationProcessOrchestrator/handler";
-import { Input as UpdateServiceSubscriptionFeedActivityInput } from "../UpdateSubscriptionsFeedActivity/index";
+import { Input as UpdateServiceSubscriptionFeedActivityInput } from "../UpdateSubscriptionsFeedActivity/handler";
 import { diffBlockedServices } from "../utils/profiles";
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
