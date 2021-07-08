@@ -6,6 +6,9 @@ import { none, some } from "fp-ts/lib/Option";
 
 import * as df from "durable-functions";
 
+import { QueueClient } from "@azure/storage-queue";
+import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
+import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
@@ -13,19 +16,15 @@ import {
   aFiscalCode,
   aProfile,
   aRetrievedProfile,
-  legacyApiProfileServicePreferencesSettings,
-  manualApiProfileServicePreferencesSettings,
   autoApiProfileServicePreferencesSettings,
+  autoProfileServicePreferencesSettings,
+  legacyApiProfileServicePreferencesSettings,
   legacyProfileServicePreferencesSettings,
-  manualProfileServicePreferencesSettings,
-  autoProfileServicePreferencesSettings
+  manualApiProfileServicePreferencesSettings,
+  manualProfileServicePreferencesSettings
 } from "../../__mocks__/mocks";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../../UpsertedProfileOrchestrator/handler";
 import { UpdateProfileHandler } from "../handler";
-import { QueueClient } from "@azure/storage-queue";
-import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
-import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
-import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
 
 const mockSendMessage = jest.fn().mockImplementation(() => Promise.resolve());
 const mockQueueClient = ({
@@ -45,6 +44,7 @@ afterEach(() => {
   clock = clock.uninstall();
 });
 
+// tslint:disable-next-line: no-big-function
 describe("UpdateProfileHandler", () => {
   it("should return a query error when an error occurs retrieving the existing profile", async () => {
     const profileModelMock = {
