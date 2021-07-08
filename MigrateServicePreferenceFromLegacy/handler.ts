@@ -11,8 +11,6 @@ import {
   CosmosErrors
 } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { NonNegativeInteger } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/numbers";
-import { ResponseErrorFromValidationErrors } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/responses";
-import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import * as a from "fp-ts/lib/Array";
 import * as o from "fp-ts/lib/Option";
 import * as te from "fp-ts/lib/TaskEither";
