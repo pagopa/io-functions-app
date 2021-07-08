@@ -4,12 +4,16 @@ import { MigrateServicePreferenceFromLegacy } from "../handler";
 import * as e from "fp-ts/lib/Either";
 import * as te from "fp-ts/lib/TaskEither";
 import {
+  makeServicesPreferencesDocumentId,
   NewServicePreference,
   ServicesPreferencesModel
 } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
 import { CosmosErrorResponse } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
+import { FiscalCode } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/strings";
+import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 
 const baseProfile = {
   email: "info@agid.gov.it",
