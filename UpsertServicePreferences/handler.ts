@@ -206,7 +206,7 @@ export const GetUpsertServicePreferencesHandler = (
   serviceModels: ServiceModel,
   servicePreferencesModel: ServicesPreferencesModel,
   tableService: TableService,
-  subscriptionFeedTable: NonEmptyString,
+  subscriptionFeedTableName: NonEmptyString,
   logPrefix: string = "GetUpsertServicePreferencesHandler"
 ): IUpsertServicePreferencesHandler => {
   return async (context, fiscalCode, serviceId, servicePreference) =>
@@ -287,7 +287,7 @@ export const GetUpsertServicePreferencesHandler = (
           feedOperation !== FeedOperationEnum.NO_UPDATE
             ? updateSubscriptionFeedTask(
                 tableService,
-                subscriptionFeedTable,
+                subscriptionFeedTableName,
                 telemetryClient,
                 context,
                 {
@@ -319,7 +319,7 @@ export function UpsertServicePreferences(
   serviceModels: ServiceModel,
   servicePreferencesModel: ServicesPreferencesModel,
   tableService: TableService,
-  subscriptionFeedTable: NonEmptyString
+  subscriptionFeedTableName: NonEmptyString
 ): express.RequestHandler {
   const handler = GetUpsertServicePreferencesHandler(
     telemetryClient,
@@ -327,7 +327,7 @@ export function UpsertServicePreferences(
     serviceModels,
     servicePreferencesModel,
     tableService,
-    subscriptionFeedTable
+    subscriptionFeedTableName
   );
 
   const middlewaresWrap = withRequestMiddlewares(
