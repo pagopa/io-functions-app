@@ -6,13 +6,8 @@ import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { TelemetryClient } from "applicationinsights";
 import { EventTelemetry } from "applicationinsights/out/Declarations/Contracts";
 import { TableService } from "azure-storage";
-import { toError, tryCatch2v } from "fp-ts/lib/Either";
-import {
-  fromEither,
-  taskEither,
-  TaskEither,
-  tryCatch
-} from "fp-ts/lib/TaskEither";
+import { toError } from "fp-ts/lib/Either";
+import { taskEither, TaskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 import { updateSubscriptionFeed } from "../UpdateSubscriptionsFeedActivity/handler";
 
