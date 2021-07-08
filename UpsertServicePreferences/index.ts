@@ -17,13 +17,17 @@ import { secureExpressApp } from "@pagopa/io-functions-commons/dist/src/utils/ex
 import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
+import { createTableService } from "azure-storage";
+import { initTelemetryClient } from "../utils/appinsights";
+import { getConfigOrThrow } from "../utils/config";
 import { cosmosdbInstance } from "../utils/cosmosdb";
-
 import { UpsertServicePreferences } from "./handler";
 
 // Setup Express
 const app = express();
 secureExpressApp(app);
+
+const config = getConfigOrThrow();
 
 // Setup Models
 const profileModel = new ProfileModel(
@@ -37,9 +41,17 @@ const servicePreferencesModel = new ServicesPreferencesModel(
   SERVICE_PREFERENCES_COLLECTION_NAME
 );
 
+const tableService = createTableService(config.QueueStorageConnection);
 app.post(
   "/api/v1/profiles/:fiscalcode/services/:serviceId/preferences",
-  UpsertServicePreferences(profileModel, serviceModel, servicePreferencesModel)
+  UpsertServicePreferences(
+    initTelemetryClient(),
+    profileModel,
+    serviceModel,
+    servicePreferencesModel,
+    tableService,
+    config.SUBSCRIPTIONS_FEED_TABLE
+  )
 );
 
 const azureFunctionHandler = createAzureFunctionHandler(app);

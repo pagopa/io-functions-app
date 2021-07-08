@@ -46,8 +46,30 @@ import {
   toUserServicePreferenceFromModel
 } from "../utils/service_preferences";
 
+import { Context } from "@azure/functions";
+import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { NonNegativeInteger } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/numbers";
+import { enumType } from "@pagopa/ts-commons/lib/types";
 import { identity } from "fp-ts/lib/function";
+import { Option } from "fp-ts/lib/Option";
+import * as t from "io-ts";
+import { updateSubscriptionFeedTask } from "./subscription_feed";
+
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { TableService } from "azure-storage";
+
+enum FeedOperationEnum {
+  "SUBSCRIBED" = "SUBSCRIBED",
+  "UNSUBSCRIBED" = "UNSUBSCRIBED",
+  "NO_UPDATE" = "NO_UPDATE"
+}
+
+export type FeedOperation = t.TypeOf<typeof FeedOperation>;
+export const FeedOperation = enumType<FeedOperationEnum>(
+  FeedOperationEnum,
+  "FeedOperation"
+);
 
 type IUpsertServicePreferencesHandlerResult =
   | IResponseSuccessJson<ServicePreference>
@@ -62,6 +84,7 @@ type IUpsertServicePreferencesHandlerResult =
  * a Not Found error.
  */
 type IUpsertServicePreferencesHandler = (
+  context: Context,
   fiscalCode: FiscalCode,
   serviceId: ServiceId,
   servicePreference: ServicePreference
@@ -150,15 +173,43 @@ const upsertUserServicePreferences = (
     )
     .map(toUserServicePreferenceFromModel);
 
+const decodeOperation = (isInboxEnabled: boolean) =>
+  isInboxEnabled
+    ? FeedOperationEnum.SUBSCRIBED
+    : FeedOperationEnum.UNSUBSCRIBED;
+
+/**
+ * Calculate Feed operation to perform by considering:
+ * - the previous service preference's inboxEnabled (if exists)
+ * - the current one that should be upserted.
+ * @param maybePreviousInboxEnabled The previous service preference's inboxEnabled property
+ * @param currentInboxEnabled The current service preference's inboxEnabled property
+ * @returns a FeedOperation to be performed. Possible values are SUBSCRIBED, UNSUBSCRIBED or NO_UPDATE
+ */
+const getFeedOperation = (
+  maybePreviousInboxEnabled: Option<boolean>,
+  currentInboxEnabled: boolean
+): FeedOperation =>
+  maybePreviousInboxEnabled.foldL(
+    () => decodeOperation(currentInboxEnabled),
+    prev =>
+      prev !== currentInboxEnabled
+        ? decodeOperation(currentInboxEnabled)
+        : FeedOperationEnum.NO_UPDATE
+  );
 /**
  * Return a type safe GetServicePreferences handler.
  */
 export const GetUpsertServicePreferencesHandler = (
+  telemetryClient: ReturnType<typeof initAppInsights>,
   profileModels: ProfileModel,
   serviceModels: ServiceModel,
-  servicePreferencesModel: ServicesPreferencesModel
+  servicePreferencesModel: ServicesPreferencesModel,
+  tableService: TableService,
+  subscriptionFeedTableName: NonEmptyString,
+  logPrefix: string = "GetUpsertServicePreferencesHandler"
 ): IUpsertServicePreferencesHandler => {
-  return async (fiscalCode, serviceId, servicePreference) =>
+  return async (context, fiscalCode, serviceId, servicePreference) =>
     sequenceS(te.taskEither)({
       profile: getProfileOrErrorResponse(profileModels)(fiscalCode),
       service: getServiceOrErrorResponse(serviceModels)(serviceId)
@@ -190,7 +241,68 @@ export const GetUpsertServicePreferencesHandler = (
             version
           }))
       )
-      .chain(upsertUserServicePreferences(servicePreferencesModel))
+      .chain(results =>
+        servicePreferencesModel
+          .find([
+            makeServicesPreferencesDocumentId(
+              fiscalCode,
+              serviceId,
+              results.version
+            ),
+            fiscalCode
+          ])
+          .bimap(
+            failure =>
+              ResponseErrorQuery(
+                "Error while retrieving the user's service preferences",
+                failure
+              ),
+            maybeExistingServicesPreference => ({
+              ...results,
+              feedOperation: getFeedOperation(
+                maybeExistingServicesPreference.map(
+                  pref => pref.isInboxEnabled
+                ),
+                results.servicePreferencesToUpsert.is_inbox_enabled
+              )
+            })
+          )
+      )
+      .chain(results =>
+        upsertUserServicePreferences(servicePreferencesModel)(results).map(
+          upsertedUserServicePreference => ({
+            ...results,
+            updatedAt: new Date().getTime(),
+            upsertedUserServicePreference
+          })
+        )
+      )
+      .chain(
+        ({
+          feedOperation,
+          updatedAt,
+          version,
+          upsertedUserServicePreference
+        }) =>
+          feedOperation !== FeedOperationEnum.NO_UPDATE
+            ? updateSubscriptionFeedTask(
+                tableService,
+                subscriptionFeedTableName,
+                telemetryClient,
+                context,
+                {
+                  fiscalCode,
+                  operation: feedOperation,
+                  serviceId,
+                  subscriptionKind: "SERVICE",
+                  updatedAt,
+                  version
+                },
+                logPrefix
+              ).map(() => upsertedUserServicePreference)
+            : te.taskEither.of(upsertedUserServicePreference)
+      )
+
       .fold<IUpsertServicePreferencesHandlerResult>(
         identity,
         ResponseSuccessJson
@@ -202,18 +314,24 @@ export const GetUpsertServicePreferencesHandler = (
  * Wraps a UpsertServicePreferences handler inside an Express request handler.
  */
 export function UpsertServicePreferences(
+  telemetryClient: ReturnType<typeof initAppInsights>,
   profileModels: ProfileModel,
   serviceModels: ServiceModel,
-  servicePreferencesModel: ServicesPreferencesModel
+  servicePreferencesModel: ServicesPreferencesModel,
+  tableService: TableService,
+  subscriptionFeedTableName: NonEmptyString
 ): express.RequestHandler {
   const handler = GetUpsertServicePreferencesHandler(
+    telemetryClient,
     profileModels,
     serviceModels,
-    servicePreferencesModel
+    servicePreferencesModel,
+    tableService,
+    subscriptionFeedTableName
   );
 
   const middlewaresWrap = withRequestMiddlewares(
-    // ContextMiddleware(),
+    ContextMiddleware(),
     FiscalCodeMiddleware,
     RequiredParamMiddleware("serviceId", ServiceId),
     RequiredBodyPayloadMiddleware(ServicePreference)

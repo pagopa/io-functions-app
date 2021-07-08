@@ -1,11 +1,11 @@
 /* tslint:disable:no-any */
 import { none, some } from "fp-ts/lib/Option";
-import { taskEither } from "fp-ts/lib/TaskEither";
+import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import {
   aFiscalCode,
-  legacyProfileServicePreferencesSettings,
   aRetrievedProfileWithEmail,
-  autoProfileServicePreferencesSettings
+  autoProfileServicePreferencesSettings,
+  legacyProfileServicePreferencesSettings
 } from "../../__mocks__/mocks";
 import {
   aRetrievedService,
@@ -14,10 +14,25 @@ import {
   aServicePreference
 } from "../../__mocks__/mocks.service_preference";
 
-import { GetUpsertServicePreferencesHandler } from "../handler";
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
-import { left } from "fp-ts/lib/Either";
 import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { left } from "fp-ts/lib/Either";
+import { context } from "../../__mocks__/durable-functions";
+import * as subscriptionFeedHandler from "../../UpdateSubscriptionsFeedActivity/handler";
+import { GetUpsertServicePreferencesHandler } from "../handler";
+
+const updateSubscriptionFeedMock = jest
+  .fn()
+  .mockImplementation(() => Promise.resolve("SUCCESS"));
+jest
+  .spyOn(subscriptionFeedHandler, "updateSubscriptionFeed")
+  .mockImplementation(updateSubscriptionFeedMock);
+
+const telemetryClientMock = {
+  trackEvent: jest.fn()
+};
 
 const aRetrievedProfileInValidState = {
   ...aRetrievedProfileWithEmail,
@@ -30,12 +45,12 @@ const profileFindLastVersionByModelIdMock = jest.fn(() => {
 const serviceFindLastVersionByModelIdMock = jest.fn(_ => {
   return taskEither.of(some(aRetrievedService));
 });
-const serviceFindModelMock = jest.fn(_ => {
-  return taskEither.of(some(aRetrievedServicePreference));
-});
-const serviceUpsertModelMock = jest.fn(_ => {
-  return taskEither.of(_);
-});
+const servicePreferenceFindModelMock = jest
+  .fn()
+  .mockImplementation(_ => taskEither.of(some(aRetrievedServicePreference)));
+const servicePreferenceUpsertModelMock = jest
+  .fn()
+  .mockImplementation(_ => taskEither.of(_));
 
 const profileModelMock = {
   findLastVersionByModelId: profileFindLastVersionByModelIdMock
@@ -44,28 +59,35 @@ const serviceModelMock = {
   findLastVersionByModelId: serviceFindLastVersionByModelIdMock
 };
 const servicePreferenceModelMock = {
-  find: serviceFindModelMock,
-  upsert: serviceUpsertModelMock
+  find: servicePreferenceFindModelMock,
+  upsert: servicePreferenceUpsertModelMock
+};
+
+const aDisabledInboxServicePreference = {
+  ...aServicePreference,
+  is_inbox_enabled: false
 };
 
 const upsertServicePreferencesHandler = GetUpsertServicePreferencesHandler(
+  telemetryClientMock as any,
   profileModelMock as any,
   serviceModelMock as any,
-  servicePreferenceModelMock as any
+  servicePreferenceModelMock as any,
+  {} as any,
+  "SubFeedTableName" as NonEmptyString
 );
 
+// tslint:disable-next-line: no-big-function
 describe("UpsertServicePreferences", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("should return Success if user service preferences has been upserted", async () => {
     const response = await upsertServicePreferencesHandler(
-      // (context as any) as Context,
+      context as any,
       aFiscalCode,
       aServiceId,
       aServicePreference
     );
-
-    console.log(response);
 
     expect(response).toMatchObject({
       kind: "IResponseSuccessJson",
@@ -75,6 +97,162 @@ describe("UpsertServicePreferences", () => {
     expect(profileModelMock.findLastVersionByModelId).toHaveBeenCalled();
     expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalled();
     expect(servicePreferenceModelMock.upsert).toHaveBeenCalled();
+    expect(servicePreferenceModelMock.find).toHaveBeenCalled();
+  });
+
+  it("should return Success if user service preferences has been upserted without updatingSubscriptionFeed if isInboxEnabled has not been changed", async () => {
+    const response = await upsertServicePreferencesHandler(
+      context as any,
+      aFiscalCode,
+      aServiceId,
+      aServicePreference
+    );
+
+    expect(response).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: aServicePreference
+    });
+
+    expect(profileModelMock.findLastVersionByModelId).toHaveBeenCalled();
+    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalled();
+    expect(servicePreferenceModelMock.upsert).toHaveBeenCalled();
+    expect(servicePreferenceModelMock.find).toHaveBeenCalled();
+    expect(updateSubscriptionFeedMock).not.toHaveBeenCalled();
+  });
+
+  it("should return Success if user service preferences has been upserted with subscriptionFeed UNSUBSCRIBED in case isInboxEnabled has been changed to false", async () => {
+    const response = await upsertServicePreferencesHandler(
+      context as any,
+      aFiscalCode,
+      aServiceId,
+      aDisabledInboxServicePreference
+    );
+
+    expect(response).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: aDisabledInboxServicePreference
+    });
+
+    expect(profileModelMock.findLastVersionByModelId).toHaveBeenCalled();
+    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalled();
+    expect(servicePreferenceModelMock.upsert).toHaveBeenCalled();
+    expect(servicePreferenceModelMock.find).toHaveBeenCalled();
+    expect(updateSubscriptionFeedMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        operation: "UNSUBSCRIBED",
+        subscriptionKind: "SERVICE"
+      }),
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
+  it("should return Success if user service preferences has been upserted with subscriptionFeed SUBSCRIBED in case isInboxEnabled has been changed to true", async () => {
+    servicePreferenceFindModelMock.mockImplementationOnce(() =>
+      taskEither.of(
+        some({ ...aRetrievedServicePreference, isInboxEnabled: false })
+      )
+    );
+    const response = await upsertServicePreferencesHandler(
+      context as any,
+      aFiscalCode,
+      aServiceId,
+      aServicePreference
+    );
+
+    expect(response).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: aServicePreference
+    });
+
+    expect(profileModelMock.findLastVersionByModelId).toHaveBeenCalled();
+    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalled();
+    expect(servicePreferenceModelMock.upsert).toHaveBeenCalled();
+    expect(servicePreferenceModelMock.find).toHaveBeenCalled();
+    expect(updateSubscriptionFeedMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        operation: "SUBSCRIBED",
+        subscriptionKind: "SERVICE"
+      }),
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
+  it("should return Success with upserted user service preferences even if subscription feed update throw an error", async () => {
+    servicePreferenceFindModelMock.mockImplementationOnce(() =>
+      taskEither.of(
+        some({ ...aRetrievedServicePreference, isInboxEnabled: false })
+      )
+    );
+    updateSubscriptionFeedMock.mockImplementationOnce(() =>
+      Promise.reject(new Error("Subscription Feed Error"))
+    );
+    const response = await upsertServicePreferencesHandler(
+      context as any,
+      aFiscalCode,
+      aServiceId,
+      aServicePreference
+    );
+
+    expect(response).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: aServicePreference
+    });
+
+    expect(profileModelMock.findLastVersionByModelId).toHaveBeenCalled();
+    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalled();
+    expect(servicePreferenceModelMock.upsert).toHaveBeenCalled();
+    expect(servicePreferenceModelMock.find).toHaveBeenCalled();
+    expect(updateSubscriptionFeedMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        operation: "SUBSCRIBED",
+        subscriptionKind: "SERVICE"
+      }),
+      expect.anything(),
+      expect.anything()
+    );
+    expect(telemetryClientMock.trackEvent).toHaveBeenCalled();
+  });
+
+  it("should return Success with upserted user service preferences even if subscription feed update returns FAILURE", async () => {
+    servicePreferenceFindModelMock.mockImplementationOnce(() =>
+      taskEither.of(
+        some({ ...aRetrievedServicePreference, isInboxEnabled: false })
+      )
+    );
+    updateSubscriptionFeedMock.mockImplementationOnce(() =>
+      Promise.resolve("FAILURE")
+    );
+    const response = await upsertServicePreferencesHandler(
+      context as any,
+      aFiscalCode,
+      aServiceId,
+      aServicePreference
+    );
+
+    expect(response).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: aServicePreference
+    });
+
+    expect(profileModelMock.findLastVersionByModelId).toHaveBeenCalled();
+    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalled();
+    expect(servicePreferenceModelMock.upsert).toHaveBeenCalled();
+    expect(servicePreferenceModelMock.find).toHaveBeenCalled();
+    expect(updateSubscriptionFeedMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        operation: "SUBSCRIBED",
+        subscriptionKind: "SERVICE"
+      }),
+      expect.anything(),
+      expect.anything()
+    );
+    expect(telemetryClientMock.trackEvent).toHaveBeenCalled();
   });
 
   // ---------------------------------------------
@@ -86,7 +264,7 @@ describe("UpsertServicePreferences", () => {
     });
 
     const response = await upsertServicePreferencesHandler(
-      // (context as any) as Context,
+      context as any,
       aFiscalCode,
       aServiceId,
       aServicePreference
@@ -107,7 +285,7 @@ describe("UpsertServicePreferences", () => {
     });
 
     const response = await upsertServicePreferencesHandler(
-      // (context as any) as Context,
+      context as any,
       aFiscalCode,
       aServiceId,
       aServicePreference
@@ -128,7 +306,7 @@ describe("UpsertServicePreferences", () => {
     });
 
     const response = await upsertServicePreferencesHandler(
-      // (context as any) as Context,
+      context as any,
       aFiscalCode,
       aServiceId,
       aServicePreference
@@ -147,7 +325,7 @@ describe("UpsertServicePreferences", () => {
     });
 
     const response = await upsertServicePreferencesHandler(
-      // (context as any) as Context,
+      context as any,
       aFiscalCode,
       aServiceId,
       aServicePreference
@@ -160,13 +338,32 @@ describe("UpsertServicePreferences", () => {
     expect(servicePreferenceModelMock.upsert).not.toHaveBeenCalled();
   });
 
-  it("should return IResponseErrorQuery if serviceSettings model raise an error", async () => {
-    serviceUpsertModelMock.mockImplementationOnce(() => {
+  it("should return IResponseErrorQuery if serviceSettings model find raise an error", async () => {
+    servicePreferenceFindModelMock.mockImplementationOnce(() => {
+      return fromLeft({} as CosmosErrors);
+    });
+
+    const response = await upsertServicePreferencesHandler(
+      context as any,
+      aFiscalCode,
+      aServiceId,
+      aServicePreference
+    );
+
+    expect(response).toMatchObject({
+      kind: "IResponseErrorQuery"
+    });
+
+    expect(servicePreferenceModelMock.upsert).not.toHaveBeenCalled();
+  });
+
+  it("should return IResponseErrorQuery if serviceSettings model upsert raise an error", async () => {
+    servicePreferenceUpsertModelMock.mockImplementationOnce(() => {
       return taskEither.fromEither(left({} as CosmosErrors));
     });
 
     const response = await upsertServicePreferencesHandler(
-      // (context as any) as Context,
+      context as any,
       aFiscalCode,
       aServiceId,
       aServicePreference
@@ -190,7 +387,7 @@ describe("UpsertServicePreferences", () => {
     });
 
     const response = await upsertServicePreferencesHandler(
-      // (context as any) as Context,
+      context as any,
       aFiscalCode,
       aServiceId,
       aServicePreference
@@ -205,7 +402,7 @@ describe("UpsertServicePreferences", () => {
 
   it("should return IResponseErrorConflict if service preference han a different version from profile's one", async () => {
     const response = await upsertServicePreferencesHandler(
-      // (context as any) as Context,
+      context as any,
       aFiscalCode,
       aServiceId,
       {
