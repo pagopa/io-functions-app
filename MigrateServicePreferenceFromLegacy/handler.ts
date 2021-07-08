@@ -45,14 +45,10 @@ export const createServicePreference = (
 ): NewServicePreference => ({
   fiscalCode,
   id: makeServicesPreferencesDocumentId(fiscalCode, serviceId, version),
-  isEmailEnabled: !blockedChannels.some(
-    channel => channel === BlockedInboxOrChannelEnum.EMAIL
-  ),
-  isInboxEnabled: !blockedChannels.some(
-    channel => channel === BlockedInboxOrChannelEnum.INBOX
-  ),
-  isWebhookEnabled: !blockedChannels.some(
-    channel => channel === BlockedInboxOrChannelEnum.WEBHOOK
+  isEmailEnabled: !blockedChannels.includes(BlockedInboxOrChannelEnum.EMAIL),
+  isInboxEnabled: !blockedChannels.includes(BlockedInboxOrChannelEnum.INBOX),
+  isWebhookEnabled: !blockedChannels.includes(
+    BlockedInboxOrChannelEnum.WEBHOOK
   ),
   kind: "INewServicePreference",
   serviceId,
