@@ -3,7 +3,7 @@
     {
       "queueName": "%MIGRATE_SERVICES_PREFERENCES_PROFILE_QUEUE_NAME%",
       "connection": "FN_APP_STORAGE_CONNECTION_STRING",
-      "name": "fiscalCode",
+      "name": "oldAndNewProfiles",
       "type": "queueTrigger",
       "direction": "in"
     }
