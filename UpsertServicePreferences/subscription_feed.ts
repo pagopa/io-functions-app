@@ -3,13 +3,12 @@ import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitio
 import { IResponseErrorQuery } from "@pagopa/io-functions-commons/dist/src/utils/response";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { TelemetryClient } from "applicationinsights";
-import { EventTelemetry } from "applicationinsights/out/Declarations/Contracts";
 import { TableService } from "azure-storage";
 import { toError } from "fp-ts/lib/Either";
 import { taskEither, TaskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 import { updateSubscriptionFeed } from "../UpdateSubscriptionsFeedActivity/handler";
+import { createTracker } from "../utils/tracking";
 
 export const UpdateSubscriptionFeedInput = t.interface({
   fiscalCode: FiscalCode,
@@ -24,36 +23,13 @@ export type UpdateSubscriptionFeedInput = t.TypeOf<
   typeof UpdateSubscriptionFeedInput
 >;
 
-export const trackSubscriptionFeedFailure = (
-  context: Context,
-  aiClient: TelemetryClient,
-  input: UpdateSubscriptionFeedInput,
-  kind: "EXCEPTION" | "FAILURE",
-  logPrefix: string,
-  message: string
-) => {
-  context.log.verbose(
-    `${logPrefix}| Error while trying to update subscriptionFeed|ERROR=${message}`
-  );
-  aiClient.trackEvent({
-    name: "subscriptionFeed.upsertServicesPreferences.failure",
-    properties: {
-      ...input,
-      kind,
-      updatedAt: input.updatedAt.toString(),
-      version: input.version.toString()
-    },
-    tagOverrides: { samplingEnabled: "false" }
-  } as EventTelemetry);
-};
-
 export const updateSubscriptionFeedTask = (
   tableService: TableService,
   subscriptionFeedTable: NonEmptyString,
-  aiClient: TelemetryClient,
   context: Context,
   input: UpdateSubscriptionFeedInput,
-  logPrefix: string
+  logPrefix: string,
+  tracker: ReturnType<typeof createTracker>
 ): TaskEither<IResponseErrorQuery, boolean> =>
   tryCatch(
     () =>
@@ -66,27 +42,19 @@ export const updateSubscriptionFeedTask = (
     toError
   ).foldTaskEither(
     err => {
-      trackSubscriptionFeedFailure(
-        context,
-        aiClient,
-        input,
-        "EXCEPTION",
-        logPrefix,
-        err.message
+      context.log.verbose(
+        `${logPrefix}| Error while trying to update subscriptionFeed|ERROR=${err.message}`
       );
+      tracker.subscriptionFeed.trackSubscriptionFeedFailure(input, "EXCEPTION");
       return taskEither.of(false);
     },
     result => {
       const isSuccess = result === "SUCCESS";
       if (!isSuccess) {
-        trackSubscriptionFeedFailure(
-          context,
-          aiClient,
-          input,
-          "FAILURE",
-          logPrefix,
-          "FAILURE"
+        context.log.verbose(
+          `${logPrefix}| Error while trying to update subscriptionFeed|ERROR=${"FAILURE"}`
         );
+        tracker.subscriptionFeed.trackSubscriptionFeedFailure(input, "FAILURE");
       }
       return taskEither.of(isSuccess);
     }

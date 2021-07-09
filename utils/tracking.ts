@@ -1,5 +1,7 @@
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
+import { EventTelemetry } from "applicationinsights/out/Declarations/Contracts";
+import { UpdateSubscriptionFeedInput } from "../UpsertServicePreferences/subscription_feed";
 import { initTelemetryClient } from "./appinsights";
 import { toHash } from "./crypto";
 
@@ -50,10 +52,30 @@ export const createTracker = (
       tagOverrides: { samplingEnabled: "false" }
     });
 
+  const trackSubscriptionFeedFailure = (
+    { fiscalCode, version, updatedAt, ...input }: UpdateSubscriptionFeedInput,
+    kind: "EXCEPTION" | "FAILURE"
+  ) => {
+    telemetryClient.trackEvent({
+      name: "subscriptionFeed.upsertServicesPreferences.failure",
+      properties: {
+        ...input,
+        fiscalCode: toHash(fiscalCode),
+        kind,
+        updatedAt: updatedAt.toString(),
+        version: version.toString()
+      },
+      tagOverrides: { samplingEnabled: "false" }
+    } as EventTelemetry);
+  };
+
   return {
     profile: {
       traceMigratingServicePreferences,
       traceServicePreferenceModeChange
+    },
+    subscriptionFeed: {
+      trackSubscriptionFeedFailure
     }
   };
 };
