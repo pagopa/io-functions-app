@@ -1,5 +1,6 @@
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { EventTelemetry } from "applicationinsights/out/Declarations/Contracts";
 import { UpdateSubscriptionFeedInput } from "../UpsertServicePreferences/subscription_feed";
 import { initTelemetryClient } from "./appinsights";
@@ -16,13 +17,15 @@ export const createTracker = (
   const traceServicePreferenceModeChange = (
     hashedFiscalCode: string,
     previousMode: ServicesPreferencesModeEnum,
-    nextMode: ServicesPreferencesModeEnum
+    nextMode: ServicesPreferencesModeEnum,
+    profileVersion: NonNegativeInteger
   ) =>
     telemetryClient.trackEvent({
       name: eventName("change-service-preferences-mode"),
       properties: {
         nextMode,
         previousMode,
+        profileVersion,
         userId: hashedFiscalCode
       },
       tagOverrides: { samplingEnabled: "false" }

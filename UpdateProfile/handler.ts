@@ -119,15 +119,6 @@ export function UpdateProfileHandler(
       requestedServicePreferencesSettingsMode !==
       existingProfile.servicePreferencesSettings.mode;
 
-    // trace event
-    if (isServicePreferencesSettingsModeChanged) {
-      tracker.profile.traceServicePreferenceModeChange(
-        toHash(fiscalCode),
-        existingProfile.servicePreferencesSettings.mode,
-        requestedServicePreferencesSettingsMode
-      );
-    }
-
     // return to LEGACY profile from updated ones is forbidden
     if (
       isServicePreferencesSettingsModeChanged &&
@@ -194,6 +185,16 @@ export function UpdateProfileHandler(
     }
 
     const updateProfile = errorOrMaybeUpdatedProfile.value;
+
+    // trace event
+    if (isServicePreferencesSettingsModeChanged) {
+      tracker.profile.traceServicePreferenceModeChange(
+        toHash(fiscalCode),
+        existingProfile.servicePreferencesSettings.mode,
+        requestedServicePreferencesSettingsMode,
+        updateProfile.version
+      );
+    }
 
     const dfClient = df.getClient(context);
 
