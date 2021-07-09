@@ -14,6 +14,7 @@ import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/gen
 import { FiscalCode } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/strings";
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { createTracker } from "../../__mocks__/tracking";
 
 const baseProfile = {
   email: "info@agid.gov.it",
@@ -76,6 +77,8 @@ const mockServicesPreferencesModel = ({
   )
 } as unknown) as ServicesPreferencesModel;
 
+const mockTracker = createTracker("" as any);
+
 describe("MigrateServicePreferenceFromLegacy", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -91,7 +94,8 @@ describe("MigrateServicePreferenceFromLegacy", () => {
       }
     };
     const handler = MigrateServicePreferenceFromLegacy(
-      mockServicesPreferencesModel
+      mockServicesPreferencesModel,
+      mockTracker
     );
     const result = await handler(
       (context as unknown) as Context,
@@ -121,7 +125,8 @@ describe("MigrateServicePreferenceFromLegacy", () => {
       oldProfile: legacyProfile
     };
     const handler = MigrateServicePreferenceFromLegacy(
-      mockServicesPreferencesModel
+      mockServicesPreferencesModel,
+      mockTracker
     );
     const result = await handler(
       (context as unknown) as Context,
@@ -133,7 +138,8 @@ describe("MigrateServicePreferenceFromLegacy", () => {
 
   it("GIVEN a not valid message, WHEN the queue handler is called, THEN must throw an error", async () => {
     const handler = MigrateServicePreferenceFromLegacy(
-      mockServicesPreferencesModel
+      mockServicesPreferencesModel,
+      mockTracker
     );
     await expect(
       handler((context as unknown) as Context, {})
@@ -159,7 +165,8 @@ describe("MigrateServicePreferenceFromLegacy", () => {
       )
     } as unknown) as ServicesPreferencesModel;
     const handler = MigrateServicePreferenceFromLegacy(
-      mockServicesPreferencesModelWith409
+      mockServicesPreferencesModelWith409,
+      mockTracker
     );
     const result = await handler(
       (context as unknown) as Context,
@@ -180,7 +187,8 @@ describe("MigrateServicePreferenceFromLegacy", () => {
       }
     };
     const handler = MigrateServicePreferenceFromLegacy(
-      mockServicesPreferencesModelWithError
+      mockServicesPreferencesModelWithError,
+      mockTracker
     );
     await expect(
       handler((context as unknown) as Context, legacyToAutoRawInput)

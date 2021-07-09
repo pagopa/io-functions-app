@@ -18,6 +18,7 @@ import * as t from "io-ts";
 import { FiscalCode } from "../generated/backend/FiscalCode";
 import { ServiceId } from "../generated/backend/ServiceId";
 import { errorsToError } from "../utils/conversions";
+import { createTracker } from "../utils/tracking";
 
 const COSMOS_ERROR_KIND = "COSMOS_ERROR_RESPONSE";
 const CONFLICT_CODE = 409;
@@ -83,7 +84,8 @@ export const blockedsToServicesPreferences = (
     .getOrElse([]);
 
 export const MigrateServicePreferenceFromLegacy = (
-  servicePreferenceModel: ServicesPreferencesModel
+  servicePreferenceModel: ServicesPreferencesModel,
+  tracker: ReturnType<typeof createTracker>
 ) => async (context: Context, input: unknown) =>
   te
     .fromEither(
@@ -91,6 +93,15 @@ export const MigrateServicePreferenceFromLegacy = (
         errorsToError
       )
     )
+    // trace event
+    .map(_ => {
+      tracker.profile.traceMigratingServicePreferences(
+        _.oldProfile,
+        _.newProfile,
+        "DOING"
+      );
+      return _;
+    })
     .filterOrElse(
       migrateInput =>
         NonNegativeInteger.is(
