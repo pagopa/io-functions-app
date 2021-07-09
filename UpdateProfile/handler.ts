@@ -68,6 +68,7 @@ export function UpdateProfileHandler(
   queueClient: QueueClient,
   tracker: ReturnType<typeof createTracker>
 ): IUpdateProfileHandler {
+  // tslint:disable-next-line: max-lines-per-function
   return async (context, fiscalCode, profilePayload) => {
     const logPrefix = `UpdateProfileHandler|FISCAL_CODE=${toHash(fiscalCode)}`;
 
@@ -186,12 +187,25 @@ export function UpdateProfileHandler(
 
     const updateProfile = errorOrMaybeUpdatedProfile.value;
 
-    // trace event
+    // a mode change occurred, we trace before and after
     if (isServicePreferencesSettingsModeChanged) {
       tracker.profile.traceServicePreferenceModeChange(
-        toHash(fiscalCode),
+        fiscalCode,
         existingProfile.servicePreferencesSettings.mode,
         requestedServicePreferencesSettingsMode,
+        updateProfile.version
+      );
+    }
+    // mode hasn't changed, but the user is still updating a LEGACY profile
+    //  this trace monitors how many users did not upgrade yet
+    else if (
+      updateProfile.servicePreferencesSettings.mode ===
+      ServicesPreferencesModeEnum.LEGACY
+    ) {
+      tracker.profile.traceServicePreferenceModeChange(
+        fiscalCode,
+        ServicesPreferencesModeEnum.LEGACY,
+        ServicesPreferencesModeEnum.LEGACY,
         updateProfile.version
       );
     }
