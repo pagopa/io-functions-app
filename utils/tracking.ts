@@ -45,6 +45,7 @@ export const createTracker = (
           oldProfile.blockedInboxOrChannels || {}
         ).length,
         profileVersion: newProfile.version,
+        servicePreferencesMode: newProfile.servicePreferencesSettings.mode,
         servicePreferencesVersion:
           newProfile.servicePreferencesSettings.version,
         userId: toHash(newProfile.fiscalCode)
