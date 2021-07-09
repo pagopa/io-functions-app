@@ -6,6 +6,9 @@ import { none, some } from "fp-ts/lib/Option";
 
 import * as df from "durable-functions";
 
+import { QueueClient } from "@azure/storage-queue";
+import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
+import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
@@ -13,15 +16,20 @@ import {
   aFiscalCode,
   aProfile,
   aRetrievedProfile,
-  legacyApiProfileServicePreferencesSettings,
-  manualApiProfileServicePreferencesSettings,
   autoApiProfileServicePreferencesSettings,
-  legacyProfileServicePreferencesSettings,
-  manualProfileServicePreferencesSettings,
   autoProfileServicePreferencesSettings,
+  legacyApiProfileServicePreferencesSettings,
+  legacyProfileServicePreferencesSettings,
+  manualApiProfileServicePreferencesSettings,
+  manualProfileServicePreferencesSettings
 } from "../../__mocks__/mocks";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../../UpsertedProfileOrchestrator/handler";
 import { UpdateProfileHandler } from "../handler";
+
+const mockSendMessage = jest.fn().mockImplementation(() => Promise.resolve());
+const mockQueueClient = ({
+  sendMessage: mockSendMessage
+} as unknown) as QueueClient;
 
 // tslint:disable-next-line: no-let
 let clock: any;
@@ -30,18 +38,23 @@ beforeEach(() => {
   (df as any).mockStartNew.mockClear();
   // We need to mock time to test token expiration.
   clock = lolex.install({ now: Date.now() });
+  mockSendMessage.mockClear();
 });
 afterEach(() => {
   clock = clock.uninstall();
 });
 
+// tslint:disable-next-line: no-big-function
 describe("UpdateProfileHandler", () => {
   it("should return a query error when an error occurs retrieving the existing profile", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => fromLeft({}))
     };
 
-    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
 
     const result = await updateProfileHandler(
       contextMock as any,
@@ -57,7 +70,10 @@ describe("UpdateProfileHandler", () => {
       findLastVersionByModelId: jest.fn(() => taskEither.of(none))
     };
 
-    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
 
     const result = await updateProfileHandler(
       contextMock as any,
@@ -75,7 +91,10 @@ describe("UpdateProfileHandler", () => {
       )
     };
 
-    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
 
     const result = await updateProfileHandler(
       contextMock as any,
@@ -97,7 +116,10 @@ describe("UpdateProfileHandler", () => {
       update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
     };
 
-    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
       ...aProfile,
@@ -119,12 +141,20 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(some({ ...aRetrievedProfile, servicePreferencesSettings: autoProfileServicePreferencesSettings }))
+        taskEither.of(
+          some({
+            ...aRetrievedProfile,
+            servicePreferencesSettings: autoProfileServicePreferencesSettings
+          })
+        )
       ),
       update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
     };
 
-    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
       ...aProfile,
@@ -140,12 +170,20 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(some({ ...aRetrievedProfile, servicePreferencesSettings: manualProfileServicePreferencesSettings }))
+        taskEither.of(
+          some({
+            ...aRetrievedProfile,
+            servicePreferencesSettings: manualProfileServicePreferencesSettings
+          })
+        )
       ),
       update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
     };
 
-    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
       ...aProfile,
@@ -161,12 +199,20 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(some({ ...aRetrievedProfile, servicePreferencesSettings: autoProfileServicePreferencesSettings }))
+        taskEither.of(
+          some({
+            ...aRetrievedProfile,
+            servicePreferencesSettings: autoProfileServicePreferencesSettings
+          })
+        )
       ),
       update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
     };
 
-    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
       ...aProfile,
@@ -182,12 +228,20 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(some({ ...aRetrievedProfile, servicePreferencesSettings: manualProfileServicePreferencesSettings }))
+        taskEither.of(
+          some({
+            ...aRetrievedProfile,
+            servicePreferencesSettings: manualProfileServicePreferencesSettings
+          })
+        )
       ),
       update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
     };
 
-    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
       ...aProfile,
@@ -208,7 +262,10 @@ describe("UpdateProfileHandler", () => {
       update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
     };
 
-    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
       ...aProfile,
@@ -237,7 +294,10 @@ describe("UpdateProfileHandler", () => {
       update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
     };
 
-    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
       ...aProfile
@@ -260,12 +320,20 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(some({ ...aRetrievedProfile, servicePreferencesSettings: autoProfileServicePreferencesSettings }))
+        taskEither.of(
+          some({
+            ...aRetrievedProfile,
+            servicePreferencesSettings: autoProfileServicePreferencesSettings
+          })
+        )
       ),
       update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
     };
 
-    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
       ...aProfile,
@@ -289,12 +357,20 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(some({ ...aRetrievedProfile, servicePreferencesSettings: manualProfileServicePreferencesSettings }))
+        taskEither.of(
+          some({
+            ...aRetrievedProfile,
+            servicePreferencesSettings: manualProfileServicePreferencesSettings
+          })
+        )
       ),
       update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
     };
 
-    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
       ...aProfile,
@@ -323,14 +399,18 @@ describe("UpdateProfileHandler", () => {
       update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
     };
 
-    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
       ...aProfile,
       service_preferences_settings: manualApiProfileServicePreferencesSettings
     });
 
-    let expectedServicePreferencesSettingsVersion = legacyProfileServicePreferencesSettings.version + 1;
+    let expectedServicePreferencesSettingsVersion =
+      legacyProfileServicePreferencesSettings.version + 1;
 
     expect(result.kind).toBe("IResponseSuccessJson");
     if (result.kind === "IResponseSuccessJson") {
@@ -354,14 +434,18 @@ describe("UpdateProfileHandler", () => {
       update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
     };
 
-    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
       ...aProfile,
       service_preferences_settings: autoApiProfileServicePreferencesSettings
     });
 
-    let expectedServicePreferencesSettingsVersion = legacyProfileServicePreferencesSettings.version + 1;
+    let expectedServicePreferencesSettingsVersion =
+      legacyProfileServicePreferencesSettings.version + 1;
 
     expect(result.kind).toBe("IResponseSuccessJson");
     if (result.kind === "IResponseSuccessJson") {
@@ -380,19 +464,28 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(some({ ...aRetrievedProfile, servicePreferencesSettings: autoProfileServicePreferencesSettings }))
+        taskEither.of(
+          some({
+            ...aRetrievedProfile,
+            servicePreferencesSettings: autoProfileServicePreferencesSettings
+          })
+        )
       ),
       update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
     };
 
-    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
       ...aProfile,
       service_preferences_settings: manualApiProfileServicePreferencesSettings
     });
 
-    let expectedServicePreferencesSettingsVersion = autoProfileServicePreferencesSettings.version + 1;
+    let expectedServicePreferencesSettingsVersion =
+      autoProfileServicePreferencesSettings.version + 1;
 
     expect(result.kind).toBe("IResponseSuccessJson");
     if (result.kind === "IResponseSuccessJson") {
@@ -411,19 +504,28 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(some({ ...aRetrievedProfile, servicePreferencesSettings: manualProfileServicePreferencesSettings }))
+        taskEither.of(
+          some({
+            ...aRetrievedProfile,
+            servicePreferencesSettings: manualProfileServicePreferencesSettings
+          })
+        )
       ),
       update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
     };
 
-    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
       ...aProfile,
       service_preferences_settings: autoApiProfileServicePreferencesSettings
     });
 
-    let expectedServicePreferencesSettingsVersion = manualProfileServicePreferencesSettings.version + 1;
+    let expectedServicePreferencesSettingsVersion =
+      manualProfileServicePreferencesSettings.version + 1;
 
     expect(result.kind).toBe("IResponseSuccessJson");
     if (result.kind === "IResponseSuccessJson") {
@@ -495,7 +597,8 @@ describe("UpdateProfileHandler", () => {
         update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
       };
       const updateProfileHandler = UpdateProfileHandler(
-        profileModelMock as any
+        profileModelMock as any,
+        mockQueueClient
       );
       const newProfile = {
         ...aProfile,
@@ -542,7 +645,10 @@ describe("UpdateProfileHandler", () => {
       update: jest.fn(() => taskEither.of(updatedProfile))
     };
 
-    const updateProfileHandler = UpdateProfileHandler(profileModelMock as any);
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
 
     await updateProfileHandler(contextMock as any, aFiscalCode, {
       ...aProfile,
@@ -557,5 +663,169 @@ describe("UpdateProfileHandler", () => {
       undefined,
       upsertedProfileOrchestratorInput
     );
+  });
+
+  it("should update blockedInboxOrChannels if the profile still in LEGACY mode and the migration message not be sent", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(
+          some({
+            ...aRetrievedProfile,
+            blockedInboxOrChannels: {
+              serviceId: [BlockedInboxOrChannelEnum.INBOX]
+            }
+          })
+        )
+      ),
+      update: jest.fn(p => taskEither.of(p))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
+
+    await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      blocked_inbox_or_channels: {
+        newService: [BlockedInboxOrChannelEnum.EMAIL],
+        serviceId: [BlockedInboxOrChannelEnum.INBOX]
+      },
+      service_preferences_settings: legacyApiProfileServicePreferencesSettings
+    });
+
+    expect(profileModelMock.update).toBeCalledWith(
+      expect.objectContaining({
+        blockedInboxOrChannels: {
+          newService: [BlockedInboxOrChannelEnum.EMAIL],
+          serviceId: [BlockedInboxOrChannelEnum.INBOX]
+        },
+        servicePreferencesSettings: {
+          mode: ServicesPreferencesModeEnum.LEGACY,
+          version: -1
+        }
+      })
+    );
+    expect(mockSendMessage).not.toBeCalled();
+  });
+
+  it("GIVEN a valid profile with mode AUTO, WHEN the update is called with current profile mode LEGACY and empty blockedInboxOrChannel, THEN the handler not send the migration message", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some(aRetrievedProfile))
+      ),
+      update: jest.fn(p => taskEither.of(p))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
+
+    await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: autoApiProfileServicePreferencesSettings
+    });
+
+    expect(profileModelMock.update).toBeCalledWith(
+      expect.objectContaining({
+        servicePreferencesSettings: {
+          mode: ServicesPreferencesModeEnum.AUTO,
+          version: 0
+        }
+      })
+    );
+    expect(mockSendMessage).not.toBeCalled();
+  });
+
+  it("GIVEN a valid profile with mode AUTO, WHEN the update is called with current profile mode LEGACY, THEN the handler send the migration message", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(
+          some({
+            ...aRetrievedProfile,
+            blockedInboxOrChannels: {
+              serviceId: [BlockedInboxOrChannelEnum.INBOX]
+            }
+          })
+        )
+      ),
+      update: jest.fn(p => taskEither.of(p))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
+
+    await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: autoApiProfileServicePreferencesSettings
+    });
+
+    expect(profileModelMock.update).toBeCalledWith(
+      expect.objectContaining({
+        blockedInboxOrChannels: undefined,
+        servicePreferencesSettings: {
+          mode: ServicesPreferencesModeEnum.AUTO,
+          version: 0
+        }
+      })
+    );
+    expect(mockSendMessage).toBeCalled();
+  });
+
+  it("GIVEN a valid profile with mode AUTO, WHEN the update is called with current profile mode MANUAL, THEN the handler not send the migration message", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(
+          some({
+            ...aRetrievedProfile,
+            servicePreferencesSettings: manualProfileServicePreferencesSettings
+          })
+        )
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    mockSendMessage.mockImplementation(() => Promise.resolve());
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
+
+    await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: autoApiProfileServicePreferencesSettings
+    });
+
+    expect(mockSendMessage).toBeCalledTimes(0);
+  });
+
+  it("GIVEN a valid profile with mode MANUAL, WHEN the update is called with current profile mode LEGACY, THEN the handler not send the migration message", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        taskEither.of(some(aRetrievedProfile))
+      ),
+      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    mockSendMessage.mockImplementation(() => Promise.resolve());
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient
+    );
+
+    await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      service_preferences_settings: manualProfileServicePreferencesSettings
+    });
+
+    expect(mockSendMessage).toBeCalledTimes(0);
   });
 });

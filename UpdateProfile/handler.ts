@@ -5,6 +5,7 @@ import * as df from "durable-functions";
 
 import { isLeft } from "fp-ts/lib/Either";
 import { fromNullable, isNone } from "fp-ts/lib/Option";
+import * as te from "fp-ts/lib/TaskEither";
 
 import {
   IResponseErrorConflict,
@@ -32,7 +33,9 @@ import {
   wrapRequestHandler
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 
+import { QueueClient } from "@azure/storage-queue";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
+import { MigrateServicesPreferencesQueueMessage } from "../MigrateServicePreferenceFromLegacy/handler";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { ProfileMiddleware } from "../utils/middlewares/profile";
 import {
@@ -58,7 +61,8 @@ type IUpdateProfileHandler = (
 
 // tslint:disable-next-line: cognitive-complexity
 export function UpdateProfileHandler(
-  profileModel: ProfileModel
+  profileModel: ProfileModel,
+  queueClient: QueueClient
 ): IUpdateProfileHandler {
   return async (context, fiscalCode, profilePayload) => {
     const logPrefix = `UpdateProfileHandler|FISCAL_CODE=${fiscalCode}`;
@@ -144,13 +148,25 @@ export function UpdateProfileHandler(
     const overriddenInboxAndWebhook = autoEnableInboxAndWebHook
       ? { isInboxEnabled: true, isWebhookEnabled: true }
       : {};
+    // If the user profile was on LEGACY mode we update blockedInboxOrChannels
+    // Otherwise we remove the property
+    const overrideBlockedInboxOrChannels =
+      profile.servicePreferencesSettings.mode ===
+      ServicesPreferencesModeEnum.LEGACY
+        ? // To be compliant with the previous implementation if the provided blocked_inbox_or_channel
+          // is undefined the stored value remains unchanged
+          profile.blockedInboxOrChannels ||
+          existingProfile.blockedInboxOrChannels
+        : undefined;
 
     const errorOrMaybeUpdatedProfile = await profileModel
       .update({
         ...existingProfile,
         // Remove undefined values to avoid overriding already existing profile properties
         ...withoutUndefinedValues(profile),
-        ...overriddenInboxAndWebhook
+        ...overriddenInboxAndWebhook,
+        // Override blockedInboxOrChannel when mode change from LEGACY to MANUAL or AUTO
+        blockedInboxOrChannels: overrideBlockedInboxOrChannels
       })
       .run();
 
@@ -166,6 +182,8 @@ export function UpdateProfileHandler(
 
     const updateProfile = errorOrMaybeUpdatedProfile.value;
 
+    const dfClient = df.getClient(context);
+
     // Start the Orchestrator
     const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.encode(
       {
@@ -174,13 +192,47 @@ export function UpdateProfileHandler(
         updatedAt: new Date()
       }
     );
-
-    const dfClient = df.getClient(context);
     await dfClient.startNew(
       "UpsertedProfileOrchestrator",
       undefined,
       upsertedProfileOrchestratorInput
     );
+
+    // Queue services preferences migration
+    if (
+      existingProfile.blockedInboxOrChannels &&
+      existingProfile.servicePreferencesSettings.mode ===
+        ServicesPreferencesModeEnum.LEGACY &&
+      updateProfile.servicePreferencesSettings.mode ===
+        ServicesPreferencesModeEnum.AUTO
+    ) {
+      await te.taskEither
+        .of(
+          MigrateServicesPreferencesQueueMessage.encode({
+            newProfile: updateProfile,
+            oldProfile: existingProfile
+          })
+        )
+        .chain(message =>
+          te.tryCatch(
+            () =>
+              queueClient
+                // Default message TTL is 7 days @ref https://docs.microsoft.com/it-it/azure/storage/queues/storage-nodejs-how-to-use-queues?tabs=javascript#queue-service-concepts
+                .sendMessage(
+                  Buffer.from(JSON.stringify(message)).toString("base64")
+                ),
+            err => {
+              context.log.error(
+                `${logPrefix}|Cannot send a message to the queue ${
+                  queueClient.name
+                } |ERROR=${JSON.stringify(err)}`
+              );
+              return err;
+            }
+          )
+        )
+        .run();
+    }
 
     return ResponseSuccessJson(
       retrievedProfileToExtendedProfile(updateProfile)
@@ -192,9 +244,10 @@ export function UpdateProfileHandler(
  * Wraps an UpdateProfile handler inside an Express request handler.
  */
 export function UpdateProfile(
-  profileModel: ProfileModel
+  profileModel: ProfileModel,
+  queueClient: QueueClient
 ): express.RequestHandler {
-  const handler = UpdateProfileHandler(profileModel);
+  const handler = UpdateProfileHandler(profileModel, queueClient);
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
