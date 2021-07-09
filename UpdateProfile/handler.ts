@@ -3,7 +3,7 @@ import * as express from "express";
 import { Context } from "@azure/functions";
 import * as df from "durable-functions";
 
-import { isLeft } from "fp-ts/lib/Either";
+import { isLeft, toError } from "fp-ts/lib/Either";
 import { fromNullable, isNone } from "fp-ts/lib/Option";
 import * as te from "fp-ts/lib/TaskEither";
 
@@ -20,7 +20,10 @@ import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
 
 import { Profile as ApiProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/Profile";
-import { ProfileModel } from "@pagopa/io-functions-commons/dist/src/models/profile";
+import {
+  ProfileModel,
+  RetrievedProfile
+} from "@pagopa/io-functions-commons/dist/src/models/profile";
 import {
   IResponseErrorQuery,
   ResponseErrorQuery
@@ -33,7 +36,7 @@ import {
   wrapRequestHandler
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 
-import { QueueClient } from "@azure/storage-queue";
+import { QueueClient, QueueSendMessageResponse } from "@azure/storage-queue";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { MigrateServicesPreferencesQueueMessage } from "../MigrateServicePreferenceFromLegacy/handler";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
@@ -62,13 +65,34 @@ type IUpdateProfileHandler = (
   | IResponseErrorInternal
 >;
 
+const migratePreferences = (
+  queueClient: QueueClient,
+  oldProfile: RetrievedProfile,
+  newProfile: RetrievedProfile
+): te.TaskEither<Error, QueueSendMessageResponse> =>
+  te.tryCatch(
+    () =>
+      queueClient
+        // Default message TTL is 7 days @ref https://docs.microsoft.com/it-it/azure/storage/queues/storage-nodejs-how-to-use-queues?tabs=javascript#queue-service-concepts
+        .sendMessage(
+          Buffer.from(
+            JSON.stringify(
+              MigrateServicesPreferencesQueueMessage.encode({
+                newProfile,
+                oldProfile
+              })
+            )
+          ).toString("base64")
+        ),
+    toError
+  );
+
 // tslint:disable-next-line: cognitive-complexity
 export function UpdateProfileHandler(
   profileModel: ProfileModel,
   queueClient: QueueClient,
   tracker: ReturnType<typeof createTracker>
 ): IUpdateProfileHandler {
-  // tslint:disable-next-line: max-lines-per-function
   return async (context, fiscalCode, profilePayload) => {
     const logPrefix = `UpdateProfileHandler|FISCAL_CODE=${toHash(fiscalCode)}`;
 
@@ -239,29 +263,12 @@ export function UpdateProfileHandler(
         updateProfile,
         "REQUESTING"
       );
-      await te.taskEither
-        .of(
-          MigrateServicesPreferencesQueueMessage.encode({
-            newProfile: updateProfile,
-            oldProfile: existingProfile
-          })
-        )
-        .chain(message =>
-          te.tryCatch(
-            () =>
-              queueClient
-                // Default message TTL is 7 days @ref https://docs.microsoft.com/it-it/azure/storage/queues/storage-nodejs-how-to-use-queues?tabs=javascript#queue-service-concepts
-                .sendMessage(
-                  Buffer.from(JSON.stringify(message)).toString("base64")
-                ),
-            err => {
-              context.log.error(
-                `${logPrefix}|Cannot send a message to the queue ${
-                  queueClient.name
-                } |ERROR=${JSON.stringify(err)}`
-              );
-              return err;
-            }
+      await migratePreferences(queueClient, existingProfile, updateProfile)
+        .mapLeft(err =>
+          context.log.error(
+            `${logPrefix}|Cannot send a message to the queue ${
+              queueClient.name
+            } |ERROR=${JSON.stringify(err)}`
           )
         )
         .run();
