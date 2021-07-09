@@ -66,9 +66,11 @@ export const blockedsToServicesPreferences = (
     .fromNullable(blocked)
     .map(b =>
       Object.entries(b)
-        .filter((_): _ is [ServiceId, BlockedInboxOrChannelEnum[]] =>
-          ServiceId.is(_[0])
-        )
+        // tslint:disable-next-line: readonly-array
+        .filter((_): _ is [
+          ServiceId,
+          ReadonlyArray<BlockedInboxOrChannelEnum>
+        ] => ServiceId.is(_[0]))
         .map(([serviceId, blockedInboxOrChannelsForService]) =>
           createServicePreference(
             serviceId,
