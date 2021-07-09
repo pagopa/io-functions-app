@@ -109,17 +109,14 @@ export const MigrateServicePreferenceFromLegacy = (
         ),
       new Error("Can not migrate to negative services preferences version.")
     )
-    .map(migrateInput =>
-      blockedsToServicesPreferences(
+    .chain(migrateInput => {
+      const tasks = blockedsToServicesPreferences(
         migrateInput.oldProfile.blockedInboxOrChannels,
         migrateInput.newProfile.fiscalCode,
         /* tslint:disable-next-line no-useless-cast */
         migrateInput.newProfile.servicePreferencesSettings
           .version as NonNegativeInteger // cast required: ts do not identify filterOrElse as a guard
-      )
-    )
-    .map(preferences =>
-      preferences.map(preference =>
+      ).map(preference =>
         servicePreferenceModel
           .create(preference)
           .foldTaskEither<Error, boolean>(
@@ -136,9 +133,18 @@ export const MigrateServicePreferenceFromLegacy = (
                   ),
             _ => te.taskEither.of(true)
           )
-      )
-    )
-    .chain(m => a.array.sequence(te.taskEither)(m))
+      );
+      return a.array
+        .sequence(te.taskEither)(tasks)
+        .map(_ => {
+          tracker.profile.traceMigratingServicePreferences(
+            migrateInput.oldProfile,
+            migrateInput.newProfile,
+            "DONE"
+          );
+          return _;
+        });
+    })
     .getOrElseL(error => {
       context.log.error(`${LOG_PREFIX}|ERROR|${error}`);
       throw error;

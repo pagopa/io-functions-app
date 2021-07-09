@@ -34,7 +34,7 @@ export const createTracker = (
   const traceMigratingServicePreferences = (
     oldProfile: RetrievedProfile,
     newProfile: RetrievedProfile,
-    action: "REQUESTING" | "DOING"
+    action: "REQUESTING" | "DOING" | "DONE"
   ) =>
     telemetryClient.trackEvent({
       name: eventName("migrate-legacy-preferences"),
