@@ -1,11 +1,10 @@
 ﻿import { Context } from "@azure/functions";
-
-import * as express from "express";
-import { initTelemetryClient } from "../utils/appinsights";
 import {
   PROFILE_COLLECTION_NAME,
   ProfileModel
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
+import * as express from "express";
+import { initTelemetryClient } from "../utils/appinsights";
 
 import { secureExpressApp } from "@pagopa/io-functions-commons/dist/src/utils/express";
 import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
@@ -13,11 +12,11 @@ import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middl
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
 import { QueueServiceClient } from "@azure/storage-queue";
-import { cosmosdbInstance } from "../utils/cosmosdb";
-
 import { getConfigOrThrow } from "../utils/config";
-import { UpdateProfile } from "./handler";
+import { cosmosdbInstance } from "../utils/cosmosdb";
 import { createTracker } from "../utils/tracking";
+
+import { UpdateProfile } from "./handler";
 
 const config = getConfigOrThrow();
 

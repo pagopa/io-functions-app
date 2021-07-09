@@ -42,9 +42,9 @@ import {
   apiProfileToProfile,
   retrievedProfileToExtendedProfile
 } from "../utils/profiles";
-import { initTelemetryClient } from "../utils/appinsights";
-import { createTracker } from "../utils/tracking";
+
 import { toHash } from "../utils/crypto";
+import { createTracker } from "../utils/tracking";
 
 /**
  * Type of an UpdateProfile handler.
@@ -120,12 +120,13 @@ export function UpdateProfileHandler(
       existingProfile.servicePreferencesSettings.mode;
 
     // trace event
-    isServicePreferencesSettingsModeChanged &&
+    if (isServicePreferencesSettingsModeChanged) {
       tracker.profile.traceServicePreferenceModeChange(
         toHash(fiscalCode),
         existingProfile.servicePreferencesSettings.mode,
         requestedServicePreferencesSettingsMode
       );
+    }
 
     // return to LEGACY profile from updated ones is forbidden
     if (
