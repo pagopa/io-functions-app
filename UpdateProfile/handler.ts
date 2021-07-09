@@ -43,6 +43,9 @@ import {
   retrievedProfileToExtendedProfile
 } from "../utils/profiles";
 
+import { toHash } from "../utils/crypto";
+import { createTracker } from "../utils/tracking";
+
 /**
  * Type of an UpdateProfile handler.
  */
@@ -62,10 +65,11 @@ type IUpdateProfileHandler = (
 // tslint:disable-next-line: cognitive-complexity
 export function UpdateProfileHandler(
   profileModel: ProfileModel,
-  queueClient: QueueClient
+  queueClient: QueueClient,
+  tracker: ReturnType<typeof createTracker>
 ): IUpdateProfileHandler {
   return async (context, fiscalCode, profilePayload) => {
-    const logPrefix = `UpdateProfileHandler|FISCAL_CODE=${fiscalCode}`;
+    const logPrefix = `UpdateProfileHandler|FISCAL_CODE=${toHash(fiscalCode)}`;
 
     const errorOrMaybeExistingProfile = await profileModel
       .findLastVersionByModelId([fiscalCode])
@@ -182,6 +186,16 @@ export function UpdateProfileHandler(
 
     const updateProfile = errorOrMaybeUpdatedProfile.value;
 
+    // trace event
+    if (isServicePreferencesSettingsModeChanged) {
+      tracker.profile.traceServicePreferenceModeChange(
+        toHash(fiscalCode),
+        existingProfile.servicePreferencesSettings.mode,
+        requestedServicePreferencesSettingsMode,
+        updateProfile.version
+      );
+    }
+
     const dfClient = df.getClient(context);
 
     // Start the Orchestrator
@@ -206,6 +220,11 @@ export function UpdateProfileHandler(
       updateProfile.servicePreferencesSettings.mode ===
         ServicesPreferencesModeEnum.AUTO
     ) {
+      tracker.profile.traceMigratingServicePreferences(
+        existingProfile,
+        updateProfile,
+        "REQUESTING"
+      );
       await te.taskEither
         .of(
           MigrateServicesPreferencesQueueMessage.encode({
@@ -245,9 +264,10 @@ export function UpdateProfileHandler(
  */
 export function UpdateProfile(
   profileModel: ProfileModel,
-  queueClient: QueueClient
+  queueClient: QueueClient,
+  tracker: ReturnType<typeof createTracker>
 ): express.RequestHandler {
-  const handler = UpdateProfileHandler(profileModel, queueClient);
+  const handler = UpdateProfileHandler(profileModel, queueClient, tracker);
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),

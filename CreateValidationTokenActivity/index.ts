@@ -1,6 +1,4 @@
-﻿import * as crypto from "crypto";
-
-import { createTableService } from "azure-storage";
+﻿import { createTableService } from "azure-storage";
 
 import { Millisecond } from "@pagopa/ts-commons/lib/units";
 
@@ -10,6 +8,7 @@ import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strin
 import { getCreateValidationTokenActivityHandler } from "./handler";
 
 import { getConfigOrThrow } from "../utils/config";
+import { randomBytes, toHash } from "../utils/crypto";
 
 const config = getConfigOrThrow();
 
@@ -20,15 +19,6 @@ const TOKEN_INVALID_AFTER_MS = (1000 * 60 * 60 * 24 * 30) as Millisecond; // 30 
 
 const tableService = createTableService(config.QueueStorageConnection);
 
-const randomBytesGenerator = (size: number) =>
-  crypto.randomBytes(size).toString("hex");
-
-const hashCreator = (value: string) =>
-  crypto
-    .createHash("sha256")
-    .update(value)
-    .digest("hex");
-
 // When the function starts, attempt to create the table if it does not exist
 // Note that we cannot log anything just yet since we don't have a Context
 tableService.createTableIfNotExists(VALIDATION_TOKEN_TABLE_NAME, () => 0);
@@ -38,8 +28,8 @@ const activityFunctionHandler = getCreateValidationTokenActivityHandler(
   tableService,
   VALIDATION_TOKEN_TABLE_NAME,
   TOKEN_INVALID_AFTER_MS,
-  randomBytesGenerator,
-  hashCreator
+  randomBytes,
+  toHash
 );
 
 export default activityFunctionHandler;
