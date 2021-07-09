@@ -1,8 +1,5 @@
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
-import {
-  Profile,
-  RetrievedProfile
-} from "@pagopa/io-functions-commons/dist/src/models/profile";
+import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { initTelemetryClient } from "./appinsights";
 import { toHash } from "./crypto";
 
@@ -22,9 +19,9 @@ export const createTracker = (
     telemetryClient.trackEvent({
       name: eventName("change-service-preferences-mode"),
       properties: {
-        userId: hashedFiscalCode,
+        nextMode,
         previousMode,
-        nextMode
+        userId: hashedFiscalCode
       },
       tagOverrides: { samplingEnabled: "false" }
     });
@@ -40,23 +37,23 @@ export const createTracker = (
     telemetryClient.trackEvent({
       name: eventName("migrate-legacy-preferences"),
       properties: {
-        userId: toHash(newProfile.fiscalCode),
         action,
-        profileVersion: newProfile.version,
-        servicePreferencesVersion:
-          newProfile.servicePreferencesSettings.version,
         oldPreferences: oldProfile.blockedInboxOrChannels,
         oldPreferencesCount: Object.keys(
           oldProfile.blockedInboxOrChannels || {}
-        ).length
+        ).length,
+        profileVersion: newProfile.version,
+        servicePreferencesVersion:
+          newProfile.servicePreferencesSettings.version,
+        userId: toHash(newProfile.fiscalCode)
       },
       tagOverrides: { samplingEnabled: "false" }
     });
 
   return {
     profile: {
-      traceServicePreferenceModeChange,
-      traceMigratingServicePreferences
+      traceMigratingServicePreferences,
+      traceServicePreferenceModeChange
     }
   };
 };
