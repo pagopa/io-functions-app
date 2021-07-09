@@ -69,8 +69,16 @@ export const createTracker = (
     } as EventTelemetry);
   };
 
+  const traceEmailValidationSend = (messageInfo: object) => {
+    telemetryClient.trackEvent({
+      name: `SendValidationEmailActivity.success`,
+      properties: messageInfo
+    } as EventTelemetry);
+  };
+
   return {
     profile: {
+      traceEmailValidationSend,
       traceMigratingServicePreferences,
       traceServicePreferenceModeChange
     },

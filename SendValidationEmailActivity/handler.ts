@@ -16,6 +16,7 @@ import { EmailDefaults } from "./";
 import { getEmailHtmlFromTemplate } from "./template";
 
 import { sendMail } from "@pagopa/io-functions-commons/dist/src/mailer";
+import { createTracker } from "../utils/tracking";
 
 // Activity input
 export const ActivityInput = t.interface({
@@ -99,10 +100,9 @@ export const getSendValidationEmailActivityHandler = (
         // on success, track a custom event with properties of transport used
         // see https://github.com/pagopa/io-functions-commons/blob/master/src/utils/nodemailer.ts
         // note: the extra properties will be defined only when using a MultiTransport
-        ai.defaultClient.trackEvent({
-          name: `SendValidationEmailActivity.success`,
-          properties: typeof messageInfo === "object" ? messageInfo : {}
-        });
+        createTracker(ai.defaultClient).profile.traceEmailValidationSend(
+          typeof messageInfo === "object" ? messageInfo : {}
+        );
       }
     )
     .run();
