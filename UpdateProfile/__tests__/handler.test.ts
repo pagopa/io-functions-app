@@ -26,6 +26,8 @@ import {
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../../UpsertedProfileOrchestrator/handler";
 import { UpdateProfileHandler } from "../handler";
 
+import { createTracker } from "../../__mocks__/tracking";
+
 const mockSendMessage = jest.fn().mockImplementation(() => Promise.resolve());
 const mockQueueClient = ({
   sendMessage: mockSendMessage
@@ -44,6 +46,8 @@ afterEach(() => {
   clock = clock.uninstall();
 });
 
+const mockTracker = createTracker("" as any);
+
 // tslint:disable-next-line: no-big-function
 describe("UpdateProfileHandler", () => {
   it("should return a query error when an error occurs retrieving the existing profile", async () => {
@@ -53,12 +57,13 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     const result = await updateProfileHandler(
       contextMock as any,
-      undefined as any,
+      aFiscalCode,
       {} as any
     );
 
@@ -72,12 +77,13 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     const result = await updateProfileHandler(
       contextMock as any,
-      undefined as any,
+      aFiscalCode,
       {} as any
     );
 
@@ -93,16 +99,13 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
-    const result = await updateProfileHandler(
-      contextMock as any,
-      undefined as any,
-      {
-        version: 1
-      } as any
-    );
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      version: 1
+    } as any);
 
     expect(result.kind).toBe("IResponseErrorConflict");
   });
@@ -118,7 +121,8 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -153,7 +157,8 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -182,7 +187,8 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -211,7 +217,8 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -240,7 +247,8 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -264,7 +272,8 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -296,7 +305,8 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -332,7 +342,8 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -369,7 +380,8 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -401,7 +413,8 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -436,7 +449,8 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -476,7 +490,8 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -516,7 +531,8 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -598,7 +614,8 @@ describe("UpdateProfileHandler", () => {
       };
       const updateProfileHandler = UpdateProfileHandler(
         profileModelMock as any,
-        mockQueueClient
+        mockQueueClient,
+        mockTracker
       );
       const newProfile = {
         ...aProfile,
@@ -647,7 +664,8 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -683,7 +701,8 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -721,7 +740,8 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -758,7 +778,8 @@ describe("UpdateProfileHandler", () => {
 
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -795,7 +816,8 @@ describe("UpdateProfileHandler", () => {
     mockSendMessage.mockImplementation(() => Promise.resolve());
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -818,7 +840,8 @@ describe("UpdateProfileHandler", () => {
     mockSendMessage.mockImplementation(() => Promise.resolve());
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
-      mockQueueClient
+      mockQueueClient,
+      mockTracker
     );
 
     await updateProfileHandler(contextMock as any, aFiscalCode, {

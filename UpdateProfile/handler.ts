@@ -42,6 +42,9 @@ import {
   apiProfileToProfile,
   retrievedProfileToExtendedProfile
 } from "../utils/profiles";
+import { initTelemetryClient } from "../utils/appinsights";
+import { createTracker } from "../utils/tracking";
+import { toHash } from "../utils/crypto";
 
 /**
  * Type of an UpdateProfile handler.
@@ -62,10 +65,11 @@ type IUpdateProfileHandler = (
 // tslint:disable-next-line: cognitive-complexity
 export function UpdateProfileHandler(
   profileModel: ProfileModel,
-  queueClient: QueueClient
+  queueClient: QueueClient,
+  tracker: ReturnType<typeof createTracker>
 ): IUpdateProfileHandler {
   return async (context, fiscalCode, profilePayload) => {
-    const logPrefix = `UpdateProfileHandler|FISCAL_CODE=${fiscalCode}`;
+    const logPrefix = `UpdateProfileHandler|FISCAL_CODE=${toHash(fiscalCode)}`;
 
     const errorOrMaybeExistingProfile = await profileModel
       .findLastVersionByModelId([fiscalCode])
@@ -114,6 +118,14 @@ export function UpdateProfileHandler(
     const isServicePreferencesSettingsModeChanged =
       requestedServicePreferencesSettingsMode !==
       existingProfile.servicePreferencesSettings.mode;
+
+    // trace event
+    isServicePreferencesSettingsModeChanged &&
+      tracker.profile.traceServicePreferenceModeChange(
+        toHash(fiscalCode),
+        existingProfile.servicePreferencesSettings.mode,
+        requestedServicePreferencesSettingsMode
+      );
 
     // return to LEGACY profile from updated ones is forbidden
     if (
@@ -206,6 +218,11 @@ export function UpdateProfileHandler(
       updateProfile.servicePreferencesSettings.mode ===
         ServicesPreferencesModeEnum.AUTO
     ) {
+      tracker.profile.traceMigratingServicePreferences(
+        existingProfile,
+        updateProfile,
+        "REQUESTING"
+      );
       await te.taskEither
         .of(
           MigrateServicesPreferencesQueueMessage.encode({
@@ -245,9 +262,10 @@ export function UpdateProfileHandler(
  */
 export function UpdateProfile(
   profileModel: ProfileModel,
-  queueClient: QueueClient
+  queueClient: QueueClient,
+  tracker: ReturnType<typeof createTracker>
 ): express.RequestHandler {
-  const handler = UpdateProfileHandler(profileModel, queueClient);
+  const handler = UpdateProfileHandler(profileModel, queueClient, tracker);
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
