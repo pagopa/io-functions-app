@@ -3,8 +3,8 @@ import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitio
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { TableService } from "azure-storage";
-import * as crypto from "crypto";
 import * as t from "io-ts";
+import { toHash } from "../utils/crypto";
 import { updateSubscriptionStatus } from "../utils/subscription_feed";
 
 /**
@@ -64,10 +64,7 @@ export const updateSubscriptionFeed = async (
 
   // Create a SHA256 hash of the fiscal code
   // see https://nodejs.org/api/crypto.html#crypto_crypto_createhash_algorithm_options
-  const fiscalCodeHash = crypto
-    .createHash("sha256")
-    .update(fiscalCode)
-    .digest("hex");
+  const fiscalCodeHash = toHash(fiscalCode);
 
   const updateLogPrefix = `${logPrefix}|PROFILE=${fiscalCode}|OPERATION=${operation}|PROFILE=${fiscalCode}`;
 
