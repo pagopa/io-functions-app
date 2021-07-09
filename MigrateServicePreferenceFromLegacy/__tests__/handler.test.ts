@@ -97,6 +97,7 @@ describe("MigrateServicePreferenceFromLegacy", () => {
       mockServicesPreferencesModel,
       mockTracker
     );
+
     const result = await handler(
       (context as unknown) as Context,
       legacyToAutoRawInput
@@ -196,5 +197,82 @@ describe("MigrateServicePreferenceFromLegacy", () => {
     expect(mockServicesPreferencesModelWithError.create).toHaveBeenCalledTimes(
       1
     );
+  });
+
+  it("should trace DONE event just once", async () => {
+    const legacyToAutoRawInput = {
+      newProfile: autoProfile,
+      oldProfile: {
+        ...legacyProfile,
+        blockedInboxOrChannels: {
+          MyServiceId: [BlockedInboxOrChannelEnum.INBOX],
+          MyOtherServiceId: [BlockedInboxOrChannelEnum.INBOX],
+          MyOtherOtherServiceId: [BlockedInboxOrChannelEnum.INBOX]
+        }
+      }
+    };
+
+    const spiedTracker = ({
+      profile: { traceMigratingServicePreferences: jest.fn() }
+    } as unknown) as typeof mockTracker;
+
+    const handler = MigrateServicePreferenceFromLegacy(
+      mockServicesPreferencesModel,
+      spiedTracker
+    );
+
+    const _ = await handler(
+      (context as unknown) as Context,
+      legacyToAutoRawInput
+    );
+
+    const spied = spiedTracker.profile
+      .traceMigratingServicePreferences as jest.Mock;
+
+    expect(spied).toHaveBeenCalledTimes(
+      2 /* one with DOING and one with DONE */
+    );
+
+    expect(spied.mock.calls[0][2]).toEqual("DOING");
+    expect(spied.mock.calls[1][2]).toEqual("DONE");
+  });
+
+  it("should NOT trace DONE event if at least one migration fails", async () => {
+    const legacyToAutoRawInput = {
+      newProfile: autoProfile,
+      oldProfile: {
+        ...legacyProfile,
+        blockedInboxOrChannels: {
+          MyServiceId: [BlockedInboxOrChannelEnum.INBOX],
+          MyOtherServiceId: [BlockedInboxOrChannelEnum.INBOX],
+          MyOtherOtherServiceId: [BlockedInboxOrChannelEnum.INBOX]
+        }
+      }
+    };
+
+    // We have 3 preference to migrate, but we want one to fail
+    (mockServicesPreferencesModel.create as jest.Mock).mockImplementationOnce(
+      () => te.fromLeft({})
+    );
+
+    const spiedTracker = ({
+      profile: { traceMigratingServicePreferences: jest.fn() }
+    } as unknown) as typeof mockTracker;
+
+    const handler = MigrateServicePreferenceFromLegacy(
+      mockServicesPreferencesModel,
+      spiedTracker
+    );
+
+    await expect(
+      handler((context as unknown) as Context, legacyToAutoRawInput)
+    ).rejects.not.toBeNull();
+
+    const spied = spiedTracker.profile
+      .traceMigratingServicePreferences as jest.Mock;
+
+    expect(spied).toHaveBeenCalledTimes(1 /* one with DOING  */);
+
+    expect(spied.mock.calls[0][2]).toEqual("DOING");
   });
 });
