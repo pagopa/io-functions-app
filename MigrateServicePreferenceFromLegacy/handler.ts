@@ -126,7 +126,7 @@ export const MigrateServicePreferenceFromLegacy = (
                 ? te.taskEither.of(false)
                 : te.fromLeft(
                     new Error(
-                      `Can not create the service profile: ${JSON.stringify(
+                      `Can not create the service preferences: ${JSON.stringify(
                         cosmosError
                       )}`
                     )
