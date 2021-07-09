@@ -95,7 +95,7 @@ export function UpdateProfileHandler(
     // Verify that the client asked to update the latest version
     if (profilePayload.version !== existingProfile.version) {
       context.log.warn(
-        `${logPrefix}|CURRENT_VERSION=${existingProfile.version}|RESULT=CONFLICT`
+        `${logPrefix}|CURRENT_VERSION=${existingProfile.version}|PREV_VERSION=${profilePayload.version}|RESULT=CONFLICT`
       );
       return ResponseErrorConflict(
         `Version ${profilePayload.version} is not the latest version.`
