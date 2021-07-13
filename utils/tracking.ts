@@ -1,3 +1,4 @@
+import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
@@ -15,7 +16,7 @@ export const createTracker = (
    * Trace an event when a user changes their preference mode
    */
   const traceServicePreferenceModeChange = (
-    hashedFiscalCode: string,
+    fiscalCode: FiscalCode,
     previousMode: ServicesPreferencesModeEnum,
     nextMode: ServicesPreferencesModeEnum,
     profileVersion: NonNegativeInteger
@@ -26,7 +27,7 @@ export const createTracker = (
         nextMode,
         previousMode,
         profileVersion,
-        userId: hashedFiscalCode
+        userId: toHash(fiscalCode)
       },
       tagOverrides: { samplingEnabled: "false" }
     });
