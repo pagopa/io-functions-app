@@ -21,7 +21,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
-import { fromUnixTime, isBefore } from "date-fns";
+import { isBefore } from "date-fns";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 
 type IGetProfileHandlerResult =
@@ -60,8 +60,7 @@ export function GetProfileHandler(
               // this map is valid for ever so this check cannot be removed.
               // Please note that cosmos timestamps are expressed in unix notation (in seconds), so we must transform
               // it to a common Date representation.
-              isOptInEmailEnabled &&
-              isBefore(fromUnixTime(_._ts), optOutEmailSwitchDate)
+              isOptInEmailEnabled && isBefore(_._ts, optOutEmailSwitchDate)
                 ? { ..._, isEmailEnabled: false }
                 : _
             )
