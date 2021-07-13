@@ -57,7 +57,9 @@ export function GetProfileHandler(
           maybeProfile
             .map(_ =>
               // if profile's timestamp is before email opt out switch limit date we must force isEmailEnabled to false
-              // this map is valid for ever so this check cannot be removed
+              // this map is valid for ever so this check cannot be removed.
+              // Please note that cosmos timestamps are expressed in unix notation (in seconds), so we must transform
+              // it to a common Date representation.
               isOptInEmailEnabled && isBefore(_._ts, optOutEmailSwitchDate)
                 ? { ..._, isEmailEnabled: false }
                 : _

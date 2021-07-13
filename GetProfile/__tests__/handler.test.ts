@@ -1,10 +1,7 @@
 /* tslint:disable:no-any */
 
 import { none, some } from "fp-ts/lib/Option";
-
-import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
-import { fromLeft } from "fp-ts/lib/IOEither";
-import { taskEither } from "fp-ts/lib/TaskEither";
+import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import {
   aExtendedProfile,
   aFiscalCode,
@@ -12,17 +9,16 @@ import {
 } from "../../__mocks__/mocks";
 import { GetProfileHandler } from "../handler";
 
-const anEmailOptOutEmailSwitchDate = UTCISODateFromString.decode(
-  "2021-07-08T23:59:59Z"
-).getOrElseL(() => fail("wrong date value"));
-const aTimestamp = anEmailOptOutEmailSwitchDate.valueOf();
+// Date returns a timestamp expressed in milliseconds
+const aTimestamp = Math.floor(new Date().valueOf() / 1000);
+const anEmailOptOutEmailSwitchDate = new Date(aTimestamp);
 const aRetrievedProfileWithTimestampBeforeLimit = {
   ...aRetrievedProfile,
   _ts: aTimestamp - 1
 };
 const aRetrievedProfileWithTimestampAfterLimit = {
   ...aRetrievedProfile,
-  _ts: aTimestamp
+  _ts: aTimestamp + 10
 };
 
 describe("GetProfileHandler", () => {
