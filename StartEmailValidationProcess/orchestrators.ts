@@ -1,4 +1,3 @@
-import * as crypto from "crypto";
 import * as df from "durable-functions";
 import { DurableOrchestrationClient } from "durable-functions/lib/src/durableorchestrationclient";
 
@@ -9,12 +8,7 @@ import { TaskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { PromiseType } from "@pagopa/ts-commons/lib/types";
 import { EmailAddress } from "../generated/backend/EmailAddress";
-
-const hashCreator = (value: string) =>
-  crypto
-    .createHash("sha256")
-    .update(value)
-    .digest("hex");
+import { toHash } from "../utils/crypto";
 
 /**
  * The identifier for EmailValidationProcessOrchestrator
@@ -26,7 +20,7 @@ export const makeStartEmailValidationProcessOrchestratorId = (
   email: EmailAddress,
   creationDate: Date = new Date()
 ) =>
-  hashCreator(
+  toHash(
     `${dateFns.format(creationDate, "dd/MM/yyyy")}-${fiscalCode}-${email}`
   );
 

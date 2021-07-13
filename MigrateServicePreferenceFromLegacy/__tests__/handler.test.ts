@@ -14,6 +14,7 @@ import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/gen
 import { FiscalCode } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/strings";
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { createTracker } from "../../__mocks__/tracking";
 
 const baseProfile = {
   email: "info@agid.gov.it",
@@ -76,6 +77,8 @@ const mockServicesPreferencesModel = ({
   )
 } as unknown) as ServicesPreferencesModel;
 
+const mockTracker = createTracker("" as any);
+
 describe("MigrateServicePreferenceFromLegacy", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -91,8 +94,10 @@ describe("MigrateServicePreferenceFromLegacy", () => {
       }
     };
     const handler = MigrateServicePreferenceFromLegacy(
-      mockServicesPreferencesModel
+      mockServicesPreferencesModel,
+      mockTracker
     );
+
     const result = await handler(
       (context as unknown) as Context,
       legacyToAutoRawInput
@@ -121,7 +126,8 @@ describe("MigrateServicePreferenceFromLegacy", () => {
       oldProfile: legacyProfile
     };
     const handler = MigrateServicePreferenceFromLegacy(
-      mockServicesPreferencesModel
+      mockServicesPreferencesModel,
+      mockTracker
     );
     const result = await handler(
       (context as unknown) as Context,
@@ -133,7 +139,8 @@ describe("MigrateServicePreferenceFromLegacy", () => {
 
   it("GIVEN a not valid message, WHEN the queue handler is called, THEN must throw an error", async () => {
     const handler = MigrateServicePreferenceFromLegacy(
-      mockServicesPreferencesModel
+      mockServicesPreferencesModel,
+      mockTracker
     );
     await expect(
       handler((context as unknown) as Context, {})
@@ -159,7 +166,8 @@ describe("MigrateServicePreferenceFromLegacy", () => {
       )
     } as unknown) as ServicesPreferencesModel;
     const handler = MigrateServicePreferenceFromLegacy(
-      mockServicesPreferencesModelWith409
+      mockServicesPreferencesModelWith409,
+      mockTracker
     );
     const result = await handler(
       (context as unknown) as Context,
@@ -180,7 +188,8 @@ describe("MigrateServicePreferenceFromLegacy", () => {
       }
     };
     const handler = MigrateServicePreferenceFromLegacy(
-      mockServicesPreferencesModelWithError
+      mockServicesPreferencesModelWithError,
+      mockTracker
     );
     await expect(
       handler((context as unknown) as Context, legacyToAutoRawInput)
@@ -188,5 +197,82 @@ describe("MigrateServicePreferenceFromLegacy", () => {
     expect(mockServicesPreferencesModelWithError.create).toHaveBeenCalledTimes(
       1
     );
+  });
+
+  it("should trace DONE event just once", async () => {
+    const legacyToAutoRawInput = {
+      newProfile: autoProfile,
+      oldProfile: {
+        ...legacyProfile,
+        blockedInboxOrChannels: {
+          MyServiceId: [BlockedInboxOrChannelEnum.INBOX],
+          MyOtherServiceId: [BlockedInboxOrChannelEnum.INBOX],
+          MyOtherOtherServiceId: [BlockedInboxOrChannelEnum.INBOX]
+        }
+      }
+    };
+
+    const spiedTracker = ({
+      profile: { traceMigratingServicePreferences: jest.fn() }
+    } as unknown) as typeof mockTracker;
+
+    const handler = MigrateServicePreferenceFromLegacy(
+      mockServicesPreferencesModel,
+      spiedTracker
+    );
+
+    const _ = await handler(
+      (context as unknown) as Context,
+      legacyToAutoRawInput
+    );
+
+    const spied = spiedTracker.profile
+      .traceMigratingServicePreferences as jest.Mock;
+
+    expect(spied).toHaveBeenCalledTimes(
+      2 /* one with DOING and one with DONE */
+    );
+
+    expect(spied.mock.calls[0][2]).toEqual("DOING");
+    expect(spied.mock.calls[1][2]).toEqual("DONE");
+  });
+
+  it("should NOT trace DONE event if at least one migration fails", async () => {
+    const legacyToAutoRawInput = {
+      newProfile: autoProfile,
+      oldProfile: {
+        ...legacyProfile,
+        blockedInboxOrChannels: {
+          MyServiceId: [BlockedInboxOrChannelEnum.INBOX],
+          MyOtherServiceId: [BlockedInboxOrChannelEnum.INBOX],
+          MyOtherOtherServiceId: [BlockedInboxOrChannelEnum.INBOX]
+        }
+      }
+    };
+
+    // We have 3 preference to migrate, but we want one to fail
+    (mockServicesPreferencesModel.create as jest.Mock).mockImplementationOnce(
+      () => te.fromLeft({})
+    );
+
+    const spiedTracker = ({
+      profile: { traceMigratingServicePreferences: jest.fn() }
+    } as unknown) as typeof mockTracker;
+
+    const handler = MigrateServicePreferenceFromLegacy(
+      mockServicesPreferencesModel,
+      spiedTracker
+    );
+
+    await expect(
+      handler((context as unknown) as Context, legacyToAutoRawInput)
+    ).rejects.not.toBeNull();
+
+    const spied = spiedTracker.profile
+      .traceMigratingServicePreferences as jest.Mock;
+
+    expect(spied).toHaveBeenCalledTimes(1 /* one with DOING  */);
+
+    expect(spied.mock.calls[0][2]).toEqual("DOING");
   });
 });

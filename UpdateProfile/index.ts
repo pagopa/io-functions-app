@@ -1,11 +1,10 @@
 ﻿import { Context } from "@azure/functions";
-
-import * as express from "express";
-
 import {
   PROFILE_COLLECTION_NAME,
   ProfileModel
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
+import * as express from "express";
+import { initTelemetryClient } from "../utils/appinsights";
 
 import { secureExpressApp } from "@pagopa/io-functions-commons/dist/src/utils/express";
 import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
@@ -13,9 +12,10 @@ import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middl
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
 import { QueueServiceClient } from "@azure/storage-queue";
-import { cosmosdbInstance } from "../utils/cosmosdb";
-
 import { getConfigOrThrow } from "../utils/config";
+import { cosmosdbInstance } from "../utils/cosmosdb";
+import { createTracker } from "../utils/tracking";
+
 import { UpdateProfile } from "./handler";
 
 const config = getConfigOrThrow();
@@ -28,12 +28,15 @@ const queueClient = QueueServiceClient.fromConnectionString(
   config.FN_APP_STORAGE_CONNECTION_STRING
 ).getQueueClient(config.MIGRATE_SERVICES_PREFERENCES_PROFILE_QUEUE_NAME);
 
+// Initialize application insights
+const telemetryClient = initTelemetryClient();
+
 // Setup Express
 const app = express();
 secureExpressApp(app);
 app.put(
   "/api/v1/profiles/:fiscalcode",
-  UpdateProfile(profileModel, queueClient)
+  UpdateProfile(profileModel, queueClient, createTracker(telemetryClient))
 );
 
 const azureFunctionHandler = createAzureFunctionHandler(app);

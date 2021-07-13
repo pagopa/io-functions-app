@@ -58,6 +58,7 @@ import { updateSubscriptionFeedTask } from "./subscription_feed";
 import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { TableService } from "azure-storage";
+import { createTracker } from "../utils/tracking";
 
 enum FeedOperationEnum {
   "SUBSCRIBED" = "SUBSCRIBED",
@@ -288,7 +289,6 @@ export const GetUpsertServicePreferencesHandler = (
             ? updateSubscriptionFeedTask(
                 tableService,
                 subscriptionFeedTableName,
-                telemetryClient,
                 context,
                 {
                   fiscalCode,
@@ -298,7 +298,8 @@ export const GetUpsertServicePreferencesHandler = (
                   updatedAt,
                   version
                 },
-                logPrefix
+                logPrefix,
+                createTracker(telemetryClient)
               ).map(() => upsertedUserServicePreference)
             : te.taskEither.of(upsertedUserServicePreference)
       )

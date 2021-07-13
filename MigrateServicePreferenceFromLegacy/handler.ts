@@ -18,6 +18,7 @@ import * as t from "io-ts";
 import { FiscalCode } from "../generated/backend/FiscalCode";
 import { ServiceId } from "../generated/backend/ServiceId";
 import { errorsToError } from "../utils/conversions";
+import { createTracker } from "../utils/tracking";
 
 const COSMOS_ERROR_KIND = "COSMOS_ERROR_RESPONSE";
 const CONFLICT_CODE = 409;
@@ -83,7 +84,8 @@ export const blockedsToServicesPreferences = (
     .getOrElse([]);
 
 export const MigrateServicePreferenceFromLegacy = (
-  servicePreferenceModel: ServicesPreferencesModel
+  servicePreferenceModel: ServicesPreferencesModel,
+  tracker: ReturnType<typeof createTracker>
 ) => async (context: Context, input: unknown) =>
   te
     .fromEither(
@@ -91,6 +93,15 @@ export const MigrateServicePreferenceFromLegacy = (
         errorsToError
       )
     )
+    // trace event
+    .map(_ => {
+      tracker.profile.traceMigratingServicePreferences(
+        _.oldProfile,
+        _.newProfile,
+        "DOING"
+      );
+      return _;
+    })
     .filterOrElse(
       migrateInput =>
         NonNegativeInteger.is(
@@ -98,17 +109,14 @@ export const MigrateServicePreferenceFromLegacy = (
         ),
       new Error("Can not migrate to negative services preferences version.")
     )
-    .map(migrateInput =>
-      blockedsToServicesPreferences(
+    .chain(migrateInput => {
+      const tasks = blockedsToServicesPreferences(
         migrateInput.oldProfile.blockedInboxOrChannels,
         migrateInput.newProfile.fiscalCode,
         /* tslint:disable-next-line no-useless-cast */
         migrateInput.newProfile.servicePreferencesSettings
           .version as NonNegativeInteger // cast required: ts do not identify filterOrElse as a guard
-      )
-    )
-    .map(preferences =>
-      preferences.map(preference =>
+      ).map(preference =>
         servicePreferenceModel
           .create(preference)
           .foldTaskEither<Error, boolean>(
@@ -118,16 +126,25 @@ export const MigrateServicePreferenceFromLegacy = (
                 ? te.taskEither.of(false)
                 : te.fromLeft(
                     new Error(
-                      `Can not create the service profile: ${JSON.stringify(
+                      `Can not create the service preferences: ${JSON.stringify(
                         cosmosError
                       )}`
                     )
                   ),
             _ => te.taskEither.of(true)
           )
-      )
-    )
-    .chain(m => a.array.sequence(te.taskEither)(m))
+      );
+      return a.array
+        .sequence(te.taskEither)(tasks)
+        .map(_ => {
+          tracker.profile.traceMigratingServicePreferences(
+            migrateInput.oldProfile,
+            migrateInput.newProfile,
+            "DONE"
+          );
+          return _;
+        });
+    })
     .getOrElseL(error => {
       context.log.error(`${LOG_PREFIX}|ERROR|${error}`);
       throw error;
