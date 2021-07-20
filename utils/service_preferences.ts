@@ -6,7 +6,7 @@ import { NonNegativeInteger } from "@pagopa/io-functions-commons/node_modules/@p
 
 import * as te from "fp-ts/lib/TaskEither";
 
-const toUserServicePreference = (
+export const toUserServicePreference = (
   emailEnabled: boolean,
   inboxEnabled: boolean,
   webhookEnabled: boolean,
@@ -35,31 +35,17 @@ export const toUserServicePreferenceFromModel = (
   );
 
 /**
- * Create a default ENABLED ServicePreference
- *
- * @param version the service preference version
- * @returns
- */
-export const toDefaultEnabledUserServicePreference = (
-  version: NonNegativeInteger
-): ServicePreference => toUserServicePreference(true, true, true, version);
-
-/**
- * Create a default DISABLED ServicePreference
- *
- * @param version the service preference version
- * @returns
- */
-export const toDefaultDisabledUserServicePreference = (
-  version: NonNegativeInteger
-): ServicePreference => toUserServicePreference(false, false, false, version);
-
-/**
  *
  * @param profile
  * @returns
  */
-export const nonLegacyServicePreferences = (profile: Profile): boolean => {
+export const nonLegacyServicePreferences = (
+  profile: Profile
+): profile is Profile & {
+  servicePreferencesSettings: {
+    mode: ServicesPreferencesModeEnum.MANUAL | ServicesPreferencesModeEnum.AUTO;
+  };
+} => {
   return (
     profile.servicePreferencesSettings.mode ===
       ServicesPreferencesModeEnum.AUTO ||

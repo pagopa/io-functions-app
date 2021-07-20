@@ -39,8 +39,7 @@ import {
 import {
   getServicePreferenceSettingsVersion,
   nonLegacyServicePreferences,
-  toDefaultDisabledUserServicePreference,
-  toDefaultEnabledUserServicePreference,
+  toUserServicePreference,
   toUserServicePreferenceFromModel
 } from "../utils/service_preferences";
 
@@ -91,17 +90,23 @@ const getProfileOrErrorResponse = (
  * @param fiscalCode the fiscal code
  * @returns
  */
-export declare type getUserServicePreferencesT = (params: {
+const getUserServicePreferencesOrDefault = (
+  servicePreferencesModel: ServicesPreferencesModel
+) => ({
+  fiscalCode,
+  isEmailEnabled,
+  serviceId,
+  mode,
+  version
+}: {
   readonly serviceId: ServiceId;
   readonly mode:
     | ServicesPreferencesModeEnum.AUTO
     | ServicesPreferencesModeEnum.MANUAL;
   readonly version: NonNegativeInteger;
   readonly fiscalCode: FiscalCode;
-}) => te.TaskEither<IResponseErrorQuery, ServicePreference>;
-const getUserServicePreferencesOrDefault = (
-  servicePreferencesModel: ServicesPreferencesModel
-): getUserServicePreferencesT => ({ fiscalCode, serviceId, mode, version }) =>
+  readonly isEmailEnabled: boolean;
+}): te.TaskEither<IResponseErrorQuery, ServicePreference> =>
   servicePreferencesModel
     .find([
       makeServicesPreferencesDocumentId(fiscalCode, serviceId, version),
@@ -118,9 +123,19 @@ const getUserServicePreferencesOrDefault = (
         () => {
           switch (mode) {
             case ServicesPreferencesModeEnum.AUTO:
-              return toDefaultEnabledUserServicePreference(version);
+              return toUserServicePreference(
+                isEmailEnabled,
+                true,
+                true,
+                version
+              );
             case ServicesPreferencesModeEnum.MANUAL:
-              return toDefaultDisabledUserServicePreference(version);
+              return toUserServicePreference(
+                isEmailEnabled,
+                false,
+                false,
+                version
+              );
           }
         },
         pref => toUserServicePreferenceFromModel(pref)
@@ -154,6 +169,7 @@ export const GetServicePreferencesHandler = (
           )
           .map(version => ({
             fiscalCode,
+            isEmailEnabled: profile.isEmailEnabled,
             mode: profile.servicePreferencesSettings.mode,
             serviceId,
             version

@@ -9,10 +9,8 @@ import {
   aProfile,
   aRetrievedProfileWithEmail,
   autoProfileServicePreferencesSettings,
-  manualApiProfileServicePreferencesSettings,
   manualProfileServicePreferencesSettings
 } from "../../__mocks__/mocks";
-import { context } from "../../__mocks__/durable-functions";
 import {
   aRetrievedServicePreference,
   aServiceId,
@@ -20,8 +18,6 @@ import {
 } from "../../__mocks__/mocks.service_preference";
 
 import { GetServicePreferencesHandler } from "../handler";
-import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { left } from "fp-ts/lib/Either";
 import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 
@@ -132,11 +128,51 @@ describe("GetServicePreferences", () => {
     expect(response).toMatchObject({
       kind: "IResponseSuccessJson",
       value: {
-        is_email_enabled: false,
+        is_email_enabled: aRetrievedProfileInValidState.isEmailEnabled,
         is_inbox_enabled: false,
         is_webhook_enabled: false,
         settings_version: 1
       }
+    });
+  });
+
+  it("should use global settings for email if no preference is set for the service", async () => {
+    const defaultEmailSetting = true;
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() => {
+        return taskEither.of(
+          some({
+            ...aRetrievedProfileInValidState,
+            isEmailEnabled: defaultEmailSetting,
+            // any but LEGACY
+            servicePreferencesSettings: manualProfileServicePreferencesSettings
+          })
+        );
+      })
+    };
+
+    const servicePreferenceModelMock = {
+      find: jest.fn(_ => {
+        return taskEither.of(none);
+      })
+    };
+
+    const getServicePreferencesHandler = GetServicePreferencesHandler(
+      profileModelMock as any,
+      servicePreferenceModelMock as any
+    );
+
+    const response = await getServicePreferencesHandler(
+      // (context as any) as Context,
+      aFiscalCode,
+      aServiceId
+    );
+
+    expect(response).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: expect.objectContaining({
+        is_email_enabled: defaultEmailSetting
+      })
     });
   });
 
