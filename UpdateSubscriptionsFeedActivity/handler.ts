@@ -1,40 +1,57 @@
 import { Context } from "@azure/functions";
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
+import { ServicePreference } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { TableService } from "azure-storage";
+import { fromPredicate } from "fp-ts/lib/Option";
 import * as t from "io-ts";
 import { toHash } from "../utils/crypto";
-import { updateSubscriptionStatus } from "../utils/subscription_feed";
+import {
+  SubscriptionFeedEntitySelector,
+  updateSubscriptionStatus
+} from "../utils/subscription_feed";
+
+const CommonInput = t.interface({
+  // fiscal code of the user affected by this update
+  fiscalCode: FiscalCode,
+  // whether the service has been subscribed or unsubscribed
+  operation: t.union([t.literal("SUBSCRIBED"), t.literal("UNSUBSCRIBED")]),
+  // the time (millis epoch) of the update
+  updatedAt: t.number,
+  // updated version of the profile
+  version: t.number
+});
+type CommonInput = t.TypeOf<typeof CommonInput>;
+
+const ProfileInput = t.intersection([
+  CommonInput,
+  t.interface({
+    // a profile subscription event
+    subscriptionKind: t.literal("PROFILE")
+  }),
+  t.partial({
+    previousPreferences: t.readonlyArray(ServicePreference)
+  })
+]);
+type ProfileInput = t.TypeOf<typeof ProfileInput>;
+
+const ServiceInput = t.intersection([
+  CommonInput,
+  t.interface({
+    // the updated service
+    serviceId: ServiceId,
+    // a service subscription event
+    subscriptionKind: t.literal("SERVICE")
+  })
+]);
+type ServiceInput = t.TypeOf<typeof ServiceInput>;
 
 /**
  * Input data for this activity function, we need information about the kind
  * of subscription event and the affected user profile.
  */
-const Input = t.intersection([
-  t.interface({
-    // fiscal code of the user affected by this update
-    fiscalCode: FiscalCode,
-    // whether the service has been subscribed or unsubscribed
-    operation: t.union([t.literal("SUBSCRIBED"), t.literal("UNSUBSCRIBED")]),
-    // the time (millis epoch) of the update
-    updatedAt: t.number,
-    // updated version of the profile
-    version: t.number
-  }),
-  t.union([
-    t.interface({
-      // a profile subscription event
-      subscriptionKind: t.literal("PROFILE")
-    }),
-    t.interface({
-      // the updated service
-      serviceId: ServiceId,
-      // a service subscription event
-      subscriptionKind: t.literal("SERVICE")
-    })
-  ])
-]);
+const Input = t.union([ProfileInput, ServiceInput]);
 
 export type Input = t.TypeOf<typeof Input>;
 
@@ -92,6 +109,36 @@ export const updateSubscriptionFeed = async (
   const sKey = `${sPartitionKey}-${fiscalCodeHash}`;
   const uKey = `${uPartitionKey}-${fiscalCodeHash}`;
 
+  const deleteOtherEntities: ReadonlyArray<
+    SubscriptionFeedEntitySelector
+  > = fromPredicate(ProfileInput.is)(decodedInput)
+    .mapNullable(_ => _.previousPreferences)
+    .map(_ =>
+      _.reduce(
+        (prev, preference) => {
+          // TODO: This code could be optimized deleting only the entry based on the current
+          // profile status and the effective previous preference inbox value
+          const sPreferencePartitionKey = `S-${utcTodayPrefix}-${preference.serviceId}-S`;
+          const uPreferencePartitionKey = `S-${utcTodayPrefix}-${preference.serviceId}-U`;
+          return [
+            ...prev,
+            {
+              partitionKey: sPreferencePartitionKey,
+              rowKey: `${sPreferencePartitionKey}-${fiscalCodeHash}`
+            },
+            {
+              partitionKey: uPreferencePartitionKey,
+              rowKey: `${uPreferencePartitionKey}-${fiscalCodeHash}`
+            }
+          ];
+        },
+        [] as ReadonlyArray<SubscriptionFeedEntitySelector>
+      )
+    )
+    .getOrElse([]);
+
+  const doenstInsertIfDeleted = decodedInput.subscriptionKind === "SERVICE";
+
   const updateSubscriptionStatusHandler = updateSubscriptionStatus(
     tableService,
     subscriptionFeedTableName
@@ -103,10 +150,16 @@ export const updateSubscriptionFeed = async (
       context,
       updateLogPrefix,
       version,
-      uPartitionKey,
-      uKey,
-      sPartitionKey,
-      sKey
+      {
+        partitionKey: uPartitionKey,
+        rowKey: uKey
+      },
+      deleteOtherEntities, // TODO: Delete other entities for service preferences
+      {
+        partitionKey: sPartitionKey,
+        rowKey: sKey
+      },
+      doenstInsertIfDeleted
     );
   } else {
     // we delete the entry from the subscriptions and we add it to the
@@ -115,10 +168,16 @@ export const updateSubscriptionFeed = async (
       context,
       updateLogPrefix,
       version,
-      sPartitionKey,
-      sKey,
-      uPartitionKey,
-      uKey
+      {
+        partitionKey: sPartitionKey,
+        rowKey: sKey
+      },
+      deleteOtherEntities, // TODO: Delete other entities for service preferences
+      {
+        partitionKey: uPartitionKey,
+        rowKey: uKey
+      },
+      doenstInsertIfDeleted
     );
   }
 
