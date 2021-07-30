@@ -1,6 +1,6 @@
 import * as t from "io-ts";
 
-import { fromPredicate, isLeft, toError } from "fp-ts/lib/Either";
+import { fromPredicate, isLeft } from "fp-ts/lib/Either";
 
 import * as df from "durable-functions";
 import { IOrchestrationFunctionContext } from "durable-functions/lib/src/classes";
