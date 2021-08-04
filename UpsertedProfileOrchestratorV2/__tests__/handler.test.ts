@@ -662,7 +662,9 @@ describe("UpsertedProfileOrchestrator", () => {
 
     consumeGenerator(orchestratorHandler);
 
-    expect(contextMockWithDf.df.callSubOrchestratorWithRetry).toBeCalledWith(
+    expect(
+      contextMockWithDf.df.callSubOrchestratorWithRetry
+    ).toHaveBeenCalledWith(
       "EmailValidationProcessOrchestrator",
       expect.anything(), // retryOptions
       EmailValidationProcessOrchestratorInput.encode({
@@ -671,7 +673,9 @@ describe("UpsertedProfileOrchestrator", () => {
       })
     );
 
-    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
+    let nth = 1;
+    expect(contextMockWithDf.df.callActivityWithRetry).toHaveBeenNthCalledWith(
+      nth++,
       "SendWelcomeMessagesActivity",
       someRetryOptions,
       {
@@ -680,7 +684,8 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
+    expect(contextMockWithDf.df.callActivityWithRetry).toHaveBeenNthCalledWith(
+      nth++,
       "SendWelcomeMessagesActivity",
       someRetryOptions,
       {
@@ -689,7 +694,8 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
+    expect(contextMockWithDf.df.callActivityWithRetry).toHaveBeenNthCalledWith(
+      nth++,
       "SendWelcomeMessagesActivity",
       someRetryOptions,
       {
@@ -698,7 +704,8 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
+    expect(contextMockWithDf.df.callActivityWithRetry).toHaveBeenNthCalledWith(
+      nth++,
       "GetServicesPreferencesActivity",
       someRetryOptions,
       {
@@ -709,18 +716,22 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
+    expect(contextMockWithDf.df.callActivityWithRetry).toHaveBeenNthCalledWith(
+      nth++,
       "UpdateSubscriptionsFeedActivity",
       someRetryOptions,
       {
         fiscalCode: aFiscalCode,
         operation: "UNSUBSCRIBED",
         subscriptionKind: "PROFILE",
+        previousPreferences: [],
         updatedAt: upsertedProfileOrchestratorInput.updatedAt.getTime(),
         version: upsertedProfileOrchestratorInput.newProfile.version
       }
     );
-    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
+
+    expect(contextMockWithDf.df.callActivityWithRetry).toHaveBeenNthCalledWith(
+      6,
       "EnqueueProfileCreationEventActivity",
       someRetryOptions,
       {
@@ -778,6 +789,7 @@ describe("UpsertedProfileOrchestrator", () => {
           .fn()
           .mockReturnValueOnce(sendWelcomeMessagesActivityResult) // WELCOME
           .mockReturnValueOnce(sendWelcomeMessagesActivityResult) // HOW TO
+          .mockReturnValueOnce(sendWelcomeMessagesActivityResult) // CASHBACK
           .mockReturnValueOnce({
             kind: "SUCCESS",
             preferences: []
@@ -805,7 +817,9 @@ describe("UpsertedProfileOrchestrator", () => {
       })
     );
 
-    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
+    let nth = 1;
+    expect(contextMockWithDf.df.callActivityWithRetry).toHaveBeenNthCalledWith(
+      nth++,
       "SendWelcomeMessagesActivity",
       someRetryOptions,
       {
@@ -814,7 +828,8 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
+    expect(contextMockWithDf.df.callActivityWithRetry).toHaveBeenNthCalledWith(
+      nth++,
       "SendWelcomeMessagesActivity",
       someRetryOptions,
       {
@@ -823,7 +838,18 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
+    expect(contextMockWithDf.df.callActivityWithRetry).toHaveBeenNthCalledWith(
+      nth++,
+      "SendWelcomeMessagesActivity",
+      someRetryOptions,
+      {
+        messageKind: "CASHBACK",
+        profile: upsertedProfileOrchestratorInput.newProfile
+      }
+    );
+
+    expect(contextMockWithDf.df.callActivityWithRetry).toHaveBeenNthCalledWith(
+      nth++,
       "GetServicesPreferencesActivity",
       someRetryOptions,
       {
@@ -834,27 +860,22 @@ describe("UpsertedProfileOrchestrator", () => {
       }
     );
 
-    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
-      "SendWelcomeMessagesActivity",
-      someRetryOptions,
-      {
-        messageKind: "CASHBACK",
-        profile: upsertedProfileOrchestratorInput.newProfile
-      }
-    );
-
-    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
+    expect(contextMockWithDf.df.callActivityWithRetry).toHaveBeenNthCalledWith(
+      nth++,
       "UpdateSubscriptionsFeedActivity",
       someRetryOptions,
       {
         fiscalCode: aFiscalCode,
         operation: "SUBSCRIBED",
         subscriptionKind: "PROFILE",
+        previousPreferences: [],
         updatedAt: upsertedProfileOrchestratorInput.updatedAt.getTime(),
         version: upsertedProfileOrchestratorInput.newProfile.version
       }
     );
-    expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
+
+    expect(contextMockWithDf.df.callActivityWithRetry).toHaveBeenNthCalledWith(
+      nth++,
       "EnqueueProfileCreationEventActivity",
       someRetryOptions,
       {

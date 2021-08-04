@@ -143,6 +143,7 @@ export const updateSubscriptionFeed = async (
     tableService,
     subscriptionFeedTableName
   );
+
   if (operation === "SUBSCRIBED") {
     // we delete the entry from the unsubscriptions and we add it to the
     // subscriptions
