@@ -30,7 +30,7 @@ const someRetryOptions = new df.RetryOptions(5000, 10);
 someRetryOptions.backoffCoefficient = 1.5;
 
 // tslint:disable-next-line: no-big-function
-describe("UpsertedProfileOrchestrator", () => {
+describe("UpsertedProfileOrchestratorV2", () => {
   it("should not start the EmailValidationProcessOrchestrator if the email is not changed", () => {
     const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.decode(
       {
