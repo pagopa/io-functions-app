@@ -1,6 +1,6 @@
 import * as t from "io-ts";
 
-import { isLeft } from "fp-ts/lib/Either";
+import { fromPredicate, isLeft } from "fp-ts/lib/Either";
 
 import * as df from "durable-functions";
 import { IOrchestrationFunctionContext } from "durable-functions/lib/src/classes";
@@ -22,6 +22,10 @@ import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/g
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import { EnqueueProfileCreationEventActivityInput } from "../EnqueueProfileCreationEventActivity/handler";
+import {
+  ActivityResult,
+  ActivityResultSuccess
+} from "../GetServicesPreferencesActivity/handler";
 import { ActivityInput as SendWelcomeMessageActivityInput } from "../SendWelcomeMessagesActivity/handler";
 
 /**
@@ -42,11 +46,6 @@ export const OrchestratorInput = t.intersection([
 
 export type OrchestratorInput = t.TypeOf<typeof OrchestratorInput>;
 
-/**
- * @deprecated This orchestrator will be replaced by UpsertedProfileOrchestratorV2.
- * When the rollout of the new orchestrator will be completed and a rollback option
- * is not needed anymore this orchestrator could be removed.
- */
 export const getUpsertedProfileOrchestratorHandler = (params: {
   sendCashbackMessage: boolean;
   notifyOn?: NonEmptyArray<NonEmptyString>;
@@ -284,17 +283,64 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
         context.log.verbose(
           `${logPrefix}|Calling UpdateSubscriptionsFeedActivity|OPERATION=${feedOperation}`
         );
-        yield context.df.callActivityWithRetry(
-          "UpdateSubscriptionsFeedActivity",
-          retryOptions,
-          {
-            fiscalCode: newProfile.fiscalCode,
-            operation: feedOperation,
-            subscriptionKind: "PROFILE",
-            updatedAt: updatedAt.getTime(),
-            version: newProfile.version
-          } as UpdateServiceSubscriptionFeedActivityInput
-        );
+
+        // Only if previous mode is MANUAL or AUTO could exists services preferences.
+        if (
+          oldProfile.servicePreferencesSettings.mode !==
+          ServicesPreferencesModeEnum.LEGACY
+        ) {
+          // Execute a new version of the orchestrator
+          const activityResult = yield context.df.callActivityWithRetry(
+            "GetServicesPreferencesActivity",
+            retryOptions,
+            {
+              fiscalCode: oldProfile.fiscalCode,
+              settingsVersion: oldProfile.servicePreferencesSettings.version
+            }
+          );
+          const maybeServicesPreferences = ActivityResult.decode(activityResult)
+            .mapLeft(_ => new Error(readableReport(_)))
+            .chain(
+              fromPredicate(
+                (_): _ is ActivityResultSuccess => _.kind === "SUCCESS",
+                _ => new Error(_.kind)
+              )
+            )
+            .fold(
+              err => {
+                // Invalid Activity input. The orchestration fail
+                context.log.error(
+                  `${logPrefix}|GetServicesPreferencesActivity|ERROR=${err.message}`
+                );
+                throw err;
+              },
+              _ => _.preferences
+            );
+          yield context.df.callActivityWithRetry(
+            "UpdateSubscriptionsFeedActivity",
+            retryOptions,
+            {
+              fiscalCode: newProfile.fiscalCode,
+              operation: feedOperation,
+              previousPreferences: maybeServicesPreferences,
+              subscriptionKind: "PROFILE",
+              updatedAt: updatedAt.getTime(),
+              version: newProfile.version
+            } as UpdateServiceSubscriptionFeedActivityInput
+          );
+        } else {
+          yield context.df.callActivityWithRetry(
+            "UpdateSubscriptionsFeedActivity",
+            retryOptions,
+            {
+              fiscalCode: newProfile.fiscalCode,
+              operation: feedOperation,
+              subscriptionKind: "PROFILE",
+              updatedAt: updatedAt.getTime(),
+              version: newProfile.version
+            } as UpdateServiceSubscriptionFeedActivityInput
+          );
+        }
       }
     }
 
