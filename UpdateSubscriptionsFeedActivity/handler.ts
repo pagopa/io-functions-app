@@ -109,7 +109,7 @@ export const updateSubscriptionFeed = async (
   const sKey = `${sPartitionKey}-${fiscalCodeHash}`;
   const uKey = `${uPartitionKey}-${fiscalCodeHash}`;
 
-  const deleteOtherEntities: ReadonlyArray<
+  const otherEntitiesToDelete: ReadonlyArray<
     SubscriptionFeedEntitySelector
   > = fromPredicate(ProfileInput.is)(decodedInput)
     .mapNullable(_ => _.previousPreferences)
@@ -137,7 +137,7 @@ export const updateSubscriptionFeed = async (
     )
     .getOrElse([]);
 
-  const doenstInsertIfDeleted = decodedInput.subscriptionKind === "SERVICE";
+  const allowInsertIfDeleted = decodedInput.subscriptionKind !== "SERVICE";
 
   const updateSubscriptionStatusHandler = updateSubscriptionStatus(
     tableService,
@@ -155,12 +155,12 @@ export const updateSubscriptionFeed = async (
         partitionKey: uPartitionKey,
         rowKey: uKey
       },
-      deleteOtherEntities, // TODO: Delete other entities for service preferences
+      otherEntitiesToDelete,
       {
         partitionKey: sPartitionKey,
         rowKey: sKey
       },
-      doenstInsertIfDeleted
+      allowInsertIfDeleted
     );
   } else {
     // we delete the entry from the subscriptions and we add it to the
@@ -173,12 +173,12 @@ export const updateSubscriptionFeed = async (
         partitionKey: sPartitionKey,
         rowKey: sKey
       },
-      deleteOtherEntities, // TODO: Delete other entities for service preferences
+      otherEntitiesToDelete,
       {
         partitionKey: uPartitionKey,
         rowKey: uKey
       },
-      doenstInsertIfDeleted
+      allowInsertIfDeleted
     );
   }
 
