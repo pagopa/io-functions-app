@@ -113,7 +113,10 @@ export function StartEmailValidationProcessHandler(
       .chain(orchId =>
         isOrchestratorRunning(dfClient, orchId)
           .chain(
-            fromPredicate(_ => _.isRunning, () => new Error("Not Running"))
+            fromPredicate(
+              _ => _.isRunning,
+              () => new Error("Not Running")
+            )
           )
           .foldTaskEither(
             () =>
