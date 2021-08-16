@@ -2,7 +2,7 @@ import { ServicePreference } from "@pagopa/io-functions-commons/dist/generated/d
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { Profile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { RetrievedServicePreference } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
-import { NonNegativeInteger } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/numbers";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 
 import * as te from "fp-ts/lib/TaskEither";
 
