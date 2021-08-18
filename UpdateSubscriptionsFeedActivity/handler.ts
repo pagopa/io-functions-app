@@ -109,31 +109,28 @@ export const updateSubscriptionFeed = async (
   const sKey = `${sPartitionKey}-${fiscalCodeHash}`;
   const uKey = `${uPartitionKey}-${fiscalCodeHash}`;
 
-  const otherEntitiesToDelete: ReadonlyArray<
-    SubscriptionFeedEntitySelector
-  > = fromPredicate(ProfileInput.is)(decodedInput)
+  const otherEntitiesToDelete: ReadonlyArray<SubscriptionFeedEntitySelector> = fromPredicate(
+    ProfileInput.is
+  )(decodedInput)
     .mapNullable(_ => _.previousPreferences)
     .map(_ =>
-      _.reduce(
-        (prev, preference) => {
-          // TODO: This code could be optimized deleting only the entry based on the current
-          // profile status and the effective previous preference inbox value
-          const sPreferencePartitionKey = `S-${utcTodayPrefix}-${preference.serviceId}-S`;
-          const uPreferencePartitionKey = `S-${utcTodayPrefix}-${preference.serviceId}-U`;
-          return [
-            ...prev,
-            {
-              partitionKey: sPreferencePartitionKey,
-              rowKey: `${sPreferencePartitionKey}-${fiscalCodeHash}`
-            },
-            {
-              partitionKey: uPreferencePartitionKey,
-              rowKey: `${uPreferencePartitionKey}-${fiscalCodeHash}`
-            }
-          ];
-        },
-        [] as ReadonlyArray<SubscriptionFeedEntitySelector>
-      )
+      _.reduce((prev, preference) => {
+        // TODO: This code could be optimized deleting only the entry based on the current
+        // profile status and the effective previous preference inbox value
+        const sPreferencePartitionKey = `S-${utcTodayPrefix}-${preference.serviceId}-S`;
+        const uPreferencePartitionKey = `S-${utcTodayPrefix}-${preference.serviceId}-U`;
+        return [
+          ...prev,
+          {
+            partitionKey: sPreferencePartitionKey,
+            rowKey: `${sPreferencePartitionKey}-${fiscalCodeHash}`
+          },
+          {
+            partitionKey: uPreferencePartitionKey,
+            rowKey: `${uPreferencePartitionKey}-${fiscalCodeHash}`
+          }
+        ];
+      }, [] as ReadonlyArray<SubscriptionFeedEntitySelector>)
     )
     .getOrElse([]);
 

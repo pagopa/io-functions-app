@@ -48,7 +48,7 @@ import {
 
 import { Context } from "@azure/functions";
 import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
-import { NonNegativeInteger } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/numbers";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { enumType } from "@pagopa/ts-commons/lib/types";
 import { identity } from "fp-ts/lib/function";
 import { Option } from "fp-ts/lib/Option";

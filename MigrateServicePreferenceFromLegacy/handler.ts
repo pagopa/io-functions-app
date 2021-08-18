@@ -10,7 +10,7 @@ import {
   CosmosErrorResponse,
   CosmosErrors
 } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
-import { NonNegativeInteger } from "@pagopa/io-functions-commons/node_modules/@pagopa/ts-commons/lib/numbers";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import * as a from "fp-ts/lib/Array";
 import * as o from "fp-ts/lib/Option";
 import * as te from "fp-ts/lib/TaskEither";
