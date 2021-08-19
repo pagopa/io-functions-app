@@ -26,9 +26,11 @@ export const insertTableEntity = (
         response: ServiceResponse
       ) =>
         resolve(
-          response.isSuccessful
-            ? Tuple2(right(result), response)
-            : Tuple2(left(error), response)
+          // We need to check error first becouse response could be null
+          // @ref https://github.com/Azure/azure-storage-node/blob/v2.10.2/lib/common/services/storageserviceclient.js#L250
+          error || !response.isSuccessful
+            ? Tuple2(left(error), response)
+            : Tuple2(right(result), response)
         )
     )
   );
@@ -49,9 +51,11 @@ export const deleteTableEntity = (
       entityDescriptor,
       (error: Error, response: ServiceResponse) =>
         resolve(
-          response.isSuccessful
-            ? Tuple2(none, response)
-            : Tuple2(some(error), response)
+          // We need to check error first becouse response could be null
+          // @ref https://github.com/Azure/azure-storage-node/blob/v2.10.2/lib/common/services/storageserviceclient.js#L250
+          error || !response.isSuccessful
+            ? Tuple2(some(error), response)
+            : Tuple2(none, response)
         )
     )
   );
