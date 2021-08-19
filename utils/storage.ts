@@ -26,7 +26,7 @@ export const insertTableEntity = (
         response: ServiceResponse
       ) =>
         resolve(
-          // We need to check error first becouse response could be null
+          // We need to check error first because response could be null
           // @ref https://github.com/Azure/azure-storage-node/blob/v2.10.2/lib/common/services/storageserviceclient.js#L250
           error || !response.isSuccessful
             ? Tuple2(left(error), response)
@@ -51,7 +51,7 @@ export const deleteTableEntity = (
       entityDescriptor,
       (error: Error, response: ServiceResponse) =>
         resolve(
-          // We need to check error first becouse response could be null
+          // We need to check error first because response could be null
           // @ref https://github.com/Azure/azure-storage-node/blob/v2.10.2/lib/common/services/storageserviceclient.js#L250
           error || !response.isSuccessful
             ? Tuple2(some(error), response)
