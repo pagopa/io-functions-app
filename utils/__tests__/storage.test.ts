@@ -32,6 +32,7 @@ describe("insertTableEntity", () => {
     title                                                      | error           | result                | response            | e1                           | e2
     ${"returns an error if insertEntity fail"}                 | ${genericError} | ${null}               | ${null}             | ${left(genericError)}        | ${null}
     ${"returns an error if insertEntity fail with a response"} | ${genericError} | ${null}               | ${anErrorResponse}  | ${left(genericError)}        | ${anErrorResponse}
+    ${"returns an error if insertEntity fail with no error"}   | ${null}         | ${null}               | ${anErrorResponse}  | ${left(expect.any(Error))}   | ${anErrorResponse}
     ${"returns the response value if insertEntity succeded"}   | ${null}         | ${anEntityDescriptor} | ${aSuccessResponse} | ${right(anEntityDescriptor)} | ${aSuccessResponse}
   `("should $title", async ({ error, result, response, e1, e2 }) => {
     mockInsertEntity.mockImplementationOnce((_, __, callback) =>
@@ -53,10 +54,11 @@ describe("insertTableEntity", () => {
 
 describe("deleteTableEntity", () => {
   it.each`
-    title                                                      | error           | response            | e1                    | e2
-    ${"returns an error if deleteEntity fail"}                 | ${genericError} | ${null}             | ${some(genericError)} | ${null}
-    ${"returns an error if deleteEntity fail with a response"} | ${genericError} | ${anErrorResponse}  | ${some(genericError)} | ${anErrorResponse}
-    ${"returns the response value if deleteEntity succeded"}   | ${null}         | ${aSuccessResponse} | ${none}               | ${aSuccessResponse}
+    title                                                      | error           | response            | e1                         | e2
+    ${"returns an error if deleteEntity fail"}                 | ${genericError} | ${null}             | ${some(genericError)}      | ${null}
+    ${"returns an error if deleteEntity fail with a response"} | ${genericError} | ${anErrorResponse}  | ${some(genericError)}      | ${anErrorResponse}
+    ${"returns an error if deleteEntity fail with no error"}   | ${null}         | ${anErrorResponse}  | ${some(expect.any(Error))} | ${anErrorResponse}
+    ${"returns the response value if deleteEntity succeded"}   | ${null}         | ${aSuccessResponse} | ${none}                    | ${aSuccessResponse}
   `("should $title", async ({ error, response, e1, e2 }) => {
     mockDeleteEntity.mockImplementationOnce((_, __, callback) =>
       callback(error, response)
