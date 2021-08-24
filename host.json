@@ -26,7 +26,7 @@
       "hubName": "%SLOT_TASK_HUBNAME%",
       "localRpcEndpointEnabled": false,
       "storageProvider": {
-        "connectionStringName": "AzureWebJobsStorage"
+        "connectionStringName": "DURABLE_FUNCTION_STORAGE_CONNECTION_STRING"
       },
       "tracing": {
         "traceInputsAndOutputs": false,
