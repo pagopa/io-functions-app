@@ -41,7 +41,7 @@ IO ti consente di ricevere comunicazioni da tutte le Pubbliche Amministrazioni i
 All’arrivo di ogni nuovo messaggio, a seconda delle tue preferenze, IO può informarti attraverso una notifica e inoltrarti il messaggio sulla tua casella di posta: nel dettaglio dei servizi, o nelle preferenze presenti nel Profilo, puoi decidere come ricevere comunicazioni da ciascun servizio. 
 
 #### I pagamenti
-IO integra [pagoPA](https://pagopa.gov.it) per effettuare pagamenti sicuri verso la Pubblica Amministrazione. Dalla sezione Portafoglio puoi aggiungere i tuoi metodi di pagamento preferiti, procedere al pagamento di un avviso pagoPA (tramite scansione del codice QR o inserimento manuale del codice avviso) e tenere traccia di tutte le operazioni svolte. Se hai già usato pagoPA con SPID in passato, nella sezione Portafoglio potrai vedere lo storico delle transazioni effettuate e i tuoi metodi di pagamento salvati. 
+IO integra [pagoPA](https://www.pagopa.gov.it/) per effettuare pagamenti sicuri verso la Pubblica Amministrazione. Dalla sezione Portafoglio puoi aggiungere i tuoi metodi di pagamento preferiti, procedere al pagamento di un avviso pagoPA (tramite scansione del codice QR o inserimento manuale del codice avviso) e tenere traccia di tutte le operazioni svolte. Se hai già usato pagoPA con SPID in passato, nella sezione Portafoglio potrai vedere lo storico delle transazioni effettuate e i tuoi metodi di pagamento salvati. 
 
 #### I servizi
 Al primo accesso in IO, IO ti chiede di impostare una configurazione generale per la comunicazione dei servizi. Nella sezione Servizi puoi vedere la lista di tutti i servizi locali e nazionali disponibili all’interno dell’app, e decidere da quali ricevere comunicazioni e come. 
