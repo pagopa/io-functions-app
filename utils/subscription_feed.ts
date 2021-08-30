@@ -90,7 +90,9 @@ export const updateSubscriptionStatus = (
 
   if (
     deleteResults.some(
-      _ => _.maybeError.isSome() && _.uResponse.statusCode !== 404
+      _ =>
+        // _.uResponse could be null
+        _.maybeError.isSome() && _.uResponse && _.uResponse.statusCode !== 404
     )
   ) {
     // retry
@@ -115,7 +117,8 @@ export const updateSubscriptionStatus = (
     RowKey: eg.String(insertEntity.rowKey),
     version: eg.Int32(version)
   });
-  if (resultOrError.isLeft() && sResponse.statusCode !== 409) {
+  // sResponse could be null
+  if (resultOrError.isLeft() && sResponse && sResponse.statusCode !== 409) {
     // retry
     context.log.error(`${logPrefix}|ERROR=${resultOrError.value.message}`);
     throw resultOrError.value;
