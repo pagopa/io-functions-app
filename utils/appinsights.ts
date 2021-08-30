@@ -1,5 +1,8 @@
 import * as ai from "applicationinsights";
 
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
+
 import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -12,13 +15,18 @@ const DEFAULT_SAMPLING_PERCENTAGE = 5;
 export const initTelemetryClient = (env = process.env) =>
   ai.defaultClient
     ? ai.defaultClient
-    : NonEmptyString.decode(env.APPINSIGHTS_INSTRUMENTATIONKEY)
-        .map(k =>
+    : pipe(
+        env.APPINSIGHTS_INSTRUMENTATIONKEY,
+        NonEmptyString.decode,
+        E.map(k =>
           initAppInsights(k, {
             disableAppInsights: env.APPINSIGHTS_DISABLE === "true",
-            samplingPercentage: IntegerFromString.decode(
-              env.APPINSIGHTS_SAMPLING_PERCENTAGE
-            ).getOrElse(DEFAULT_SAMPLING_PERCENTAGE)
+            samplingPercentage: pipe(
+              env.APPINSIGHTS_SAMPLING_PERCENTAGE,
+              IntegerFromString.decode,
+              E.getOrElse(() => DEFAULT_SAMPLING_PERCENTAGE)
+            )
           })
-        )
-        .getOrElse(undefined);
+        ),
+        E.getOrElse(undefined)
+      );
