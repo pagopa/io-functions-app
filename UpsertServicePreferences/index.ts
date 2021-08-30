@@ -15,7 +15,7 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
 import { secureExpressApp } from "@pagopa/io-functions-commons/dist/src/utils/express";
 import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
-import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
+import createAzureFunctionHandler from "@pagopa/express-azure-functions/dist/src/createAzureFunctionsHandler";
 
 import { createTableService } from "azure-storage";
 import { initTelemetryClient } from "../utils/appinsights";

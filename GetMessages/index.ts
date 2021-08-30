@@ -10,7 +10,7 @@ import {
   MessageModel
 } from "@pagopa/io-functions-commons/dist/src/models/message";
 
-import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
+import createAzureFunctionHandler from "@pagopa/express-azure-functions/dist/src/createAzureFunctionsHandler";
 
 import { cosmosdbInstance } from "../utils/cosmosdb";
 import { GetMessages } from "./handler";
