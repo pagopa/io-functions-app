@@ -39,7 +39,7 @@ import {
 import { QueueClient, QueueSendMessageResponse } from "@azure/storage-queue";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { MigrateServicesPreferencesQueueMessage } from "../MigrateServicePreferenceFromLegacy/handler";
-import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
+import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestratorV2/handler";
 import { ProfileMiddleware } from "../utils/middlewares/profile";
 import {
   apiProfileToProfile,
@@ -48,6 +48,9 @@ import {
 
 import { toHash } from "../utils/crypto";
 import { createTracker } from "../utils/tracking";
+import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
 
 /**
  * Type of an UpdateProfile handler.
@@ -96,18 +99,18 @@ export function UpdateProfileHandler(
   return async (context, fiscalCode, profilePayload) => {
     const logPrefix = `UpdateProfileHandler|FISCAL_CODE=${toHash(fiscalCode)}`;
 
-    const errorOrMaybeExistingProfile = await profileModel
-      .findLastVersionByModelId([fiscalCode])
-      .run();
+    const errorOrMaybeExistingProfile = await profileModel.findLastVersionByModelId(
+      [fiscalCode]
+    )();
 
     if (isLeft(errorOrMaybeExistingProfile)) {
       return ResponseErrorQuery(
         "Error trying to retrieve existing profile",
-        errorOrMaybeExistingProfile.value
+        errorOrMaybeExistingProfile.left
       );
     }
 
-    const maybeExistingProfile = errorOrMaybeExistingProfile.value;
+    const maybeExistingProfile = errorOrMaybeExistingProfile.right;
     if (isNone(maybeExistingProfile)) {
       return ResponseErrorNotFound(
         "Error",
@@ -133,11 +136,11 @@ export function UpdateProfileHandler(
       profilePayload.email !== existingProfile.email;
 
     // Get servicePreferencesSettings mode from payload or default to LEGACY
-    const requestedServicePreferencesSettingsMode = fromNullable(
-      profilePayload.service_preferences_settings
-    )
-      .map(_ => _.mode)
-      .getOrElse(ServicesPreferencesModeEnum.LEGACY);
+    const requestedServicePreferencesSettingsMode = pipe(
+      fromNullable(profilePayload.service_preferences_settings),
+      O.map(_ => _.mode),
+      O.getOrElse(() => ServicesPreferencesModeEnum.LEGACY)
+    );
 
     // Check if a mode change is requested
     const isServicePreferencesSettingsModeChanged =
@@ -188,28 +191,26 @@ export function UpdateProfileHandler(
           existingProfile.blockedInboxOrChannels
         : undefined;
 
-    const errorOrMaybeUpdatedProfile = await profileModel
-      .update({
-        ...existingProfile,
-        // Remove undefined values to avoid overriding already existing profile properties
-        ...withoutUndefinedValues(profile),
-        ...overriddenInboxAndWebhook,
-        // Override blockedInboxOrChannel when mode change from LEGACY to MANUAL or AUTO
-        blockedInboxOrChannels: overrideBlockedInboxOrChannels
-      })
-      .run();
+    const errorOrMaybeUpdatedProfile = await profileModel.update({
+      ...existingProfile,
+      // Remove undefined values to avoid overriding already existing profile properties
+      ...withoutUndefinedValues(profile),
+      ...overriddenInboxAndWebhook,
+      // Override blockedInboxOrChannel when mode change from LEGACY to MANUAL or AUTO
+      blockedInboxOrChannels: overrideBlockedInboxOrChannels
+    })();
 
     if (isLeft(errorOrMaybeUpdatedProfile)) {
       context.log.error(
-        `${logPrefix}|ERROR=${errorOrMaybeUpdatedProfile.value.kind}`
+        `${logPrefix}|ERROR=${errorOrMaybeUpdatedProfile.left.kind}`
       );
       return ResponseErrorQuery(
         "Error while updating the existing profile",
-        errorOrMaybeUpdatedProfile.value
+        errorOrMaybeUpdatedProfile.left
       );
     }
 
-    const updateProfile = errorOrMaybeUpdatedProfile.value;
+    const updateProfile = errorOrMaybeUpdatedProfile.right;
 
     // a mode change occurred, we trace before and after
     if (isServicePreferencesSettingsModeChanged) {
@@ -265,15 +266,16 @@ export function UpdateProfileHandler(
         updateProfile,
         "REQUESTING"
       );
-      await migratePreferences(queueClient, existingProfile, updateProfile)
-        .mapLeft(err =>
+      await pipe(
+        migratePreferences(queueClient, existingProfile, updateProfile),
+        TE.mapLeft(err =>
           context.log.error(
             `${logPrefix}|Cannot send a message to the queue ${
               queueClient.name
             } |ERROR=${JSON.stringify(err)}`
           )
         )
-        .run();
+      )();
     }
 
     return ResponseSuccessJson(

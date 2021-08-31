@@ -9,7 +9,7 @@ import * as df from "durable-functions";
 import { QueueClient } from "@azure/storage-queue";
 import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aEmailChanged,
@@ -23,7 +23,7 @@ import {
   manualApiProfileServicePreferencesSettings,
   manualProfileServicePreferencesSettings
 } from "../../__mocks__/mocks";
-import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../../UpsertedProfileOrchestrator/handler";
+import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../../UpsertedProfileOrchestratorV2/handler";
 import { UpdateProfileHandler } from "../handler";
 
 import { createTracker } from "../../__mocks__/tracking";
@@ -52,7 +52,7 @@ const mockTracker = createTracker("" as any);
 describe("UpdateProfileHandler", () => {
   it("should return a query error when an error occurs retrieving the existing profile", async () => {
     const profileModelMock = {
-      findLastVersionByModelId: jest.fn(() => fromLeft({}))
+      findLastVersionByModelId: jest.fn(() => TE.left({}))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -72,7 +72,7 @@ describe("UpdateProfileHandler", () => {
 
   it("should return a not found error if can't find an existing profile", async () => {
     const profileModelMock = {
-      findLastVersionByModelId: jest.fn(() => taskEither.of(none))
+      findLastVersionByModelId: jest.fn(() => TE.of(none))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -92,9 +92,7 @@ describe("UpdateProfileHandler", () => {
 
   it("should return a conflict error if the verion in the payload is not the latest", async () => {
     const profileModelMock = {
-      findLastVersionByModelId: jest.fn(() =>
-        taskEither.of(some(aRetrievedProfile))
-      )
+      findLastVersionByModelId: jest.fn(() => TE.of(some(aRetrievedProfile)))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -114,9 +112,9 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(some({ ...aRetrievedProfile, isEmailValidated: true }))
+        TE.of(some({ ...aRetrievedProfile, isEmailValidated: true }))
       ),
-      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -145,14 +143,14 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(
+        TE.of(
           some({
             ...aRetrievedProfile,
             servicePreferencesSettings: autoProfileServicePreferencesSettings
           })
         )
       ),
-      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -175,14 +173,14 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(
+        TE.of(
           some({
             ...aRetrievedProfile,
             servicePreferencesSettings: manualProfileServicePreferencesSettings
           })
         )
       ),
-      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -205,14 +203,14 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(
+        TE.of(
           some({
             ...aRetrievedProfile,
             servicePreferencesSettings: autoProfileServicePreferencesSettings
           })
         )
       ),
-      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -235,14 +233,14 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(
+        TE.of(
           some({
             ...aRetrievedProfile,
             servicePreferencesSettings: manualProfileServicePreferencesSettings
           })
         )
       ),
-      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -265,9 +263,9 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(some({ ...aRetrievedProfile }))
+        TE.of(some({ ...aRetrievedProfile }))
       ),
-      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -298,9 +296,9 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(some({ ...aRetrievedProfile }))
+        TE.of(some({ ...aRetrievedProfile }))
       ),
-      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -330,14 +328,14 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(
+        TE.of(
           some({
             ...aRetrievedProfile,
             servicePreferencesSettings: autoProfileServicePreferencesSettings
           })
         )
       ),
-      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -368,14 +366,14 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(
+        TE.of(
           some({
             ...aRetrievedProfile,
             servicePreferencesSettings: manualProfileServicePreferencesSettings
           })
         )
       ),
-      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -406,9 +404,9 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(some({ ...aRetrievedProfile }))
+        TE.of(some({ ...aRetrievedProfile }))
       ),
-      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -442,9 +440,9 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(some({ ...aRetrievedProfile }))
+        TE.of(some({ ...aRetrievedProfile }))
       ),
-      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -478,14 +476,14 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(
+        TE.of(
           some({
             ...aRetrievedProfile,
             servicePreferencesSettings: autoProfileServicePreferencesSettings
           })
         )
       ),
-      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -519,14 +517,14 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(
+        TE.of(
           some({
             ...aRetrievedProfile,
             servicePreferencesSettings: manualProfileServicePreferencesSettings
           })
         )
       ),
-      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -608,9 +606,9 @@ describe("UpdateProfileHandler", () => {
     ) => {
       const profileModelMock = {
         findLastVersionByModelId: jest.fn(() =>
-          taskEither.of(some({ ...aRetrievedProfile, acceptedTosVersion }))
+          TE.of(some({ ...aRetrievedProfile, acceptedTosVersion }))
         ),
-        update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+        update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
       };
       const updateProfileHandler = UpdateProfileHandler(
         profileModelMock as any,
@@ -656,10 +654,8 @@ describe("UpdateProfileHandler", () => {
     );
 
     const profileModelMock = {
-      findLastVersionByModelId: jest.fn(() =>
-        taskEither.of(some(aRetrievedProfile))
-      ),
-      update: jest.fn(() => taskEither.of(updatedProfile))
+      findLastVersionByModelId: jest.fn(() => TE.of(some(aRetrievedProfile))),
+      update: jest.fn(() => TE.of(updatedProfile))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -687,7 +683,7 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(
+        TE.of(
           some({
             ...aRetrievedProfile,
             blockedInboxOrChannels: {
@@ -696,7 +692,7 @@ describe("UpdateProfileHandler", () => {
           })
         )
       ),
-      update: jest.fn(p => taskEither.of(p))
+      update: jest.fn(p => TE.of(p))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -733,9 +729,9 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(some(aRetrievedProfile))
+        TE.of(some(aRetrievedProfile))
       ),
-      update: jest.fn(p => taskEither.of(p))
+      update: jest.fn(p => TE.of(p))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -764,7 +760,7 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(
+        TE.of(
           some({
             ...aRetrievedProfile,
             blockedInboxOrChannels: {
@@ -773,7 +769,7 @@ describe("UpdateProfileHandler", () => {
           })
         )
       ),
-      update: jest.fn(p => taskEither.of(p))
+      update: jest.fn(p => TE.of(p))
     };
 
     const updateProfileHandler = UpdateProfileHandler(
@@ -803,14 +799,14 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(
+        TE.of(
           some({
             ...aRetrievedProfile,
             servicePreferencesSettings: manualProfileServicePreferencesSettings
           })
         )
       ),
-      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
     };
 
     mockSendMessage.mockImplementation(() => Promise.resolve());
@@ -832,9 +828,9 @@ describe("UpdateProfileHandler", () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
         // Return a profile with a validated email
-        taskEither.of(some(aRetrievedProfile))
+        TE.of(some(aRetrievedProfile))
       ),
-      update: jest.fn(_ => taskEither.of({ ...aRetrievedProfile, ..._ }))
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
     };
 
     mockSendMessage.mockImplementation(() => Promise.resolve());
