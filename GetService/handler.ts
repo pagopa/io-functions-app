@@ -36,9 +36,9 @@ import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitio
 import { ServicePublic } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePublic";
 import { toApiServiceMetadata } from "@pagopa/io-functions-commons/dist/src/utils/service_metadata";
 
+import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
-import * as E from "fp-ts/lib/Either";
 
 type IGetServiceHandlerRet =
   | IResponseSuccessJson<ServicePublic>

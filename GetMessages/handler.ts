@@ -25,8 +25,8 @@ import {
 import { CreatedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
 
 import * as express from "express";
-import { pipe } from "fp-ts/lib/function";
 import { isRight } from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 

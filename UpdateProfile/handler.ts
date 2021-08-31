@@ -46,11 +46,11 @@ import {
   retrievedProfileToExtendedProfile
 } from "../utils/profiles";
 
-import { toHash } from "../utils/crypto";
-import { createTracker } from "../utils/tracking";
 import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import { toHash } from "../utils/crypto";
+import { createTracker } from "../utils/tracking";
 
 /**
  * Type of an UpdateProfile handler.

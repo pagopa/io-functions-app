@@ -5,8 +5,8 @@ import {
 } from "@pagopa/ts-commons/lib/encrypt";
 import { IPString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
-import { pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
 
 import * as t from "io-ts";
 import { SpidMsgItem } from "./index";

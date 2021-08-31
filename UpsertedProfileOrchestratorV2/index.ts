@@ -1,8 +1,7 @@
 ﻿import * as df from "durable-functions";
-
-import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 import * as NonEmptyArray from "fp-ts/lib/NonEmptyArray";
+import * as O from "fp-ts/lib/Option";
 
 import { getConfigOrThrow } from "../utils/config";
 

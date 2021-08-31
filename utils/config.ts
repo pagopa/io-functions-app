@@ -7,9 +7,9 @@
 
 import * as t from "io-ts";
 
-import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
 import { flow, pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/lib/Option";
 
 import { MailerConfig } from "@pagopa/io-functions-commons/dist/src/mailer";
 
@@ -21,9 +21,9 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 // exclude a specific value from a type
 // as strict equality is performed, allowed input types are constrained to be values not references (object, arrays, etc)
 // tslint:disable-next-line max-union-size
-const AnyBut = <A extends string | number | boolean | symbol, O = A>(
+const AnyBut = <A extends string | number | boolean | symbol, Out = A>(
   but: A,
-  base: t.Type<A, O> = t.any
+  base: t.Type<A, Out> = t.any
 ) =>
   t.brand(
     base,

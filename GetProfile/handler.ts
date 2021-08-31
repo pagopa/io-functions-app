@@ -22,10 +22,10 @@ import {
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 import { isBefore } from "date-fns";
-import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 import { pipe } from "fp-ts/lib/function";
-import * as TE from "fp-ts/lib/TaskEither";
 import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
+import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 
 type IGetProfileHandlerResult =
   | IResponseSuccessJson<ExtendedProfile>

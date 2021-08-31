@@ -10,22 +10,21 @@ import {
 
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
-import { pipe } from "fp-ts/lib/function";
 
+import { sequenceT } from "fp-ts/lib/Apply";
 import fetch from "node-fetch";
 import { getConfig, IConfig } from "./config";
-import { sequenceT } from "fp-ts/lib/Apply";
-import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 
 type ProblemSource = "AzureCosmosDB" | "AzureStorage" | "Config" | "Url";
 export type HealthProblem<S extends ProblemSource> = string & { __source: S };
 export type HealthCheck<
   S extends ProblemSource = ProblemSource,
-  T = true
-> = TE.TaskEither<ReadonlyArray<HealthProblem<S>>, T>;
+  True = true
+> = TE.TaskEither<ReadonlyArray<HealthProblem<S>>, True>;
 
 // format and cast a problem message with its source
 const formatProblem = <S extends ProblemSource>(

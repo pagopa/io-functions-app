@@ -10,8 +10,8 @@ import { Context } from "@azure/functions";
 import * as df from "durable-functions";
 
 import { isLeft, toError } from "fp-ts/lib/Either";
-import * as TE from "fp-ts/lib/TaskEither";
 import { isNone } from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
 
 import {
   IResponseErrorInternal,
@@ -39,13 +39,12 @@ import {
   wrapRequestHandler
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 
-import { fromPredicate, taskEither, tryCatch } from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import { OrchestratorInput as EmailValidationProcessOrchestratorInput } from "../EmailValidationProcessOrchestrator/handler";
 import {
   isOrchestratorRunning,
   makeStartEmailValidationProcessOrchestratorId
 } from "./orchestrators";
-import { pipe } from "fp-ts/lib/function";
 
 type ReturnTypes =
   // tslint:disable-next-line: max-union-size

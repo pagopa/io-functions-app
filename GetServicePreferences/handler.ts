@@ -45,7 +45,7 @@ import {
 
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
-import { identity, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 
 type IGetServicePreferencesHandlerResult =
   | IResponseSuccessJson<ServicePreference>

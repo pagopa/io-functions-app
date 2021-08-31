@@ -3,8 +3,8 @@ import { DurableOrchestrationClient } from "durable-functions/lib/src/durableorc
 
 import * as dateFns from "date-fns";
 import { toError } from "fp-ts/lib/Either";
-import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/lib/TaskEither";
 
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { PromiseType } from "@pagopa/ts-commons/lib/types";

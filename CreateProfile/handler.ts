@@ -20,10 +20,7 @@ import {
   NewProfile as INewProfile,
   ProfileModel
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
-import {
-  CosmosDecodingError,
-  CosmosErrors
-} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
+import { CosmosDecodingError } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
 import {
@@ -36,11 +33,11 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/response";
 
 import { isBefore } from "date-fns";
+import { pipe } from "fp-ts/lib/function";
 import { fromEither } from "fp-ts/lib/TaskEither";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestratorV2/handler";
 import { NewProfileMiddleware } from "../utils/middlewares/profile";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
-import { pipe } from "fp-ts/lib/function";
 
 /**
  * Type of an CreateProfile handler.

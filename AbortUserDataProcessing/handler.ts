@@ -37,10 +37,9 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
-import { flow, identity, pipe } from "fp-ts/lib/function";
-import { fromEither, taskEither } from "fp-ts/lib/TaskEither";
-import * as TE from "fp-ts/lib/TaskEither";
+import { flow, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
 
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 

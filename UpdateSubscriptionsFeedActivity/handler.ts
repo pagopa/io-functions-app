@@ -8,8 +8,8 @@ import { TableService } from "azure-storage";
 import * as t from "io-ts";
 
 import * as E from "fp-ts/lib/Either";
-import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/lib/Option";
 
 import { toHash } from "../utils/crypto";
 import {

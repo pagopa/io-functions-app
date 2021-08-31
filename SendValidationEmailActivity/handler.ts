@@ -17,8 +17,8 @@ import { EmailDefaults } from "./";
 import { getEmailHtmlFromTemplate } from "./template";
 
 import { sendMail } from "@pagopa/io-functions-commons/dist/src/mailer";
-import { createTracker } from "../utils/tracking";
 import { pipe } from "fp-ts/lib/function";
+import { createTracker } from "../utils/tracking";
 
 // Activity input
 export const ActivityInput = t.interface({

@@ -7,10 +7,10 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-import * as packageJson from "../package.json";
-import { checkApplicationHealth, HealthCheck } from "../utils/healthcheck";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as packageJson from "../package.json";
+import { checkApplicationHealth, HealthCheck } from "../utils/healthcheck";
 
 interface IInfo {
   name: string;
