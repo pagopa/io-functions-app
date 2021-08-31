@@ -1,9 +1,13 @@
 import { Context } from "@azure/functions";
 import { QueueServiceClient } from "@azure/storage-queue";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { tryCatch } from "fp-ts/lib/TaskEither";
+
 import * as t from "io-ts";
+import * as TE from "fp-ts/lib/TaskEither";
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
 
 export const EnqueueProfileCreationEventActivityInput = t.interface({
   fiscalCode: FiscalCode,
@@ -28,36 +32,37 @@ export const GetEnqueueProfileCreationEventActivityHandler: IEnqueueProfileCreat
   const decodedInputOrError = EnqueueProfileCreationEventActivityInput.decode(
     rawInput
   );
-  if (decodedInputOrError.isLeft()) {
+  if (E.isLeft(decodedInputOrError)) {
     context.log.error(
       `EnqueueProfileCreationEventActivity|Cannot parse input|ERROR=${readableReport(
-        decodedInputOrError.value
+        decodedInputOrError.left
       )}`
     );
     return "FAILURE";
   }
   const newProfileMessage: NewProfileInput = {
-    fiscal_code: decodedInputOrError.value.fiscalCode
+    fiscal_code: decodedInputOrError.right.fiscalCode
   };
-  return tryCatch(
-    () =>
-      queueService
-        .getQueueClient(decodedInputOrError.value.queueName)
-        // Default message TTL is 7 days @ref https://docs.microsoft.com/it-it/azure/storage/queues/storage-nodejs-how-to-use-queues?tabs=javascript#queue-service-concepts
-        .sendMessage(
-          Buffer.from(JSON.stringify(newProfileMessage)).toString("base64")
-        ),
-    err => {
-      context.log.error(
-        `EnqueueProfileCreationEventActivity|Cannot send a message to the queue ${
-          decodedInputOrError.value.queueName
-        }|ERROR=${JSON.stringify(err)}`
-      );
-    }
-  )
-    .map(() => "SUCCESS")
-    .getOrElseL(err => {
+  return pipe(
+    TE.tryCatch(
+      () =>
+        queueService
+          .getQueueClient(decodedInputOrError.right.queueName)
+          // Default message TTL is 7 days @ref https://docs.microsoft.com/it-it/azure/storage/queues/storage-nodejs-how-to-use-queues?tabs=javascript#queue-service-concepts
+          .sendMessage(
+            Buffer.from(JSON.stringify(newProfileMessage)).toString("base64")
+          ),
+      err => {
+        context.log.error(
+          `EnqueueProfileCreationEventActivity|Cannot send a message to the queue ${
+            decodedInputOrError.right.queueName
+          }|ERROR=${JSON.stringify(err)}`
+        );
+      }
+    ),
+    TE.map(_ => "SUCCESS" as const),
+    TE.getOrElse(err => {
       throw new Error(`TRANSIENT ERROR|${err}`);
     })
-    .run();
+  )();
 };
