@@ -69,7 +69,7 @@ const toRetrivedServicePreference = (newDocument: NewServicePreference) => ({
 });
 
 const mockServicesPreferencesModelWithError = ({
-  create: jest.fn(() => te.fromLeft({}))
+  create: jest.fn(() => te.left({}))
 } as unknown) as ServicesPreferencesModel;
 const mockServicesPreferencesModel = ({
   create: jest.fn((newDocument: NewServicePreference) =>
@@ -252,7 +252,7 @@ describe("MigrateServicePreferenceFromLegacy", () => {
 
     // We have 3 preference to migrate, but we want one to fail
     (mockServicesPreferencesModel.create as jest.Mock).mockImplementationOnce(
-      () => te.fromLeft({})
+      () => te.left({})
     );
 
     const spiedTracker = ({
