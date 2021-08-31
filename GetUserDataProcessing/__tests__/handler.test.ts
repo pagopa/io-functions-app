@@ -1,7 +1,7 @@
 /* tslint:disable:no-any */
 
 import { none, some } from "fp-ts/lib/Option";
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aFiscalCode,
@@ -16,7 +16,7 @@ describe("GetUserDataProcessingHandler", () => {
   it("should find an existing User data processing", async () => {
     const userDataProcessingModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(some(aRetrievedUserDataProcessing));
+        return TE.of(some(aRetrievedUserDataProcessing));
       })
     };
 
@@ -42,7 +42,7 @@ describe("GetUserDataProcessingHandler", () => {
   it("should respond with NotFound if userDataProcessing does not exist", async () => {
     const userDataProcessingModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(none);
+        return TE.of(none);
       })
     };
 
@@ -64,7 +64,7 @@ describe("GetUserDataProcessingHandler", () => {
   it("should reject the promise in case of errors", async () => {
     const userDataProcessingModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return fromLeft("error");
+        return TE.left("error");
       })
     };
 
