@@ -1,6 +1,7 @@
 import * as t from "io-ts";
 
-import { fromPredicate, isLeft } from "fp-ts/lib/Either";
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
 
 import * as df from "durable-functions";
 import { IOrchestrationFunctionContext } from "durable-functions/lib/src/classes";
@@ -65,17 +66,17 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
       input
     );
 
-    if (isLeft(errorOrUpsertedProfileOrchestratorInput)) {
+    if (E.isLeft(errorOrUpsertedProfileOrchestratorInput)) {
       context.log.error(
         `${logPrefix}|Error decoding input|ERROR=${readableReport(
-          errorOrUpsertedProfileOrchestratorInput.value
+          errorOrUpsertedProfileOrchestratorInput.left
         )}`
       );
       return false;
     }
 
     const upsertedProfileOrchestratorInput =
-      errorOrUpsertedProfileOrchestratorInput.value;
+      errorOrUpsertedProfileOrchestratorInput.right;
 
     // Log the input
     context.log.verbose(
@@ -119,15 +120,15 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
           emailValidationProcessOrchestartorResultJson
         );
 
-        if (isLeft(errorOrEmailValidationProcessOrchestartorResult)) {
+        if (E.isLeft(errorOrEmailValidationProcessOrchestartorResult)) {
           context.log.error(
             `${logPrefix}|Error decoding sub-orchestrator result|ERROR=${readableReport(
-              errorOrEmailValidationProcessOrchestartorResult.value
+              errorOrEmailValidationProcessOrchestartorResult.left
             )}`
           );
         } else {
           const emailValidationProcessOrchestartorResult =
-            errorOrEmailValidationProcessOrchestartorResult.value;
+            errorOrEmailValidationProcessOrchestartorResult.right;
 
           if (emailValidationProcessOrchestartorResult.kind === "FAILURE") {
             context.log.error(
@@ -298,15 +299,16 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
               settingsVersion: oldProfile.servicePreferencesSettings.version
             }
           );
-          const maybeServicesPreferences = ActivityResult.decode(activityResult)
-            .mapLeft(_ => new Error(readableReport(_)))
-            .chain(
-              fromPredicate(
+          const maybeServicesPreferences = pipe(
+            ActivityResult.decode(activityResult),
+            E.mapLeft(_ => new Error(readableReport(_))),
+            E.chain(
+              E.fromPredicate(
                 (_): _ is ActivityResultSuccess => _.kind === "SUCCESS",
                 _ => new Error(_.kind)
               )
-            )
-            .fold(
+            ),
+            E.fold(
               err => {
                 // Invalid Activity input. The orchestration fail
                 context.log.error(
@@ -315,7 +317,8 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
                 throw err;
               },
               _ => _.preferences
-            );
+            )
+          );
           yield context.df.callActivityWithRetry(
             "UpdateSubscriptionsFeedActivity",
             retryOptions,
@@ -349,7 +352,7 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
     if (hasJustEnabledInbox && params.notifyOn) {
       try {
         yield context.df.Task.all(
-          params.notifyOn.toArray().map(serviceQueueName =>
+          params.notifyOn.map(serviceQueueName =>
             context.df.callActivityWithRetry(
               "EnqueueProfileCreationEventActivity",
               retryOptions,
