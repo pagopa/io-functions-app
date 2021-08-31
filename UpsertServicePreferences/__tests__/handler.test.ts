@@ -1,6 +1,6 @@
 /* tslint:disable:no-any */
-import { none, some } from "fp-ts/lib/Option";
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
 import {
   aFiscalCode,
   aRetrievedProfileWithEmail,
@@ -15,13 +15,14 @@ import {
 } from "../../__mocks__/mocks.service_preference";
 
 import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { left } from "fp-ts/lib/Either";
 import { context } from "../../__mocks__/durable-functions";
 import * as subscriptionFeedHandler from "../../UpdateSubscriptionsFeedActivity/handler";
 import { GetUpsertServicePreferencesHandler } from "../handler";
+import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
+import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 
 const updateSubscriptionFeedMock = jest
   .fn()
@@ -40,17 +41,21 @@ const aRetrievedProfileInValidState = {
 };
 
 const profileFindLastVersionByModelIdMock = jest.fn(() => {
-  return taskEither.of(some(aRetrievedProfileInValidState));
+  return TE.of<CosmosErrors, O.Option<RetrievedProfile>>(
+    O.some(aRetrievedProfileInValidState)
+  );
 });
 const serviceFindLastVersionByModelIdMock = jest.fn(_ => {
-  return taskEither.of(some(aRetrievedService));
+  return TE.of<CosmosErrors, O.Option<RetrievedService>>(
+    O.some(aRetrievedService)
+  );
 });
 const servicePreferenceFindModelMock = jest
   .fn()
-  .mockImplementation(_ => taskEither.of(some(aRetrievedServicePreference)));
+  .mockImplementation(_ => TE.of(O.some(aRetrievedServicePreference)));
 const servicePreferenceUpsertModelMock = jest
   .fn()
-  .mockImplementation(_ => taskEither.of(_));
+  .mockImplementation(_ => TE.of(_));
 
 const profileModelMock = {
   findLastVersionByModelId: profileFindLastVersionByModelIdMock
@@ -150,9 +155,7 @@ describe("UpsertServicePreferences", () => {
 
   it("should return Success if user service preferences has been upserted with subscriptionFeed SUBSCRIBED in case isInboxEnabled has been changed to true", async () => {
     servicePreferenceFindModelMock.mockImplementationOnce(() =>
-      taskEither.of(
-        some({ ...aRetrievedServicePreference, isInboxEnabled: false })
-      )
+      TE.of(O.some({ ...aRetrievedServicePreference, isInboxEnabled: false }))
     );
     const response = await upsertServicePreferencesHandler(
       context as any,
@@ -183,9 +186,7 @@ describe("UpsertServicePreferences", () => {
 
   it("should return Success with upserted user service preferences even if subscription feed update throw an error", async () => {
     servicePreferenceFindModelMock.mockImplementationOnce(() =>
-      taskEither.of(
-        some({ ...aRetrievedServicePreference, isInboxEnabled: false })
-      )
+      TE.of(O.some({ ...aRetrievedServicePreference, isInboxEnabled: false }))
     );
     updateSubscriptionFeedMock.mockImplementationOnce(() =>
       Promise.reject(new Error("Subscription Feed Error"))
@@ -220,9 +221,7 @@ describe("UpsertServicePreferences", () => {
 
   it("should return Success with upserted user service preferences even if subscription feed update returns FAILURE", async () => {
     servicePreferenceFindModelMock.mockImplementationOnce(() =>
-      taskEither.of(
-        some({ ...aRetrievedServicePreference, isInboxEnabled: false })
-      )
+      TE.of(O.some({ ...aRetrievedServicePreference, isInboxEnabled: false }))
     );
     updateSubscriptionFeedMock.mockImplementationOnce(() =>
       Promise.resolve("FAILURE")
@@ -260,7 +259,7 @@ describe("UpsertServicePreferences", () => {
   // ---------------------------------------------
   it("should return IResponseErrorNotFound if no profile is found in db", async () => {
     profileFindLastVersionByModelIdMock.mockImplementationOnce(() => {
-      return taskEither.of(none);
+      return TE.of(O.none);
     });
 
     const response = await upsertServicePreferencesHandler(
@@ -281,7 +280,7 @@ describe("UpsertServicePreferences", () => {
 
   it("should return IResponseErrorNotFound if no service is found in db", async () => {
     serviceFindLastVersionByModelIdMock.mockImplementationOnce(() => {
-      return taskEither.of(none);
+      return TE.of(O.none);
     });
 
     const response = await upsertServicePreferencesHandler(
@@ -302,7 +301,7 @@ describe("UpsertServicePreferences", () => {
 
   it("should return IResponseErrorQuery if profile model raise an error", async () => {
     profileFindLastVersionByModelIdMock.mockImplementationOnce(() => {
-      return taskEither.fromEither(left({} as CosmosErrors));
+      return TE.left({} as CosmosErrors);
     });
 
     const response = await upsertServicePreferencesHandler(
@@ -321,7 +320,7 @@ describe("UpsertServicePreferences", () => {
 
   it("should return IResponseErrorQuery if service model raise an error", async () => {
     serviceFindLastVersionByModelIdMock.mockImplementationOnce(() => {
-      return taskEither.fromEither(left({} as CosmosErrors));
+      return TE.left({} as CosmosErrors);
     });
 
     const response = await upsertServicePreferencesHandler(
@@ -340,7 +339,7 @@ describe("UpsertServicePreferences", () => {
 
   it("should return IResponseErrorQuery if serviceSettings model find raise an error", async () => {
     servicePreferenceFindModelMock.mockImplementationOnce(() => {
-      return fromLeft({} as CosmosErrors);
+      return TE.left({} as CosmosErrors);
     });
 
     const response = await upsertServicePreferencesHandler(
@@ -359,7 +358,7 @@ describe("UpsertServicePreferences", () => {
 
   it("should return IResponseErrorQuery if serviceSettings model upsert raise an error", async () => {
     servicePreferenceUpsertModelMock.mockImplementationOnce(() => {
-      return taskEither.fromEither(left({} as CosmosErrors));
+      return TE.left({} as CosmosErrors);
     });
 
     const response = await upsertServicePreferencesHandler(
@@ -378,8 +377,8 @@ describe("UpsertServicePreferences", () => {
 
   it("should return IResponseErrorConflict if profile is in LEGACY mode", async () => {
     profileFindLastVersionByModelIdMock.mockImplementationOnce(() => {
-      return taskEither.of(
-        some({
+      return TE.of(
+        O.some({
           ...aRetrievedProfileInValidState,
           servicePreferencesSettings: legacyProfileServicePreferencesSettings
         })
