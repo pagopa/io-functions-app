@@ -25,7 +25,9 @@ import {
 import { CreatedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
 
 import * as express from "express";
+import { pipe } from "fp-ts/lib/function";
 import { isRight } from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 
 import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
@@ -61,18 +63,19 @@ export function GetMessagesHandler(
   messageModel: MessageModel
 ): IGetMessagesHandler {
   return async fiscalCode => {
-    return messageModel
-      .findMessages(fiscalCode)
-      .map(flattenAsyncIterator)
-      .map(_ => filterAsyncIterator(_, isRight))
-      .map(_ => mapAsyncIterator(_, e => e.value))
-      .map(_ => filterAsyncIterator(_, RetrievedNotPendingMessage.is))
-      .map(_ => mapAsyncIterator(_, retrievedMessageToPublic))
-      .fold<IGetMessagesHandlerResponse>(
+    return pipe(
+      messageModel.findMessages(fiscalCode),
+      TE.map(flattenAsyncIterator),
+      TE.map(_ => filterAsyncIterator(_, isRight)),
+      TE.map(_ => mapAsyncIterator(_, e => e.right)),
+      TE.map(_ => filterAsyncIterator(_, RetrievedNotPendingMessage.is)),
+      TE.map(_ => mapAsyncIterator(_, retrievedMessageToPublic)),
+      TE.bimap(
         failure => ResponseErrorQuery(failure.kind, failure),
         ResponseJsonIterator
-      )
-      .run();
+      ),
+      TE.toUnion
+    )();
   };
 }
 
