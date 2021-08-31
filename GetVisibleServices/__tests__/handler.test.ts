@@ -88,6 +88,7 @@ describe("GetVisibleServicesHandler", () => {
         cb(
           undefined,
           JSON.stringify({
+            localServiceId: aLocalVisibleService,
             serviceId: aVisibleService,
             serviceIdx: aVisibleService
           })
@@ -109,6 +110,10 @@ describe("GetVisibleServicesHandler", () => {
       expect.any(Function)
     );
     expect(response.kind).toEqual("IResponseSuccessJson");
+    expect(
+      (response as IResponseSuccessJson<PaginatedServiceTupleCollection>).value
+        .items
+    ).toHaveLength(3);
   });
 
   it("should return only NATIONAL scoped services", async () => {
@@ -143,6 +148,38 @@ describe("GetVisibleServicesHandler", () => {
       (response as IResponseSuccessJson<PaginatedServiceTupleCollection>).value
         .items
     ).toHaveLength(2);
+    expect(
+      (response as IResponseSuccessJson<
+        PaginatedServiceTupleCollection
+      >).value.items.every(s => s.scope === ServiceScopeEnum.NATIONAL)
+    ).toBeTruthy();
+  });
+
+  it("should return empty list", async () => {
+    const blobStorageMock = {
+      getBlobToText: jest.fn().mockImplementation((_, __, ___, cb) => {
+        cb(undefined, JSON.stringify({}));
+      })
+    };
+    const getVisibleServicesHandler = GetVisibleServicesHandler(
+      blobStorageMock as any,
+      true
+    );
+    const response = await getVisibleServicesHandler();
+    response.apply(MockResponse());
+
+    await Promise.resolve(); // needed to let the response promise complete
+    expect(blobStorageMock.getBlobToText).toHaveBeenCalledWith(
+      VISIBLE_SERVICE_CONTAINER,
+      VISIBLE_SERVICE_BLOB_ID,
+      {},
+      expect.any(Function)
+    );
+    expect(response.kind).toEqual("IResponseSuccessJson");
+    expect(
+      (response as IResponseSuccessJson<PaginatedServiceTupleCollection>).value
+        .items
+    ).toHaveLength(0);
   });
 });
 
