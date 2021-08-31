@@ -7,8 +7,9 @@ import * as df from "durable-functions";
 import { NewProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
 import * as date_fns from "date-fns";
-import { identity } from "fp-ts/lib/function";
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
+import { identity, pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/lib/TaskEither";
+import * as E from "fp-ts/lib/Either";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aExtendedProfile,
@@ -17,7 +18,7 @@ import {
   aNewProfile,
   aRetrievedProfile
 } from "../../__mocks__/mocks";
-import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../../UpsertedProfileOrchestrator/handler";
+import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../../UpsertedProfileOrchestratorV2/handler";
 import { CreateProfileHandler } from "../handler";
 
 // tslint:disable-next-line: no-let
@@ -31,13 +32,15 @@ afterEach(() => {
   clock = clock.uninstall();
 });
 
-const anOptOutEmailSwitchDate = UTCISODateFromString.decode(
-  "2021-07-08T23:59:59Z"
-).getOrElseL(() => fail("wrong date value"));
+const anOptOutEmailSwitchDate = pipe(
+  UTCISODateFromString.decode("2021-07-08T23:59:59Z"),
+  E.getOrElseW(() => fail("wrong date value"))
+);
 
-const aPastOptOutEmailSwitchDate = UTCISODateFromString.decode(
-  "2000-07-08T23:59:59Z"
-).getOrElseL(() => fail("wrong date value"));
+const aPastOptOutEmailSwitchDate = pipe(
+  UTCISODateFromString.decode("2000-07-08T23:59:59Z"),
+  E.getOrElseW(() => fail("wrong date value"))
+);
 
 const aFutureOptOutEmailSwitchDate = date_fns.addDays(aNewDate, 1);
 
@@ -46,21 +49,24 @@ const aTestProfileWithEmailDisabled = {
   isEmailEnabled: false
 };
 
-const expectedNewProfile = NewProfile.decode({
-  email: aNewProfile.email,
-  fiscalCode: aFiscalCode,
-  isEmailEnabled: false,
-  isEmailValidated: aNewProfile.is_email_validated,
-  isInboxEnabled: false,
-  isTestProfile: aNewProfile.is_test_profile,
-  isWebhookEnabled: false,
-  kind: "INewProfile"
-}).fold(() => fail("wrong new Profile"), identity);
+const expectedNewProfile = pipe(
+  NewProfile.decode({
+    email: aNewProfile.email,
+    fiscalCode: aFiscalCode,
+    isEmailEnabled: false,
+    isEmailValidated: aNewProfile.is_email_validated,
+    isInboxEnabled: false,
+    isTestProfile: aNewProfile.is_test_profile,
+    isWebhookEnabled: false,
+    kind: "INewProfile"
+  }),
+  E.fold(() => fail("wrong new Profile"), identity)
+);
 
 describe("CreateProfileHandler", () => {
   it("should return a query error when an error occurs creating the new profile", async () => {
     const profileModelMock = {
-      create: jest.fn(() => fromLeft({}))
+      create: jest.fn(() => TE.left({}))
     };
 
     const createProfileHandler = CreateProfileHandler(
@@ -79,7 +85,7 @@ describe("CreateProfileHandler", () => {
 
   it("should return the created profile", async () => {
     const profileModelMock = {
-      create: jest.fn(() => taskEither.of(aRetrievedProfile))
+      create: jest.fn(() => TE.of(aRetrievedProfile))
     };
 
     const createProfileHandler = CreateProfileHandler(
@@ -101,7 +107,7 @@ describe("CreateProfileHandler", () => {
 
   it("should return the created profile with is_email_enabled set to false", async () => {
     const profileModelMock = {
-      create: jest.fn(_ => taskEither.of(aTestProfileWithEmailDisabled))
+      create: jest.fn(_ => TE.of(aTestProfileWithEmailDisabled))
     };
 
     const createProfileHandler = CreateProfileHandler(
@@ -127,7 +133,7 @@ describe("CreateProfileHandler", () => {
 
   it("should return the created profile with is_email_enabled set to true if limit date is after profile creation date", async () => {
     const profileModelMock = {
-      create: jest.fn(_ => taskEither.of(aRetrievedProfile))
+      create: jest.fn(_ => TE.of(aRetrievedProfile))
     };
 
     const createProfileHandler = CreateProfileHandler(
@@ -153,7 +159,7 @@ describe("CreateProfileHandler", () => {
 
   it("should start the orchestrator with the appropriate input after the profile has been created", async () => {
     const profileModelMock = {
-      create: jest.fn(() => taskEither.of(aRetrievedProfile))
+      create: jest.fn(() => TE.of(aRetrievedProfile))
     };
     const createProfileHandler = CreateProfileHandler(
       profileModelMock as any,
