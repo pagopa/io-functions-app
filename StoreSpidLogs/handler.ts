@@ -4,14 +4,18 @@ import {
   toEncryptedPayload
 } from "@pagopa/ts-commons/lib/encrypt";
 import { IPString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { curry } from "fp-ts/lib/function";
+
+import { pipe } from "fp-ts/lib/function";
+import * as E from "fp-ts/lib/Either";
+
 import * as t from "io-ts";
 import { SpidMsgItem } from "./index";
 
 import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { sequenceS } from "fp-ts/lib/Apply";
-import { either } from "fp-ts/lib/Either";
+
+import { curry2 } from "fp-ts-std/Function";
 
 /**
  * Payload of the stored blob item
@@ -45,23 +49,23 @@ export const encryptAndStore = async (
   spidMsgItem: SpidMsgItem,
   spidLogsPublicKey: NonEmptyString
 ): Promise<void | IOutputBinding> => {
-  const encrypt = curry(toEncryptedPayload)(spidLogsPublicKey);
-  return sequenceS(either)({
-    encryptedRequestPayload: encrypt(spidMsgItem.requestPayload),
-    encryptedResponsePayload: encrypt(spidMsgItem.responsePayload)
-  })
-    .map(item => ({
+  const encrypt = curry2(toEncryptedPayload)(spidLogsPublicKey);
+  return pipe(
+    sequenceS(E.Applicative)({
+      encryptedRequestPayload: encrypt(spidMsgItem.requestPayload),
+      encryptedResponsePayload: encrypt(spidMsgItem.responsePayload)
+    }),
+    E.map(item => ({
       ...spidMsgItem,
       ...item
-    }))
-    .fold(
+    })),
+    E.fold(
       err =>
         context.log.error(`StoreSpidLogs|ERROR=Cannot encrypt payload|${err}`),
       (encryptedBlobItem: SpidBlobItem) =>
-        t
-          .exact(SpidBlobItem)
-          .decode(encryptedBlobItem)
-          .fold(
+        pipe(
+          t.exact(SpidBlobItem).decode(encryptedBlobItem),
+          E.fold(
             errs => {
               // unrecoverable error
               context.log.error(
@@ -74,5 +78,7 @@ export const encryptAndStore = async (
               spidRequestResponse: spidBlobItem
             })
           )
-    );
+        )
+    )
+  );
 };
