@@ -1,6 +1,6 @@
 // tslint:disable:no-any
 import { none, some } from "fp-ts/lib/Option";
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 
 import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
 import { NotificationChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/NotificationChannel";
@@ -96,7 +96,7 @@ describe("GetServiceHandler", () => {
   it("should get an existing service", async () => {
     const serviceModelMock = {
       findOneByServiceId: jest.fn(() => {
-        return taskEither.of(some(aRetrievedService));
+        return TE.of(some(aRetrievedService));
       })
     };
     const aServiceId = "1" as NonEmptyString;
@@ -113,7 +113,7 @@ describe("GetServiceHandler", () => {
   it("should fail on errors during get", async () => {
     const serviceModelMock = {
       findOneByServiceId: jest.fn(() => {
-        return fromLeft(none);
+        return TE.left(none);
       })
     };
     const aServiceId = "1" as NonEmptyString;
@@ -127,7 +127,7 @@ describe("GetServiceHandler", () => {
   it("should return not found if the service does not exist", async () => {
     const serviceModelMock = {
       findOneByServiceId: jest.fn(() => {
-        return taskEither.of(none);
+        return TE.of(none);
       })
     };
     const aServiceId = "1" as NonEmptyString;
