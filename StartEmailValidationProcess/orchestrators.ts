@@ -3,7 +3,8 @@ import { DurableOrchestrationClient } from "durable-functions/lib/src/durableorc
 
 import * as dateFns from "date-fns";
 import { toError } from "fp-ts/lib/Either";
-import { TaskEither, tryCatch } from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { PromiseType } from "@pagopa/ts-commons/lib/types";
@@ -30,15 +31,18 @@ export const makeStartEmailValidationProcessOrchestratorId = (
 export const isOrchestratorRunning = (
   client: DurableOrchestrationClient,
   orchestratorId: string
-): TaskEither<
+): TE.TaskEither<
   Error,
   PromiseType<ReturnType<typeof client["getStatus"]>> & {
     isRunning: boolean;
   }
 > =>
-  tryCatch(() => client.getStatus(orchestratorId), toError).map(status => ({
-    ...status,
-    isRunning:
-      status.runtimeStatus === df.OrchestrationRuntimeStatus.Running ||
-      status.runtimeStatus === df.OrchestrationRuntimeStatus.Pending
-  }));
+  pipe(
+    TE.tryCatch(() => client.getStatus(orchestratorId), toError),
+    TE.map(status => ({
+      ...status,
+      isRunning:
+        status.runtimeStatus === df.OrchestrationRuntimeStatus.Running ||
+        status.runtimeStatus === df.OrchestrationRuntimeStatus.Pending
+    }))
+  );

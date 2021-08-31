@@ -10,6 +10,7 @@ import { Context } from "@azure/functions";
 import * as df from "durable-functions";
 
 import { isLeft, toError } from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
 import { isNone } from "fp-ts/lib/Option";
 
 import {
@@ -44,6 +45,7 @@ import {
   isOrchestratorRunning,
   makeStartEmailValidationProcessOrchestratorId
 } from "./orchestrators";
+import { pipe } from "fp-ts/lib/function";
 
 type ReturnTypes =
   // tslint:disable-next-line: max-union-size
@@ -68,18 +70,18 @@ export function StartEmailValidationProcessHandler(
   return async (context, fiscalCode) => {
     const logPrefix = `StartEmailValidationProcessHandler|FISCAL_CODE=${fiscalCode}`;
 
-    const errorOrMaybeExistingProfile = await profileModel
-      .findLastVersionByModelId([fiscalCode])
-      .run();
+    const errorOrMaybeExistingProfile = await profileModel.findLastVersionByModelId(
+      [fiscalCode]
+    )();
 
     if (isLeft(errorOrMaybeExistingProfile)) {
       return ResponseErrorQuery(
         "Error trying to retrieve existing service",
-        errorOrMaybeExistingProfile.value
+        errorOrMaybeExistingProfile.left
       );
     }
 
-    const maybeExistingProfile = errorOrMaybeExistingProfile.value;
+    const maybeExistingProfile = errorOrMaybeExistingProfile.right;
     if (isNone(maybeExistingProfile)) {
       return ResponseErrorNotFound(
         "Error",
@@ -108,19 +110,20 @@ export function StartEmailValidationProcessHandler(
     );
 
     const dfClient = df.getClient(context);
-    return taskEither
-      .of(makeStartEmailValidationProcessOrchestratorId(fiscalCode, email))
-      .chain(orchId =>
-        isOrchestratorRunning(dfClient, orchId)
-          .chain(
-            fromPredicate(
+    return pipe(
+      TE.of(makeStartEmailValidationProcessOrchestratorId(fiscalCode, email)),
+      TE.chain(orchId =>
+        pipe(
+          isOrchestratorRunning(dfClient, orchId),
+          TE.chain(
+            TE.fromPredicate(
               _ => _.isRunning,
               () => new Error("Not Running")
             )
-          )
-          .foldTaskEither(
+          ),
+          TE.fold(
             () =>
-              tryCatch(
+              TE.tryCatch(
                 () =>
                   dfClient.startNew(
                     "EmailValidationProcessOrchestrator",
@@ -129,14 +132,17 @@ export function StartEmailValidationProcessHandler(
                   ),
                 toError
               ),
-            _ => taskEither.of(String(_.isRunning))
+            _ => TE.of(String(_.isRunning))
           )
-      )
-      .fold<ReturnTypes>(
+        )
+      ),
+      TE.bimap(
         e => ResponseErrorInternal(String(e)),
-        () => ResponseSuccessAccepted()
-      )
-      .run();
+        // tslint:disable-next-line: no-useless-cast
+        () => ResponseSuccessAccepted() as IResponseSuccessAccepted
+      ),
+      TE.toUnion
+    )();
   };
 }
 
