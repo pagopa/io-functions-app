@@ -23,6 +23,9 @@ import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 import { isBefore } from "date-fns";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
+import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/lib/TaskEither";
+import * as O from "fp-ts/lib/Option";
 
 type IGetProfileHandlerResult =
   | IResponseSuccessJson<ExtendedProfile>
@@ -47,15 +50,16 @@ export function GetProfileHandler(
   optOutEmailSwitchDate: Date,
   isOptInEmailEnabled: boolean
 ): IGetProfileHandler {
-  return async fiscalCode =>
-    profileModel
-      .findLastVersionByModelId([fiscalCode])
-      .fold(
+  return async fiscalCode => {
+    return pipe(
+      profileModel.findLastVersionByModelId([fiscalCode]),
+      TE.bimap(
         failure =>
           ResponseErrorQuery("Error while retrieving the profile", failure),
         maybeProfile =>
-          maybeProfile
-            .map(_ =>
+          pipe(
+            maybeProfile,
+            O.map(_ =>
               // if profile's timestamp is before email opt out switch limit date we must force isEmailEnabled to false
               // this map is valid for ever so this check cannot be removed.
               // Please note that cosmos timestamps are expressed in unix notation (in seconds), so we must transform
@@ -63,17 +67,21 @@ export function GetProfileHandler(
               isOptInEmailEnabled && isBefore(_._ts, optOutEmailSwitchDate)
                 ? { ..._, isEmailEnabled: false }
                 : _
-            )
-            .fold<IGetProfileHandlerResult>(
-              ResponseErrorNotFound(
-                "Profile not found",
-                "The profile you requested was not found in the system."
-              ),
+            ),
+            O.foldW(
+              () =>
+                ResponseErrorNotFound(
+                  "Profile not found",
+                  "The profile you requested was not found in the system."
+                ),
               profile =>
                 ResponseSuccessJson(retrievedProfileToExtendedProfile(profile))
             )
-      )
-      .run();
+          )
+      ),
+      TE.toUnion
+    )();
+  };
 }
 
 /**
