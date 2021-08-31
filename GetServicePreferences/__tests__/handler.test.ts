@@ -1,7 +1,7 @@
 /* tslint:disable:no-any */
 import { Context } from "@azure/functions";
 import { none, some } from "fp-ts/lib/Option";
-import { taskEither } from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import {
   aFiscalCode,
   legacyProfileServicePreferencesSettings,
@@ -34,13 +34,13 @@ describe("GetServicePreferences", () => {
   it("should return existing service preference for user", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(some(aRetrievedProfileInValidState));
+        return TE.of(some(aRetrievedProfileInValidState));
       })
     };
 
     const servicePreferenceModelMock = {
       find: jest.fn(_ => {
-        return taskEither.of(some(aRetrievedServicePreference));
+        return TE.of(some(aRetrievedServicePreference));
       })
     };
 
@@ -68,13 +68,13 @@ describe("GetServicePreferences", () => {
   it("should return default ENABLED preferences if no service preference is found for user and mode is AUTO", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(some(aRetrievedProfileInValidState));
+        return TE.of(some(aRetrievedProfileInValidState));
       })
     };
 
     const servicePreferenceModelMock = {
       find: jest.fn(_ => {
-        return taskEither.of(none);
+        return TE.of(none);
       })
     };
 
@@ -103,7 +103,7 @@ describe("GetServicePreferences", () => {
   it("should return default DISABLED preferences if no service preference is found for user and mode is MANUAL", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(
+        return TE.of(
           some({
             ...aRetrievedProfileInValidState,
             servicePreferencesSettings: manualProfileServicePreferencesSettings
@@ -114,7 +114,7 @@ describe("GetServicePreferences", () => {
 
     const servicePreferenceModelMock = {
       find: jest.fn(_ => {
-        return taskEither.of(none);
+        return TE.of(none);
       })
     };
 
@@ -147,13 +147,13 @@ describe("GetServicePreferences", () => {
   it("should return IResponseErrorNotFound if no profile is found in db", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(none);
+        return TE.of(none);
       })
     };
 
     const servicePreferenceModelMock = {
       find: jest.fn(_ => {
-        return taskEither.of(some(aRetrievedServicePreference));
+        return TE.of(some(aRetrievedServicePreference));
       })
     };
 
@@ -178,13 +178,13 @@ describe("GetServicePreferences", () => {
   it("should return IResponseErrorQuery if profile model raise an error", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return taskEither.fromEither(left({} as CosmosErrors));
+        return TE.fromEither(left({} as CosmosErrors));
       })
     };
 
     const servicePreferenceModelMock = {
       find: jest.fn(_ => {
-        return taskEither.fromEither(left({} as CosmosErrors));
+        return TE.fromEither(left({} as CosmosErrors));
       })
     };
 
@@ -209,7 +209,7 @@ describe("GetServicePreferences", () => {
   it("should return IResponseErrorConflict if profile is in LEGACY mode", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(
+        return TE.of(
           some({
             ...aRetrievedProfile,
             servicePreferencesSettings: legacyProfileServicePreferencesSettings
@@ -220,7 +220,7 @@ describe("GetServicePreferences", () => {
 
     const servicePreferenceModelMock = {
       find: jest.fn(_ => {
-        return taskEither.fromEither(left({} as CosmosErrors));
+        return TE.fromEither(left({} as CosmosErrors));
       })
     };
 
@@ -245,13 +245,13 @@ describe("GetServicePreferences", () => {
   it("should return IResponseErrorQuery if service preference model raise an error", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(some(aRetrievedProfileInValidState));
+        return TE.of(some(aRetrievedProfileInValidState));
       })
     };
 
     const servicePreferenceModelMock = {
       find: jest.fn(_ => {
-        return taskEither.fromEither(left({} as CosmosErrors));
+        return TE.fromEither(left({} as CosmosErrors));
       })
     };
 
