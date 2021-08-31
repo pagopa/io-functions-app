@@ -9,7 +9,7 @@ import {
   UserDataProcessingModel
 } from "@pagopa/io-functions-commons/dist/src/models/user_data_processing";
 import { none, some } from "fp-ts/lib/Option";
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aFiscalCode,
@@ -32,7 +32,7 @@ const withChoice = (
 ): RetrievedUserDataProcessing => ({ ...r, choice: c });
 
 const mockFindLastVersionByModelId = jest.fn(() =>
-  taskEither.of(
+  TE.of(
     some(
       withChoice(
         UserDataProcessingChoiceEnum.DELETE,
@@ -45,7 +45,7 @@ const mockFindLastVersionByModelId = jest.fn(() =>
   )
 );
 const mockUpdate = jest.fn(() =>
-  taskEither.of(
+  TE.of<string, RetrievedUserDataProcessing>(
     withStatus(
       UserDataProcessingStatusEnum.ABORTED,
       aRetrievedUserDataProcessing
@@ -71,7 +71,7 @@ describe("AbortUserDataProcessingHandler", () => {
     "should accept an abortion on $choice requests when previous status is $previousStatus",
     async ({ previousStatus, choice }) => {
       mockFindLastVersionByModelId.mockImplementationOnce(() =>
-        taskEither.of(
+        TE.of(
           some(
             withChoice(
               choice,
@@ -108,9 +108,7 @@ describe("AbortUserDataProcessingHandler", () => {
     "should return conflict error on $choice requests when the entity is in status $previousStatus",
     async ({ choice, previousStatus }) => {
       mockFindLastVersionByModelId.mockImplementationOnce(() =>
-        taskEither.of(
-          some(withStatus(previousStatus, aRetrievedUserDataProcessing))
-        )
+        TE.of(some(withStatus(previousStatus, aRetrievedUserDataProcessing)))
       );
 
       const upsertUserDataProcessingHandler = AbortUserDataProcessingHandler(
@@ -129,7 +127,7 @@ describe("AbortUserDataProcessingHandler", () => {
   );
 
   it("should return error if the update fails", async () => {
-    mockUpdate.mockImplementationOnce(() => fromLeft("any cosmos error"));
+    mockUpdate.mockImplementationOnce(() => TE.left("any cosmos error"));
 
     const upsertUserDataProcessingHandler = AbortUserDataProcessingHandler(
       userDataProcessingModelMock
@@ -146,9 +144,7 @@ describe("AbortUserDataProcessingHandler", () => {
   });
 
   it("should return not found if there is not a request already", async () => {
-    mockFindLastVersionByModelId.mockImplementationOnce(() =>
-      taskEither.of(none)
-    );
+    mockFindLastVersionByModelId.mockImplementationOnce(() => TE.of(none));
 
     const upsertUserDataProcessingHandler = AbortUserDataProcessingHandler(
       userDataProcessingModelMock
