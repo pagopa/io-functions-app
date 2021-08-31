@@ -5,7 +5,7 @@ import * as lolex from "lolex";
 import * as df from "durable-functions";
 
 import { none, some } from "fp-ts/lib/Option";
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aClosedRetrievedUserDataProcessing,
@@ -31,8 +31,8 @@ afterEach(() => {
 describe("UpsertUserDataProcessingHandler", () => {
   it("should return a query error when an error occurs creating the new User data processing", async () => {
     const userDataProcessingModelMock = {
-      findLastVersionByModelId: jest.fn(() => taskEither.of(none)),
-      upsert: jest.fn(() => fromLeft({}))
+      findLastVersionByModelId: jest.fn(() => TE.of(none)),
+      upsert: jest.fn(() => TE.left({}))
     };
 
     const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
@@ -51,7 +51,7 @@ describe("UpsertUserDataProcessingHandler", () => {
   it("should return a conflict error when a new request is upserted and it was already PENDING", async () => {
     const userDataProcessingModelMock = {
       findLastVersionByModelId: jest.fn(() =>
-        taskEither.of(some(aRetrievedUserDataProcessing))
+        TE.of(some(aRetrievedUserDataProcessing))
       )
     };
 
@@ -71,7 +71,7 @@ describe("UpsertUserDataProcessingHandler", () => {
   it("should return a conflict error when a new request is upserted and it was already WIP", async () => {
     const userDataProcessingModelMock = {
       findLastVersionByModelId: jest.fn(() =>
-        taskEither.of(some(aWipRetrievedUserDataProcessing))
+        TE.of(some(aWipRetrievedUserDataProcessing))
       )
     };
 
@@ -91,9 +91,9 @@ describe("UpsertUserDataProcessingHandler", () => {
   it("should return the upserted user data processing in case the request was CLOSED", async () => {
     const userDataProcessingModelMock = {
       findLastVersionByModelId: jest.fn(() =>
-        taskEither.of(some(aClosedRetrievedUserDataProcessing))
+        TE.of(some(aClosedRetrievedUserDataProcessing))
       ),
-      upsert: jest.fn(() => taskEither.of(aRetrievedUserDataProcessing))
+      upsert: jest.fn(() => TE.of(aRetrievedUserDataProcessing))
     };
     const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
       userDataProcessingModelMock as any
@@ -113,8 +113,8 @@ describe("UpsertUserDataProcessingHandler", () => {
 
   it("should return the upserted user data processing in case there was no preceeding request", async () => {
     const userDataProcessingModelMock = {
-      findLastVersionByModelId: jest.fn(() => taskEither.of(none)),
-      upsert: jest.fn(() => taskEither.of(aRetrievedUserDataProcessing))
+      findLastVersionByModelId: jest.fn(() => TE.of(none)),
+      upsert: jest.fn(() => TE.of(aRetrievedUserDataProcessing))
     };
     const upsertUserDataProcessingHandler = UpsertUserDataProcessingHandler(
       userDataProcessingModelMock as any
