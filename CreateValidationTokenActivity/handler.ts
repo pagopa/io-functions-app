@@ -14,7 +14,7 @@
 
 import * as t from "io-ts";
 
-import { isLeft } from "fp-ts/lib/Either";
+import * as E from "fp-ts/lib/Either";
 
 import { Context } from "@azure/functions";
 import { TableService } from "azure-storage";
@@ -68,10 +68,10 @@ export const getCreateValidationTokenActivityHandler = (
 
   const errorOrCreateValidationTokenActivityInput = ActivityInput.decode(input);
 
-  if (isLeft(errorOrCreateValidationTokenActivityInput)) {
+  if (E.isLeft(errorOrCreateValidationTokenActivityInput)) {
     context.log.error(
       `${logPrefix}|Error decoding input|ERROR=${readableReport(
-        errorOrCreateValidationTokenActivityInput.value
+        errorOrCreateValidationTokenActivityInput.left
       )}`
     );
     return ActivityResultFailure.encode({
@@ -81,7 +81,7 @@ export const getCreateValidationTokenActivityHandler = (
   }
 
   const createValidationTokenActivityInput =
-    errorOrCreateValidationTokenActivityInput.value;
+    errorOrCreateValidationTokenActivityInput.right;
 
   // Log the input
   context.log.verbose(
@@ -110,16 +110,16 @@ export const getCreateValidationTokenActivityHandler = (
     validationTokenEntity
   );
 
-  if (isLeft(errorOrCreatedValidationTokenEntity)) {
+  if (E.isLeft(errorOrCreatedValidationTokenEntity)) {
     const error = Error(
-      `${logPrefix}|Error creating new validation token|ERROR=${errorOrCreatedValidationTokenEntity.value}`
+      `${logPrefix}|Error creating new validation token|ERROR=${errorOrCreatedValidationTokenEntity.left}`
     );
     context.log.error(error.message);
     throw error;
   }
 
   const createdValidationTokenEntity =
-    errorOrCreatedValidationTokenEntity.value;
+    errorOrCreatedValidationTokenEntity.right;
 
   context.log.verbose(
     `${logPrefix}|Validation token created|ENTITY=${JSON.stringify(
