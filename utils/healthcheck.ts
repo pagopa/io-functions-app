@@ -77,13 +77,9 @@ export const checkAzureCosmosDbHealth = (
   dbKey?: string
 ): HealthCheck<"AzureCosmosDB", true> =>
   pipe(
-    TE.tryCatch(() => {
-      try {
-        const client = buildCosmosClient(dbUri, dbKey);
-        return client.getDatabaseAccount();
-      } catch (e) {
-        return Promise.reject(e);
-      }
+    TE.tryCatch(async () => {
+      const client = buildCosmosClient(dbUri, dbKey);
+      return client.getDatabaseAccount();
     }, toHealthProblems("AzureCosmosDB")),
     TE.map(_ => true)
   );
