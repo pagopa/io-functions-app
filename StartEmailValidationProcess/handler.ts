@@ -137,8 +137,7 @@ export function StartEmailValidationProcessHandler(
       ),
       TE.bimap(
         e => ResponseErrorInternal(String(e)),
-        // tslint:disable-next-line: no-useless-cast
-        () => ResponseSuccessAccepted() as IResponseSuccessAccepted
+        () => ResponseSuccessAccepted("", undefined)
       ),
       TE.toUnion
     )();

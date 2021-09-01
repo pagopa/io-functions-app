@@ -127,8 +127,7 @@ export function AbortUserDataProcessingHandler(
           )
         )
       ),
-      // tslint:disable-next-line: no-useless-cast
-      TE.map(__ => ResponseSuccessAccepted() as IResponseSuccessAccepted),
+      TE.map(__ => ResponseSuccessAccepted("", undefined)),
       TE.toUnion
     )();
   };
