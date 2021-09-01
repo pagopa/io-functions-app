@@ -15,8 +15,6 @@ import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { sequenceS } from "fp-ts/lib/Apply";
 
-import { curry2 } from "fp-ts-std/Function";
-
 /**
  * Payload of the stored blob item
  * (one for each SPID request or response).
@@ -49,7 +47,9 @@ export const encryptAndStore = async (
   spidMsgItem: SpidMsgItem,
   spidLogsPublicKey: NonEmptyString
 ): Promise<void | IOutputBinding> => {
-  const encrypt = curry2(toEncryptedPayload)(spidLogsPublicKey);
+  const encrypt = (plainText: string) =>
+    toEncryptedPayload(spidLogsPublicKey, plainText);
+
   return pipe(
     sequenceS(E.Applicative)({
       encryptedRequestPayload: encrypt(spidMsgItem.requestPayload),
