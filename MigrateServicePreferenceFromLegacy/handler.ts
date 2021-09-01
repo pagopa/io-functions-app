@@ -94,7 +94,6 @@ export const MigrateServicePreferenceFromLegacy = (
     MigrateServicesPreferencesQueueMessage.decode(input),
     e.mapLeft(errorsToError),
     te.fromEither,
-    x => x,
     // trace event
     te.map(_ => {
       tracker.profile.traceMigratingServicePreferences(

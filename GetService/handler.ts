@@ -109,8 +109,7 @@ export function GetServiceHandler(
               service => ResponseSuccessJson(retrievedServiceToPublic(service))
             )
           )
-      ),
-      x => x
+      )
     );
 }
 
