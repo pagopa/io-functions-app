@@ -25,6 +25,7 @@ import { getBlobAsObject } from "@pagopa/io-functions-commons/dist/src/utils/azu
 import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 
 import { PaginatedServiceTupleCollection } from "@pagopa/io-functions-commons/dist/generated/definitions/PaginatedServiceTupleCollection";
+import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 import { pipe } from "fp-ts/lib/function";
 
@@ -43,7 +44,7 @@ export function GetVisibleServicesHandler(
 ): IGetVisibleServicesHandler {
   return async () => {
     const errorOrMaybeVisibleServicesJson = await getBlobAsObject(
-      t.record(t.string, VisibleService),
+      t.record(ServiceId, VisibleService),
       blobService,
       VISIBLE_SERVICE_CONTAINER,
       VISIBLE_SERVICE_BLOB_ID
