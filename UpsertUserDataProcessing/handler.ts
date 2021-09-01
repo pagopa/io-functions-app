@@ -114,7 +114,7 @@ export function UpsertUserDataProcessingHandler(
             }),
             TE.fromEither,
             TE.mapLeft(CosmosDecodingError),
-            TE.chain(userDataProcessingModel.upsert)
+            TE.chain(_ => userDataProcessingModel.upsert(_))
           )();
 
           if (E.isLeft(errorOrUpsertedUserDataProcessing)) {
