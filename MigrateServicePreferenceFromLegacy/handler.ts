@@ -116,6 +116,7 @@ export const MigrateServicePreferenceFromLegacy = (
       const tasks = blockedsToServicesPreferences(
         migrateInput.oldProfile.blockedInboxOrChannels,
         migrateInput.newProfile.fiscalCode,
+        // tslint:disable-next-line: no-useless-cast
         migrateInput.newProfile.servicePreferencesSettings
           .version as NonNegativeInteger // cast required: ts do not identify filterOrElse as a guard
       ).map(preference =>
