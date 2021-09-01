@@ -57,15 +57,12 @@ export function GetVisibleServicesHandler(
           ),
         maybeVisibleServicesJson => {
           const servicesTuples = pipe(
-            toServicesTuple(
-              new Map<string, VisibleService>(
-                pipe(
-                  maybeVisibleServicesJson,
-                  O.map(Object.entries),
-                  O.getOrElse(() => Object.entries({}))
-                )
-              )
-            ),
+            maybeVisibleServicesJson,
+            // tslint:disable-next-line: no-inferred-empty-object-type
+            O.getOrElse(() => ({})),
+            Object.entries,
+            _ => new Map<string, VisibleService>(_),
+            toServicesTuple,
             arr =>
               onlyNationalService
                 ? arr.filter(_ => _.scope === ServiceScopeEnum.NATIONAL)
