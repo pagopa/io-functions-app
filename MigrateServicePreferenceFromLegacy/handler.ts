@@ -11,12 +11,15 @@ import {
   CosmosErrors
 } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
-import * as a from "fp-ts/lib/Array";
-import * as e from "fp-ts/lib/Either";
+
+import * as A from "fp-ts/lib/Array";
+import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
-import * as o from "fp-ts/lib/Option";
-import * as te from "fp-ts/lib/TaskEither";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
+
 import * as t from "io-ts";
+
 import { FiscalCode } from "../generated/backend/FiscalCode";
 import { ServiceId } from "../generated/backend/ServiceId";
 import { errorsToError } from "../utils/conversions";
@@ -66,8 +69,8 @@ export const blockedsToServicesPreferences = (
   version: NonNegativeInteger
 ) =>
   pipe(
-    o.fromNullable(blocked),
-    o.map(b =>
+    O.fromNullable(blocked),
+    O.map(b =>
       Object.entries(b)
         // tslint:disable-next-line: readonly-array
         .filter((_): _ is [
@@ -83,7 +86,7 @@ export const blockedsToServicesPreferences = (
           )
         )
     ),
-    o.getOrElse(() => [])
+    O.getOrElse(() => [])
   );
 
 export const MigrateServicePreferenceFromLegacy = (
@@ -92,10 +95,10 @@ export const MigrateServicePreferenceFromLegacy = (
 ) => async (context: Context, input: unknown) =>
   pipe(
     MigrateServicesPreferencesQueueMessage.decode(input),
-    e.mapLeft(errorsToError),
-    te.fromEither,
+    E.mapLeft(errorsToError),
+    TE.fromEither,
     // trace event
-    te.map(_ => {
+    TE.map(_ => {
       tracker.profile.traceMigratingServicePreferences(
         _.oldProfile,
         _.newProfile,
@@ -103,7 +106,7 @@ export const MigrateServicePreferenceFromLegacy = (
       );
       return _;
     }),
-    te.filterOrElse(
+    TE.filterOrElse(
       migrateInput =>
         NonNegativeInteger.is(
           migrateInput.newProfile.servicePreferencesSettings.version
@@ -111,7 +114,7 @@ export const MigrateServicePreferenceFromLegacy = (
       () =>
         new Error("Can not migrate to negative services preferences version.")
     ),
-    te.chain(migrateInput => {
+    TE.chain(migrateInput => {
       const tasks = blockedsToServicesPreferences(
         migrateInput.oldProfile.blockedInboxOrChannels,
         migrateInput.newProfile.fiscalCode,
@@ -121,25 +124,25 @@ export const MigrateServicePreferenceFromLegacy = (
       ).map(preference =>
         pipe(
           servicePreferenceModel.create(preference),
-          te.fold(
+          TE.fold(
             cosmosError =>
               isCosmosError(cosmosError) &&
               cosmosError.error.code === CONFLICT_CODE
-                ? te.of<Error, boolean>(false)
-                : te.left(
+                ? TE.of<Error, boolean>(false)
+                : TE.left(
                     new Error(
                       `Can not create the service preferences: ${JSON.stringify(
                         cosmosError
                       )}`
                     )
                   ),
-            _ => te.of<Error, boolean>(true)
+            _ => TE.of<Error, boolean>(true)
           )
         )
       );
       return pipe(
-        a.array.sequence(te.ApplicativeSeq)(tasks),
-        te.map(_ => {
+        A.array.sequence(TE.ApplicativeSeq)(tasks),
+        TE.map(_ => {
           tracker.profile.traceMigratingServicePreferences(
             migrateInput.oldProfile,
             migrateInput.newProfile,
@@ -149,7 +152,7 @@ export const MigrateServicePreferenceFromLegacy = (
         })
       );
     }),
-    te.getOrElse(error => {
+    TE.getOrElse(error => {
       context.log.error(`${LOG_PREFIX}|ERROR|${error}`);
       throw error;
     })

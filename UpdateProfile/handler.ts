@@ -3,9 +3,10 @@ import * as express from "express";
 import { Context } from "@azure/functions";
 import * as df from "durable-functions";
 
-import { isLeft, toError } from "fp-ts/lib/Either";
-import { fromNullable, isNone } from "fp-ts/lib/Option";
-import * as te from "fp-ts/lib/TaskEither";
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
 
 import {
   IResponseErrorConflict,
@@ -46,9 +47,6 @@ import {
   retrievedProfileToExtendedProfile
 } from "../utils/profiles";
 
-import { pipe } from "fp-ts/lib/function";
-import * as O from "fp-ts/lib/Option";
-import * as TE from "fp-ts/lib/TaskEither";
 import { toHash } from "../utils/crypto";
 import { createTracker } from "../utils/tracking";
 
@@ -72,8 +70,8 @@ const migratePreferences = (
   queueClient: QueueClient,
   oldProfile: RetrievedProfile,
   newProfile: RetrievedProfile
-): te.TaskEither<Error, QueueSendMessageResponse> =>
-  te.tryCatch(
+): TE.TaskEither<Error, QueueSendMessageResponse> =>
+  TE.tryCatch(
     () =>
       queueClient
         // Default message TTL is 7 days @ref https://docs.microsoft.com/it-it/azure/storage/queues/storage-nodejs-how-to-use-queues?tabs=javascript#queue-service-concepts
@@ -87,7 +85,7 @@ const migratePreferences = (
             )
           ).toString("base64")
         ),
-    toError
+    E.toError
   );
 
 // tslint:disable-next-line: cognitive-complexity
@@ -103,7 +101,7 @@ export function UpdateProfileHandler(
       [fiscalCode]
     )();
 
-    if (isLeft(errorOrMaybeExistingProfile)) {
+    if (E.isLeft(errorOrMaybeExistingProfile)) {
       return ResponseErrorQuery(
         "Error trying to retrieve existing profile",
         errorOrMaybeExistingProfile.left
@@ -111,7 +109,7 @@ export function UpdateProfileHandler(
     }
 
     const maybeExistingProfile = errorOrMaybeExistingProfile.right;
-    if (isNone(maybeExistingProfile)) {
+    if (O.isNone(maybeExistingProfile)) {
       return ResponseErrorNotFound(
         "Error",
         "Could not find a profile with the provided fiscalcode"
@@ -137,7 +135,7 @@ export function UpdateProfileHandler(
 
     // Get servicePreferencesSettings mode from payload or default to LEGACY
     const requestedServicePreferencesSettingsMode = pipe(
-      fromNullable(profilePayload.service_preferences_settings),
+      O.fromNullable(profilePayload.service_preferences_settings),
       O.map(_ => _.mode),
       O.getOrElse(() => ServicesPreferencesModeEnum.LEGACY)
     );
@@ -200,7 +198,7 @@ export function UpdateProfileHandler(
       blockedInboxOrChannels: overrideBlockedInboxOrChannels
     })();
 
-    if (isLeft(errorOrMaybeUpdatedProfile)) {
+    if (E.isLeft(errorOrMaybeUpdatedProfile)) {
       context.log.error(
         `${logPrefix}|ERROR=${errorOrMaybeUpdatedProfile.left.kind}`
       );
