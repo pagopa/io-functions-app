@@ -4,9 +4,13 @@ import { IResponseErrorQuery } from "@pagopa/io-functions-commons/dist/src/utils
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { TableService } from "azure-storage";
-import { toError } from "fp-ts/lib/Either";
-import { taskEither, TaskEither, tryCatch } from "fp-ts/lib/TaskEither";
+
 import * as t from "io-ts";
+
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/lib/TaskEither";
+
 import { updateSubscriptionFeed } from "../UpdateSubscriptionsFeedActivity/handler";
 import { createTracker } from "../utils/tracking";
 
@@ -30,32 +34,41 @@ export const updateSubscriptionFeedTask = (
   input: UpdateSubscriptionFeedInput,
   logPrefix: string,
   tracker: ReturnType<typeof createTracker>
-): TaskEither<IResponseErrorQuery, boolean> =>
-  tryCatch(
-    () =>
-      updateSubscriptionFeed(
-        context,
-        input,
-        tableService,
-        subscriptionFeedTable
-      ),
-    toError
-  ).foldTaskEither(
-    err => {
-      context.log.verbose(
-        `${logPrefix}| Error while trying to update subscriptionFeed|ERROR=${err.message}`
-      );
-      tracker.subscriptionFeed.trackSubscriptionFeedFailure(input, "EXCEPTION");
-      return taskEither.of(false);
-    },
-    result => {
-      const isSuccess = result === "SUCCESS";
-      if (!isSuccess) {
+): TE.TaskEither<IResponseErrorQuery, boolean> =>
+  pipe(
+    TE.tryCatch(
+      () =>
+        updateSubscriptionFeed(
+          context,
+          input,
+          tableService,
+          subscriptionFeedTable
+        ),
+      E.toError
+    ),
+    TE.fold(
+      err => {
         context.log.verbose(
-          `${logPrefix}| Error while trying to update subscriptionFeed|ERROR=${"FAILURE"}`
+          `${logPrefix}| Error while trying to update subscriptionFeed|ERROR=${err.message}`
         );
-        tracker.subscriptionFeed.trackSubscriptionFeedFailure(input, "FAILURE");
+        tracker.subscriptionFeed.trackSubscriptionFeedFailure(
+          input,
+          "EXCEPTION"
+        );
+        return TE.of(false);
+      },
+      result => {
+        const isSuccess = result === "SUCCESS";
+        if (!isSuccess) {
+          context.log.verbose(
+            `${logPrefix}| Error while trying to update subscriptionFeed|ERROR=${"FAILURE"}`
+          );
+          tracker.subscriptionFeed.trackSubscriptionFeedFailure(
+            input,
+            "FAILURE"
+          );
+        }
+        return TE.of(isSuccess);
       }
-      return taskEither.of(isSuccess);
-    }
+    )
   );

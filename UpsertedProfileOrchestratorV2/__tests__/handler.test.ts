@@ -25,6 +25,10 @@ import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/gen
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { consumeGenerator } from "../../utils/durable";
 
+import * as O from "fp-ts/lib/Option";
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
+
 const someRetryOptions = new df.RetryOptions(5000, 10);
 // tslint:disable-next-line: no-object-mutation
 someRetryOptions.backoffCoefficient = 1.5;
@@ -32,17 +36,18 @@ someRetryOptions.backoffCoefficient = 1.5;
 // tslint:disable-next-line: no-big-function
 describe("UpsertedProfileOrchestratorV2", () => {
   it("should not start the EmailValidationProcessOrchestrator if the email is not changed", () => {
-    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.decode(
-      {
+    const upsertedProfileOrchestratorInput = pipe(
+      UpsertedProfileOrchestratorInput.decode({
         newProfile: { ...aRetrievedProfile, isWebhookEnabled: true },
         oldProfile: aRetrievedProfile,
         updatedAt: new Date()
-      }
-    ).getOrElseL(errs =>
-      fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
-          errs
-        )}`
+      }),
+      E.getOrElseW(errs =>
+        fail(
+          `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+            errs
+          )}`
+        )
       )
     );
 
@@ -64,8 +69,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
   });
 
   it("should start the activities with the right inputs", async () => {
-    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.decode(
-      {
+    const upsertedProfileOrchestratorInput = pipe(
+      UpsertedProfileOrchestratorInput.decode({
         newProfile: {
           ...aRetrievedProfile,
           email: aEmailChanged, // Email changed to start the EmailValidationProcessOrchestrator
@@ -73,24 +78,26 @@ describe("UpsertedProfileOrchestratorV2", () => {
         },
         oldProfile: aRetrievedProfile,
         updatedAt: new Date()
-      }
-    ).getOrElseL(errs =>
-      fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
-          errs
-        )}`
+      }),
+      E.getOrElseW(errs =>
+        fail(
+          `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+            errs
+          )}`
+        )
       )
     );
 
-    const emailValidationProcessOrchestratorResult = EmailValidationProcessOrchestratorResult.decode(
-      {
+    const emailValidationProcessOrchestratorResult = pipe(
+      EmailValidationProcessOrchestratorResult.decode({
         kind: "SUCCESS"
-      }
-    ).getOrElseL(errs =>
-      fail(
-        `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
-          errs
-        )}`
+      }),
+      E.getOrElseW(errs =>
+        fail(
+          `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
+            errs
+          )}`
+        )
       )
     );
 
@@ -154,8 +161,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
 
   it("should enqueue a message if the notifyOn queue name is provided when an inbox become enabled", async () => {
     const expectedQueueName = "queue_name" as NonEmptyString;
-    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.decode(
-      {
+    const upsertedProfileOrchestratorInput = pipe(
+      UpsertedProfileOrchestratorInput.decode({
         newProfile: {
           ...aRetrievedProfile,
           email: aEmailChanged, // Email changed to start the EmailValidationProcessOrchestrator
@@ -163,24 +170,26 @@ describe("UpsertedProfileOrchestratorV2", () => {
         },
         oldProfile: aRetrievedProfile,
         updatedAt: new Date()
-      }
-    ).getOrElseL(errs =>
-      fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
-          errs
-        )}`
+      }),
+      E.getOrElseW(errs =>
+        fail(
+          `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+            errs
+          )}`
+        )
       )
     );
 
-    const emailValidationProcessOrchestratorResult = EmailValidationProcessOrchestratorResult.decode(
-      {
+    const emailValidationProcessOrchestratorResult = pipe(
+      EmailValidationProcessOrchestratorResult.decode({
         kind: "SUCCESS"
-      }
-    ).getOrElseL(errs =>
-      fail(
-        `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
-          errs
-        )}`
+      }),
+      E.getOrElseW(errs =>
+        fail(
+          `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
+            errs
+          )}`
+        )
       )
     );
 
@@ -203,7 +212,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      notifyOn: fromArray([expectedQueueName]).getOrElseL(undefined),
+      notifyOn: pipe(fromArray([expectedQueueName]), O.getOrElse(undefined)),
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
@@ -257,8 +266,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
 
   it("should not call UpdateSubscriptionFeedActivity if oldProfile and newProfile have the same servicePreferenceMode", async () => {
     const expectedQueueName = "queue_name" as NonEmptyString;
-    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.decode(
-      {
+    const upsertedProfileOrchestratorInput = pipe(
+      UpsertedProfileOrchestratorInput.decode({
         newProfile: {
           ...aRetrievedProfile,
           email: aEmailChanged, // Email changed to start the EmailValidationProcessOrchestrator
@@ -270,24 +279,26 @@ describe("UpsertedProfileOrchestratorV2", () => {
           servicePreferencesSettings: autoProfileServicePreferencesSettings
         },
         updatedAt: new Date()
-      }
-    ).getOrElseL(errs =>
-      fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
-          errs
-        )}`
+      }),
+      E.getOrElseW(errs =>
+        fail(
+          `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+            errs
+          )}`
+        )
       )
     );
 
-    const emailValidationProcessOrchestratorResult = EmailValidationProcessOrchestratorResult.decode(
-      {
+    const emailValidationProcessOrchestratorResult = pipe(
+      EmailValidationProcessOrchestratorResult.decode({
         kind: "SUCCESS"
-      }
-    ).getOrElseL(errs =>
-      fail(
-        `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
-          errs
-        )}`
+      }),
+      E.getOrElseW(errs =>
+        fail(
+          `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
+            errs
+          )}`
+        )
       )
     );
 
@@ -310,7 +321,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      notifyOn: fromArray([expectedQueueName]).getOrElseL(undefined),
+      notifyOn: pipe(fromArray([expectedQueueName]), O.getOrElse(undefined)),
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
@@ -369,8 +380,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
 
   it("should not call UpdateSubscriptionFeedActivity switching from LEGACY to AUTO", async () => {
     const expectedQueueName = "queue_name" as NonEmptyString;
-    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.decode(
-      {
+    const upsertedProfileOrchestratorInput = pipe(
+      UpsertedProfileOrchestratorInput.decode({
         newProfile: {
           ...aRetrievedProfile,
           email: aEmailChanged, // Email changed to start the EmailValidationProcessOrchestrator
@@ -381,24 +392,26 @@ describe("UpsertedProfileOrchestratorV2", () => {
           ...aRetrievedProfile
         },
         updatedAt: new Date()
-      }
-    ).getOrElseL(errs =>
-      fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
-          errs
-        )}`
+      }),
+      E.getOrElseW(errs =>
+        fail(
+          `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+            errs
+          )}`
+        )
       )
     );
 
-    const emailValidationProcessOrchestratorResult = EmailValidationProcessOrchestratorResult.decode(
-      {
+    const emailValidationProcessOrchestratorResult = pipe(
+      EmailValidationProcessOrchestratorResult.decode({
         kind: "SUCCESS"
-      }
-    ).getOrElseL(errs =>
-      fail(
-        `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
-          errs
-        )}`
+      }),
+      E.getOrElseW(errs =>
+        fail(
+          `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
+            errs
+          )}`
+        )
       )
     );
 
@@ -421,7 +434,10 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      notifyOn: fromArray([expectedQueueName]).getOrElseL(undefined),
+      notifyOn: pipe(
+        fromArray([expectedQueueName]),
+        O.getOrElse(() => undefined)
+      ),
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
@@ -480,8 +496,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
 
   it("should call UpdateSubscriptionFeedActivity to unsubscribe the entire profile switching from LEGACY to MANUAL", async () => {
     const expectedQueueName = "queue_name" as NonEmptyString;
-    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.decode(
-      {
+    const upsertedProfileOrchestratorInput = pipe(
+      UpsertedProfileOrchestratorInput.decode({
         newProfile: {
           ...aRetrievedProfile,
           email: aEmailChanged, // Email changed to start the EmailValidationProcessOrchestrator
@@ -492,24 +508,26 @@ describe("UpsertedProfileOrchestratorV2", () => {
           ...aRetrievedProfile
         },
         updatedAt: new Date()
-      }
-    ).getOrElseL(errs =>
-      fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
-          errs
-        )}`
+      }),
+      E.getOrElseW(errs =>
+        fail(
+          `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+            errs
+          )}`
+        )
       )
     );
 
-    const emailValidationProcessOrchestratorResult = EmailValidationProcessOrchestratorResult.decode(
-      {
+    const emailValidationProcessOrchestratorResult = pipe(
+      EmailValidationProcessOrchestratorResult.decode({
         kind: "SUCCESS"
-      }
-    ).getOrElseL(errs =>
-      fail(
-        `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
-          errs
-        )}`
+      }),
+      E.getOrElseW(errs =>
+        fail(
+          `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
+            errs
+          )}`
+        )
       )
     );
 
@@ -532,7 +550,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      notifyOn: fromArray([expectedQueueName]).getOrElseL(undefined),
+      notifyOn: pipe(fromArray([expectedQueueName]), O.getOrElse(undefined)),
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
@@ -597,8 +615,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
 
   it("should call UpdateSubscriptionFeedActivity to unsubscribe the entire profile switching from AUTO to MANUAL", async () => {
     const expectedQueueName = "queue_name" as NonEmptyString;
-    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.decode(
-      {
+    const upsertedProfileOrchestratorInput = pipe(
+      UpsertedProfileOrchestratorInput.decode({
         newProfile: {
           ...aRetrievedProfile,
           email: aEmailChanged, // Email changed to start the EmailValidationProcessOrchestrator
@@ -610,24 +628,26 @@ describe("UpsertedProfileOrchestratorV2", () => {
           servicePreferencesSettings: autoProfileServicePreferencesSettings
         },
         updatedAt: new Date()
-      }
-    ).getOrElseL(errs =>
-      fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
-          errs
-        )}`
+      }),
+      E.getOrElseW(errs =>
+        fail(
+          `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+            errs
+          )}`
+        )
       )
     );
 
-    const emailValidationProcessOrchestratorResult = EmailValidationProcessOrchestratorResult.decode(
-      {
+    const emailValidationProcessOrchestratorResult = pipe(
+      EmailValidationProcessOrchestratorResult.decode({
         kind: "SUCCESS"
-      }
-    ).getOrElseL(errs =>
-      fail(
-        `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
-          errs
-        )}`
+      }),
+      E.getOrElseW(errs =>
+        fail(
+          `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
+            errs
+          )}`
+        )
       )
     );
 
@@ -656,7 +676,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      notifyOn: fromArray([expectedQueueName]).getOrElseL(undefined),
+      notifyOn: pipe(fromArray([expectedQueueName]), O.getOrElse(undefined)),
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
@@ -743,8 +763,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
 
   it("should call UpdateSubscriptionFeedActivity to subscribe the entire profile switching from MANUAL to AUTO", async () => {
     const expectedQueueName = "queue_name" as NonEmptyString;
-    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.decode(
-      {
+    const upsertedProfileOrchestratorInput = pipe(
+      UpsertedProfileOrchestratorInput.decode({
         newProfile: {
           ...aRetrievedProfile,
           email: aEmailChanged, // Email changed to start the EmailValidationProcessOrchestrator
@@ -756,24 +776,26 @@ describe("UpsertedProfileOrchestratorV2", () => {
           servicePreferencesSettings: manualProfileServicePreferencesSettings
         },
         updatedAt: new Date()
-      }
-    ).getOrElseL(errs =>
-      fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
-          errs
-        )}`
+      }),
+      E.getOrElseW(errs =>
+        fail(
+          `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+            errs
+          )}`
+        )
       )
     );
 
-    const emailValidationProcessOrchestratorResult = EmailValidationProcessOrchestratorResult.decode(
-      {
+    const emailValidationProcessOrchestratorResult = pipe(
+      EmailValidationProcessOrchestratorResult.decode({
         kind: "SUCCESS"
-      }
-    ).getOrElseL(errs =>
-      fail(
-        `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
-          errs
-        )}`
+      }),
+      E.getOrElseW(errs =>
+        fail(
+          `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
+            errs
+          )}`
+        )
       )
     );
 
@@ -802,7 +824,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      notifyOn: fromArray([expectedQueueName]).getOrElseL(undefined),
+      notifyOn: pipe(fromArray([expectedQueueName]), O.getOrElse(undefined)),
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
@@ -887,8 +909,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
 
   it("should call UpdateSubscriptionFeedActivity with the difference between blockedInboxOrchannels when servicePreferenceMode is LEGACY", async () => {
     const expectedQueueName = "queue_name" as NonEmptyString;
-    const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.decode(
-      {
+    const upsertedProfileOrchestratorInput = pipe(
+      UpsertedProfileOrchestratorInput.decode({
         newProfile: {
           ...aRetrievedProfile,
           blockedInboxOrChannels: {
@@ -905,24 +927,26 @@ describe("UpsertedProfileOrchestratorV2", () => {
           }
         },
         updatedAt: new Date()
-      }
-    ).getOrElseL(errs =>
-      fail(
-        `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
-          errs
-        )}`
+      }),
+      E.getOrElseW(errs =>
+        fail(
+          `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+            errs
+          )}`
+        )
       )
     );
 
-    const emailValidationProcessOrchestratorResult = EmailValidationProcessOrchestratorResult.decode(
-      {
+    const emailValidationProcessOrchestratorResult = pipe(
+      EmailValidationProcessOrchestratorResult.decode({
         kind: "SUCCESS"
-      }
-    ).getOrElseL(errs =>
-      fail(
-        `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
-          errs
-        )}`
+      }),
+      E.getOrElseW(errs =>
+        fail(
+          `Cannot decode EmailValidationProcessOrchestratorResult: ${readableReport(
+            errs
+          )}`
+        )
       )
     );
 
@@ -945,7 +969,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      notifyOn: fromArray([expectedQueueName]).getOrElseL(undefined),
+      notifyOn: pipe(fromArray([expectedQueueName]), O.getOrElse(undefined)),
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 

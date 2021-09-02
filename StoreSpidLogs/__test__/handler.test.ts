@@ -5,6 +5,7 @@ import { toPlainText } from "@pagopa/ts-commons/lib/encrypt";
 import { IPString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { format } from "date-fns";
+import { isRight } from "fp-ts/lib/Either";
 import { aFiscalCode } from "../../__mocks__/mocks";
 import { encryptAndStore, IOutputBinding } from "../handler";
 import { SpidMsgItem } from "../index";
@@ -106,10 +107,17 @@ describe("StoreSpidLogs", () => {
       aRSAPrivateKey,
       encryptedSpidBlobItem.encryptedResponsePayload
     );
-    expect(decryptedRequestPayload.value).toEqual(aSpidMsgItem.requestPayload);
-    expect(decryptedResponsePayload.value).toEqual(
-      aSpidMsgItem.responsePayload
-    );
+
+    if (isRight(decryptedRequestPayload) && isRight(decryptedResponsePayload)) {
+      expect(decryptedRequestPayload.right).toEqual(
+        aSpidMsgItem.requestPayload
+      );
+      expect(decryptedResponsePayload.right).toEqual(
+        aSpidMsgItem.responsePayload
+      );
+    } else {
+      expect(true).toBeFalsy();
+    }
   });
   it("should encrypt two different messages with the same Cipher instance and decrypt with another one", async () => {
     const mockedContext = {
@@ -136,10 +144,16 @@ describe("StoreSpidLogs", () => {
       aRSAPrivateKey,
       encryptedSpidBlobItem.encryptedResponsePayload
     );
-    expect(decryptedRequestPayload.value).toEqual(aSpidMsgItem.requestPayload);
-    expect(decryptedResponsePayload.value).toEqual(
-      aSpidMsgItem.responsePayload
-    );
+    if (isRight(decryptedRequestPayload) && isRight(decryptedResponsePayload)) {
+      expect(decryptedRequestPayload.right).toEqual(
+        aSpidMsgItem.requestPayload
+      );
+      expect(decryptedResponsePayload.right).toEqual(
+        aSpidMsgItem.responsePayload
+      );
+    } else {
+      expect(true).toBeFalsy();
+    }
 
     const anotherMockedContext = {
       bindings: {
@@ -166,11 +180,19 @@ describe("StoreSpidLogs", () => {
       aRSAPrivateKey,
       secondEncryptedSpidBlobItem.encryptedResponsePayload
     );
-    expect(secondDecryptedRequestPayload.value).toEqual(
-      anotherSpidMsgItem.requestPayload
-    );
-    expect(secondDecryptedResponsePayload.value).toEqual(
-      anotherSpidMsgItem.responsePayload
-    );
+
+    if (
+      isRight(secondDecryptedRequestPayload) &&
+      isRight(secondDecryptedResponsePayload)
+    ) {
+      expect(secondDecryptedRequestPayload.right).toEqual(
+        anotherSpidMsgItem.requestPayload
+      );
+      expect(secondDecryptedResponsePayload.right).toEqual(
+        anotherSpidMsgItem.responsePayload
+      );
+    } else {
+      expect(true).toBeFalsy();
+    }
   });
 });

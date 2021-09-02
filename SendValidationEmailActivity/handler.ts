@@ -1,6 +1,7 @@
 import * as t from "io-ts";
 
 import { isLeft } from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
 
 import * as HtmlToText from "html-to-text";
 import * as NodeMailer from "nodemailer";
@@ -16,6 +17,7 @@ import { EmailDefaults } from "./";
 import { getEmailHtmlFromTemplate } from "./template";
 
 import { sendMail } from "@pagopa/io-functions-commons/dist/src/mailer";
+import { pipe } from "fp-ts/lib/function";
 import { createTracker } from "../utils/tracking";
 
 // Activity input
@@ -55,7 +57,7 @@ export const getSendValidationEmailActivityHandler = (
   if (isLeft(errorOrActivityInput)) {
     context.log.error(
       `${logPrefix}|Error decoding input|ERROR=${readableReport(
-        errorOrActivityInput.value
+        errorOrActivityInput.left
       )}`
     );
     return ActivityResultFailure.encode({
@@ -64,7 +66,7 @@ export const getSendValidationEmailActivityHandler = (
     });
   }
 
-  const activityInput = errorOrActivityInput.value;
+  const activityInput = errorOrActivityInput.right;
   const { email, token } = activityInput;
 
   // Generate the email html from the template
@@ -79,14 +81,15 @@ export const getSendValidationEmailActivityHandler = (
   const emailText = HtmlToText.fromString(emailHtml, htmlToTextOptions);
 
   // Send email with the validation link
-  await sendMail(mailerTransporter, {
-    from,
-    html: emailHtml,
-    subject: title,
-    text: emailText,
-    to: email
-  })
-    .bimap(
+  await pipe(
+    sendMail(mailerTransporter, {
+      from,
+      html: emailHtml,
+      subject: title,
+      text: emailText,
+      to: email
+    }),
+    TE.bimap(
       e => {
         const error = Error(
           `${logPrefix}|Error sending validation email|ERROR=${e.message}`
@@ -105,7 +108,7 @@ export const getSendValidationEmailActivityHandler = (
         );
       }
     )
-    .run();
+  )();
 
   return ActivityResultSuccess.encode({
     kind: "SUCCESS"

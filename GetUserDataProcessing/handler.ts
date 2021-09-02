@@ -55,11 +55,11 @@ export function GetUserDataProcessingHandler(
   return async (context, fiscalCode, choice) => {
     const logPrefix = `GetUserDataProcessingHandler|FISCAL_CODE=${fiscalCode}`;
     const id = makeUserDataProcessingId(choice, fiscalCode);
-    const maybeResultOrError = await userDataProcessingModel
-      .findLastVersionByModelId([id, fiscalCode])
-      .run();
+    const maybeResultOrError = await userDataProcessingModel.findLastVersionByModelId(
+      [id, fiscalCode]
+    )();
     if (isLeft(maybeResultOrError)) {
-      const failure = maybeResultOrError.value;
+      const failure = maybeResultOrError.left;
 
       context.log.error(`${logPrefix}|ERROR=${failure.kind}`);
       if (
@@ -78,7 +78,7 @@ export function GetUserDataProcessingHandler(
       }
     }
 
-    const maybeUserDataProcessing = maybeResultOrError.value;
+    const maybeUserDataProcessing = maybeResultOrError.right;
     if (isSome(maybeUserDataProcessing)) {
       const userDataProc = maybeUserDataProcessing.value;
       return ResponseSuccessJson(toUserDataProcessingApi(userDataProc));

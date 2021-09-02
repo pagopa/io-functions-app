@@ -62,7 +62,7 @@ export const handler = function*(
   if (isLeft(errorOrOrchestratorInput)) {
     const error = Error(
       `${logPrefix}|Error decoding input|ERROR=${readableReport(
-        errorOrOrchestratorInput.value
+        errorOrOrchestratorInput.left
       )}`
     );
     context.log.error(error.message);
@@ -73,7 +73,7 @@ export const handler = function*(
     // We don't throw an error because we can't do a retry in this scenario
   }
 
-  const orchestratorInput = errorOrOrchestratorInput.value;
+  const orchestratorInput = errorOrOrchestratorInput.right;
   const { fiscalCode, email } = orchestratorInput;
 
   // Log the input
@@ -108,7 +108,7 @@ export const handler = function*(
     if (isLeft(errorOrCreateValidationTokenActivityResult)) {
       const error = Error(
         `${logPrefix}|Error decoding activity result|ERROR=${readableReport(
-          errorOrCreateValidationTokenActivityResult.value
+          errorOrCreateValidationTokenActivityResult.left
         )}`
       );
       context.log.error(error.message);
@@ -117,7 +117,7 @@ export const handler = function*(
     }
 
     const createValidationTokenActivityResult =
-      errorOrCreateValidationTokenActivityResult.value;
+      errorOrCreateValidationTokenActivityResult.right;
 
     if (createValidationTokenActivityResult.kind === "FAILURE") {
       const error = Error(
@@ -162,7 +162,7 @@ export const handler = function*(
     if (isLeft(errorOrSendValidationEmailActivityResult)) {
       const error = Error(
         `${logPrefix}|Error decoding activity result|ERROR=${readableReport(
-          errorOrSendValidationEmailActivityResult.value
+          errorOrSendValidationEmailActivityResult.left
         )}`
       );
       context.log.error(error.message);
@@ -171,7 +171,7 @@ export const handler = function*(
     }
 
     const sendValidationEmailActivityResult =
-      errorOrSendValidationEmailActivityResult.value;
+      errorOrSendValidationEmailActivityResult.right;
 
     if (sendValidationEmailActivityResult.kind === "FAILURE") {
       const error = Error(

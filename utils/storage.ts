@@ -14,21 +14,29 @@ export const insertTableEntity = (
 ) => <T>(
   entityDescriptor: T
 ): Promise<
-  ITuple2<Either<Error, T | TableService.EntityMetadata>, ServiceResponse>
+  ITuple2<
+    Either<Error, T | TableService.EntityMetadata>,
+    ServiceResponse | null
+  >
 > => {
   return new Promise(resolve =>
     tableService.insertEntity(
       table,
       entityDescriptor,
       (
-        error: Error,
+        error: Error | null,
         result: T | TableService.EntityMetadata,
-        response: ServiceResponse
+        response: ServiceResponse | null
       ) =>
         resolve(
-          response.isSuccessful
-            ? Tuple2(right(result), response)
-            : Tuple2(left(error), response)
+          // We need to check error first because response could be null
+          // @ref https://github.com/Azure/azure-storage-node/blob/v2.10.2/lib/common/services/storageserviceclient.js#L250
+          error || !response.isSuccessful
+            ? Tuple2(
+                left(error || new Error("Unsuccessful response from storage")),
+                response
+              )
+            : Tuple2(right(result), response)
         )
     )
   );
@@ -42,16 +50,21 @@ export const deleteTableEntity = (
   table: string
 ) => <T>(
   entityDescriptor: T
-): Promise<ITuple2<Option<Error>, ServiceResponse>> => {
+): Promise<ITuple2<Option<Error>, ServiceResponse | null>> => {
   return new Promise(resolve =>
     tableService.deleteEntity(
       table,
       entityDescriptor,
-      (error: Error, response: ServiceResponse) =>
+      (error: Error | null, response: ServiceResponse | null) =>
         resolve(
-          response.isSuccessful
-            ? Tuple2(none, response)
-            : Tuple2(some(error), response)
+          // We need to check error first because response could be null
+          // @ref https://github.com/Azure/azure-storage-node/blob/v2.10.2/lib/common/services/storageserviceclient.js#L250
+          error || !response.isSuccessful
+            ? Tuple2(
+                some(error || new Error("Unsuccessful response from storage")),
+                response
+              )
+            : Tuple2(none, response)
         )
     )
   );

@@ -14,7 +14,7 @@ import { TimeToLiveSeconds } from "@pagopa/io-functions-commons/dist/generated/d
 
 import { response as MockResponse } from "jest-mock-express";
 
-import { taskEither } from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetMessagesHandler } from "../handler";
 import { none } from "fp-ts/lib/Option";
@@ -61,7 +61,7 @@ describe("GetMessagesHandler", () => {
     };
 
     const mockMessageModel = {
-      findMessages: jest.fn(() => taskEither.of(mockIterator))
+      findMessages: jest.fn(() => TE.of(mockIterator))
     };
 
     const getMessagesHandler = GetMessagesHandler(mockMessageModel as any);
@@ -89,7 +89,7 @@ describe("GetMessagesHandler", () => {
     };
 
     const mockMessageModel = {
-      findMessages: jest.fn(() => taskEither.of(mockIterator))
+      findMessages: jest.fn(() => TE.of(mockIterator))
     };
 
     const getMessagesHandler = GetMessagesHandler(mockMessageModel as any);

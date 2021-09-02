@@ -1,8 +1,10 @@
 import { context } from "../../__mocks__/durable-functions";
 import { Context } from "@azure/functions";
 import { MigrateServicePreferenceFromLegacy } from "../handler";
-import * as e from "fp-ts/lib/Either";
-import * as te from "fp-ts/lib/TaskEither";
+
+import * as E from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
+
 import {
   makeServicesPreferencesDocumentId,
   NewServicePreference,
@@ -69,11 +71,11 @@ const toRetrivedServicePreference = (newDocument: NewServicePreference) => ({
 });
 
 const mockServicesPreferencesModelWithError = ({
-  create: jest.fn(() => te.fromLeft({}))
+  create: jest.fn(() => TE.left({}))
 } as unknown) as ServicesPreferencesModel;
 const mockServicesPreferencesModel = ({
   create: jest.fn((newDocument: NewServicePreference) =>
-    te.fromEither(e.right(toRetrivedServicePreference(newDocument)))
+    TE.fromEither(E.right(toRetrivedServicePreference(newDocument)))
   )
 } as unknown) as ServicesPreferencesModel;
 
@@ -160,8 +162,8 @@ describe("MigrateServicePreferenceFromLegacy", () => {
     };
     const mockServicesPreferencesModelWith409 = ({
       create: jest.fn((newDocument: NewServicePreference) =>
-        te.fromEither(
-          e.left(CosmosErrorResponse({ name: "", message: "", code: 409 }))
+        TE.fromEither(
+          E.left(CosmosErrorResponse({ name: "", message: "", code: 409 }))
         )
       )
     } as unknown) as ServicesPreferencesModel;
@@ -252,7 +254,7 @@ describe("MigrateServicePreferenceFromLegacy", () => {
 
     // We have 3 preference to migrate, but we want one to fail
     (mockServicesPreferencesModel.create as jest.Mock).mockImplementationOnce(
-      () => te.fromLeft({})
+      () => TE.left({})
     );
 
     const spiedTracker = ({

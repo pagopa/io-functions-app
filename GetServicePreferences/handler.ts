@@ -1,8 +1,7 @@
 import * as express from "express";
 
-import * as e from "fp-ts/lib/Either";
-import * as o from "fp-ts/lib/Option";
-import * as te from "fp-ts/lib/TaskEither";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
 
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
@@ -46,7 +45,7 @@ import {
 
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
-import { identity } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 
 type IGetServicePreferencesHandlerResult =
   | IResponseSuccessJson<ServicePreference>
@@ -71,16 +70,14 @@ type IGetServicePreferencesHandler = (
  * @returns
  */
 const getProfileOrErrorResponse = (
-  maybeProfile: o.Option<RetrievedProfile>
-): te.TaskEither<IResponseErrorNotFound, Profile> =>
-  te.fromEither(
-    e.fromOption(
-      ResponseErrorNotFound(
-        "Profile not found",
-        "The profile you requested was not found in the system."
-      )
-    )(maybeProfile)
-  );
+  maybeProfile: O.Option<RetrievedProfile>
+): TE.TaskEither<IResponseErrorNotFound, Profile> =>
+  TE.fromOption(() =>
+    ResponseErrorNotFound(
+      "Profile not found",
+      "The profile you requested was not found in the system."
+    )
+  )(maybeProfile);
 
 /**
  * Return a function that returns the service preference for the
@@ -98,34 +95,38 @@ export declare type getUserServicePreferencesT = (params: {
     | ServicesPreferencesModeEnum.MANUAL;
   readonly version: NonNegativeInteger;
   readonly fiscalCode: FiscalCode;
-}) => te.TaskEither<IResponseErrorQuery, ServicePreference>;
+}) => TE.TaskEither<IResponseErrorQuery, ServicePreference>;
 const getUserServicePreferencesOrDefault = (
   servicePreferencesModel: ServicesPreferencesModel
 ): getUserServicePreferencesT => ({ fiscalCode, serviceId, mode, version }) =>
-  servicePreferencesModel
-    .find([
+  pipe(
+    servicePreferencesModel.find([
       makeServicesPreferencesDocumentId(fiscalCode, serviceId, version),
       fiscalCode
-    ])
-    .mapLeft(failure =>
+    ]),
+    TE.mapLeft(failure =>
       ResponseErrorQuery(
         "Error while retrieving the user's service preferences",
         failure
       )
-    )
-    .map(maybeServicePref =>
-      maybeServicePref.foldL<ServicePreference>(
-        () => {
-          switch (mode) {
-            case ServicesPreferencesModeEnum.AUTO:
-              return toDefaultEnabledUserServicePreference(version);
-            case ServicesPreferencesModeEnum.MANUAL:
-              return toDefaultDisabledUserServicePreference(version);
-          }
-        },
-        pref => toUserServicePreferenceFromModel(pref)
+    ),
+    TE.map(maybeServicePref =>
+      pipe(
+        maybeServicePref,
+        O.fold(
+          () => {
+            switch (mode) {
+              case ServicesPreferencesModeEnum.AUTO:
+                return toDefaultEnabledUserServicePreference(version);
+              case ServicesPreferencesModeEnum.MANUAL:
+                return toDefaultDisabledUserServicePreference(version);
+            }
+          },
+          pref => toUserServicePreferenceFromModel(pref)
+        )
       )
-    );
+    )
+  );
 
 /**
  * Return a type safe GetServicePreferences handler.
@@ -135,33 +136,33 @@ export const GetServicePreferencesHandler = (
   servicePreferencesModel: ServicesPreferencesModel
 ): IGetServicePreferencesHandler => {
   return async (fiscalCode, serviceId) =>
-    profileModels
-      .findLastVersionByModelId([fiscalCode])
-      .mapLeft<
-        IResponseErrorQuery | IResponseErrorNotFound | IResponseErrorConflict
-      >(failure =>
+    pipe(
+      profileModels.findLastVersionByModelId([fiscalCode]),
+      TE.mapLeft(failure =>
         ResponseErrorQuery("Error while retrieving the profile", failure)
-      )
-      .chain(getProfileOrErrorResponse)
-      .filterOrElse(
-        nonLegacyServicePreferences,
+      ),
+      TE.chainW(getProfileOrErrorResponse),
+      TE.filterOrElseW(nonLegacyServicePreferences, () =>
         ResponseErrorConflict("Legacy service preferences not allowed")
-      )
-      .chain(profile =>
-        getServicePreferenceSettingsVersion(profile)
-          .mapLeft(_ =>
+      ),
+      TE.chain(profile =>
+        pipe(
+          getServicePreferenceSettingsVersion(profile),
+          TE.mapLeft(_ =>
             ResponseErrorConflict("Service Preferences Version < 0 not allowed")
-          )
-          .map(version => ({
+          ),
+          TE.map(version => ({
             fiscalCode,
             mode: profile.servicePreferencesSettings.mode,
             serviceId,
             version
           }))
-      )
-      .chain(getUserServicePreferencesOrDefault(servicePreferencesModel))
-      .fold<IGetServicePreferencesHandlerResult>(identity, ResponseSuccessJson)
-      .run();
+        )
+      ),
+      TE.chainW(getUserServicePreferencesOrDefault(servicePreferencesModel)),
+      TE.map(ResponseSuccessJson),
+      TE.toUnion
+    )();
 };
 
 /**

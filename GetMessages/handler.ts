@@ -27,6 +27,8 @@ import { CreatedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/
 
 import * as express from "express";
 import { isRight } from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 
 import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
@@ -75,19 +77,19 @@ export function GetMessagesHandler(
     const pageSize = maybePageSize.getOrElse(100 as NonNegativeInteger);
     const enrichResultData = maybeEnrichResultData.getOrElse(false);
     const continuationToken = maybeContinuationToken.getOrElse(undefined);
-    
-    return messageModel
-      .findMessages(fiscalCode, pageSize, continuationToken)
-      .map(flattenAsyncIterator)
-      .map(_ => filterAsyncIterator(_, isRight))
-      .map(_ => mapAsyncIterator(_, e => e.value))
-      .map(_ => filterAsyncIterator(_, RetrievedNotPendingMessage.is))
-      .map(_ => mapAsyncIterator(_, retrievedMessageToPublic))
-      .fold<IGetMessagesHandlerResponse>(
+    return pipe(
+      messageModel.findMessages(fiscalCode),
+      TE.map(flattenAsyncIterator),
+      TE.map(_ => filterAsyncIterator(_, isRight)),
+      TE.map(_ => mapAsyncIterator(_, e => e.right)),
+      TE.map(_ => filterAsyncIterator(_, RetrievedNotPendingMessage.is)),
+      TE.map(_ => mapAsyncIterator(_, retrievedMessageToPublic)),
+      TE.bimap(
         failure => ResponseErrorQuery(failure.kind, failure),
         ResponseJsonIterator
-      )
-      .run();
+      ),
+      TE.toUnion
+    )();
   };
 }
 

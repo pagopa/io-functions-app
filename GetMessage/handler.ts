@@ -1,7 +1,7 @@
 import * as express from "express";
 
 import { isLeft } from "fp-ts/lib/Either";
-import { isNone } from "fp-ts/lib/Option";
+import * as O from "fp-ts/lib/Option";
 
 import { BlobService } from "azure-storage";
 
@@ -71,22 +71,23 @@ export function GetMessageHandler(
 ): IGetMessageHandler {
   return async (context, fiscalCode, messageId) => {
     const [errorOrMaybeDocument, errorOrMaybeContent] = await Promise.all([
-      messageModel
-        .findMessageForRecipient(fiscalCode, messageId as NonEmptyString) // FIXME: decode instead of cast
-        .run(),
-      messageModel.getContentFromBlob(blobService, messageId).run()
+      messageModel.findMessageForRecipient(
+        fiscalCode,
+        messageId as NonEmptyString
+      )(), // FIXME: decode instead of cast
+      messageModel.getContentFromBlob(blobService, messageId)()
     ]);
 
     if (isLeft(errorOrMaybeDocument)) {
       // the query failed
       return ResponseErrorQuery(
         "Error while retrieving the message",
-        errorOrMaybeDocument.value
+        errorOrMaybeDocument.left
       );
     }
 
-    const maybeDocument = errorOrMaybeDocument.value;
-    if (isNone(maybeDocument)) {
+    const maybeDocument = errorOrMaybeDocument.right;
+    if (O.isNone(maybeDocument)) {
       // the document does not exist
       return ResponseErrorNotFound(
         "Message not found",
@@ -98,19 +99,19 @@ export function GetMessageHandler(
 
     if (isLeft(errorOrMaybeContent)) {
       context.log.error(
-        `GetMessageHandler|${JSON.stringify(errorOrMaybeContent.value)}`
+        `GetMessageHandler|${JSON.stringify(errorOrMaybeContent.left)}`
       );
       return ResponseErrorInternal(
-        `${errorOrMaybeContent.value.name}: ${errorOrMaybeContent.value.message}`
+        `${errorOrMaybeContent.left.name}: ${errorOrMaybeContent.left.message}`
       );
     }
 
-    const maybeContent = errorOrMaybeContent.value;
+    const maybeContent = errorOrMaybeContent.right;
 
     const message:
       | CreatedMessageWithContent
       | CreatedMessageWithoutContent = withoutUndefinedValues({
-      content: maybeContent.toUndefined(),
+      content: O.toUndefined(maybeContent),
       ...retrievedMessageToPublic(retrievedMessage)
     });
 

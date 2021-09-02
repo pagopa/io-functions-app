@@ -36,6 +36,10 @@ import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitio
 import { ServicePublic } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePublic";
 import { toApiServiceMetadata } from "@pagopa/io-functions-commons/dist/src/utils/service_metadata";
 
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/lib/Option";
+
 type IGetServiceHandlerRet =
   | IResponseSuccessJson<ServicePublic>
   | IResponseErrorNotFound
@@ -88,21 +92,24 @@ export function GetServiceHandler(
   serviceModel: ServiceModel
 ): IGetServiceHandler {
   return async serviceId =>
-    (await serviceModel.findOneByServiceId(serviceId).run()).fold<
-      IGetServiceHandlerRet
-    >(
-      error => ResponseErrorQuery("Error while retrieving the service", error),
-      maybeService =>
-        maybeService.foldL<
-          IResponseErrorNotFound | IResponseSuccessJson<ServicePublic>
-        >(
-          () =>
-            ResponseErrorNotFound(
-              "Service not found",
-              "The service you requested was not found in the system."
-            ),
-          service => ResponseSuccessJson(retrievedServiceToPublic(service))
-        )
+    pipe(
+      await serviceModel.findOneByServiceId(serviceId)(),
+      E.foldW(
+        error =>
+          ResponseErrorQuery("Error while retrieving the service", error),
+        maybeService =>
+          pipe(
+            maybeService,
+            O.foldW(
+              () =>
+                ResponseErrorNotFound(
+                  "Service not found",
+                  "The service you requested was not found in the system."
+                ),
+              service => ResponseSuccessJson(retrievedServiceToPublic(service))
+            )
+          )
+      )
     );
 }
 

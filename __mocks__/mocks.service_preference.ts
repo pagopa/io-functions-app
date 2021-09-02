@@ -1,6 +1,6 @@
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServicePreference } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePreference";
-import { Service } from "@pagopa/io-functions-commons/dist/src/models/service";
+import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
 import {
   makeServicesPreferencesDocumentId,
   RetrievedServicePreference
@@ -34,8 +34,8 @@ export const aServicePreference: ServicePreference = {
   settings_version: aServicePreferenceVersion
 };
 
-export const aRetrievedService: Service = ({
+export const aRetrievedService: RetrievedService = ({
   ...aCosmosResourceMetadata,
   serviceId: aServiceId,
   isVisible: true
-} as any) as Service;
+} as any) as RetrievedService;

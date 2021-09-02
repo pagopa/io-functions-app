@@ -11,10 +11,15 @@ import {
   CosmosErrors
 } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
-import * as a from "fp-ts/lib/Array";
-import * as o from "fp-ts/lib/Option";
-import * as te from "fp-ts/lib/TaskEither";
+
+import * as A from "fp-ts/lib/Array";
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
+
 import * as t from "io-ts";
+
 import { FiscalCode } from "../generated/backend/FiscalCode";
 import { ServiceId } from "../generated/backend/ServiceId";
 import { errorsToError } from "../utils/conversions";
@@ -63,9 +68,9 @@ export const blockedsToServicesPreferences = (
   fiscalCode: FiscalCode,
   version: NonNegativeInteger
 ) =>
-  o
-    .fromNullable(blocked)
-    .map(b =>
+  pipe(
+    O.fromNullable(blocked),
+    O.map(b =>
       Object.entries(b)
         // tslint:disable-next-line: readonly-array
         .filter((_): _ is [
@@ -80,73 +85,75 @@ export const blockedsToServicesPreferences = (
             version
           )
         )
-    )
-    .getOrElse([]);
+    ),
+    O.getOrElse(() => [])
+  );
 
 export const MigrateServicePreferenceFromLegacy = (
   servicePreferenceModel: ServicesPreferencesModel,
   tracker: ReturnType<typeof createTracker>
 ) => async (context: Context, input: unknown) =>
-  te
-    .fromEither(
-      MigrateServicesPreferencesQueueMessage.decode(input).mapLeft(
-        errorsToError
-      )
-    )
+  pipe(
+    MigrateServicesPreferencesQueueMessage.decode(input),
+    E.mapLeft(errorsToError),
+    TE.fromEither,
     // trace event
-    .map(_ => {
+    TE.map(_ => {
       tracker.profile.traceMigratingServicePreferences(
         _.oldProfile,
         _.newProfile,
         "DOING"
       );
       return _;
-    })
-    .filterOrElse(
+    }),
+    TE.filterOrElse(
       migrateInput =>
         NonNegativeInteger.is(
           migrateInput.newProfile.servicePreferencesSettings.version
         ),
-      new Error("Can not migrate to negative services preferences version.")
-    )
-    .chain(migrateInput => {
+      () =>
+        new Error("Can not migrate to negative services preferences version.")
+    ),
+    TE.chain(migrateInput => {
       const tasks = blockedsToServicesPreferences(
         migrateInput.oldProfile.blockedInboxOrChannels,
         migrateInput.newProfile.fiscalCode,
-        /* tslint:disable-next-line no-useless-cast */
+        // tslint:disable-next-line: no-useless-cast
         migrateInput.newProfile.servicePreferencesSettings
           .version as NonNegativeInteger // cast required: ts do not identify filterOrElse as a guard
       ).map(preference =>
-        servicePreferenceModel
-          .create(preference)
-          .foldTaskEither<Error, boolean>(
+        pipe(
+          servicePreferenceModel.create(preference),
+          TE.fold(
             cosmosError =>
               isCosmosError(cosmosError) &&
               cosmosError.error.code === CONFLICT_CODE
-                ? te.taskEither.of(false)
-                : te.fromLeft(
+                ? TE.of<Error, boolean>(false)
+                : TE.left(
                     new Error(
                       `Can not create the service preferences: ${JSON.stringify(
                         cosmosError
                       )}`
                     )
                   ),
-            _ => te.taskEither.of(true)
+            _ => TE.of<Error, boolean>(true)
           )
+        )
       );
-      return a.array
-        .sequence(te.taskEither)(tasks)
-        .map(_ => {
+      return pipe(
+        A.array.sequence(TE.ApplicativeSeq)(tasks),
+        TE.map(_ => {
           tracker.profile.traceMigratingServicePreferences(
             migrateInput.oldProfile,
             migrateInput.newProfile,
             "DONE"
           );
           return _;
-        });
-    })
-    .getOrElseL(error => {
+        })
+      );
+    }),
+    TE.getOrElse(error => {
       context.log.error(`${LOG_PREFIX}|ERROR|${error}`);
       throw error;
     })
-    .run();
+  )();

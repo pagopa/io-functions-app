@@ -6,7 +6,7 @@ import * as express from "express";
 import { secureExpressApp } from "@pagopa/io-functions-commons/dist/src/utils/express";
 import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 
-import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
+import createAzureFunctionHandler from "@pagopa/express-azure-functions/dist/src/createAzureFunctionsHandler";
 
 import { GetVisibleServices } from "./handler";
 
