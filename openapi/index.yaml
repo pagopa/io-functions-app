@@ -40,7 +40,9 @@ paths:
         - restricted
       parameters:
         - $ref: '#/parameters/FiscalCode'
-        - $ref: '#/parameters/PaginationRequest'
+        - $ref: '#/parameters/PageSize'
+        - $ref: '#/parameters/ContinuationToken'
+        - $ref: '#/parameters/EnrichResultData'
       responses:
         '200':
           description: Found.
@@ -513,6 +515,27 @@ parameters:
     minimum: 1
     description: An opaque identifier that points to the next item in the collection.
     x-example: 01BX9NSMKVXXS5PSP2FATZM123
+  PageSize:
+    type: integer
+    name: page_size
+    in: query
+    minimum: 1
+    required: false
+    description: How many items a page should include.
+  ContinuationToken:
+    type: string
+    name: continuation_token
+    in: query
+    required: false
+    description: >-
+      A token that encodes cosmosdb query state and is required to get the next
+      page of results.
+  EnrichResultData:
+    type: boolean
+    name: enrich_result_data
+    in: query
+    required: false
+    description: Indicates whether result data should be enriched or not.
   UserDataProcessingChoiceParam:
     name: choice
     in: path

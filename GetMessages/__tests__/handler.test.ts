@@ -17,6 +17,7 @@ import { response as MockResponse } from "jest-mock-express";
 import { taskEither } from "fp-ts/lib/TaskEither";
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetMessagesHandler } from "../handler";
+import { none } from "fp-ts/lib/Option";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
 const aMessageId = "A_MESSAGE_ID" as NonEmptyString;
@@ -65,7 +66,7 @@ describe("GetMessagesHandler", () => {
 
     const getMessagesHandler = GetMessagesHandler(mockMessageModel as any);
 
-    const result = await getMessagesHandler(aFiscalCode);
+    const result = await getMessagesHandler(aFiscalCode, none, none, none);
     expect(result.kind).toBe("IResponseSuccessJsonIterator");
 
     const mockResponse = MockResponse();
@@ -93,7 +94,7 @@ describe("GetMessagesHandler", () => {
 
     const getMessagesHandler = GetMessagesHandler(mockMessageModel as any);
 
-    const result = await getMessagesHandler(aFiscalCode);
+    const result = await getMessagesHandler(aFiscalCode, none, none, none);
     expect(result.kind).toBe("IResponseSuccessJsonIterator");
 
     const mockResponse = MockResponse();

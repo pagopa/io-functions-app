@@ -1,6 +1,7 @@
 import { mapAsyncIterator } from "@pagopa/io-functions-commons/dist/src/utils/async";
 import { retrievedMessageToPublic } from "@pagopa/io-functions-commons/dist/src/utils/messages";
 import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
+import { OptionalParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/optional_param";
 import {
   withRequestMiddlewares,
   wrapRequestHandler
@@ -29,7 +30,9 @@ import { isRight } from "fp-ts/lib/Either";
 import * as t from "io-ts";
 
 import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { Option } from "fp-ts/lib/Option";
 
 type RetrievedNotPendingMessage = t.TypeOf<typeof RetrievedNotPendingMessage>;
 const RetrievedNotPendingMessage = t.intersection([
@@ -51,7 +54,10 @@ type IGetMessagesHandlerResponse =
  * TODO: add full results and paging
  */
 type IGetMessagesHandler = (
-  fiscalCode: FiscalCode
+  fiscalCode: FiscalCode,
+  maybePageSize: Option<NonNegativeInteger>,
+  maybeEnrichResultData: Option<boolean>,
+  maybeContinuationToken: Option<NonEmptyString>
 ) => Promise<IGetMessagesHandlerResponse>;
 
 /**
@@ -60,9 +66,18 @@ type IGetMessagesHandler = (
 export function GetMessagesHandler(
   messageModel: MessageModel
 ): IGetMessagesHandler {
-  return async fiscalCode => {
+  return async (
+    fiscalCode,
+    maybePageSize,
+    maybeEnrichResultData,
+    maybeContinuationToken
+  ) => {
+    const pageSize = maybePageSize.getOrElse(100 as NonNegativeInteger);
+    const enrichResultData = maybeEnrichResultData.getOrElse(false);
+    const continuationToken = maybeContinuationToken.getOrElse(undefined);
+    
     return messageModel
-      .findMessages(fiscalCode)
+      .findMessages(fiscalCode, pageSize, continuationToken)
       .map(flattenAsyncIterator)
       .map(_ => filterAsyncIterator(_, isRight))
       .map(_ => mapAsyncIterator(_, e => e.value))
@@ -83,6 +98,11 @@ export function GetMessages(
   messageModel: MessageModel
 ): express.RequestHandler {
   const handler = GetMessagesHandler(messageModel);
-  const middlewaresWrap = withRequestMiddlewares(FiscalCodeMiddleware);
+  const middlewaresWrap = withRequestMiddlewares(
+    FiscalCodeMiddleware,
+    OptionalParamMiddleware("page_size", NonNegativeInteger),
+    OptionalParamMiddleware("enrich_result_data", t.boolean),
+    OptionalParamMiddleware("continuation_token", NonEmptyString)
+  );
   return wrapRequestHandler(middlewaresWrap(handler));
 }
