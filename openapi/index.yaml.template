@@ -36,7 +36,8 @@ paths:
       parameters:
         - $ref: "#/parameters/FiscalCode"
         - $ref: '#/parameters/PageSize'
-        - $ref: '#/parameters/ContinuationToken'
+        - $ref: '#/parameters/MaximumId'
+        - $ref: '#/parameters/MinimumId'
         - $ref: '#/parameters/EnrichResultData'
       responses:
         "200":
@@ -490,12 +491,20 @@ parameters:
     minimum: 1
     required: false
     description: How many items a page should include.
-  ContinuationToken:
+  MaximumId:
     type: string
-    name: continuation_token
+    name: maximum_id
     in: query
     required: false
-    description: A token that encodes cosmosdb query state and is required to get the next page of results.
+    description: >-
+      The maximum id to get messages until to.
+  MinimumId:
+    type: string
+    name: minimum_id
+    in: query
+    required: false
+    description: >-
+      The minimum id to get messages from.
   EnrichResultData:
     type: boolean
     name: enrich_result_data

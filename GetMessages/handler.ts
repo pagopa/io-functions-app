@@ -9,8 +9,10 @@ import {
 import {
   IResponseErrorQuery,
   IResponseSuccessJsonIterator,
+  IResponseSuccessPageIdBasedIterator,
   ResponseErrorQuery,
-  ResponseJsonIterator
+  ResponseJsonIterator,
+  ResponsePageIdBasedIterator
 } from "@pagopa/io-functions-commons/dist/src/utils/response";
 
 import {
@@ -19,6 +21,7 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/async";
 
 import {
+  defaultPageSize,
   MessageModel,
   RetrievedMessage
 } from "@pagopa/io-functions-commons/dist/src/models/message";
@@ -34,7 +37,7 @@ import * as t from "io-ts";
 import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
-import { Option } from "fp-ts/lib/Option";
+import * as O from "fp-ts/lib/Option";
 
 type RetrievedNotPendingMessage = t.TypeOf<typeof RetrievedNotPendingMessage>;
 const RetrievedNotPendingMessage = t.intersection([
@@ -43,7 +46,7 @@ const RetrievedNotPendingMessage = t.intersection([
 ]);
 
 type IGetMessagesHandlerResponse =
-  | IResponseSuccessJsonIterator<CreatedMessageWithoutContent>
+  | IResponseSuccessPageIdBasedIterator<CreatedMessageWithoutContent>
   | IResponseErrorValidation
   | IResponseErrorQuery;
 
@@ -57,9 +60,10 @@ type IGetMessagesHandlerResponse =
  */
 type IGetMessagesHandler = (
   fiscalCode: FiscalCode,
-  maybePageSize: Option<NonNegativeInteger>,
-  maybeEnrichResultData: Option<boolean>,
-  maybeContinuationToken: Option<NonEmptyString>
+  maybePageSize: O.Option<NonNegativeInteger>,
+  maybeEnrichResultData: O.Option<boolean>,
+  maybeMaximumId: O.Option<NonEmptyString>,
+  maybeMinimumId: O.Option<NonEmptyString>
 ) => Promise<IGetMessagesHandlerResponse>;
 
 /**
@@ -72,21 +76,35 @@ export function GetMessagesHandler(
     fiscalCode,
     maybePageSize,
     maybeEnrichResultData,
-    maybeContinuationToken
+    maybeMaximumId: O.Option<NonEmptyString>,
+    maybeMinimumId: O.Option<NonEmptyString>
   ) => {
-    const pageSize = maybePageSize.getOrElse(100 as NonNegativeInteger);
-    const enrichResultData = maybeEnrichResultData.getOrElse(false);
-    const continuationToken = maybeContinuationToken.getOrElse(undefined);
+    const pageSize = pipe(
+      maybePageSize,
+      O.getOrElse(() => defaultPageSize)
+    );
+    const enrichResultData = pipe(
+      maybeEnrichResultData,
+      O.getOrElse(() => false)
+    );
+    const maximumId = pipe(
+      maybeMaximumId,
+      O.getOrElse(() => undefined)
+    );
+    const minimumId = pipe(
+      maybeMinimumId,
+      O.getOrElse(() => undefined)
+    );
     return pipe(
-      messageModel.findMessages(fiscalCode),
+      messageModel.findMessages(fiscalCode, pageSize, maximumId, minimumId),
       TE.map(flattenAsyncIterator),
-      TE.map(_ => filterAsyncIterator(_, isRight)),
-      TE.map(_ => mapAsyncIterator(_, e => e.right)),
-      TE.map(_ => filterAsyncIterator(_, RetrievedNotPendingMessage.is)),
-      TE.map(_ => mapAsyncIterator(_, retrievedMessageToPublic)),
+      TE.map(i => filterAsyncIterator(i, isRight)),
+      TE.map(i => mapAsyncIterator(i, e => e.right)),
+      TE.map(i => filterAsyncIterator(i, RetrievedNotPendingMessage.is)),
+      TE.map(i => mapAsyncIterator(i, retrievedMessageToPublic)),
       TE.bimap(
         failure => ResponseErrorQuery(failure.kind, failure),
-        ResponseJsonIterator
+        i => ResponsePageIdBasedIterator(i, pageSize)
       ),
       TE.toUnion
     )();
@@ -104,7 +122,8 @@ export function GetMessages(
     FiscalCodeMiddleware,
     OptionalParamMiddleware("page_size", NonNegativeInteger),
     OptionalParamMiddleware("enrich_result_data", t.boolean),
-    OptionalParamMiddleware("continuation_token", NonEmptyString)
+    OptionalParamMiddleware("maximum_id", NonEmptyString),
+    OptionalParamMiddleware("minimum_id", NonEmptyString)
   );
   return wrapRequestHandler(middlewaresWrap(handler));
 }

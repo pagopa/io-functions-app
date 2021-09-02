@@ -18,6 +18,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetMessagesHandler } from "../handler";
 import { none } from "fp-ts/lib/Option";
+import { boolean } from "io-ts";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
 const aMessageId = "A_MESSAGE_ID" as NonEmptyString;
@@ -66,8 +67,14 @@ describe("GetMessagesHandler", () => {
 
     const getMessagesHandler = GetMessagesHandler(mockMessageModel as any);
 
-    const result = await getMessagesHandler(aFiscalCode, none, none, none);
-    expect(result.kind).toBe("IResponseSuccessJsonIterator");
+    const result = await getMessagesHandler(
+      aFiscalCode,
+      none,
+      none,
+      none,
+      none
+    );
+    expect(result.kind).toBe("IResponseSuccessPageIdBasedIterator");
 
     const mockResponse = MockResponse();
     await result.apply(mockResponse);
@@ -94,15 +101,23 @@ describe("GetMessagesHandler", () => {
 
     const getMessagesHandler = GetMessagesHandler(mockMessageModel as any);
 
-    const result = await getMessagesHandler(aFiscalCode, none, none, none);
-    expect(result.kind).toBe("IResponseSuccessJsonIterator");
+    const result = await getMessagesHandler(
+      aFiscalCode,
+      none,
+      none,
+      none,
+      none
+    );
+    expect(result.kind).toBe("IResponseSuccessPageIdBasedIterator");
 
     const mockResponse = MockResponse();
     await result.apply(mockResponse);
 
     expect(mockResponse.json).toHaveBeenCalledWith({
+      hasMoreResults: false,
       items: [expect.objectContaining({ id: aMessageId })],
-      page_size: 1
+      items_size: 1,
+      prev: aRetrievedMessageWithoutContent.id
     });
     expect(mockIterator.next).toHaveBeenCalledTimes(2);
   });
