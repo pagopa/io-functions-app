@@ -14,8 +14,11 @@ import {
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import { isRight } from "fp-ts/lib/Either";
-import { fromEither, tryCatch } from "fp-ts/lib/TaskEither";
+
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/lib/TaskEither";
+
 import * as t from "io-ts";
 
 const ActivityInput = t.interface({
@@ -46,12 +49,12 @@ export type ActivityResult = t.TypeOf<typeof ActivityResult>;
 export const GetServicesPreferencesActivityHandler = (
   servicePreferences: ServicesPreferencesModel
 ) => async (context: Context, input: unknown): Promise<ActivityResult> => {
-  return fromEither<t.Errors, ActivityInput>(ActivityInput.decode(input))
-    .mapLeft<InvalidInputFailure | CosmosErrors>(_ =>
-      InvalidInputFailure.encode({ kind: "INVALID_INPUT" })
-    )
-    .chain(({ fiscalCode, settingsVersion }) =>
-      tryCatch(
+  return pipe(
+    ActivityInput.decode(input),
+    TE.fromEither,
+    TE.mapLeft(_ => InvalidInputFailure.encode({ kind: "INVALID_INPUT" })),
+    TE.chainW(({ fiscalCode, settingsVersion }) =>
+      TE.tryCatch(
         async () =>
           servicePreferences
             .getQueryIterator({
@@ -68,14 +71,19 @@ export const GetServicesPreferencesActivityHandler = (
               query: `SELECT * FROM m WHERE m.fiscalCode = @fiscalCode AND m.settingsVersion = @version`
             })
             [Symbol.asyncIterator](),
-        toCosmosErrorResponse
+        _ => toCosmosErrorResponse(_) as CosmosErrors
       )
-    )
-    .map(flattenAsyncIterator)
-    .map(asyncIteratorToArray)
-    .chain(i => tryCatch(() => i, toCosmosErrorResponse))
-    .map(values => values.filter(isRight).map(_ => _.value))
-    .fold<ActivityResult>(
+    ),
+    TE.map(flattenAsyncIterator),
+    TE.map(asyncIteratorToArray),
+    TE.chainW(i =>
+      TE.tryCatch(
+        () => i,
+        _ => toCosmosErrorResponse(_) as CosmosErrors
+      )
+    ),
+    TE.map(values => values.filter(E.isRight).map(_ => _.right)),
+    TE.bimap(
       err => {
         if (err.kind === "INVALID_INPUT") {
           context.log.error(
@@ -99,6 +107,7 @@ export const GetServicesPreferencesActivityHandler = (
           kind: "SUCCESS",
           preferences
         })
-    )
-    .run();
+    ),
+    TE.toUnion
+  )();
 };

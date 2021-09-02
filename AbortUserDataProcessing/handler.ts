@@ -37,8 +37,9 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
-import { identity } from "fp-ts/lib/function";
-import { fromEither, fromLeft, taskEither } from "fp-ts/lib/TaskEither";
+import { flow, pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
 
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 
@@ -80,53 +81,55 @@ export function AbortUserDataProcessingHandler(
   return async (_, fiscalCode, choice) => {
     const id = makeUserDataProcessingId(choice, fiscalCode);
 
-    return (
-      // retrieve the eventual previous delete request
-      userDataProcessingModel
-        .findLastVersionByModelId([id, fiscalCode])
-        .mapLeft<IAbortUserDataProcessingHandlerResult>(
-          errorUserDataProcessing =>
-            ResponseErrorQuery(
-              "Error while retrieving a previous version of user data processing",
-              errorUserDataProcessing
-            )
+    // retrieve the eventual previous delete request
+    return pipe(
+      userDataProcessingModel.findLastVersionByModelId([id, fiscalCode]),
+      TE.mapLeft(errorUserDataProcessing =>
+        ResponseErrorQuery(
+          "Error while retrieving a previous version of user data processing",
+          errorUserDataProcessing
         )
-        // check we have a previous request to abort
-        .chain(maybeRetrievedUserDataProcessing =>
-          maybeRetrievedUserDataProcessing.fold(
-            fromLeft(
+      ),
+      // check we have a previous request to abort
+      TE.chainW(
+        O.fold(
+          () =>
+            TE.left(
               ResponseErrorNotFound(
                 "Not Found",
                 `Cannot find any DELETE request for user ${fiscalCode}`
               )
             ),
-            value => taskEither.of(value)
-          )
+          value => TE.of(value)
         )
-        // check the request can be aborted
-        .chain(retrievedUserDataProcessing =>
-          fromEither(
-            AbortableUserDataProcessing.decode(retrievedUserDataProcessing)
-          ).mapLeft(errors =>
+      ),
+      // check the request can be aborted
+      TE.chainW(
+        flow(
+          AbortableUserDataProcessing.decode,
+          TE.fromEither,
+          TE.mapLeft(errors =>
             ResponseErrorConflict(
               `Cannot abort the request because: ${readableReport(errors)}`
             )
           )
         )
-        // finally save the abortion
-        .chain(retrievedUserDataProcessing =>
-          userDataProcessingModel
-            .update({
-              ...retrievedUserDataProcessing,
-              status: UserDataProcessingStatusEnum.ABORTED
-            })
-            .mapLeft(error =>
-              ResponseErrorQuery("Failed to save the entity", error)
-            )
+      ),
+      // finally save the abortion
+      TE.chain(retrievedUserDataProcessing =>
+        pipe(
+          userDataProcessingModel.update({
+            ...retrievedUserDataProcessing,
+            status: UserDataProcessingStatusEnum.ABORTED
+          }),
+          TE.mapLeft(error =>
+            ResponseErrorQuery("Failed to save the entity", error)
+          )
         )
-        .fold(identity, __ => ResponseSuccessAccepted())
-        .run()
-    );
+      ),
+      TE.map(__ => ResponseSuccessAccepted("", undefined)),
+      TE.toUnion
+    )();
   };
 }
 

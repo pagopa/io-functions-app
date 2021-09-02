@@ -1,7 +1,11 @@
 import * as express from "express";
 
 import { Context } from "@azure/functions";
-import { isLeft } from "fp-ts/lib/Either";
+
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
 
 import {
   IResponseErrorConflict,
@@ -33,15 +37,9 @@ import {
   UserDataProcessing,
   UserDataProcessingModel
 } from "@pagopa/io-functions-commons/dist/src/models/user_data_processing";
-import {
-  CosmosDecodingError,
-  CosmosErrors
-} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
+import { CosmosDecodingError } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { RequiredBodyPayloadMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_body_payload";
 import { toUserDataProcessingApi } from "../utils/user_data_processings";
-
-import { none, some } from "fp-ts/lib/Option";
-import { fromEither } from "fp-ts/lib/TaskEither";
 
 /**
  * Type of an UpsertUserDataProcessing handler.
@@ -71,77 +69,75 @@ export function UpsertUserDataProcessingHandler(
       fiscalCode
     );
 
-    const errorOrMaybeRetrievedUserDataProcessing = await userDataProcessingModel
-      .findLastVersionByModelId([id, fiscalCode])
-      .run();
+    const errorOrMaybeRetrievedUserDataProcessing = await userDataProcessingModel.findLastVersionByModelId(
+      [id, fiscalCode]
+    )();
 
-    if (isLeft(errorOrMaybeRetrievedUserDataProcessing)) {
+    if (E.isLeft(errorOrMaybeRetrievedUserDataProcessing)) {
       return ResponseErrorQuery(
         "Error while retrieving a previous version of user data processing",
-        errorOrMaybeRetrievedUserDataProcessing.value
+        errorOrMaybeRetrievedUserDataProcessing.left
       );
     }
     const maybeRetrievedUserDataProcessing =
-      errorOrMaybeRetrievedUserDataProcessing.value;
+      errorOrMaybeRetrievedUserDataProcessing.right;
 
-    const maybeNewStatus = maybeRetrievedUserDataProcessing.fold(
-      // create a new PENDING request in case this is the first request
-      some(UserDataProcessingStatusEnum.PENDING),
-      ({ status }) =>
-        // if the request is currently on going, don't create another
-        UserDataProcessingStatusEnum.PENDING === status ||
-        UserDataProcessingStatusEnum.WIP === status
-          ? none
-          : some(UserDataProcessingStatusEnum.PENDING)
-    );
+    return pipe(
+      maybeRetrievedUserDataProcessing,
+      O.foldW(
+        // create a new PENDING request in case this is the first request
+        () => O.some(UserDataProcessingStatusEnum.PENDING),
+        ({ status }) =>
+          // if the request is currently on going, don't create another
+          UserDataProcessingStatusEnum.PENDING === status ||
+          UserDataProcessingStatusEnum.WIP === status
+            ? O.none
+            : O.some(UserDataProcessingStatusEnum.PENDING)
+      ),
+      O.foldW(
+        async () =>
+          ResponseErrorConflict(
+            "Another request is already PENDING or WIP for this User"
+          ),
+        async newStatus => {
+          const userDataProcessing: UserDataProcessing = {
+            choice: upsertUserDataProcessingPayload.choice,
+            createdAt: new Date(),
+            fiscalCode,
+            status: newStatus,
+            userDataProcessingId: id
+          };
+          const errorOrUpsertedUserDataProcessing = await pipe(
+            NewUserDataProcessing.decode({
+              ...userDataProcessing,
+              kind: "INewUserDataProcessing"
+            }),
+            TE.fromEither,
+            TE.mapLeft(CosmosDecodingError),
+            TE.chain(valueToUpsert =>
+              userDataProcessingModel.upsert(valueToUpsert)
+            )
+          )();
 
-    return maybeNewStatus.foldL<
-      Promise<
-        | IResponseSuccessJson<UserDataProcessingApi>
-        | IResponseErrorQuery
-        | IResponseErrorConflict
-      >
-    >(
-      async () =>
-        ResponseErrorConflict(
-          "Another request is already PENDING or WIP for this User"
-        ),
-      async newStatus => {
-        const userDataProcessing: UserDataProcessing = {
-          choice: upsertUserDataProcessingPayload.choice,
-          createdAt: new Date(),
-          fiscalCode,
-          status: newStatus,
-          userDataProcessingId: id
-        };
-        const errorOrUpsertedUserDataProcessing = await fromEither(
-          NewUserDataProcessing.decode({
-            ...userDataProcessing,
-            kind: "INewUserDataProcessing"
-          })
-        )
-          .mapLeft<CosmosErrors>(CosmosDecodingError)
-          .chain(_ => userDataProcessingModel.upsert(_))
-          .run();
+          if (E.isLeft(errorOrUpsertedUserDataProcessing)) {
+            const failure = errorOrUpsertedUserDataProcessing.left;
 
-        if (isLeft(errorOrUpsertedUserDataProcessing)) {
-          const failure = errorOrUpsertedUserDataProcessing.value;
+            context.log.error(`${logPrefix}|ERROR=${failure.kind}`);
 
-          context.log.error(`${logPrefix}|ERROR=${failure.kind}`);
+            return ResponseErrorQuery(
+              "Error while creating a new user data processing",
+              errorOrUpsertedUserDataProcessing.left
+            );
+          }
 
-          return ResponseErrorQuery(
-            "Error while creating a new user data processing",
-            errorOrUpsertedUserDataProcessing.value
+          const createdOrUpdatedUserDataProcessing =
+            errorOrUpsertedUserDataProcessing.right;
+
+          return ResponseSuccessJson(
+            toUserDataProcessingApi(createdOrUpdatedUserDataProcessing)
           );
         }
-
-        const createdOrUpdatedUserDataProcessing =
-          errorOrUpsertedUserDataProcessing.value;
-
-        return ResponseSuccessJson(
-          toUserDataProcessingApi(createdOrUpdatedUserDataProcessing)
-        );
-      }
+      )
     );
   };
 }

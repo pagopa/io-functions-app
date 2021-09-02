@@ -4,6 +4,7 @@ import { Context } from "@azure/functions";
 import * as df from "durable-functions";
 
 import { isLeft } from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
 
 import {
   IResponseErrorConflict,
@@ -19,10 +20,7 @@ import {
   NewProfile as INewProfile,
   ProfileModel
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
-import {
-  CosmosDecodingError,
-  CosmosErrors
-} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
+import { CosmosDecodingError } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
 import {
@@ -35,8 +33,9 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/response";
 
 import { isBefore } from "date-fns";
+import { pipe } from "fp-ts/lib/function";
 import { fromEither } from "fp-ts/lib/TaskEither";
-import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
+import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestratorV2/handler";
 import { NewProfileMiddleware } from "../utils/middlewares/profile";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 
@@ -60,25 +59,26 @@ export function CreateProfileHandler(
   return async (context, fiscalCode, createProfilePayload) => {
     const logPrefix = `CreateProfileHandler|FISCAL_CODE=${fiscalCode}`;
 
-    const errorOrCreatedProfile = await fromEither(
-      INewProfile.decode({
-        email: createProfilePayload.email,
-        fiscalCode,
-        // this check can be removed after the release date for optOutEmailSwitchDate
-        isEmailEnabled: isBefore(new Date(), optOutEmailSwitchDate),
-        isEmailValidated: createProfilePayload.is_email_validated,
-        isInboxEnabled: false,
-        isTestProfile: createProfilePayload.is_test_profile,
-        isWebhookEnabled: false,
-        kind: "INewProfile"
-      })
-    )
-      .mapLeft<CosmosErrors>(CosmosDecodingError)
-      .chain(newProfile => profileModel.create(newProfile))
-      .run();
+    const errorOrCreatedProfile = await pipe(
+      fromEither(
+        INewProfile.decode({
+          email: createProfilePayload.email,
+          fiscalCode,
+          // this check can be removed after the release date for optOutEmailSwitchDate
+          isEmailEnabled: isBefore(new Date(), optOutEmailSwitchDate),
+          isEmailValidated: createProfilePayload.is_email_validated,
+          isInboxEnabled: false,
+          isTestProfile: createProfilePayload.is_test_profile,
+          isWebhookEnabled: false,
+          kind: "INewProfile"
+        })
+      ),
+      TE.mapLeft(CosmosDecodingError),
+      TE.chain(newProfile => profileModel.create(newProfile))
+    )();
 
     if (isLeft(errorOrCreatedProfile)) {
-      const failure = errorOrCreatedProfile.value;
+      const failure = errorOrCreatedProfile.left;
 
       context.log.error(`${logPrefix}|ERROR=${failure.kind}`);
 
@@ -95,7 +95,7 @@ export function CreateProfileHandler(
       return ResponseErrorQuery("Error while creating a new profile", failure);
     }
 
-    const createdProfile = errorOrCreatedProfile.value;
+    const createdProfile = errorOrCreatedProfile.right;
 
     // Start the Orchestrator
     const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.encode(

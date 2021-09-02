@@ -1,3 +1,6 @@
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
+
 import { ResponseErrorFromValidationErrors } from "@pagopa/ts-commons/lib/responses";
 
 import { NewProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/NewProfile";
@@ -12,8 +15,10 @@ export const NewProfileMiddleware: IRequestMiddleware<
   NewProfile
 > = request =>
   Promise.resolve(
-    NewProfile.decode(request.body).mapLeft(
-      ResponseErrorFromValidationErrors(NewProfile)
+    pipe(
+      request.body,
+      NewProfile.decode,
+      E.mapLeft(ResponseErrorFromValidationErrors(NewProfile))
     )
   );
 
@@ -25,7 +30,9 @@ export const ProfileMiddleware: IRequestMiddleware<
   Profile
 > = request =>
   Promise.resolve(
-    Profile.decode(request.body).mapLeft(
-      ResponseErrorFromValidationErrors(Profile)
+    pipe(
+      request.body,
+      Profile.decode,
+      E.mapLeft(ResponseErrorFromValidationErrors(Profile))
     )
   );

@@ -14,7 +14,7 @@ import { MessageResponseWithoutContent } from "@pagopa/io-functions-commons/dist
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { TimeToLiveSeconds } from "@pagopa/io-functions-commons/dist/generated/definitions/TimeToLiveSeconds";
 
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetMessageHandler } from "../handler";
@@ -55,9 +55,9 @@ describe("GetMessageHandler", () => {
   it("should fail if any error occurs trying to retrieve the message content", async () => {
     const mockMessageModel = {
       findMessageForRecipient: jest.fn(() =>
-        taskEither.of(some(aRetrievedMessageWithoutContent))
+        TE.of(some(aRetrievedMessageWithoutContent))
       ),
-      getContentFromBlob: jest.fn(() => fromLeft(new Error()))
+      getContentFromBlob: jest.fn(() => TE.left(new Error()))
     };
 
     const getMessageHandler = GetMessageHandler(
@@ -84,9 +84,9 @@ describe("GetMessageHandler", () => {
   it("should respond with a message", async () => {
     const mockMessageModel = {
       findMessageForRecipient: jest.fn(() =>
-        taskEither.of(some(aRetrievedMessageWithoutContent))
+        TE.of(some(aRetrievedMessageWithoutContent))
       ),
-      getContentFromBlob: jest.fn(() => taskEither.of(none))
+      getContentFromBlob: jest.fn(() => TE.of(none))
     };
 
     const getMessageHandler = GetMessageHandler(
@@ -133,10 +133,10 @@ describe("GetMessageHandler", () => {
 
     const mockMessageModel = {
       findMessageForRecipient: jest.fn(() =>
-        taskEither.of(some(aRetrievedMessageWithEuCovidCert))
+        TE.of(some(aRetrievedMessageWithEuCovidCert))
       ),
       getContentFromBlob: jest.fn(() =>
-        taskEither.of(some(aRetrievedMessageWithEuCovidCert.content))
+        TE.of(some(aRetrievedMessageWithEuCovidCert.content))
       )
     };
 
@@ -170,8 +170,8 @@ describe("GetMessageHandler", () => {
 
   it("should respond with not found a message doesn not exist", async () => {
     const mockMessageModel = {
-      findMessageForRecipient: jest.fn(() => taskEither.of(none)),
-      getContentFromBlob: jest.fn(() => taskEither.of(none))
+      findMessageForRecipient: jest.fn(() => TE.of(none)),
+      getContentFromBlob: jest.fn(() => TE.of(none))
     };
 
     const getMessageHandler = GetMessageHandler(

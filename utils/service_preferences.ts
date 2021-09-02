@@ -1,10 +1,11 @@
+import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/lib/TaskEither";
+
 import { ServicePreference } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePreference";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { Profile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { RetrievedServicePreference } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
-
-import * as te from "fp-ts/lib/TaskEither";
 
 const toUserServicePreference = (
   emailEnabled: boolean,
@@ -77,10 +78,11 @@ export const nonLegacyServicePreferences = (profile: Profile): boolean => {
  */
 export function getServicePreferenceSettingsVersion(
   profile
-): te.TaskEither<Error, NonNegativeInteger> {
-  return te
-    .fromEither(
-      NonNegativeInteger.decode(profile.servicePreferencesSettings.version)
-    )
-    .mapLeft(_ => Error("Service Preferences Version < 0 not allowed"));
+): TE.TaskEither<Error, NonNegativeInteger> {
+  return pipe(
+    profile.servicePreferencesSettings.version,
+    NonNegativeInteger.decode,
+    TE.fromEither,
+    TE.mapLeft(_ => Error("Service Preferences Version < 0 not allowed"))
+  );
 }

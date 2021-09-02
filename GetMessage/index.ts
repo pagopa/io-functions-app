@@ -12,7 +12,7 @@ import {
 
 import { createBlobService } from "azure-storage";
 
-import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
+import createAzureFunctionHandler from "@pagopa/express-azure-functions/dist/src/createAzureFunctionsHandler";
 
 import { cosmosdbInstance } from "../utils/cosmosdb";
 import { GetMessage } from "./handler";

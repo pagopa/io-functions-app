@@ -1,7 +1,7 @@
 /* tslint:disable:no-any */
 
 import { none, some } from "fp-ts/lib/Option";
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import {
   aExtendedProfile,
   aFiscalCode,
@@ -25,7 +25,7 @@ describe("GetProfileHandler", () => {
   it("should find an existing profile", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(some(aRetrievedProfileWithTimestampAfterLimit));
+        return TE.of(some(aRetrievedProfileWithTimestampAfterLimit));
       })
     };
 
@@ -49,7 +49,7 @@ describe("GetProfileHandler", () => {
   it("should find an existing profile overwriting isEmailEnabled property if cosmos timestamp is before email opt out switch limit date", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(some(aRetrievedProfileWithTimestampBeforeLimit));
+        return TE.of(some(aRetrievedProfileWithTimestampBeforeLimit));
       })
     };
 
@@ -76,7 +76,7 @@ describe("GetProfileHandler", () => {
   it("should find an existing profile by not overwriting isEmailEnabled property if cosmos timestamp is before email opt out switch limit date", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(some(aRetrievedProfileWithTimestampBeforeLimit));
+        return TE.of(some(aRetrievedProfileWithTimestampBeforeLimit));
       })
     };
 
@@ -100,7 +100,7 @@ describe("GetProfileHandler", () => {
   it("should respond with NotFound if profile does not exist", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(none);
+        return TE.of(none);
       })
     };
 
@@ -120,7 +120,7 @@ describe("GetProfileHandler", () => {
   it("should reject the promise in case of errors", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
-        return fromLeft("error");
+        return TE.left("error");
       })
     };
 

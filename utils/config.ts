@@ -5,9 +5,11 @@
  * The configuration is evaluate eagerly at the first access to the module. The module exposes convenient methods to access such value.
  */
 
-import { fromNullable as fromNullableE } from "fp-ts/lib/Either";
-import { fromNullable } from "fp-ts/lib/Option";
 import * as t from "io-ts";
+
+import * as E from "fp-ts/lib/Either";
+import { flow, pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/lib/Option";
 
 import { MailerConfig } from "@pagopa/io-functions-commons/dist/src/mailer";
 
@@ -15,14 +17,13 @@ import { DateFromTimestamp } from "@pagopa/ts-commons/lib/dates";
 import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { identity } from "fp-ts/lib/function";
 
 // exclude a specific value from a type
 // as strict equality is performed, allowed input types are constrained to be values not references (object, arrays, etc)
 // tslint:disable-next-line max-union-size
-const AnyBut = <A extends string | number | boolean | symbol, O = A>(
+const AnyBut = <A extends string | number | boolean | symbol, Out = A>(
   but: A,
-  base: t.Type<A, O> = t.any
+  base: t.Type<A, Out> = t.any
 ) =>
   t.brand(
     base,
@@ -101,32 +102,40 @@ export const IConfig = t.intersection([
 // This means that Date representation is in the past compared to the effectively switch Date we want to set
 const DEFAULT_OPT_OUT_EMAIL_SWITCH_DATE = 1625781600;
 
+// get a boolen value from string
+const getBooleanOrFalse = (value: string) =>
+  pipe(
+    value,
+    O.fromNullable,
+    O.map(_ => _.toLocaleLowerCase() === "true"),
+    O.getOrElse(() => false)
+  );
+
 // No need to re-evaluate this object for each call
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   ...process.env,
-  FF_NEW_USERS_EUCOVIDCERT_ENABLED: fromNullable(
+  FF_NEW_USERS_EUCOVIDCERT_ENABLED: getBooleanOrFalse(
     process.env.FF_NEW_USERS_EUCOVIDCERT_ENABLED
-  )
-    .map(_ => _.toLocaleLowerCase() === "true")
-    .getOrElse(false),
-  FF_ONLY_NATIONAL_SERVICES: fromNullable(process.env.FF_ONLY_NATIONAL_SERVICES)
-    .map(_ => _.toLocaleLowerCase() === "true")
-    .getOrElse(false),
-  FF_OPT_IN_EMAIL_ENABLED: fromNullable(process.env.FF_OPT_IN_EMAIL_ENABLED)
-    .map(_ => _.toLocaleLowerCase() === "true")
-    .getOrElse(false),
-  IS_CASHBACK_ENABLED: fromNullable(process.env.IS_CASHBACK_ENABLED)
-    .map(_ => _.toLocaleLowerCase() === "true")
-    .getOrElse(false),
-  OPT_OUT_EMAIL_SWITCH_DATE: fromNullableE(DEFAULT_OPT_OUT_EMAIL_SWITCH_DATE)(
-    process.env.OPT_OUT_EMAIL_SWITCH_DATE
-  )
-    .chain(_ =>
-      NumberFromString.decode(_).mapLeft(
-        () => DEFAULT_OPT_OUT_EMAIL_SWITCH_DATE
+  ),
+  FF_ONLY_NATIONAL_SERVICES: getBooleanOrFalse(
+    process.env.FF_ONLY_NATIONAL_SERVICES
+  ),
+  FF_OPT_IN_EMAIL_ENABLED: getBooleanOrFalse(
+    process.env.FF_OPT_IN_EMAIL_ENABLED
+  ),
+  IS_CASHBACK_ENABLED: getBooleanOrFalse(process.env.IS_CASHBACK_ENABLED),
+  OPT_OUT_EMAIL_SWITCH_DATE: pipe(
+    E.fromNullable(DEFAULT_OPT_OUT_EMAIL_SWITCH_DATE)(
+      process.env.OPT_OUT_EMAIL_SWITCH_DATE
+    ),
+    E.chain(
+      flow(
+        NumberFromString.decode,
+        E.mapLeft(() => DEFAULT_OPT_OUT_EMAIL_SWITCH_DATE)
       )
-    )
-    .fold(identity, identity),
+    ),
+    E.toUnion
+  ),
   isProduction: process.env.NODE_ENV === "production"
 });
 
@@ -148,7 +157,10 @@ export function getConfig(): t.Validation<IConfig> {
  * @throws validation errors found while parsing the application configuration
  */
 export function getConfigOrThrow(): IConfig {
-  return errorOrConfig.getOrElseL(errors => {
-    throw new Error(`Invalid configuration: ${readableReport(errors)}`);
-  });
+  return pipe(
+    errorOrConfig,
+    E.getOrElse(errors => {
+      throw new Error(`Invalid configuration: ${readableReport(errors)}`);
+    })
+  );
 }
