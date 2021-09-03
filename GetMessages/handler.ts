@@ -89,20 +89,8 @@ export function GetMessagesHandler(
     );
     return pipe(
       TE.Do,
-      TE.bind("maximumId", () =>
-        pipe(
-          maybeMaximumId,
-          O.getOrElse(() => undefined),
-          TE.of
-        )
-      ),
-      TE.bind("minimumId", () =>
-        pipe(
-          maybeMinimumId,
-          O.getOrElse(() => undefined),
-          TE.of
-        )
-      ),
+      TE.bind("maximumId", () => TE.of(O.toUndefined(maybeMaximumId))),
+      TE.bind("minimumId", () => TE.of(O.toUndefined(maybeMinimumId))),
       TE.chain(params =>
         messageModel.findMessages(
           fiscalCode,
