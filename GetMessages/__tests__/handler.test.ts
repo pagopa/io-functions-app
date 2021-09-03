@@ -119,9 +119,17 @@ describe("GetMessagesHandler", () => {
 
     expect(mockResponse.json).toHaveBeenCalledWith({
       hasMoreResults: false,
-      items: [expect.objectContaining({ id: aMessageId })],
+      items: expect.arrayContaining([
+        expect.objectContaining({
+          fiscal_code: aFiscalCode,
+          id: aRetrievedMessageWithoutContent.id,
+          sender_service_id: aServiceId,
+          created_at: expect.any(Date)
+        })
+      ]),
       page_size: 1,
-      prev: aRetrievedMessageWithoutContent.id
+      prev: aRetrievedMessageWithoutContent.id,
+      next: undefined
     });
     expect(mockIterator.next).toHaveBeenCalledTimes(2);
   });
