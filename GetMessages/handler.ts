@@ -81,6 +81,7 @@ export function GetMessagesHandler(
       maybePageSize,
       O.getOrElse(() => defaultPageSize)
     );
+    // TODO: Consider enrichResultData to enrich messages with content
     // tslint:disable-next-line:no-unused-variable no-dead-store
     const enrichResultData = pipe(
       maybeEnrichResultData,
