@@ -651,13 +651,13 @@
   resolved "https://registry.yarnpkg.com/@pagopa/express-azure-functions/-/express-azure-functions-2.0.0.tgz#eb52a0b997d931c1509372e2a9bea22a8ca85c17"
   integrity sha512-IFZqtk0e2sfkMZIxYqPORzxcKRkbIrVJesR6eMLNwzh1rA4bl2uh9ZHk1m55LNq4ZmaxREDu+1JcGlIaZQgKNQ==
 
-"@pagopa/io-functions-commons@^21.1.0":
-  version "21.1.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-21.1.0.tgz#363ce999af4dd4aad46227b61fa3a51b6b407ad4"
-  integrity sha512-zVimIlzmxzpuGdglj2Zz/dLCFOBJBqVCtu9lcu9jL/rrRd4S9kyF8SY+Ywq/sYfhn8dNiluGAuSr/7352GbIFQ==
+"@pagopa/io-functions-commons@^21.1.1":
+  version "21.1.1"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-21.1.1.tgz#d43e28f1d0d4151c2b713a4a616219fabaf0180d"
+  integrity sha512-tdGRCvQjxf8u/yIoaRtOdRystAcOniXn/u1V0jcEQHRnICQhCQtp9N31JDzfd8iVU5UAUhf2C8EEsTZOlex93g==
   dependencies:
     "@azure/cosmos" "^3.11.5"
-    "@pagopa/ts-commons" "^10.0.0"
+    "@pagopa/ts-commons" "^10.0.1"
     applicationinsights "^1.8.10"
     azure-storage "^2.10.4"
     cidr-matcher "^2.1.1"

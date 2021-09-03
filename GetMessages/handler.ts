@@ -8,10 +8,8 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
   IResponseErrorQuery,
-  IResponseSuccessJsonIterator,
   IResponseSuccessPageIdBasedIterator,
   ResponseErrorQuery,
-  ResponseJsonIterator,
   ResponsePageIdBasedIterator
 } from "@pagopa/io-functions-commons/dist/src/utils/response";
 
@@ -34,9 +32,9 @@ import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import * as O from "fp-ts/lib/Option";
 
 type RetrievedNotPendingMessage = t.TypeOf<typeof RetrievedNotPendingMessage>;
@@ -83,20 +81,35 @@ export function GetMessagesHandler(
       maybePageSize,
       O.getOrElse(() => defaultPageSize)
     );
+    // tslint:disable-next-line:no-unused-variable no-dead-store
     const enrichResultData = pipe(
       maybeEnrichResultData,
       O.getOrElse(() => false)
     );
-    const maximumId = pipe(
-      maybeMaximumId,
-      O.getOrElse(() => undefined)
-    );
-    const minimumId = pipe(
-      maybeMinimumId,
-      O.getOrElse(() => undefined)
-    );
     return pipe(
-      messageModel.findMessages(fiscalCode, pageSize, maximumId, minimumId),
+      TE.Do,
+      TE.bind("maximumId", () =>
+        pipe(
+          maybeMaximumId,
+          O.getOrElse(() => undefined),
+          TE.of
+        )
+      ),
+      TE.bind("minimumId", () =>
+        pipe(
+          maybeMinimumId,
+          O.getOrElse(() => undefined),
+          TE.of
+        )
+      ),
+      TE.chain(params =>
+        messageModel.findMessages(
+          fiscalCode,
+          pageSize,
+          params.maximumId,
+          params.minimumId
+        )
+      ),
       TE.map(flattenAsyncIterator),
       TE.map(i => filterAsyncIterator(i, isRight)),
       TE.map(i => mapAsyncIterator(i, e => e.right)),
