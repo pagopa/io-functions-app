@@ -651,10 +651,10 @@
   resolved "https://registry.yarnpkg.com/@pagopa/express-azure-functions/-/express-azure-functions-2.0.0.tgz#eb52a0b997d931c1509372e2a9bea22a8ca85c17"
   integrity sha512-IFZqtk0e2sfkMZIxYqPORzxcKRkbIrVJesR6eMLNwzh1rA4bl2uh9ZHk1m55LNq4ZmaxREDu+1JcGlIaZQgKNQ==
 
-"@pagopa/io-functions-commons@^21.3.0":
-  version "21.3.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-21.3.0.tgz#fc1b6c53a09be44632e642b91f8f6abf2448ceeb"
-  integrity sha512-ZGCvyRkbR1xDqd/nqyzDUhDXwT88mfVMuYZh7p6FdmBiN2FqvUs8p5CQ2F3m+13BE/PKCsEyS7KkMrqWYY93Kg==
+"@pagopa/io-functions-commons@^21.5.0":
+  version "21.5.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-21.5.0.tgz#68c7b4af66399e688f86f346d6e8a679b0c6da5f"
+  integrity sha512-TroWIfPgnvBI0Ue+z+6z8q5uruvCs7HxvyPmTzwEieAQ2+5HcPLe4F/lkV36TJ1+NFXR794Af2+fU7RwD05Z7A==
   dependencies:
     "@azure/cosmos" "^3.11.5"
     "@pagopa/ts-commons" "^10.0.1"
@@ -696,6 +696,20 @@
   version "10.0.1"
   resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.0.1.tgz#086ae8067405f7d95802e6727a93167698ee3525"
   integrity sha512-Hl4dEpXjqSniXxpGxPaYhzgV2MeDxYa1PeHt4Wsg9vctjzkb2KHkSlegQtdyPMnV3wKHx01HqepOxEXt0uGoKA==
+  dependencies:
+    abort-controller "^3.0.0"
+    agentkeepalive "^4.1.4"
+    applicationinsights "^1.8.10"
+    fp-ts "^2.10.5"
+    io-ts "^2.2.16"
+    json-set-map "^1.1.2"
+    node-fetch "^2.6.0"
+    validator "^10.1.0"
+
+"@pagopa/ts-commons@^10.1.0":
+  version "10.1.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.1.0.tgz#899698e31c4fbf32bc7abd88614e6d411cc1e2cd"
+  integrity sha512-MqktlOQS+0m2bIuVEWfFnSvNDr5NepJ/Ut9Qo+VKZDJD2afdiBXnuMTtB6SyUHawB0pOxcQioguyYn5yB5KlNA==
   dependencies:
     abort-controller "^3.0.0"
     agentkeepalive "^4.1.4"

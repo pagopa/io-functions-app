@@ -1,7 +1,6 @@
 import { mapAsyncIterator } from "@pagopa/io-functions-commons/dist/src/utils/async";
 import { retrievedMessageToPublic } from "@pagopa/io-functions-commons/dist/src/utils/messages";
 import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
-import { OptionalParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/optional_param";
 import {
   withRequestMiddlewares,
   wrapRequestHandler
@@ -25,6 +24,7 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/models/message";
 
 import { CreatedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
+import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/optional_query_param";
 
 import * as express from "express";
 import { isRight } from "fp-ts/lib/Either";
@@ -32,7 +32,11 @@ import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import {
+  NonNegativeInteger,
+  NonNegativeIntegerFromString
+} from "@pagopa/ts-commons/lib/numbers";
+import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
@@ -74,8 +78,8 @@ export function GetMessagesHandler(
     fiscalCode,
     maybePageSize,
     maybeEnrichResultData,
-    maybeMaximumId: O.Option<NonEmptyString>,
-    maybeMinimumId: O.Option<NonEmptyString>
+    maybeMaximumId,
+    maybeMinimumId
   ) => {
     const pageSize = pipe(
       maybePageSize,
@@ -134,10 +138,10 @@ export function GetMessages(
   const handler = GetMessagesHandler(messageModel);
   const middlewaresWrap = withRequestMiddlewares(
     FiscalCodeMiddleware,
-    OptionalParamMiddleware("page_size", NonNegativeInteger),
-    OptionalParamMiddleware("enrich_result_data", t.boolean),
-    OptionalParamMiddleware("maximum_id", NonEmptyString),
-    OptionalParamMiddleware("minimum_id", NonEmptyString)
+    OptionalQueryParamMiddleware("page_size", NonNegativeIntegerFromString),
+    OptionalQueryParamMiddleware("enrich_result_data", BooleanFromString),
+    OptionalQueryParamMiddleware("maximum_id", NonEmptyString),
+    OptionalQueryParamMiddleware("minimum_id", NonEmptyString)
   );
   return wrapRequestHandler(middlewaresWrap(handler));
 }
