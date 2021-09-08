@@ -31,7 +31,7 @@ import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/
 
 import * as express from "express";
 import { isRight } from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
+import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
@@ -60,6 +60,7 @@ import {
 import { BlobService } from "azure-storage";
 import { MessageContent } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageContent";
 import { toCosmosErrorResponse } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
+import { enrichMessageData } from "../utils/messages";
 
 type RetrievedNotPendingMessage = t.TypeOf<typeof RetrievedNotPendingMessage>;
 const RetrievedNotPendingMessage = t.intersection([
@@ -68,9 +69,9 @@ const RetrievedNotPendingMessage = t.intersection([
 ]);
 
 type IGetMessagesHandlerResponse =
-  | IResponseSuccessJson<PageResults>
+  | IResponseSuccessPageIdBasedIterator<EnrichedMessage>
   | IResponseErrorValidation
-  | IResponseErrorInternal;
+  | IResponseErrorQuery;
 
 /**
  * Type of a GetMessages handler.
@@ -105,18 +106,15 @@ export const GetMessagesHandler = (
     maybePageSize,
     O.getOrElse(() => defaultPageSize)
   );
-  // TODO: Consider enrichResultData to enrich messages with content
-  // tslint:disable-next-line:no-unused-variable no-dead-store
+
   const enrichResultData = pipe(
     maybeEnrichResultData,
     O.getOrElse(() => false)
   );
 
-  const enrichMessage = enrichMessageData(
-    messageModel,
-    serviceModel,
-    blobService
-  );
+  const enrichMessage = enrichResultData
+    ? enrichMessageData(messageModel, serviceModel, blobService)
+    : identity;
 
   return await pipe(
     TE.Do,
@@ -135,28 +133,10 @@ export const GetMessagesHandler = (
     TE.map(i => mapAsyncIterator(i, e => e.right)),
     TE.map(i => filterAsyncIterator(i, RetrievedNotPendingMessage.is)),
     TE.map(i => mapAsyncIterator(i, retrievedMessageToPublic)),
-    TE.map(i => fillPage<CreatedMessageWithoutContent>(i, pageSize)),
-    TE.chain(i =>
-      TE.tryCatch(
-        () => i,
-        _ => void 0
-      )
-    ),
-    TE.chain(p =>
-      enrichResultData
-        ? pipe(
-            p.items.map((i: CreatedMessageWithoutContent) => enrichMessage(i)),
-            TE.sequenceSeqArray,
-            TE.map(i => ({
-              ...p,
-              items: i
-            }))
-          )
-        : TE.of(p)
-    ),
+    TE.map(i => mapAsyncIterator(i, enrichMessage)),
     TE.bimap(
-      failure => ResponseErrorInternal(failure.message),
-      ResponseSuccessJson
+      failure => ResponseErrorQuery(failure.kind, failure),
+      i => ResponsePageIdBasedIterator(i, pageSize)
     ),
     TE.toUnion
   )();
@@ -180,86 +160,3 @@ export function GetMessages(
   );
   return wrapRequestHandler(middlewaresWrap(handler));
 }
-
-/**
- *  To try
- */
-export const enrichMessageData = (
-  messageModel: MessageModel,
-  serviceModel: ServiceModel,
-  blobService: BlobService
-) => (
-  message: CreatedMessageWithoutContent
-): TE.TaskEither<Error, EnrichedMessage> =>
-  pipe(
-    TE.Do,
-    TE.bind("service", () =>
-      serviceModel.findLastVersionByModelId([message.sender_service_id])
-    ),
-    TE.mapLeft(E.toError),
-    TE.bind("messageContent", () =>
-      messageModel.getContentFromBlob(blobService, message.id)
-    ),
-    TE.map(x => {
-      const content = O.getOrElse(() => ({} as MessageContent))(
-        x.messageContent
-      );
-      const service = O.getOrElse(() => ({} as Service))(x.service);
-      return {
-        ...message,
-        service_name: service.serviceName,
-        organization_name: service.organizationName,
-        message_title: content.subject
-      };
-    })
-  );
-
-export const PageResults = t.intersection([
-  t.interface({
-    hasMoreResults: t.boolean,
-    items: t.readonlyArray(t.interface({ id: t.string }))
-  }),
-  t.partial({
-    next: t.string,
-    prev: t.string
-  })
-]);
-
-export type PageResults = t.TypeOf<typeof PageResults>;
-
-export const fillPage = async <T extends { readonly id: string }>(
-  iter: AsyncIterator<T, T>,
-  expectedPageSize: NonNegativeInteger
-): Promise<PageResults> => {
-  // eslint-disable-next-line functional/prefer-readonly-type
-  const items: T[] = [];
-  // eslint-disable-next-line functional/no-let
-  let hasMoreResults: boolean = true;
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const { done, value } = await iter.next();
-    if (done) {
-      hasMoreResults = false;
-      break;
-    }
-    if (items.length === expectedPageSize) {
-      break;
-    }
-    // eslint-disable-next-line functional/immutable-data
-    items.push(value);
-  }
-
-  const next = hasMoreResults
-    ? pipe(
-        O.fromNullable(items[items.length - 1]),
-        O.map(e => e.id),
-        O.toUndefined
-      )
-    : undefined;
-  const prev = pipe(
-    O.fromNullable(items[0]),
-    O.map(e => e.id),
-    O.toUndefined
-  );
-  return { hasMoreResults, items, next, prev };
-};
