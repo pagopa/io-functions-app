@@ -13,7 +13,7 @@
     "dist",
     "__mocks__",
     "docker",
-    "**/__tests__",
+
     "Dangerfile.ts"
   ]
 }

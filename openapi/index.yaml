@@ -521,6 +521,7 @@ parameters:
     name: page_size
     in: query
     minimum: 1
+    maximum: 100
     required: false
     description: How many items a page should include.
   MaximumId:

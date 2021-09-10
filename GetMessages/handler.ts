@@ -1,4 +1,7 @@
-import { mapAsyncIterator } from "@pagopa/io-functions-commons/dist/src/utils/async";
+import {
+  asyncIteratorToArray,
+  mapAsyncIterator
+} from "@pagopa/io-functions-commons/dist/src/utils/async";
 import { retrievedMessageToPublic } from "@pagopa/io-functions-commons/dist/src/utils/messages";
 import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
 import {
@@ -36,6 +39,7 @@ import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
+import * as A from "fp-ts/lib/Array";
 
 import {
   NonNegativeInteger,
@@ -60,7 +64,11 @@ import {
 import { BlobService } from "azure-storage";
 import { MessageContent } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageContent";
 import { toCosmosErrorResponse } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
-import { enrichMessageData } from "../utils/messages";
+import {
+  fillPage,
+  PageResults
+} from "@pagopa/io-functions-commons/dist/src/utils/paging";
+import { enrichMessageData, enrichMessagesData } from "../utils/messages";
 
 type RetrievedNotPendingMessage = t.TypeOf<typeof RetrievedNotPendingMessage>;
 const RetrievedNotPendingMessage = t.intersection([
@@ -70,6 +78,8 @@ const RetrievedNotPendingMessage = t.intersection([
 
 type IGetMessagesHandlerResponse =
   | IResponseSuccessPageIdBasedIterator<EnrichedMessage>
+  | IResponseSuccessJson<PageResults>
+  | IResponseErrorInternal
   | IResponseErrorValidation
   | IResponseErrorQuery;
 
@@ -112,9 +122,15 @@ export const GetMessagesHandler = (
     O.getOrElse(() => false)
   );
 
-  const enrichMessage = enrichResultData
-    ? enrichMessageData(messageModel, serviceModel, blobService)
-    : identity;
+  const mapAsyncRight = A.map(async (e: CreatedMessageWithoutContent) =>
+    E.right<Error, CreatedMessageWithoutContent>(e)
+  );
+  
+  const enrichMessage = enrichMessagesData(
+    messageModel,
+    serviceModel,
+    blobService
+  );
 
   return await pipe(
     TE.Do,
@@ -128,18 +144,76 @@ export const GetMessagesHandler = (
         params.minimumId
       )
     ),
+    TE.map(i => mapAsyncIterator(i, A.rights)),
+    TE.map(i => mapAsyncIterator(i, A.filter(RetrievedNotPendingMessage.is))),
+    TE.map(i => mapAsyncIterator(i, A.map(retrievedMessageToPublic))),
+    TE.chain(i => {
+      const x = pipe(
+        TE.fromPredicate(
+          () => enrichResultData === true,
+          () => mapAsyncIterator(i, mapAsyncRight)
+        )(i),
+        TE.map(_ => mapAsyncIterator(_, enrichMessage)),
+        TE.orElse(TE.of)
+      );
+      return x;
+    }),
     TE.map(flattenAsyncIterator),
-    TE.map(i => filterAsyncIterator(i, isRight)),
-    TE.map(i => mapAsyncIterator(i, e => e.right)),
-    TE.map(i => filterAsyncIterator(i, RetrievedNotPendingMessage.is)),
-    TE.map(i => mapAsyncIterator(i, retrievedMessageToPublic)),
-    TE.map(i => mapAsyncIterator(i, enrichMessage)),
+    TE.chain(i => TE.tryCatch(() => fillPageB(i, pageSize), E.toError)),
+    TE.chain(TE.fromEither),
     TE.bimap(
-      failure => ResponseErrorQuery(failure.kind, failure),
-      i => ResponsePageIdBasedIterator(i, pageSize)
+      failure => ResponseErrorInternal(E.toError(failure).message),
+      i => ResponseSuccessJson(i)
     ),
     TE.toUnion
   )();
+};
+
+export const fillPageB = async <
+  T extends E.Either<Error, { readonly id: string }>
+>(
+  iter: AsyncIterator<T, T>,
+  expectedPageSize: NonNegativeInteger
+) => {
+  // eslint-disable-next-line functional/prefer-readonly-type
+  const items: { readonly id: string }[] = [];
+  // eslint-disable-next-line functional/no-let
+  let hasMoreResults: boolean = true;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const { done, value } = await iter.next();
+    if (done) {
+      hasMoreResults = false;
+      break;
+    }
+    if (items.length === expectedPageSize) {
+      break;
+    }
+
+    if (E.isLeft(value)) {
+      return TE.left(new Error("errore"))();
+    } else {
+      // eslint-disable-next-line functional/immutable-data
+      items.push(value.right);
+    }
+  }
+
+  const next = hasMoreResults
+    ? pipe(
+        O.fromNullable(items[items.length - 1]),
+        O.map(e => e.id),
+        O.toUndefined
+      )
+    : undefined;
+  const prev = pipe(
+    O.fromNullable(items[0]),
+    O.map(e => e.id),
+    O.toUndefined
+  );
+  const x = TE.of<Error, PageResults>(
+    PageResults.encode({ hasMoreResults, items, next, prev })
+  )();
+  return x;
 };
 
 /**

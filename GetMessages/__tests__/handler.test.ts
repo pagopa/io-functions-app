@@ -11,7 +11,6 @@ import {
   RetrievedMessageWithoutContent
 } from "@pagopa/io-functions-commons/dist/src/models/message";
 
-import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { TimeToLiveSeconds } from "@pagopa/io-functions-commons/dist/generated/definitions/TimeToLiveSeconds";
 
 import { response as MockResponse } from "jest-mock-express";
@@ -20,9 +19,6 @@ import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetMessagesHandler } from "../handler";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { aServiceId } from "../../__mocks__/mocks.service_preference";
-import { boolean } from "fp-ts";
-import { pipe } from "fp-ts/lib/function";
-import { CreatedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
 const aMessageId = "A_MESSAGE_ID" as NonEmptyString;
@@ -69,7 +65,11 @@ describe("GetMessagesHandler", () => {
       findMessages: jest.fn(() => TE.of(mockIterator))
     };
 
-    const getMessagesHandler = GetMessagesHandler(mockMessageModel as any);
+    const getMessagesHandler = GetMessagesHandler(
+      mockMessageModel as any,
+      {} as any,
+      {} as any
+    );
 
     const result = await getMessagesHandler(
       aFiscalCode,
@@ -103,7 +103,11 @@ describe("GetMessagesHandler", () => {
       findMessages: jest.fn(() => TE.of(mockIterator))
     };
 
-    const getMessagesHandler = GetMessagesHandler(mockMessageModel as any);
+    const getMessagesHandler = GetMessagesHandler(
+      mockMessageModel as any,
+      {} as any,
+      {} as any
+    );
 
     const result = await getMessagesHandler(
       aFiscalCode,
@@ -154,7 +158,11 @@ describe("GetMessagesHandler", () => {
       findMessages: jest.fn(() => TE.of(mockIterator))
     };
 
-    const getMessagesHandler = GetMessagesHandler(mockMessageModel as any);
+    const getMessagesHandler = GetMessagesHandler(
+      mockMessageModel as any,
+      {} as any,
+      {} as any
+    );
 
     const pageSize = 2 as NonNegativeInteger;
 
@@ -207,7 +215,11 @@ describe("GetMessagesHandler", () => {
       findMessages: jest.fn(() => TE.of(mockIterator))
     };
 
-    const getMessagesHandler = GetMessagesHandler(mockMessageModel as any);
+    const getMessagesHandler = GetMessagesHandler(
+      mockMessageModel as any,
+      {} as any,
+      {} as any
+    );
 
     const pageSize = 2 as NonNegativeInteger;
 
@@ -260,7 +272,11 @@ describe("GetMessagesHandler", () => {
       findMessages: jest.fn(() => TE.of(mockIterator))
     };
 
-    const getMessagesHandler = GetMessagesHandler(mockMessageModel as any);
+    const getMessagesHandler = GetMessagesHandler(
+      mockMessageModel as any,
+      {} as any,
+      {} as any
+    );
 
     const pageSize = 2 as NonNegativeInteger;
 
@@ -313,7 +329,11 @@ describe("GetMessagesHandler", () => {
       findMessages: jest.fn(() => TE.of(mockIterator))
     };
 
-    const getMessagesHandler = GetMessagesHandler(mockMessageModel as any);
+    const getMessagesHandler = GetMessagesHandler(
+      mockMessageModel as any,
+      {} as any,
+      {} as any
+    );
 
     const pageSize = 2 as NonNegativeInteger;
 
