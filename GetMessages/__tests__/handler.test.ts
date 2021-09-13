@@ -78,7 +78,7 @@ describe("GetMessagesHandler", () => {
       O.none,
       O.none
     );
-    expect(result.kind).toBe("IResponseSuccessPageIdBasedIterator");
+    expect(result.kind).toBe("IResponseSuccessJson");
 
     const mockResponse = MockResponse();
     await result.apply(mockResponse);
@@ -116,7 +116,7 @@ describe("GetMessagesHandler", () => {
       O.none,
       O.none
     );
-    expect(result.kind).toBe("IResponseSuccessPageIdBasedIterator");
+    expect(result.kind).toBe("IResponseSuccessJson");
 
     const mockResponse = MockResponse();
     await result.apply(mockResponse);
@@ -128,7 +128,7 @@ describe("GetMessagesHandler", () => {
           fiscal_code: aFiscalCode,
           id: aRetrievedMessageWithoutContent.id,
           sender_service_id: aServiceId,
-          created_at: expect.any(Date)
+          created_at: aRetrievedMessageWithoutContent.createdAt
         })
       ]),
       page_size: 1,

@@ -111,63 +111,61 @@ export const GetMessagesHandler = (
   maybeEnrichResultData,
   maybeMaximumId,
   maybeMinimumId
-) => {
-  const pageSize = pipe(
-    maybePageSize,
-    O.getOrElse(() => defaultPageSize)
-  );
-
-  const enrichResultData = pipe(
-    maybeEnrichResultData,
-    O.getOrElse(() => false)
-  );
-
-  const mapAsyncRight = A.map(async (e: CreatedMessageWithoutContent) =>
-    E.right<Error, CreatedMessageWithoutContent>(e)
-  );
-  
-  const enrichMessage = enrichMessagesData(
-    messageModel,
-    serviceModel,
-    blobService
-  );
-
-  return await pipe(
-    TE.Do,
-    TE.bind("maximumId", () => TE.of(O.toUndefined(maybeMaximumId))),
-    TE.bind("minimumId", () => TE.of(O.toUndefined(maybeMinimumId))),
-    TE.chain(params =>
-      messageModel.findMessages(
-        fiscalCode,
-        pageSize,
-        params.maximumId,
-        params.minimumId
-      )
+) =>
+  pipe(
+    T.Do,
+    T.bind("pageSize", () =>
+      T.of(O.getOrElse(() => defaultPageSize)(maybePageSize))
     ),
-    TE.map(i => mapAsyncIterator(i, A.rights)),
-    TE.map(i => mapAsyncIterator(i, A.filter(RetrievedNotPendingMessage.is))),
-    TE.map(i => mapAsyncIterator(i, A.map(retrievedMessageToPublic))),
-    TE.chain(i => {
-      const x = pipe(
-        TE.fromPredicate(
-          () => enrichResultData === true,
-          () => mapAsyncIterator(i, mapAsyncRight)
-        )(i),
-        TE.map(_ => mapAsyncIterator(_, enrichMessage)),
-        TE.orElse(TE.of)
-      );
-      return x;
-    }),
-    TE.map(flattenAsyncIterator),
-    TE.chain(i => TE.tryCatch(() => fillPageB(i, pageSize), E.toError)),
-    TE.chain(TE.fromEither),
-    TE.bimap(
-      failure => ResponseErrorInternal(E.toError(failure).message),
-      i => ResponseSuccessJson(i)
+    T.bind("shouldEnrichResultData", () =>
+      T.of(O.getOrElse(() => false)(maybeEnrichResultData))
     ),
-    TE.toUnion
+    T.bind("maximumId", () => T.of(O.toUndefined(maybeMaximumId))),
+    T.bind("minimumId", () => T.of(O.toUndefined(maybeMinimumId))),
+    T.map(({ pageSize, shouldEnrichResultData, maximumId, minimumId }) =>
+      pipe(
+        messageModel.findMessages(fiscalCode, pageSize, maximumId, minimumId),
+        TE.map(i => mapAsyncIterator(i, A.rights)),
+        TE.map(i =>
+          mapAsyncIterator(i, A.filter(RetrievedNotPendingMessage.is))
+        ),
+        TE.map(i => mapAsyncIterator(i, A.map(retrievedMessageToPublic))),
+        TE.chain(i =>
+          // check whether we should enrich messages or not
+          pipe(
+            TE.fromPredicate(
+              () => shouldEnrichResultData === true,
+              () =>
+                // if no enrichment is requested we just wrap messages in a Promise<Right>
+                mapAsyncIterator(
+                  i,
+                  A.map(async (e: CreatedMessageWithoutContent) =>
+                    E.right<Error, CreatedMessageWithoutContent>(e)
+                  )
+                )
+            )(i),
+            TE.map(i =>
+              mapAsyncIterator(
+                i,
+                enrichMessagesData(messageModel, serviceModel, blobService)
+              )
+            ),
+            TE.orElse(TE.of)
+          )
+        ),
+        TE.map(flattenAsyncIterator),
+        TE.map(i =>
+          mapAsyncIterator(i, async e => pipe(await e, E.getOrElseW(identity)))
+        ),
+        TE.chain(i => TE.tryCatch(() => fillPageC(i, pageSize), E.toError)),
+        TE.bimap(
+          failure => ResponseErrorInternal(E.toError(failure).message),
+          i => ResponseSuccessJson(i)
+        ),
+        TE.toUnion
+      )()
+    )
   )();
-};
 
 export const fillPageB = async <
   T extends E.Either<Error, { readonly id: string }>
@@ -214,6 +212,46 @@ export const fillPageB = async <
     PageResults.encode({ hasMoreResults, items, next, prev })
   )();
   return x;
+};
+
+const fillPageC = async <T extends { readonly id: string }>(
+  iter: AsyncIterator<T, T>,
+  expectedPageSize: NonNegativeInteger
+): Promise<PageResults> => {
+  // eslint-disable-next-line functional/prefer-readonly-type
+  const items: T[] = [];
+  // eslint-disable-next-line functional/no-let
+  let hasMoreResults: boolean = true;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    if (items.length === expectedPageSize) {
+      break;
+    }
+
+    const { done, value } = await iter.next();
+
+    if (done) {
+      hasMoreResults = false;
+      break;
+    }
+
+    // eslint-disable-next-line functional/immutable-data
+    items.push(value);
+  }
+
+  const next = hasMoreResults
+    ? pipe(
+        O.fromNullable(items[items.length - 1]),
+        O.map(e => e.id),
+        O.toUndefined
+      )
+    : undefined;
+  const prev = pipe(
+    O.fromNullable(items[0]),
+    O.map(e => e.id),
+    O.toUndefined
+  );
+  return { hasMoreResults, items, next, prev };
 };
 
 /**

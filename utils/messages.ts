@@ -81,10 +81,8 @@ export const enrichMessagesData = (
   messageModel: MessageModel,
   serviceModel: ServiceModel,
   blobService: BlobService
-) => (
-  messages: CreatedMessageWithoutContent[]
-): Promise<E.Either<Error, EnrichedMessage>>[] => {
-  const x = messages.map(message =>
+) => (messages: readonly CreatedMessageWithoutContent[]) =>
+  messages.map(message =>
     pipe(
       {
         service: pipe(
@@ -103,6 +101,11 @@ export const enrichMessagesData = (
         )
       },
       A.sequenceS(TE.ApplicativePar),
+      TE.mapLeft(() => {
+        console.log(`${message.id} cannot enrich`);
+        console.log(messages);
+        throw new Error("Cannot enrich message data");
+      }),
       TE.map(({ service, subject }) => ({
         ...message,
         message_title: subject,
@@ -111,5 +114,3 @@ export const enrichMessagesData = (
       }))
     )()
   );
-  return x;
-};
