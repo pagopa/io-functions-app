@@ -43,7 +43,7 @@ paths:
         "200":
           description: Found.
           schema:
-            $ref: "#/definitions/PaginatedCreatedMessageWithoutContentCollection"
+            $ref: "#/definitions/PaginatedPublicMessagesCollection"
           examples:
             application/json:
               items:
@@ -529,8 +529,14 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/NewMessage"
   NewProfile:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/NewProfile"
-  PaginatedCreatedMessageWithoutContentCollection:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaginatedCreatedMessageWithoutContentCollection"
+  EnrichedMessage:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/EnrichedMessage"
+  PublicMessage:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PublicMessage"
+  PublicMessagesCollection:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PublicMessagesCollection"
+  PaginatedPublicMessagesCollection:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaginatedPublicMessagesCollection"
   PaginatedServiceTupleCollection:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
   ProblemJson:
