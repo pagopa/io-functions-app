@@ -15,10 +15,11 @@ import { TimeToLiveSeconds } from "@pagopa/io-functions-commons/dist/generated/d
 
 import { response as MockResponse } from "jest-mock-express";
 
-import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
-import { GetMessagesHandler } from "../handler";
+import { retrievedMessageToPublic } from "@pagopa/io-functions-commons/dist/src/utils/messages";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { aServiceId } from "../../__mocks__/mocks.service_preference";
+import { GetMessagesHandler } from "../handler";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
 const aMessageId = "A_MESSAGE_ID" as NonEmptyString;
@@ -118,23 +119,15 @@ describe("GetMessagesHandler", () => {
     );
     expect(result.kind).toBe("IResponseSuccessJson");
 
-    const mockResponse = MockResponse();
-    await result.apply(mockResponse);
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual({
+        has_more_results: false,
+        items: [retrievedMessageToPublic(aRetrievedMessageWithoutContent)],
+        prev: aRetrievedMessageWithoutContent.id,
+        next: undefined
+      });
+    }
 
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      hasMoreResults: false,
-      items: expect.arrayContaining([
-        expect.objectContaining({
-          fiscal_code: aFiscalCode,
-          id: aRetrievedMessageWithoutContent.id,
-          sender_service_id: aServiceId,
-          created_at: aRetrievedMessageWithoutContent.createdAt
-        })
-      ]),
-      page_size: 1,
-      prev: aRetrievedMessageWithoutContent.id,
-      next: undefined
-    });
     expect(mockIterator.next).toHaveBeenCalledTimes(2);
   });
 
@@ -173,25 +166,20 @@ describe("GetMessagesHandler", () => {
       O.none,
       O.none
     );
-    expect(result.kind).toBe("IResponseSuccessPageIdBasedIterator");
+    expect(result.kind).toBe("IResponseSuccessJson");
 
-    const mockResponse = MockResponse();
-    await result.apply(mockResponse);
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual({
+        has_more_results: true,
+        items: [
+          aRetrievedMessageWithoutContent,
+          aRetrievedMessageWithoutContent
+        ].map(retrievedMessageToPublic),
+        prev: aRetrievedMessageWithoutContent.id,
+        next: "A_MESSAGE_ID"
+      });
+    }
 
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      hasMoreResults: true,
-      items: expect.arrayContaining([
-        expect.objectContaining({
-          fiscal_code: aFiscalCode,
-          id: aRetrievedMessageWithoutContent.id,
-          sender_service_id: aServiceId,
-          created_at: expect.any(Date)
-        })
-      ]),
-      page_size: pageSize,
-      next: aRetrievedMessageWithoutContent.id,
-      prev: aRetrievedMessageWithoutContent.id
-    });
     expect(mockIterator.next).toHaveBeenCalledTimes(1);
   });
 
@@ -230,25 +218,20 @@ describe("GetMessagesHandler", () => {
       O.some(aRetrievedMessageWithoutContent.id),
       O.none
     );
-    expect(result.kind).toBe("IResponseSuccessPageIdBasedIterator");
+    expect(result.kind).toBe("IResponseSuccessJson");
 
-    const mockResponse = MockResponse();
-    await result.apply(mockResponse);
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual({
+        hasMoreResults: false,
+        items: [
+          aRetrievedMessageWithoutContent,
+          aRetrievedMessageWithoutContent
+        ].map(retrievedMessageToPublic),
+        prev: aRetrievedMessageWithoutContent.id,
+        next: undefined
+      });
+    }
 
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      hasMoreResults: true,
-      items: expect.arrayContaining([
-        expect.objectContaining({
-          fiscal_code: aFiscalCode,
-          id: aRetrievedMessageWithoutContent.id,
-          sender_service_id: aServiceId,
-          created_at: expect.any(Date)
-        })
-      ]),
-      page_size: pageSize,
-      next: aRetrievedMessageWithoutContent.id,
-      prev: aRetrievedMessageWithoutContent.id
-    });
     expect(mockIterator.next).toHaveBeenCalledTimes(1);
   });
 
@@ -287,29 +270,24 @@ describe("GetMessagesHandler", () => {
       O.none,
       O.some(aRetrievedMessageWithoutContent.id)
     );
-    expect(result.kind).toBe("IResponseSuccessPageIdBasedIterator");
+    expect(result.kind).toBe("IResponseSuccessJson");
 
-    const mockResponse = MockResponse();
-    await result.apply(mockResponse);
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual({
+        hasMoreResults: false,
+        items: [
+          aRetrievedMessageWithoutContent,
+          aRetrievedMessageWithoutContent
+        ].map(retrievedMessageToPublic),
+        prev: aRetrievedMessageWithoutContent.id,
+        next: undefined
+      });
+    }
 
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      hasMoreResults: true,
-      items: expect.arrayContaining([
-        expect.objectContaining({
-          fiscal_code: aFiscalCode,
-          id: aRetrievedMessageWithoutContent.id,
-          sender_service_id: aServiceId,
-          created_at: expect.any(Date)
-        })
-      ]),
-      page_size: pageSize,
-      next: aRetrievedMessageWithoutContent.id,
-      prev: aRetrievedMessageWithoutContent.id
-    });
     expect(mockIterator.next).toHaveBeenCalledTimes(1);
   });
 
-  it("should respond with a page of messages above given enrichment parameter", async () => {
+  it("should respond with a page of messages when given enrichment parameter", async () => {
     const mockIterator = {
       next: jest
         .fn()

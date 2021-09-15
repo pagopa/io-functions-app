@@ -1,5 +1,4 @@
 import {
-  asyncIteratorToArray,
   mapAsyncIterator
 } from "@pagopa/io-functions-commons/dist/src/utils/async";
 import { retrievedMessageToPublic } from "@pagopa/io-functions-commons/dist/src/utils/messages";
@@ -10,20 +9,16 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
   IResponseErrorQuery,
-  IResponseSuccessPageIdBasedIterator,
-  ResponseErrorQuery,
-  ResponsePageIdBasedIterator
+  IResponseSuccessPageIdBasedIterator
 } from "@pagopa/io-functions-commons/dist/src/utils/response";
 
 import {
-  filterAsyncIterator,
   flattenAsyncIterator
 } from "@pagopa/io-functions-commons/dist/src/utils/async";
 
 import {
   defaultPageSize,
   MessageModel,
-  MessageWithoutContent,
   RetrievedMessage
 } from "@pagopa/io-functions-commons/dist/src/models/message";
 
@@ -33,42 +28,32 @@ import { EnrichedMessage } from "@pagopa/io-functions-commons/dist/generated/def
 import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/optional_query_param";
 
 import * as express from "express";
-import { isRight } from "fp-ts/lib/Either";
-import { flow, identity, pipe } from "fp-ts/lib/function";
+import * as A from "fp-ts/lib/Array";
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
 import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
-import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
-import * as A from "fp-ts/lib/Array";
 
+import {
+  ServiceModel
+} from "@pagopa/io-functions-commons/dist/src/models/service";
+import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import {
   NonNegativeInteger,
   NonNegativeIntegerFromString
 } from "@pagopa/ts-commons/lib/numbers";
-import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import {
-  IResponseErrorGeneric,
   IResponseErrorInternal,
   IResponseErrorValidation,
   IResponseSuccessJson,
-  ResponseErrorGeneric,
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as O from "fp-ts/lib/Option";
-import {
-  Service,
-  ServiceModel
-} from "@pagopa/io-functions-commons/dist/src/models/service";
 import { BlobService } from "azure-storage";
-import { MessageContent } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageContent";
-import { toCosmosErrorResponse } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
-import {
-  fillPage,
-  PageResults
-} from "@pagopa/io-functions-commons/dist/src/utils/paging";
-import { enrichMessageData, enrichMessagesData } from "../utils/messages";
+import * as O from "fp-ts/lib/Option";
+import { enrichMessagesData } from "../utils/messages";
 
 type RetrievedNotPendingMessage = t.TypeOf<typeof RetrievedNotPendingMessage>;
 const RetrievedNotPendingMessage = t.intersection([
@@ -78,7 +63,7 @@ const RetrievedNotPendingMessage = t.intersection([
 
 type IGetMessagesHandlerResponse =
   | IResponseSuccessPageIdBasedIterator<EnrichedMessage>
-  | IResponseSuccessJson<PageResults>
+  | IResponseSuccessJson<{}>
   | IResponseErrorInternal
   | IResponseErrorValidation
   | IResponseErrorQuery;
@@ -136,10 +121,11 @@ export const GetMessagesHandler = (
             TE.fromPredicate(
               () => shouldEnrichResultData === true,
               () =>
-                // if no enrichment is requested we just wrap messages in a Promise<Right>
+                // if no enrichment is requested we just wrap messages in a TE
                 mapAsyncIterator(
                   i,
-                  A.map(async (e: CreatedMessageWithoutContent) =>
+                  //A.map(e => TE.of<Error, CreatedMessageWithoutContent>(e))
+                  A.map(async e =>
                     E.right<Error, CreatedMessageWithoutContent>(e)
                   )
                 )
@@ -154,10 +140,17 @@ export const GetMessagesHandler = (
           )
         ),
         TE.map(flattenAsyncIterator),
-        TE.map(i =>
-          mapAsyncIterator(i, async e => pipe(await e, E.getOrElseW(identity)))
+        TE.chain(i =>
+          TE.tryCatch(() => asyncIteratorToPage(i, pageSize), E.toError)
         ),
-        TE.chain(i => TE.tryCatch(() => fillPageC(i, pageSize), E.toError)),
+        TE.chain(({ results, hasMoreResults }) =>
+          pipe(
+            results,
+            E.sequenceArray,
+            E.map(messages => toPageResults(messages, hasMoreResults)),
+            TE.fromEither
+          )
+        ),
         TE.bimap(
           failure => ResponseErrorInternal(E.toError(failure).message),
           i => ResponseSuccessJson(i)
@@ -167,78 +160,40 @@ export const GetMessagesHandler = (
     )
   )();
 
-export const fillPageB = async <
-  T extends E.Either<Error, { readonly id: string }>
->(
-  iter: AsyncIterator<T, T>,
-  expectedPageSize: NonNegativeInteger
-) => {
-  // eslint-disable-next-line functional/prefer-readonly-type
-  const items: { readonly id: string }[] = [];
-  // eslint-disable-next-line functional/no-let
+interface IPage<T> {
+  results: ReadonlyArray<T>;
+  hasMoreResults: boolean;
+}
+
+export const asyncIteratorToPage = async <T>(
+  iter: AsyncIterator<T | Promise<T>>,
+  pageSize: NonNegativeInteger
+): Promise<IPage<T>> => {
+  const acc = Array<T>();
+  // tslint:disable-next-line: no-let
   let hasMoreResults: boolean = true;
+
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const { done, value } = await iter.next();
-    if (done) {
+    const next = await iter.next();
+    if (next.done === true) {
       hasMoreResults = false;
       break;
     }
-    if (items.length === expectedPageSize) {
+    if (acc.length === pageSize) {
       break;
     }
-
-    if (E.isLeft(value)) {
-      return TE.left(new Error("errore"))();
-    } else {
-      // eslint-disable-next-line functional/immutable-data
-      items.push(value.right);
-    }
+    // eslint-disable-next-line functional/immutable-data
+    acc.push(await next.value);
   }
 
-  const next = hasMoreResults
-    ? pipe(
-        O.fromNullable(items[items.length - 1]),
-        O.map(e => e.id),
-        O.toUndefined
-      )
-    : undefined;
-  const prev = pipe(
-    O.fromNullable(items[0]),
-    O.map(e => e.id),
-    O.toUndefined
-  );
-  const x = TE.of<Error, PageResults>(
-    PageResults.encode({ hasMoreResults, items, next, prev })
-  )();
-  return x;
+  return { results: acc, hasMoreResults };
 };
 
-const fillPageC = async <T extends { readonly id: string }>(
-  iter: AsyncIterator<T, T>,
-  expectedPageSize: NonNegativeInteger
-): Promise<PageResults> => {
-  // eslint-disable-next-line functional/prefer-readonly-type
-  const items: T[] = [];
-  // eslint-disable-next-line functional/no-let
-  let hasMoreResults: boolean = true;
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    if (items.length === expectedPageSize) {
-      break;
-    }
-
-    const { done, value } = await iter.next();
-
-    if (done) {
-      hasMoreResults = false;
-      break;
-    }
-
-    // eslint-disable-next-line functional/immutable-data
-    items.push(value);
-  }
-
+const toPageResults = <T extends { readonly id: string }>(
+  items: ReadonlyArray<T>,
+  hasMoreResults: boolean
+) => {
   const next = hasMoreResults
     ? pipe(
         O.fromNullable(items[items.length - 1]),
@@ -251,7 +206,11 @@ const fillPageC = async <T extends { readonly id: string }>(
     O.map(e => e.id),
     O.toUndefined
   );
-  return { hasMoreResults, items, next, prev };
+  return {
+    items,
+    next,
+    prev
+  };
 };
 
 /**

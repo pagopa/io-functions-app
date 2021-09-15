@@ -19,7 +19,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import { BlobService } from "azure-storage";
 import { MessageContent } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageContent";
-import { enrichMessageData } from "../messages";
+import { enrichMessagesData } from "../messages";
 import {
   MessageModel,
   NewMessageWithoutContent,
@@ -30,6 +30,8 @@ import { TimeToLiveSeconds } from "../../generated/backend/TimeToLiveSeconds";
 import { retrievedMessageToPublic } from "@pagopa/io-functions-commons/dist/src/utils/messages";
 import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { EnrichedMessage } from "@pagopa/io-functions-commons/dist/generated/definitions/EnrichedMessage";
+import { pipe } from "fp-ts/lib/function";
+import { CreatedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
 
 const anOrganizationFiscalCode = "01234567890" as OrganizationFiscalCode;
 
@@ -104,20 +106,31 @@ describe("Messages", () => {
   });
 
   it("should return right when message blob and service are correctly retrieved", async () => {
-    const functor = enrichMessageData(
+    const messages = [
+      retrievedMessageToPublic(aRetrievedMessageWithoutContent)
+    ] as CreatedMessageWithoutContent[];
+
+    const enrichMessages = enrichMessagesData(
       messageModelMock,
       serviceModelMock,
       blobServiceMock
     );
 
-    const enrichedMessage = await functor(
-      retrievedMessageToPublic(aRetrievedMessageWithoutContent)
-    );
+    const enrichedMessagesPromises = enrichMessages(messages);
 
-    expect(E.isRight(enrichedMessage)).toBe(true);
-    if (E.isRight(enrichedMessage)) {
-      expect(EnrichedMessage.is(enrichedMessage.right)).toBe(true);
-    }
+    const enrichedMessages = await pipe(
+      TE.tryCatch(async () => Promise.all(enrichedMessagesPromises), void 0),
+      TE.getOrElse(() => {
+        throw Error();
+      })
+    )();
+
+    enrichedMessages.map(enrichedMessage => {
+      expect(E.isRight(enrichedMessage)).toBe(true);
+      if (E.isRight(enrichedMessage)) {
+        expect(EnrichedMessage.is(enrichedMessage.right)).toBe(true);
+      }
+    });
   });
 
   it("should return left when message blob or service are not correctly retrieved", async () => {
@@ -125,7 +138,7 @@ describe("Messages", () => {
       .fn()
       .mockImplementationOnce(() => TE.left(E.toError("error")));
 
-    const functor = enrichMessageData(
+    const functor = enrichMessagesData(
       messageModelMock,
       serviceModelMock,
       blobServiceMock

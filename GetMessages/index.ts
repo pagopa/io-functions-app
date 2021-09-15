@@ -41,7 +41,7 @@ const blobService = createBlobService(config.QueueStorageConnection);
 
 app.get(
   "/api/v1/messages/:fiscalcode",
-  GetMessages(messageModel, serviceModel,blobService)
+  GetMessages(messageModel, serviceModel, blobService)
 );
 
 const azureFunctionHandler = createAzureFunctionHandler(app);
