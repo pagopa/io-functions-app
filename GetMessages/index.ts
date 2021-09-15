@@ -1,3 +1,4 @@
+// tslint:disable: ordered-imports
 import { Context } from "@azure/functions";
 
 import * as express from "express";
@@ -20,7 +21,7 @@ import {
   ServiceModel,
   SERVICE_COLLECTION_NAME
 } from "@pagopa/io-functions-commons/dist/src/models/service";
-import { BlobService, createBlobService } from "azure-storage";
+import { createBlobService } from "azure-storage";
 
 // Setup Express
 const app = express();

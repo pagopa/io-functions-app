@@ -1,7 +1,8 @@
+// tslint:disable: ordered-imports
 import {
   asyncIteratorToPageArray,
-  mapAsyncIterator,
-  flattenAsyncIterator
+  flattenAsyncIterator,
+  mapAsyncIterator
 } from "@pagopa/io-functions-commons/dist/src/utils/async";
 import { retrievedMessageToPublic } from "@pagopa/io-functions-commons/dist/src/utils/messages";
 import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
@@ -10,7 +11,10 @@ import {
   wrapRequestHandler
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import { IResponseErrorQuery } from "@pagopa/io-functions-commons/dist/src/utils/response";
-import { PageResults, toPageResults } from "@pagopa/io-functions-commons/dist/src/utils/paging";
+import {
+  PageResults,
+  toPageResults
+} from "@pagopa/io-functions-commons/dist/src/utils/paging";
 import {
   defaultPageSize,
   MessageModel,
@@ -111,15 +115,15 @@ export const GetMessagesHandler = (
                 // if no enrichment is requested we just wrap messages in a TE
                 mapAsyncIterator(
                   i,
-                  //A.map(e => TE.of<Error, CreatedMessageWithoutContent>(e))
+                  // A.map(e => TE.of<Error, CreatedMessageWithoutContent>(e))
                   A.map(async e =>
                     E.right<Error, CreatedMessageWithoutContent>(e)
                   )
                 )
             )(i),
-            TE.map(i =>
+            TE.map(j =>
               mapAsyncIterator(
-                i,
+                j,
                 enrichMessagesData(messageModel, serviceModel, blobService)
               )
             ),
