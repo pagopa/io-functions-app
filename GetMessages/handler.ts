@@ -1,6 +1,4 @@
-import {
-  mapAsyncIterator
-} from "@pagopa/io-functions-commons/dist/src/utils/async";
+import { mapAsyncIterator } from "@pagopa/io-functions-commons/dist/src/utils/async";
 import { retrievedMessageToPublic } from "@pagopa/io-functions-commons/dist/src/utils/messages";
 import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
 import {
@@ -12,9 +10,7 @@ import {
   IResponseSuccessPageIdBasedIterator
 } from "@pagopa/io-functions-commons/dist/src/utils/response";
 
-import {
-  flattenAsyncIterator
-} from "@pagopa/io-functions-commons/dist/src/utils/async";
+import { flattenAsyncIterator } from "@pagopa/io-functions-commons/dist/src/utils/async";
 
 import {
   defaultPageSize,
@@ -35,9 +31,7 @@ import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 
-import {
-  ServiceModel
-} from "@pagopa/io-functions-commons/dist/src/models/service";
+import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import {
   NonNegativeInteger,
@@ -142,17 +136,18 @@ export const GetMessagesHandler = (
         TE.chain(i =>
           TE.tryCatch(() => asyncIteratorToPage(i, pageSize), E.toError)
         ),
-        TE.chain(({ results, hasMoreResults }) =>
-          pipe(
-            results,
-            E.sequenceArray,
-            E.map(messages => toPageResults(messages, hasMoreResults)),
-            TE.fromEither
+        TE.chain(
+          TE.fromPredicate(
+            page => !page.results.some(E.isLeft),
+            () => new Error("Cannot enrich data")
           )
         ),
+        TE.map(({ hasMoreResults, results }) =>
+          toPageResults(A.rights([...results]), hasMoreResults)
+        ),
         TE.bimap(
-          failure => ResponseErrorInternal(E.toError(failure).message),
-          i => ResponseSuccessJson(i)
+          e => ResponseErrorInternal(e.message),
+          ResponseSuccessJson
         ),
         TE.toUnion
       )()
