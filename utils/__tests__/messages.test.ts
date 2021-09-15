@@ -108,7 +108,7 @@ describe("Messages", () => {
   it("should return right when message blob and service are correctly retrieved", async () => {
     const messages = [
       retrievedMessageToPublic(aRetrievedMessageWithoutContent)
-    ] as CreatedMessageWithoutContent[];
+    ] as readonly CreatedMessageWithoutContent[];
 
     const enrichMessages = enrichMessagesData(
       messageModelMock,
@@ -138,16 +138,27 @@ describe("Messages", () => {
       .fn()
       .mockImplementationOnce(() => TE.left(E.toError("error")));
 
-    const functor = enrichMessagesData(
+    const messages = [
+      retrievedMessageToPublic(aRetrievedMessageWithoutContent)
+    ] as readonly CreatedMessageWithoutContent[];
+
+    const enrichMessages = enrichMessagesData(
       messageModelMock,
       serviceModelMock,
       blobServiceMock
     );
 
-    const enrichedMessage = await functor(
-      retrievedMessageToPublic(aRetrievedMessageWithoutContent)
-    );
+    const enrichedMessagesPromises = enrichMessages(messages);
 
-    expect(E.isLeft(enrichedMessage)).toBe(true);
+    const enrichedMessages = await pipe(
+      TE.tryCatch(async () => Promise.all(enrichedMessagesPromises), void 0),
+      TE.getOrElse(() => {
+        throw Error();
+      })
+    )();
+
+    enrichedMessages.map(enrichedMessage => {
+      expect(E.isLeft(enrichedMessage)).toBe(true);
+    });
   });
 });

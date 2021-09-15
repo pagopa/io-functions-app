@@ -37,5 +37,7 @@ export const aServicePreference: ServicePreference = {
 export const aRetrievedService: RetrievedService = ({
   ...aCosmosResourceMetadata,
   serviceId: aServiceId,
-  isVisible: true
+  isVisible: true,
+  serviceName: "a Service",
+  organizationName: "a Organization"
 } as any) as RetrievedService;

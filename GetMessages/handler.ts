@@ -62,7 +62,6 @@ const RetrievedNotPendingMessage = t.intersection([
 ]);
 
 type IGetMessagesHandlerResponse =
-  | IResponseSuccessPageIdBasedIterator<EnrichedMessage>
   | IResponseSuccessJson<{}>
   | IResponseErrorInternal
   | IResponseErrorValidation
