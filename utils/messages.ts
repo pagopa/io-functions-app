@@ -24,6 +24,7 @@ export const enrichMessagesData = (
   blobService: BlobService
 ) => (
   messages: readonly CreatedMessageWithoutContent[]
+  // tslint:disable-next-line: array-type readonly-array
 ): Promise<E.Either<Error, EnrichedMessage>>[] =>
   messages.map(message =>
     pipe(
