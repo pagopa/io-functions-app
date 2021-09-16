@@ -136,7 +136,7 @@ describe("Messages", () => {
   it("should return left when message blob or service are not correctly retrieved", async () => {
     serviceModelMock.findLastVersionByModelId = jest
       .fn()
-      .mockImplementationOnce(() => TE.left(E.toError("error")));
+      .mockImplementationOnce(() => TE.left(new Error("error")));
 
     const messages = [
       retrievedMessageToPublic(aRetrievedMessageWithoutContent)

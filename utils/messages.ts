@@ -1,4 +1,5 @@
 import { CreatedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
+import { EnrichedMessage } from "@pagopa/io-functions-commons/dist/generated/definitions/EnrichedMessage";
 import { MessageModel } from "@pagopa/io-functions-commons/dist/src/models/message";
 import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { BlobService } from "azure-storage";
@@ -21,7 +22,9 @@ export const enrichMessagesData = (
   messageModel: MessageModel,
   serviceModel: ServiceModel,
   blobService: BlobService
-) => (messages: readonly CreatedMessageWithoutContent[]) =>
+) => (
+  messages: readonly CreatedMessageWithoutContent[]
+): Promise<E.Either<Error, EnrichedMessage>>[] =>
   messages.map(message =>
     pipe(
       {

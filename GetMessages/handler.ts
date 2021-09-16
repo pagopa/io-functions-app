@@ -115,10 +115,9 @@ export const GetMessagesHandler = (
             TE.fromPredicate(
               () => shouldEnrichResultData === true,
               () =>
-                // if no enrichment is requested we just wrap messages in a TE
+                // if no enrichment is requested we just wrap messages
                 mapAsyncIterator(
                   i,
-                  // A.map(e => TE.of<Error, CreatedMessageWithoutContent>(e))
                   A.map(async e =>
                     E.right<Error, CreatedMessageWithoutContent>(e)
                   )
@@ -130,6 +129,7 @@ export const GetMessagesHandler = (
                 enrichMessagesData(messageModel, serviceModel, blobService)
               )
             ),
+            // we need to make a TaskEither of the Either[] mapped above
             TE.orElse(TE.of),
             TE.map(flattenAsyncIterator),
             TE.chain(_ =>
