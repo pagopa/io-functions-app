@@ -29,7 +29,6 @@ import * as express from "express";
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
-import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
