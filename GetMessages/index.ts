@@ -1,3 +1,4 @@
+// tslint:disable: ordered-imports
 import { Context } from "@azure/functions";
 
 import * as express from "express";
@@ -16,6 +17,11 @@ import { cosmosdbInstance } from "../utils/cosmosdb";
 import { GetMessages } from "./handler";
 
 import { getConfigOrThrow } from "../utils/config";
+import {
+  ServiceModel,
+  SERVICE_COLLECTION_NAME
+} from "@pagopa/io-functions-commons/dist/src/models/service";
+import { createBlobService } from "azure-storage";
 
 // Setup Express
 const app = express();
@@ -28,7 +34,16 @@ const messageModel = new MessageModel(
   config.MESSAGE_CONTAINER_NAME
 );
 
-app.get("/api/v1/messages/:fiscalcode", GetMessages(messageModel));
+const serviceModel = new ServiceModel(
+  cosmosdbInstance.container(SERVICE_COLLECTION_NAME)
+);
+
+const blobService = createBlobService(config.QueueStorageConnection);
+
+app.get(
+  "/api/v1/messages/:fiscalcode",
+  GetMessages(messageModel, serviceModel, blobService)
+);
 
 const azureFunctionHandler = createAzureFunctionHandler(app);
 

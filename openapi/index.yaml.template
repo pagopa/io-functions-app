@@ -35,12 +35,15 @@ paths:
         - restricted
       parameters:
         - $ref: "#/parameters/FiscalCode"
-        - $ref: "#/parameters/PaginationRequest"
+        - $ref: '#/parameters/PageSize'
+        - $ref: '#/parameters/MaximumId'
+        - $ref: '#/parameters/MinimumId'
+        - $ref: '#/parameters/EnrichResultData'
       responses:
         "200":
           description: Found.
           schema:
-            $ref: "#/definitions/PaginatedCreatedMessageWithoutContentCollection"
+            $ref: "#/definitions/PaginatedPublicMessagesCollection"
           examples:
             application/json:
               items:
@@ -481,6 +484,34 @@ parameters:
     minimum: 1
     description: An opaque identifier that points to the next item in the collection.
     x-example: 01BX9NSMKVXXS5PSP2FATZM123
+  PageSize:
+    type: integer
+    name: page_size
+    in: query
+    minimum: 1
+    maximum: 100
+    required: false
+    description: How many items a page should include.
+  MaximumId:
+    type: string
+    name: maximum_id
+    in: query
+    required: false
+    description: >-
+      The maximum id to get messages until to.
+  MinimumId:
+    type: string
+    name: minimum_id
+    in: query
+    required: false
+    description: >-
+      The minimum id to get messages from.
+  EnrichResultData:
+    type: boolean
+    name: enrich_result_data
+    in: query
+    required: false
+    description: Indicates whether result data should be enriched or not.
   UserDataProcessingChoiceParam:
     name: choice
     in: path
@@ -498,8 +529,14 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/NewMessage"
   NewProfile:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/NewProfile"
-  PaginatedCreatedMessageWithoutContentCollection:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaginatedCreatedMessageWithoutContentCollection"
+  EnrichedMessage:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/EnrichedMessage"
+  PublicMessage:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PublicMessage"
+  PublicMessagesCollection:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PublicMessagesCollection"
+  PaginatedPublicMessagesCollection:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaginatedPublicMessagesCollection"
   PaginatedServiceTupleCollection:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
   ProblemJson:

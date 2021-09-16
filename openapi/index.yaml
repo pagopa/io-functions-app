@@ -40,12 +40,15 @@ paths:
         - restricted
       parameters:
         - $ref: '#/parameters/FiscalCode'
-        - $ref: '#/parameters/PaginationRequest'
+        - $ref: '#/parameters/PageSize'
+        - $ref: '#/parameters/MaximumId'
+        - $ref: '#/parameters/MinimumId'
+        - $ref: '#/parameters/EnrichResultData'
       responses:
         '200':
           description: Found.
           schema:
-            $ref: '#/definitions/PaginatedCreatedMessageWithoutContentCollection'
+            $ref: '#/definitions/PaginatedPublicMessagesCollection'
           examples:
             application/json:
               items:
@@ -513,6 +516,32 @@ parameters:
     minimum: 1
     description: An opaque identifier that points to the next item in the collection.
     x-example: 01BX9NSMKVXXS5PSP2FATZM123
+  PageSize:
+    type: integer
+    name: page_size
+    in: query
+    minimum: 1
+    maximum: 100
+    required: false
+    description: How many items a page should include.
+  MaximumId:
+    type: string
+    name: maximum_id
+    in: query
+    required: false
+    description: The maximum id to get messages until to.
+  MinimumId:
+    type: string
+    name: minimum_id
+    in: query
+    required: false
+    description: The minimum id to get messages from.
+  EnrichResultData:
+    type: boolean
+    name: enrich_result_data
+    in: query
+    required: false
+    description: Indicates whether result data should be enriched or not.
   UserDataProcessingChoiceParam:
     name: choice
     in: path
@@ -603,10 +632,52 @@ definitions:
         $ref: '#/definitions/IsTestProfile'
     required:
       - is_email_validated
-  PaginatedCreatedMessageWithoutContentCollection:
+  EnrichedMessage:
+    type: object
+    properties:
+      id:
+        type: string
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+      time_to_live:
+        $ref: '#/definitions/TimeToLiveSeconds'
+      created_at:
+        $ref: '#/definitions/Timestamp'
+      sender_service_id:
+        $ref: '#/definitions/ServiceId'
+      service_name:
+        type: string
+      organization_name:
+        type: string
+      message_title:
+        type: string
+    required:
+      - id
+      - fiscal_code
+      - created_at
+      - sender_service_id
+      - service_name
+      - organization_name
+      - message_title
+  PublicMessage:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/CreatedMessageWithoutContent'
+      - $ref: '#/definitions/EnrichedMessage'
+  PublicMessagesCollection:
+    description: A collection of messages
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          $ref: '#/definitions/PublicMessage'
+    required:
+      - items
+  PaginatedPublicMessagesCollection:
     description: A paginated collection of messages
     allOf:
-      - $ref: '#/definitions/CreatedMessageWithoutContentCollection'
+      - $ref: '#/definitions/PublicMessagesCollection'
       - $ref: '#/definitions/PaginationResponse'
   PaginatedServiceTupleCollection:
     description: A paginated collection of services tuples
@@ -1082,18 +1153,14 @@ definitions:
     type: object
     description: Pagination response parameters.
     properties:
-      page_size:
-        type: integer
-        minimum: 1
-        description: Number of items returned for each page.
-        example: 2
+      prev:
+        type: string
+        description: Contains a value useful to get the previous page
+        example: first_id_of_the_page
       next:
         type: string
-        description: |-
-          Contains an URL to GET the next results page in the
-          retrieved collection of items.
-        format: uri
-        example: https://example.com/?p=0XXX2
+        description: Contains a value useful to get the next page
+        example: last_id_of_the_page
   NotificationChannel:
     type: string
     description: All notification channels.
