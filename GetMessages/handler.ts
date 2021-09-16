@@ -10,7 +10,10 @@ import {
   withRequestMiddlewares,
   wrapRequestHandler
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
-import { IResponseErrorQuery } from "@pagopa/io-functions-commons/dist/src/utils/response";
+import {
+  IResponseErrorQuery,
+  ResponseErrorQuery
+} from "@pagopa/io-functions-commons/dist/src/utils/response";
 import {
   PageResults,
   toPageResults
@@ -89,24 +92,25 @@ export const GetMessagesHandler = (
   maybeMinimumId
 ) =>
   pipe(
-    T.Do,
-    T.bind("pageSize", () =>
-      T.of(O.getOrElse(() => defaultPageSize)(maybePageSize))
+    TE.Do,
+    TE.bind("pageSize", () =>
+      TE.of(O.getOrElse(() => defaultPageSize)(maybePageSize))
     ),
-    T.bind("shouldEnrichResultData", () =>
-      T.of(O.getOrElse(() => false)(maybeEnrichResultData))
+    TE.bind("shouldEnrichResultData", () =>
+      TE.of(O.getOrElse(() => false)(maybeEnrichResultData))
     ),
-    T.bind("maximumId", () => T.of(O.toUndefined(maybeMaximumId))),
-    T.bind("minimumId", () => T.of(O.toUndefined(maybeMinimumId))),
-    T.map(({ pageSize, shouldEnrichResultData, maximumId, minimumId }) =>
+    TE.bind("maximumId", () => TE.of(O.toUndefined(maybeMaximumId))),
+    TE.bind("minimumId", () => TE.of(O.toUndefined(maybeMinimumId))),
+    TE.chain(({ pageSize, shouldEnrichResultData, maximumId, minimumId }) =>
       pipe(
         messageModel.findMessages(fiscalCode, pageSize, maximumId, minimumId),
+        TE.mapLeft(failure => ResponseErrorQuery(failure.kind, failure)),
         TE.map(i => mapAsyncIterator(i, A.rights)),
         TE.map(i =>
           mapAsyncIterator(i, A.filter(RetrievedNotPendingMessage.is))
         ),
         TE.map(i => mapAsyncIterator(i, A.map(retrievedMessageToPublic))),
-        TE.chain(i =>
+        TE.chainW(i =>
           // check whether we should enrich messages or not
           pipe(
             TE.fromPredicate(
@@ -127,26 +131,30 @@ export const GetMessagesHandler = (
                 enrichMessagesData(messageModel, serviceModel, blobService)
               )
             ),
-            TE.orElse(TE.of)
+            TE.orElse(TE.of),
+            TE.map(flattenAsyncIterator),
+            TE.chain(_ =>
+              TE.tryCatch(
+                () => asyncIteratorToPageArray(_, pageSize),
+                E.toError
+              )
+            ),
+            TE.chain(
+              TE.fromPredicate(
+                page => !page.results.some(E.isLeft),
+                () => new Error("Cannot enrich data")
+              )
+            ),
+            TE.map(({ hasMoreResults, results }) =>
+              toPageResults(A.rights([...results]), hasMoreResults)
+            ),
+            TE.mapLeft(e => ResponseErrorInternal(e.message))
           )
-        ),
-        TE.map(flattenAsyncIterator),
-        TE.chain(i =>
-          TE.tryCatch(() => asyncIteratorToPageArray(i, pageSize), E.toError)
-        ),
-        TE.chain(
-          TE.fromPredicate(
-            page => !page.results.some(E.isLeft),
-            () => new Error("Cannot enrich data")
-          )
-        ),
-        TE.map(({ hasMoreResults, results }) =>
-          toPageResults(A.rights([...results]), hasMoreResults)
-        ),
-        TE.bimap(e => ResponseErrorInternal(e.message), ResponseSuccessJson),
-        TE.toUnion
-      )()
-    )
+        )
+      )
+    ),
+    TE.map(ResponseSuccessJson),
+    TE.toUnion
   )();
 
 /**

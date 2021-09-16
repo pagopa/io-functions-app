@@ -3,19 +3,13 @@
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-
 import {
   MessageModel,
   NewMessageWithoutContent,
   RetrievedMessageWithoutContent
 } from "@pagopa/io-functions-commons/dist/src/models/message";
-
 import { TimeToLiveSeconds } from "@pagopa/io-functions-commons/dist/generated/definitions/TimeToLiveSeconds";
-
-import { response as MockResponse } from "jest-mock-express";
-
 import { retrievedMessageToPublic } from "@pagopa/io-functions-commons/dist/src/utils/messages";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
@@ -27,6 +21,7 @@ import { GetMessagesHandler } from "../handler";
 import { MessageContent } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageContent";
 import { BlobService } from "azure-storage";
 import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
+import { toCosmosErrorResponse } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
 const aMessageId = "A_MESSAGE_ID" as NonEmptyString;
@@ -83,11 +78,33 @@ const getMessageModelMock = messageIterator =>
     findMessages: jest.fn(() => TE.of(messageIterator))
   } as unknown) as MessageModel);
 
+const errorMessageModelMock = ({
+  getContentFromBlob: jest.fn(() => TE.left("Error blob")),
+  findMessages: jest.fn(() => TE.left(toCosmosErrorResponse("Not found")))
+} as unknown) as MessageModel;
+
 const serviceModelMock = ({
-  findLastVersionByModelId: () => TE.of(O.some(aRetrievedService))
+  findLastVersionByModelId: jest.fn(() => TE.of(O.some(aRetrievedService)))
 } as unknown) as ServiceModel;
 
 describe("GetMessagesHandler", () => {
+  it("should respond with query error if it cannot retrieve messages", async () => {
+    const getMessagesHandler = GetMessagesHandler(
+      errorMessageModelMock,
+      serviceModelMock,
+      blobServiceMock
+    );
+
+    const result = await getMessagesHandler(
+      aFiscalCode,
+      O.none,
+      O.none,
+      O.none,
+      O.none
+    );
+    expect(result.kind).toBe("IResponseErrorQuery");
+  });
+
   it("should respond with the messages for the recipient when no parameters are given", async () => {
     const messages = [E.right(aRetrievedMessageWithoutContent)];
     const messageIterator = getMockIterator(messages);
@@ -358,6 +375,44 @@ describe("GetMessagesHandler", () => {
       });
     }
 
+    expect(messageIterator.next).toHaveBeenCalledTimes(1);
+  });
+
+  it("should respond with internal error when messages cannot be enriched", async () => {
+    const messages = [
+      E.right(aRetrievedMessageWithoutContent),
+      E.right(aRetrievedMessageWithoutContent),
+      E.right(aRetrievedMessageWithoutContent),
+      E.right(aRetrievedMessageWithoutContent),
+      E.right(aRetrievedMessageWithoutContent),
+      E.right(aRetrievedPendingMessageWithoutContent)
+    ];
+    const messageIterator = getMockIterator(messages);
+    const messageModelMock = getMessageModelMock(messageIterator);
+
+    serviceModelMock.findLastVersionByModelId = jest
+      .fn()
+      .mockImplementationOnce(() => {
+        throw Error();
+      });
+
+    const getMessagesHandler = GetMessagesHandler(
+      messageModelMock,
+      serviceModelMock,
+      blobServiceMock
+    );
+
+    const pageSize = 2 as NonNegativeInteger;
+
+    const result = await getMessagesHandler(
+      aFiscalCode,
+      O.some(pageSize),
+      O.some(true),
+      O.none,
+      O.none
+    );
+
+    expect(result.kind).toBe("IResponseErrorInternal");
     expect(messageIterator.next).toHaveBeenCalledTimes(1);
   });
 });
