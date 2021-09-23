@@ -12,7 +12,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 const DEFAULT_SAMPLING_PERCENTAGE = 5;
 
 // Avoid to initialize Application Insights more than once
-            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const initTelemetryClient = (env = process.env) =>
   ai.defaultClient
     ? ai.defaultClient

@@ -13,14 +13,11 @@ import * as ai from "applicationinsights";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { EmailString } from "@pagopa/ts-commons/lib/strings";
 
-            // eslint-disable-next-line import/order
-import { EmailDefaults } from "./";
-            // eslint-disable-next-line import/order
-import { getEmailHtmlFromTemplate } from "./template";
-
 import { sendMail } from "@pagopa/io-functions-commons/dist/src/mailer";
 import { pipe } from "fp-ts/lib/function";
 import { createTracker } from "../utils/tracking";
+import { getEmailHtmlFromTemplate } from "./template";
+import { EmailDefaults } from "./";
 
 // Activity input
 export const ActivityInput = t.interface({

@@ -4,7 +4,7 @@ import { RetrievedUserDataProcessing } from "@pagopa/io-functions-commons/dist/s
 /**
  * Converts a RetrievedUserDataProcessing model to an UserDataProcessing
  */
-            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function toUserDataProcessingApi(
   userDataProcessing: RetrievedUserDataProcessing
 ): UserDataProcessing {

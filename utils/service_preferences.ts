@@ -60,7 +60,7 @@ export const toDefaultDisabledUserServicePreference = (
  * @param profile
  * @returns
  */
-            // eslint-disable-next-line arrow-body-style
+// eslint-disable-next-line arrow-body-style
 export const nonLegacyServicePreferences = (profile: Profile): boolean => {
   return (
     profile.servicePreferencesSettings.mode ===
@@ -77,7 +77,7 @@ export const nonLegacyServicePreferences = (profile: Profile): boolean => {
  * @param profile
  * @returns
  */
-            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function getServicePreferenceSettingsVersion(
   profile
 ): TE.TaskEither<Error, NonNegativeInteger> {

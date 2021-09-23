@@ -1,5 +1,3 @@
-            // eslint-disable-next-line prettier/prettier
-
 import { Context } from "@azure/functions";
 
 import * as express from "express";
@@ -14,18 +12,14 @@ import {
 
 import createAzureFunctionHandler from "@pagopa/express-azure-functions/dist/src/createAzureFunctionsHandler";
 
-import { cosmosdbInstance } from "../utils/cosmosdb";
-import { GetMessages } from "./handler";
-
-            // eslint-disable-next-line import/order
-import { getConfigOrThrow } from "../utils/config";
-            // eslint-disable-next-line import/order
 import {
   ServiceModel,
   SERVICE_COLLECTION_NAME
 } from "@pagopa/io-functions-commons/dist/src/models/service";
-            // eslint-disable-next-line import/order
 import { createBlobService } from "azure-storage";
+import { cosmosdbInstance } from "../utils/cosmosdb";
+import { getConfigOrThrow } from "../utils/config";
+import { GetMessages } from "./handler";
 
 // Setup Express
 const app = express();
@@ -52,7 +46,7 @@ app.get(
 const azureFunctionHandler = createAzureFunctionHandler(app);
 
 // Binds the express app to an Azure Function handler
-            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function httpStart(context: Context): void {
   setAppContext(app, context);
   azureFunctionHandler(context);

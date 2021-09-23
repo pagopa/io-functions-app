@@ -52,12 +52,12 @@ type ICreateProfileHandler = (
   | IResponseErrorConflict
 >;
 
-            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function CreateProfileHandler(
   profileModel: ProfileModel,
   optOutEmailSwitchDate: Date
 ): ICreateProfileHandler {
-            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   return async (context, fiscalCode, createProfilePayload) => {
     const logPrefix = `CreateProfileHandler|FISCAL_CODE=${fiscalCode}`;
 
@@ -123,7 +123,7 @@ export function CreateProfileHandler(
 /**
  * Wraps an CreateProfile handler inside an Express request handler.
  */
-            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function CreateProfile(
   profileModel: ProfileModel,
   optOutEmailSwitchDate: Date

@@ -38,12 +38,12 @@ type IGetVisibleServicesHandler = () => Promise<IGetVisibleServicesHandlerRet>;
 /**
  * Returns all the visible services (is_visible = true).
  */
-            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function GetVisibleServicesHandler(
   blobService: BlobService,
   onlyNationalService: boolean
 ): IGetVisibleServicesHandler {
-            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   return async () => {
     const errorOrMaybeVisibleServicesJson = await getBlobAsObject(
       t.record(ServiceId, VisibleService),
@@ -85,7 +85,7 @@ export function GetVisibleServicesHandler(
 /**
  * Wraps a GetVisibleServices handler inside an Express request handler.
  */
-            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function GetVisibleServices(
   blobService: BlobService,
   onlyNationalService: boolean

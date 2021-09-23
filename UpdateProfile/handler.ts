@@ -58,8 +58,6 @@ type IUpdateProfileHandler = (
   fiscalCode: FiscalCode,
   profilePayload: ApiProfile
 ) => Promise<
-            // eslint-disable-next-line sonar/max-union-size
-  // eslint-disable-next-line sonar/max-union-size
   | IResponseSuccessJson<ApiProfile>
   | IResponseErrorQuery
   | IResponseErrorNotFound
@@ -90,13 +88,13 @@ const migratePreferences = (
   );
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
-            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function UpdateProfileHandler(
   profileModel: ProfileModel,
   queueClient: QueueClient,
   tracker: ReturnType<typeof createTracker>
 ): IUpdateProfileHandler {
-            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   return async (context, fiscalCode, profilePayload) => {
     const logPrefix = `UpdateProfileHandler|FISCAL_CODE=${toHash(fiscalCode)}`;
 
@@ -288,7 +286,7 @@ export function UpdateProfileHandler(
 /**
  * Wraps an UpdateProfile handler inside an Express request handler.
  */
-            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function UpdateProfile(
   profileModel: ProfileModel,
   queueClient: QueueClient,

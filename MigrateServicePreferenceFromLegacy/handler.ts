@@ -37,7 +37,7 @@ export type MigrateServicesPreferencesQueueMessage = t.TypeOf<
   typeof MigrateServicesPreferencesQueueMessage
 >;
 
-            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function isCosmosError(
   ce: CosmosErrors
 ): ce is ReturnType<typeof CosmosErrorResponse> {
@@ -62,10 +62,10 @@ export const createServicePreference = (
   settingsVersion: version
 });
 
-            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const blockedsToServicesPreferences = (
   blocked: {
-            // eslint-disable-next-line functional/prefer-readonly-type, @typescript-eslint/array-type
+    // eslint-disable-next-line functional/prefer-readonly-type, @typescript-eslint/array-type
     [x: string]: readonly BlockedInboxOrChannelEnum[];
   },
   fiscalCode: FiscalCode,
@@ -95,7 +95,7 @@ export const blockedsToServicesPreferences = (
 export const MigrateServicePreferenceFromLegacy = (
   servicePreferenceModel: ServicesPreferencesModel,
   tracker: ReturnType<typeof createTracker>
-            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => async (context: Context, input: unknown) =>
   pipe(
     MigrateServicesPreferencesQueueMessage.decode(input),

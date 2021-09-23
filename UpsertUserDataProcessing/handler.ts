@@ -50,19 +50,17 @@ type IUpsertUserDataProcessingHandler = (
 
   userDataProcessingChoiceRequest: UserDataProcessingChoiceRequest
 ) => Promise<
-            // eslint-disable-next-line sonar/max-union-size
-  // eslint-disable-next-line sonar/max-union-size
   | IResponseSuccessJson<UserDataProcessingApi>
   | IResponseErrorValidation
   | IResponseErrorQuery
   | IResponseErrorConflict
 >;
 
-            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function UpsertUserDataProcessingHandler(
   userDataProcessingModel: UserDataProcessingModel
 ): IUpsertUserDataProcessingHandler {
-            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   return async (context, fiscalCode, upsertUserDataProcessingPayload) => {
     const logPrefix = `UpsertUserDataProcessingHandler|FISCAL_CODE=${
       fiscalCode === undefined ? undefined : fiscalCode.substring(0, 5)
@@ -148,7 +146,7 @@ export function UpsertUserDataProcessingHandler(
 /**
  * Wraps an UpsertUserDataProcessing handler inside an Express request handler.
  */
-            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function UpsertUserDataProcessing(
   userDataProcessingModel: UserDataProcessingModel
 ): express.RequestHandler {

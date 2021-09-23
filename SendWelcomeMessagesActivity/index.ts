@@ -5,10 +5,8 @@ import {
   toFetch
 } from "@pagopa/ts-commons/lib/fetch";
 import { Millisecond } from "@pagopa/ts-commons/lib/units";
-import { getActivityFunction } from "./handler";
-
-            // eslint-disable-next-line import/order
 import { getConfigOrThrow } from "../utils/config";
+import { getActivityFunction } from "./handler";
 
 // HTTP external requests timeout in milliseconds
 const DEFAULT_REQUEST_TIMEOUT_MS = 10000;

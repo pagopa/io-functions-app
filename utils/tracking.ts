@@ -7,17 +7,17 @@ import { UpdateSubscriptionFeedInput } from "../UpsertServicePreferences/subscri
 import { initTelemetryClient } from "./appinsights";
 import { toHash } from "./crypto";
 
-            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const createTracker = (
   telemetryClient: ReturnType<typeof initTelemetryClient>
 ) => {
-            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const eventName = (name: string) => `api.profile.${name}`;
 
   /**
    * Trace an event when a user changes their preference mode
    */
-            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const traceServicePreferenceModeChange = (
     fiscalCode: FiscalCode,
     previousMode: ServicesPreferencesModeEnum,
@@ -38,7 +38,7 @@ export const createTracker = (
   /**
    * Trace an event when a user has previous preferences to migrate
    */
-            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const traceMigratingServicePreferences = (
     oldProfile: RetrievedProfile,
     newProfile: RetrievedProfile,
@@ -61,7 +61,7 @@ export const createTracker = (
       tagOverrides: { samplingEnabled: "false" }
     });
 
-            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const trackSubscriptionFeedFailure = (
     { fiscalCode, version, updatedAt, ...input }: UpdateSubscriptionFeedInput,
     kind: "EXCEPTION" | "FAILURE"
@@ -79,7 +79,7 @@ export const createTracker = (
     } as EventTelemetry);
   };
 
-            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/ban-types
   const traceEmailValidationSend = (messageInfo: object) => {
     telemetryClient.trackEvent({
       name: `SendValidationEmailActivity.success`,

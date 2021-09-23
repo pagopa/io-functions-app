@@ -34,7 +34,7 @@ export const updateSubscriptionFeedTask = (
   input: UpdateSubscriptionFeedInput,
   logPrefix: string,
   tracker: ReturnType<typeof createTracker>
-            // eslint-disable-next-line max-params
+  // eslint-disable-next-line max-params
 ): TE.TaskEither<IResponseErrorQuery, boolean> =>
   pipe(
     TE.tryCatch(

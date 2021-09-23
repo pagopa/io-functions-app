@@ -1,4 +1,4 @@
-            // eslint-disable-next-line prettier/prettier
+// eslint-disable-next-line prettier/prettier
 
 import {
   asyncIteratorToPageArray,
@@ -84,14 +84,13 @@ export const GetMessagesHandler = (
   messageModel: MessageModel,
   serviceModel: ServiceModel,
   blobService: BlobService
-            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ): IGetMessagesHandler => async (
   fiscalCode,
   maybePageSize,
   maybeEnrichResultData,
   maybeMaximumId,
   maybeMinimumId
-) =>
+): Promise<IGetMessagesHandlerResponse> =>
   pipe(
     TE.Do,
     TE.bind("pageSize", () =>
@@ -161,12 +160,11 @@ export const GetMessagesHandler = (
 /**
  * Wraps a GetMessages handler inside an Express request handler.
  */
-            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-export function GetMessages(
+export const GetMessages = (
   messageModel: MessageModel,
   serviceModel: ServiceModel,
   blobService: BlobService
-): express.RequestHandler {
+): express.RequestHandler => {
   const handler = GetMessagesHandler(messageModel, serviceModel, blobService);
   const middlewaresWrap = withRequestMiddlewares(
     FiscalCodeMiddleware,
@@ -176,4 +174,4 @@ export function GetMessages(
     OptionalQueryParamMiddleware("minimum_id", NonEmptyString)
   );
   return wrapRequestHandler(middlewaresWrap(handler));
-}
+};

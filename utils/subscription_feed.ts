@@ -53,7 +53,7 @@ export const updateSubscriptionStatus = (
   deleteOtherEntities: ReadonlyArray<SubscriptionFeedEntitySelector>,
   insertEntity: SubscriptionFeedEntitySelector,
   allowInsertIfDeleted: boolean
-            // eslint-disable-next-line max-params
+  // eslint-disable-next-line max-params
 ): Promise<true> => {
   const insertEntityHandler = insertTableEntity(tableService, tableName);
   const deleteEntityHandler = deleteTableEntity(tableService, tableName);

@@ -18,7 +18,7 @@ export const insertTableEntity = (
     Either<Error, T | TableService.EntityMetadata>,
     ServiceResponse | null
   >
-            // eslint-disable-next-line arrow-body-style
+  // eslint-disable-next-line arrow-body-style
 > => {
   return new Promise(resolve =>
     tableService.insertEntity(
@@ -51,7 +51,7 @@ export const deleteTableEntity = (
   table: string
 ) => <T>(
   entityDescriptor: T
-            // eslint-disable-next-line arrow-body-style
+  // eslint-disable-next-line arrow-body-style
 ): Promise<ITuple2<Option<Error>, ServiceResponse | null>> => {
   return new Promise(resolve =>
     tableService.deleteEntity(
