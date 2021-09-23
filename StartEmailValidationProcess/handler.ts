@@ -47,7 +47,7 @@ import {
 } from "./orchestrators";
 
 type ReturnTypes =
-  // tslint:disable-next-line: max-union-size
+  // eslint-disable-next-line sonar/max-union-size
   | IResponseSuccessJson<{}>
   | IResponseErrorValidation
   | IResponseErrorQuery

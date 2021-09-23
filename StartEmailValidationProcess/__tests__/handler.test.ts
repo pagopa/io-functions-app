@@ -1,4 +1,4 @@
-/* tslint:disable: no-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as durableFunction from "durable-functions";
 import { some } from "fp-ts/lib/Option";
 import { taskEither } from "fp-ts/lib/TaskEither";

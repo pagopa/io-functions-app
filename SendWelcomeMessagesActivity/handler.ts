@@ -42,7 +42,7 @@ const welcomeMessages: WelcomeMessages = {
       }),
       E.getOrElse(throwInvalidMessageError)
     ),
-  // tslint:disable-next-line: object-literal-sort-keys
+  // eslint-disable-next-line sort-keys
   HOWTO: (_: RetrievedProfile) =>
     pipe(
       NewMessage.decode({

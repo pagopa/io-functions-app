@@ -1,5 +1,5 @@
-/* tslint:disable:no-any */
-/* tslint:disable:no-object-mutation */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable functional/immutable-data */
 
 import { toPlainText } from "@pagopa/ts-commons/lib/encrypt";
 import { IPString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";

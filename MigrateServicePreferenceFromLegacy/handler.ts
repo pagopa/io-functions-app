@@ -72,7 +72,7 @@ export const blockedsToServicesPreferences = (
     O.fromNullable(blocked),
     O.map(b =>
       Object.entries(b)
-        // tslint:disable-next-line: readonly-array
+        // eslint-disable-next-line functional/prefer-readonly-type
         .filter((_): _ is [
           ServiceId,
           ReadonlyArray<BlockedInboxOrChannelEnum>
@@ -118,7 +118,7 @@ export const MigrateServicePreferenceFromLegacy = (
       const tasks = blockedsToServicesPreferences(
         migrateInput.oldProfile.blockedInboxOrChannels,
         migrateInput.newProfile.fiscalCode,
-        // tslint:disable-next-line: no-useless-cast
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         migrateInput.newProfile.servicePreferencesSettings
           .version as NonNegativeInteger // cast required: ts do not identify filterOrElse as a guard
       ).map(preference =>

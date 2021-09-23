@@ -1,4 +1,4 @@
-/* tslint:disable: no-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as lolex from "lolex";
 
@@ -33,7 +33,7 @@ const mockQueueClient = ({
   sendMessage: mockSendMessage
 } as unknown) as QueueClient;
 
-// tslint:disable-next-line: no-let
+// eslint-disable-next-line functional/no-let
 let clock: any;
 beforeEach(() => {
   (df.getClient as any).mockClear();
@@ -48,7 +48,7 @@ afterEach(() => {
 
 const mockTracker = createTracker("" as any);
 
-// tslint:disable-next-line: no-big-function
+// eslint-disable-next-line sonar/sonar-max-lines-per-function
 describe("UpdateProfileHandler", () => {
   it("should return a query error when an error occurs retrieving the existing profile", async () => {
     const profileModelMock = {

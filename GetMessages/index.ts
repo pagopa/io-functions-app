@@ -1,4 +1,4 @@
-// tslint:disable: ordered-imports
+
 import { Context } from "@azure/functions";
 
 import * as express from "express";

@@ -1,4 +1,4 @@
-/* tslint:disable: no-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { EmailString } from "@pagopa/ts-commons/lib/strings";
 

@@ -29,7 +29,7 @@ describe("GetEnqueueProfileCreationEventActivityHandler", () => {
       mockQueueService
     );
     mockSendMessage.mockImplementation(() => Promise.resolve());
-    // tslint:disable-next-line: no-unused-expression
+    // eslint-disable-next-line no-new, no-unused-expressions
     const result = await handler((context as unknown) as Context, {
       fiscalCode: aFiscalCode,
       queueName: aQueueName
@@ -46,7 +46,7 @@ describe("GetEnqueueProfileCreationEventActivityHandler", () => {
       mockQueueService
     );
     mockSendMessage.mockImplementation(() => Promise.resolve());
-    // tslint:disable-next-line: no-unused-expression
+    // eslint-disable-next-line no-new, no-unused-expressions
     const result = await handler((context as unknown) as Context, {
       fiscalCode: aFiscalCode
     });
@@ -62,7 +62,7 @@ describe("GetEnqueueProfileCreationEventActivityHandler", () => {
     mockSendMessage.mockImplementationOnce(() =>
       Promise.reject(new Error("Error"))
     );
-    // tslint:disable-next-line: no-unused-expression
+    // eslint-disable-next-line no-new, no-unused-expressions
     await expect(
       handler((context as unknown) as Context, {
         fiscalCode: aFiscalCode,

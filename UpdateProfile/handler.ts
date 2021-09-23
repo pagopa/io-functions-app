@@ -58,7 +58,7 @@ type IUpdateProfileHandler = (
   fiscalCode: FiscalCode,
   profilePayload: ApiProfile
 ) => Promise<
-  // tslint:disable-next-line: max-union-size
+  // eslint-disable-next-line sonar/max-union-size
   | IResponseSuccessJson<ApiProfile>
   | IResponseErrorQuery
   | IResponseErrorNotFound
@@ -88,7 +88,7 @@ const migratePreferences = (
     E.toError
   );
 
-// tslint:disable-next-line: cognitive-complexity
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function UpdateProfileHandler(
   profileModel: ProfileModel,
   queueClient: QueueClient,

@@ -50,7 +50,7 @@ type IUpsertUserDataProcessingHandler = (
 
   userDataProcessingChoiceRequest: UserDataProcessingChoiceRequest
 ) => Promise<
-  // tslint:disable-next-line: max-union-size
+  // eslint-disable-next-line sonar/max-union-size
   | IResponseSuccessJson<UserDataProcessingApi>
   | IResponseErrorValidation
   | IResponseErrorQuery

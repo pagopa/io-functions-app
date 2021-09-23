@@ -50,14 +50,14 @@ export type OrchestratorInput = t.TypeOf<typeof OrchestratorInput>;
 export const getUpsertedProfileOrchestratorHandler = (params: {
   sendCashbackMessage: boolean;
   notifyOn?: NonEmptyArray<NonEmptyString>;
-  // tslint:disable-next-line: no-big-function
+  // eslint-disable-next-line sonar/sonar-max-lines-per-function
 }) =>
-  // tslint:disable-next-line: no-big-function
+  // eslint-disable-next-line sonar/sonar-max-lines-per-function
   function*(context: IOrchestrationFunctionContext): Generator<unknown> {
     const logPrefix = `UpsertedProfileOrchestrator`;
 
     const retryOptions = new df.RetryOptions(5000, 10);
-    // tslint:disable-next-line: no-object-mutation
+    // eslint-disable-next-line functional/immutable-data
     retryOptions.backoffCoefficient = 1.5;
 
     // Get and decode orchestrator input

@@ -20,7 +20,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 // exclude a specific value from a type
 // as strict equality is performed, allowed input types are constrained to be values not references (object, arrays, etc)
-// tslint:disable-next-line max-union-size
+// eslint-disable-next-line sonar/max-union-size
 const AnyBut = <A extends string | number | boolean | symbol, Out = A>(
   but: A,
   base: t.Type<A, Out> = t.any

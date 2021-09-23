@@ -8,7 +8,7 @@
 export const consumeGenerator = <TReturn = unknown>(
   gen: Generator<unknown, TReturn, unknown>
 ): TReturn => {
-  // tslint:disable-next-line: no-let
+  // eslint-disable-next-line functional/no-let
   let prevValue: unknown;
   while (true) {
     const { done, value } = gen.next(prevValue);

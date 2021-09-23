@@ -1,4 +1,4 @@
-// tslint:disable:no-any no-duplicate-string no-big-function
+// eslint-disable @typescript-eslint/no-explicit-any, sonarjs/no-duplicate-string, sonar/sonar-max-lines-per-function
 
 import { none, some } from "fp-ts/lib/Option";
 

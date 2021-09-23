@@ -59,7 +59,7 @@ export function GetVisibleServicesHandler(
         maybeVisibleServicesJson => {
           const servicesTuples = pipe(
             maybeVisibleServicesJson,
-            // tslint:disable-next-line: no-inferred-empty-object-type
+            
             O.getOrElse(() => ({})),
             Object.entries,
             _ => new Map<string, VisibleService>(_),
