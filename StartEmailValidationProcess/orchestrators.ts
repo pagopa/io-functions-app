@@ -12,10 +12,12 @@ import { EmailAddress } from "../generated/backend/EmailAddress";
 import { toHash } from "../utils/crypto";
 
 /**
+            // eslint-disable-next-line jsdoc/newline-after-description
  * The identifier for EmailValidationProcessOrchestrator
  * @param fiscalCode the id of the requesting user
  * @param email the user's email
  */
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const makeStartEmailValidationProcessOrchestratorId = (
   fiscalCode: FiscalCode,
   email: EmailAddress,
@@ -34,6 +36,7 @@ export const isOrchestratorRunning = (
 ): TE.TaskEither<
   Error,
   PromiseType<ReturnType<typeof client["getStatus"]>> & {
+            // eslint-disable-next-line functional/prefer-readonly-type
     isRunning: boolean;
   }
 > =>

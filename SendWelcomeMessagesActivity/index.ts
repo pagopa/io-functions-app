@@ -7,6 +7,7 @@ import {
 import { Millisecond } from "@pagopa/ts-commons/lib/units";
 import { getActivityFunction } from "./handler";
 
+            // eslint-disable-next-line import/order
 import { getConfigOrThrow } from "../utils/config";
 
 // HTTP external requests timeout in milliseconds

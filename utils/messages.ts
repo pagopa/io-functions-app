@@ -23,8 +23,10 @@ export const enrichMessagesData = (
   serviceModel: ServiceModel,
   blobService: BlobService
 ) => (
+            // eslint-disable-next-line @typescript-eslint/array-type
   messages: readonly CreatedMessageWithoutContent[]
   // eslint-disable-next-line functional/prefer-readonly-type
+            // eslint-disable-next-line @typescript-eslint/array-type
 ): Promise<E.Either<Error, EnrichedMessage>>[] =>
   messages.map(message =>
     pipe(

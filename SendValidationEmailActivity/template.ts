@@ -1,8 +1,10 @@
 /**
+            // eslint-disable-next-line jsdoc/newline-after-description
  * Return the validation email html content
  * @param title
  * @param validationUrl
  */
+            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function getEmailHtmlFromTemplate(
   title: string,
   validationUrl: string

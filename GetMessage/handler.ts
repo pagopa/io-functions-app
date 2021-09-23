@@ -51,6 +51,7 @@ type IGetMessageHandler = (
   fiscalCode: FiscalCode,
   messageId: string
 ) => Promise<
+            // eslint-disable-next-line sonar/max-union-size
   // eslint-disable-next-line sonar/max-union-size
   | IResponseSuccessJson<
       MessageResponseWithContent | MessageResponseWithoutContent
@@ -65,10 +66,12 @@ type IGetMessageHandler = (
 /**
  * Handles requests for getting a single message for a recipient.
  */
+            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function GetMessageHandler(
   messageModel: MessageModel,
   blobService: BlobService
 ): IGetMessageHandler {
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   return async (context, fiscalCode, messageId) => {
     const [errorOrMaybeDocument, errorOrMaybeContent] = await Promise.all([
       messageModel.findMessageForRecipient(
@@ -128,6 +131,7 @@ export function GetMessageHandler(
 /**
  * Wraps a GetMessage handler inside an Express request handler.
  */
+            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function GetMessage(
   messageModel: MessageModel,
   blobService: BlobService

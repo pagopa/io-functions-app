@@ -20,6 +20,7 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/models/user_data_processing";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
 
+            // eslint-disable-next-line import/order
 import { toUserDataProcessingApi } from "../utils/user_data_processings";
 
 import * as express from "express";
@@ -43,15 +44,18 @@ type IGetUserDataProcessingHandler = (
   fiscalCode: FiscalCode,
   userDataProcessingChoice: UserDataProcessingChoice
 ) => Promise<
+            // eslint-disable-next-line sonar/max-union-size
   // eslint-disable-next-line sonar/max-union-size
   | IResponseSuccessJson<UserDataProcessingApi>
   | IResponseErrorQuery
   | IResponseErrorNotFound
 >;
 
+            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function GetUserDataProcessingHandler(
   userDataProcessingModel: UserDataProcessingModel
 ): IGetUserDataProcessingHandler {
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   return async (context, fiscalCode, choice) => {
     const logPrefix = `GetUserDataProcessingHandler|FISCAL_CODE=${fiscalCode}`;
     const id = makeUserDataProcessingId(choice, fiscalCode);
@@ -94,6 +98,7 @@ export function GetUserDataProcessingHandler(
 /**
  * Wraps a GetUserDataProcessing handler inside an Express request handler.
  */
+            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function GetUserDataProcessing(
   userDataProcessingModel: UserDataProcessingModel
 ): express.RequestHandler {

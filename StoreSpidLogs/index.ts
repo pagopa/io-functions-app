@@ -4,6 +4,7 @@ import * as t from "io-ts";
 
 import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
 import { IPString, PatternString } from "@pagopa/ts-commons/lib/strings";
+            // eslint-disable-next-line import/order
 import { encryptAndStore } from "./handler";
 
 import { initTelemetryClient } from "../utils/appinsights";
@@ -49,5 +50,6 @@ initTelemetryClient();
 /**
  * Store SPID request / responses, read from a queue, into a blob storage.
  */
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const index = (context: Context, spidMsgItem: SpidMsgItem) =>
   encryptAndStore(context, spidMsgItem, config.SPID_LOGS_PUBLIC_KEY);

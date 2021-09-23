@@ -17,6 +17,7 @@ import createAzureFunctionHandler from "@pagopa/express-azure-functions/dist/src
 import { cosmosdbInstance } from "../utils/cosmosdb";
 import { GetMessage } from "./handler";
 
+            // eslint-disable-next-line import/order
 import { getConfigOrThrow } from "../utils/config";
 
 // Setup Express
@@ -40,6 +41,7 @@ app.get(
 const azureFunctionHandler = createAzureFunctionHandler(app);
 
 // Binds the express app to an Azure Function handler
+            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function httpStart(context: Context): void {
   setAppContext(app, context);
   azureFunctionHandler(context);

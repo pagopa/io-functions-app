@@ -63,6 +63,7 @@ export const getCreateValidationTokenActivityHandler = (
   tokenInvalidAfterMS: Millisecond,
   randomBytesGenerator: (size: number) => string,
   hashCreator: (value: string) => string
+            // eslint-disable-next-line max-params
 ) => async (context: Context, input: unknown): Promise<unknown> => {
   const logPrefix = `CreateValidationTokenActivity`;
 

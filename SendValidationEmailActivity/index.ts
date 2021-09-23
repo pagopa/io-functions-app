@@ -1,9 +1,12 @@
 ﻿import { getSendValidationEmailActivityHandler } from "./handler";
 
+            // eslint-disable-next-line import/order
 import { initTelemetryClient } from "../utils/appinsights";
 
+            // eslint-disable-next-line import/order
 import { getConfigOrThrow } from "../utils/config";
 
+            // eslint-disable-next-line import/order
 import { getMailerTransporter } from "@pagopa/io-functions-commons/dist/src/mailer";
 
 const config = getConfigOrThrow();

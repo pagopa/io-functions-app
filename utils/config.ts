@@ -20,7 +20,9 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 // exclude a specific value from a type
 // as strict equality is performed, allowed input types are constrained to be values not references (object, arrays, etc)
+            // eslint-disable-next-line sonar/max-union-size
 // eslint-disable-next-line sonar/max-union-size
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const AnyBut = <A extends string | number | boolean | symbol, Out = A>(
   but: A,
   base: t.Type<A, Out> = t.any
@@ -75,6 +77,7 @@ export const IConfig = t.intersection([
     PUBLIC_API_KEY: NonEmptyString,
     PUBLIC_API_URL: NonEmptyString,
 
+            // eslint-disable-next-line sort-keys
     EventsQueueStorageConnection: NonEmptyString,
     FN_APP_STORAGE_CONNECTION_STRING: NonEmptyString,
     MIGRATE_SERVICES_PREFERENCES_PROFILE_QUEUE_NAME: NonEmptyString,
@@ -83,10 +86,13 @@ export const IConfig = t.intersection([
     SPID_LOGS_PUBLIC_KEY: NonEmptyString,
     SUBSCRIPTIONS_FEED_TABLE: NonEmptyString,
 
+            // eslint-disable-next-line sort-keys
     OPT_OUT_EMAIL_SWITCH_DATE: DateFromTimestamp,
 
+            // eslint-disable-next-line sort-keys
     IS_CASHBACK_ENABLED: t.boolean,
 
+            // eslint-disable-next-line sort-keys
     FF_NEW_USERS_EUCOVIDCERT_ENABLED: t.boolean,
     FF_ONLY_NATIONAL_SERVICES: t.boolean,
     FF_OPT_IN_EMAIL_ENABLED: t.boolean,
@@ -103,6 +109,7 @@ export const IConfig = t.intersection([
 const DEFAULT_OPT_OUT_EMAIL_SWITCH_DATE = 1625781600;
 
 // get a boolen value from string
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const getBooleanOrFalse = (value: string) =>
   pipe(
     value,
@@ -145,6 +152,7 @@ const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
  *
  * @returns either the configuration values or a list of validation errors
  */
+            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function getConfig(): t.Validation<IConfig> {
   return errorOrConfig;
 }
@@ -156,6 +164,7 @@ export function getConfig(): t.Validation<IConfig> {
  * @returns the configuration values
  * @throws validation errors found while parsing the application configuration
  */
+            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function getConfigOrThrow(): IConfig {
   return pipe(
     errorOrConfig,

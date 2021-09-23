@@ -43,6 +43,7 @@ import {
   ResponseErrorNotFound,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
+            // eslint-disable-next-line import/order
 import {
   getServicePreferenceSettingsVersion,
   nonLegacyServicePreferences,
@@ -54,6 +55,7 @@ import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/m
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { enumType } from "@pagopa/ts-commons/lib/types";
 
+            // eslint-disable-next-line import/order
 import { updateSubscriptionFeedTask } from "./subscription_feed";
 
 import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
@@ -143,6 +145,7 @@ const getServiceOrErrorResponse = (serviceModel: ServiceModel) => (
  * @param fiscalCode the fiscal code
  * @returns
  */
+            // eslint-disable-next-line @typescript-eslint/naming-convention
 export declare type upsertUserServicePreferencesT = (params: {
   readonly serviceId: ServiceId;
   readonly version: NonNegativeInteger;
@@ -151,6 +154,7 @@ export declare type upsertUserServicePreferencesT = (params: {
 }) => TE.TaskEither<IResponseErrorQuery, ServicePreference>;
 const upsertUserServicePreferences = (
   servicePreferencesModel: ServicesPreferencesModel
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ): upsertUserServicePreferencesT => ({
   fiscalCode,
   serviceId,
@@ -174,6 +178,7 @@ const upsertUserServicePreferences = (
     TE.map(toUserServicePreferenceFromModel)
   );
 
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const decodeOperation = (isInboxEnabled: boolean) =>
   isInboxEnabled
     ? FeedOperationEnum.SUBSCRIBED
@@ -182,6 +187,7 @@ const decodeOperation = (isInboxEnabled: boolean) =>
 /**
  * Calculate Feed operation to perform by considering:
  * - the previous service preference's inboxEnabled (if exists)
+            // eslint-disable-next-line jsdoc/newline-after-description
  * - the current one that should be upserted.
  * @param maybePreviousInboxEnabled The previous service preference's inboxEnabled property
  * @param currentInboxEnabled The current service preference's inboxEnabled property
@@ -212,7 +218,9 @@ export const GetUpsertServicePreferencesHandler = (
   tableService: TableService,
   subscriptionFeedTableName: NonEmptyString,
   logPrefix: string = "GetUpsertServicePreferencesHandler"
+            // eslint-disable-next-line max-params, arrow-body-style
 ): IUpsertServicePreferencesHandler => {
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   return async (context, fiscalCode, serviceId, servicePreference) =>
     pipe(
       sequenceS(TE.ApplicativeSeq)({
@@ -323,6 +331,7 @@ export const GetUpsertServicePreferencesHandler = (
 /**
  * Wraps a UpsertServicePreferences handler inside an Express request handler.
  */
+            // eslint-disable-next-line max-params, prefer-arrow/prefer-arrow-functions
 export function UpsertServicePreferences(
   telemetryClient: ReturnType<typeof initAppInsights>,
   profileModels: ProfileModel,

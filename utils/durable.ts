@@ -10,6 +10,7 @@ export const consumeGenerator = <TReturn = unknown>(
 ): TReturn => {
   // eslint-disable-next-line functional/no-let
   let prevValue: unknown;
+            // eslint-disable-next-line no-constant-condition
   while (true) {
     const { done, value } = gen.next(prevValue);
     if (done) {

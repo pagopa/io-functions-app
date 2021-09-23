@@ -1,3 +1,4 @@
+            // eslint-disable-next-line prettier/prettier
 
 import {
   asyncIteratorToPageArray,
@@ -83,6 +84,7 @@ export const GetMessagesHandler = (
   messageModel: MessageModel,
   serviceModel: ServiceModel,
   blobService: BlobService
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ): IGetMessagesHandler => async (
   fiscalCode,
   maybePageSize,
@@ -159,6 +161,7 @@ export const GetMessagesHandler = (
 /**
  * Wraps a GetMessages handler inside an Express request handler.
  */
+            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function GetMessages(
   messageModel: MessageModel,
   serviceModel: ServiceModel,

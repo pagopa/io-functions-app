@@ -19,8 +19,11 @@ import {
 import { Input as UpdateServiceSubscriptionFeedActivityInput } from "../UpdateSubscriptionsFeedActivity/handler";
 import { diffBlockedServices } from "../utils/profiles";
 
+            // eslint-disable-next-line import/order
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
+            // eslint-disable-next-line import/order
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+            // eslint-disable-next-line import/order
 import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import { EnqueueProfileCreationEventActivityInput } from "../EnqueueProfileCreationEventActivity/handler";
 import {
@@ -47,12 +50,18 @@ export const OrchestratorInput = t.intersection([
 
 export type OrchestratorInput = t.TypeOf<typeof OrchestratorInput>;
 
+            // eslint-disable-next-line max-lines-per-function
 export const getUpsertedProfileOrchestratorHandler = (params: {
+            // eslint-disable-next-line functional/prefer-readonly-type
   sendCashbackMessage: boolean;
+            // eslint-disable-next-line functional/prefer-readonly-type
   notifyOn?: NonEmptyArray<NonEmptyString>;
+            // eslint-disable-next-line sonar/sonar-max-lines-per-function
   // eslint-disable-next-line sonar/sonar-max-lines-per-function
 }) =>
+            // eslint-disable-next-line sonar/sonar-max-lines-per-function
   // eslint-disable-next-line sonar/sonar-max-lines-per-function
+            // eslint-disable-next-line max-lines-per-function, complexity, sonarjs/cognitive-complexity
   function*(context: IOrchestrationFunctionContext): Generator<unknown> {
     const logPrefix = `UpsertedProfileOrchestrator`;
 

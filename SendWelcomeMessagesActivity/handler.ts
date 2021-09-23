@@ -15,6 +15,7 @@ import {
   welcomeMessageContent
 } from "./welcome_messages";
 
+            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function throwInvalidMessageError(errs: t.Errors): never {
   throw new Error(
     "Invalid MessageContent for welcome message: " + readableReport(errs)
@@ -50,6 +51,7 @@ const welcomeMessages: WelcomeMessages = {
       }),
       E.getOrElse(throwInvalidMessageError)
     ),
+            // eslint-disable-next-line sort-keys
   CASHBACK: (_: RetrievedProfile) =>
     pipe(
       NewMessage.decode({
@@ -63,6 +65,7 @@ const welcomeMessages: WelcomeMessages = {
  * Send a single welcome message using the
  * Digital Citizenship Notification API (REST).
  */
+            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 async function sendMessage(
   profile: RetrievedProfile,
   apiUrl: string,
@@ -118,6 +121,7 @@ export const getActivityFunction = (
   context: Context,
   input: ActivityInput
 ): Promise<ActivityResult> => {
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const failure = (reason: string) => {
     context.log.error(reason);
     return ActivityResultFailure.encode({
@@ -126,6 +130,7 @@ export const getActivityFunction = (
     });
   };
 
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const success = () =>
     ActivityResultSuccess.encode({
       kind: "SUCCESS"

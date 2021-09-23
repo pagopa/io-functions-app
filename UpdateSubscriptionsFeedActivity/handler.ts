@@ -60,6 +60,7 @@ const Input = t.union([ProfileInput, ServiceInput]);
 
 export type Input = t.TypeOf<typeof Input>;
 
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const updateSubscriptionFeed = async (
   context: Context,
   rawInput: unknown,

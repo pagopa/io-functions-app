@@ -9,6 +9,7 @@ import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 
 import * as t from "io-ts";
+            // eslint-disable-next-line import/order
 import { SpidMsgItem } from "./index";
 
 import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
@@ -27,6 +28,7 @@ const SpidBlobItem = t.interface({
   ip: IPString,
 
   // XML payload of the SPID Request
+            // eslint-disable-next-line sort-keys
   encryptedRequestPayload: EncryptedPayload,
 
   // XML payload of the SPID Response
@@ -39,6 +41,7 @@ const SpidBlobItem = t.interface({
 export type SpidBlobItem = t.TypeOf<typeof SpidBlobItem>;
 
 export interface IOutputBinding {
+            // eslint-disable-next-line functional/prefer-readonly-type
   spidRequestResponse: SpidBlobItem;
 }
 
@@ -47,6 +50,7 @@ export const encryptAndStore = async (
   spidMsgItem: SpidMsgItem,
   spidLogsPublicKey: NonEmptyString
 ): Promise<void | IOutputBinding> => {
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const encrypt = (plainText: string) =>
     toEncryptedPayload(spidLogsPublicKey, plainText);
 

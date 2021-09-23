@@ -48,6 +48,7 @@ export type ActivityResult = t.TypeOf<typeof ActivityResult>;
 
 export const GetServicesPreferencesActivityHandler = (
   servicePreferences: ServicesPreferencesModel
+            // eslint-disable-next-line arrow-body-style
 ) => async (context: Context, input: unknown): Promise<ActivityResult> => {
   return pipe(
     ActivityInput.decode(input),

@@ -35,6 +35,7 @@ import {
   ResponseErrorNotFound,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
+            // eslint-disable-next-line import/order
 import {
   getServicePreferenceSettingsVersion,
   nonLegacyServicePreferences,
@@ -88,6 +89,7 @@ const getProfileOrErrorResponse = (
  * @param fiscalCode the fiscal code
  * @returns
  */
+            // eslint-disable-next-line @typescript-eslint/naming-convention
 export declare type getUserServicePreferencesT = (params: {
   readonly serviceId: ServiceId;
   readonly mode:
@@ -98,6 +100,7 @@ export declare type getUserServicePreferencesT = (params: {
 }) => TE.TaskEither<IResponseErrorQuery, ServicePreference>;
 const getUserServicePreferencesOrDefault = (
   servicePreferencesModel: ServicesPreferencesModel
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ): getUserServicePreferencesT => ({ fiscalCode, serviceId, mode, version }) =>
   pipe(
     servicePreferencesModel.find([
@@ -115,6 +118,7 @@ const getUserServicePreferencesOrDefault = (
         maybeServicePref,
         O.fold(
           () => {
+            // eslint-disable-next-line default-case
             switch (mode) {
               case ServicesPreferencesModeEnum.AUTO:
                 return toDefaultEnabledUserServicePreference(version);
@@ -134,7 +138,9 @@ const getUserServicePreferencesOrDefault = (
 export const GetServicePreferencesHandler = (
   profileModels: ProfileModel,
   servicePreferencesModel: ServicesPreferencesModel
+            // eslint-disable-next-line arrow-body-style
 ): IGetServicePreferencesHandler => {
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   return async (fiscalCode, serviceId) =>
     pipe(
       profileModels.findLastVersionByModelId([fiscalCode]),
@@ -168,6 +174,7 @@ export const GetServicePreferencesHandler = (
 /**
  * Wraps a GetServicePreferences handler inside an Express request handler.
  */
+            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function GetServicePreferences(
   profileModels: ProfileModel,
   servicePreferencesModel: ServicesPreferencesModel

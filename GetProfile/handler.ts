@@ -45,11 +45,13 @@ type IGetProfileHandler = (
 /**
  * Return a type safe GetProfile handler.
  */
+            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function GetProfileHandler(
   profileModel: ProfileModel,
   optOutEmailSwitchDate: Date,
   isOptInEmailEnabled: boolean
 ): IGetProfileHandler {
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, arrow-body-style
   return async fiscalCode => {
     return pipe(
       profileModel.findLastVersionByModelId([fiscalCode]),
@@ -64,6 +66,7 @@ export function GetProfileHandler(
               // this map is valid for ever so this check cannot be removed.
               // Please note that cosmos timestamps are expressed in unix notation (in seconds), so we must transform
               // it to a common Date representation.
+            // eslint-disable-next-line no-underscore-dangle
               isOptInEmailEnabled && isBefore(_._ts, optOutEmailSwitchDate)
                 ? { ..._, isEmailEnabled: false }
                 : _
@@ -87,6 +90,7 @@ export function GetProfileHandler(
 /**
  * Wraps a GetProfile handler inside an Express request handler.
  */
+            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function GetProfile(
   profileModel: ProfileModel,
   optOutEmailSwitchDate: Date,
