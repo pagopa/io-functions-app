@@ -12,7 +12,7 @@ import { EmailAddress } from "../generated/backend/EmailAddress";
 import { toHash } from "../utils/crypto";
 
 /**
-            // eslint-disable-next-line jsdoc/newline-after-description
+ 
  * The identifier for EmailValidationProcessOrchestrator
  *
  * @param fiscalCode the id of the requesting user

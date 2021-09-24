@@ -184,7 +184,7 @@ const decodeOperation = (isInboxEnabled: boolean) =>
 /**
  * Calculate Feed operation to perform by considering:
  * - the previous service preference's inboxEnabled (if exists)
-            // eslint-disable-next-line jsdoc/newline-after-description
+ 
  * - the current one that should be upserted.
  *
  * @param maybePreviousInboxEnabled The previous service preference's inboxEnabled property

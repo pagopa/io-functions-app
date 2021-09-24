@@ -5,11 +5,9 @@ import { Millisecond } from "@pagopa/ts-commons/lib/units";
 import { VALIDATION_TOKEN_TABLE_NAME } from "@pagopa/io-functions-commons/dist/src/entities/validation_token";
 import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
 
-// eslint-disable-next-line import/order
-import { getCreateValidationTokenActivityHandler } from "./handler";
-
 import { getConfigOrThrow } from "../utils/config";
 import { randomBytes, toHash } from "../utils/crypto";
+import { getCreateValidationTokenActivityHandler } from "./handler";
 
 const config = getConfigOrThrow();
 

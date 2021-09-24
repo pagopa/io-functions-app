@@ -1,3 +1,4 @@
+import { isObject } from "util";
 import { ITuple2, Tuple2 } from "@pagopa/ts-commons/lib/tuples";
 
 import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
@@ -9,9 +10,6 @@ import {
   PROFILE_SERVICE_PREFERENCES_SETTINGS_LEGACY_VERSION,
   RetrievedProfile
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
-
-// eslint-disable-next-line import/order
-import { isObject } from "util";
 
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";

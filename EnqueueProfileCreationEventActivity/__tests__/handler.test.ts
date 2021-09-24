@@ -29,7 +29,6 @@ describe("GetEnqueueProfileCreationEventActivityHandler", () => {
       mockQueueService
     );
     mockSendMessage.mockImplementation(() => Promise.resolve());
-    // eslint-disable-next-line no-new, no-unused-expressions
     const result = await handler((context as unknown) as Context, {
       fiscalCode: aFiscalCode,
       queueName: aQueueName

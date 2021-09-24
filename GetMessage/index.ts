@@ -15,10 +15,8 @@ import { createBlobService } from "azure-storage";
 import createAzureFunctionHandler from "@pagopa/express-azure-functions/dist/src/createAzureFunctionsHandler";
 
 import { cosmosdbInstance } from "../utils/cosmosdb";
-import { GetMessage } from "./handler";
-
-// eslint-disable-next-line import/order
 import { getConfigOrThrow } from "../utils/config";
+import { GetMessage } from "./handler";
 
 // Setup Express
 const app = express();
