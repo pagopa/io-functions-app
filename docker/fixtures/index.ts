@@ -113,8 +113,8 @@ createDatabase(config.COSMOSDB_NAME)
   )
   .run()
   .then(
-    // tslint:disable-next-line: no-console
+    // eslint-disable-next-line no-console
     _ => console.log(`Successfully created fixtures`),
-    // tslint:disable-next-line: no-console
+    // eslint-disable-next-line no-console
     _ => console.error(`Failed generate fixtures ${_.message}`)
   );

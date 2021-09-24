@@ -12,16 +12,15 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 
+import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import {
   OrchestratorInput as EmailValidationProcessOrchestratorInput,
   OrchestratorResult as EmailValidationProcessOrchestratorResult
 } from "../EmailValidationProcessOrchestrator/handler";
 import { Input as UpdateServiceSubscriptionFeedActivityInput } from "../UpdateSubscriptionsFeedActivity/handler";
 import { diffBlockedServices } from "../utils/profiles";
-
-import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import { EnqueueProfileCreationEventActivityInput } from "../EnqueueProfileCreationEventActivity/handler";
 import {
   ActivityResult,
@@ -47,17 +46,17 @@ export const OrchestratorInput = t.intersection([
 
 export type OrchestratorInput = t.TypeOf<typeof OrchestratorInput>;
 
+// eslint-disable-next-line max-lines-per-function
 export const getUpsertedProfileOrchestratorHandler = (params: {
-  sendCashbackMessage: boolean;
-  notifyOn?: NonEmptyArray<NonEmptyString>;
-  // tslint:disable-next-line: no-big-function
+  readonly sendCashbackMessage: boolean;
+  readonly notifyOn?: NonEmptyArray<NonEmptyString>;
 }) =>
-  // tslint:disable-next-line: no-big-function
+  // eslint-disable-next-line max-lines-per-function, complexity, sonarjs/cognitive-complexity
   function*(context: IOrchestrationFunctionContext): Generator<unknown> {
     const logPrefix = `UpsertedProfileOrchestrator`;
 
     const retryOptions = new df.RetryOptions(5000, 10);
-    // tslint:disable-next-line: no-object-mutation
+    // eslint-disable-next-line functional/immutable-data
     retryOptions.backoffCoefficient = 1.5;
 
     // Get and decode orchestrator input

@@ -1,4 +1,4 @@
-// tslint:disable:no-any
+// eslint-disable @typescript-eslint/no-explicit-any
 import { none, some } from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 

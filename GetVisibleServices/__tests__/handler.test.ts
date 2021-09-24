@@ -1,4 +1,4 @@
-// tslint:disable:no-any
+// eslint-disable @typescript-eslint/no-explicit-any
 
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {

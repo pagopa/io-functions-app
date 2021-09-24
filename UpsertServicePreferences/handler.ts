@@ -43,23 +43,22 @@ import {
   ResponseErrorNotFound,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-import {
-  getServicePreferenceSettingsVersion,
-  nonLegacyServicePreferences,
-  toUserServicePreferenceFromModel
-} from "../utils/service_preferences";
 
 import { Context } from "@azure/functions";
 import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { enumType } from "@pagopa/ts-commons/lib/types";
 
-import { updateSubscriptionFeedTask } from "./subscription_feed";
-
 import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { TableService } from "azure-storage";
+import {
+  getServicePreferenceSettingsVersion,
+  nonLegacyServicePreferences,
+  toUserServicePreferenceFromModel
+} from "../utils/service_preferences";
 import { createTracker } from "../utils/tracking";
+import { updateSubscriptionFeedTask } from "./subscription_feed";
 
 enum FeedOperationEnum {
   "SUBSCRIBED" = "SUBSCRIBED",
@@ -143,6 +142,7 @@ const getServiceOrErrorResponse = (serviceModel: ServiceModel) => (
  * @param fiscalCode the fiscal code
  * @returns
  */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export declare type upsertUserServicePreferencesT = (params: {
   readonly serviceId: ServiceId;
   readonly version: NonNegativeInteger;
@@ -151,6 +151,7 @@ export declare type upsertUserServicePreferencesT = (params: {
 }) => TE.TaskEither<IResponseErrorQuery, ServicePreference>;
 const upsertUserServicePreferences = (
   servicePreferencesModel: ServicesPreferencesModel
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ): upsertUserServicePreferencesT => ({
   fiscalCode,
   serviceId,
@@ -174,6 +175,7 @@ const upsertUserServicePreferences = (
     TE.map(toUserServicePreferenceFromModel)
   );
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const decodeOperation = (isInboxEnabled: boolean) =>
   isInboxEnabled
     ? FeedOperationEnum.SUBSCRIBED
@@ -182,7 +184,9 @@ const decodeOperation = (isInboxEnabled: boolean) =>
 /**
  * Calculate Feed operation to perform by considering:
  * - the previous service preference's inboxEnabled (if exists)
+ 
  * - the current one that should be upserted.
+ *
  * @param maybePreviousInboxEnabled The previous service preference's inboxEnabled property
  * @param currentInboxEnabled The current service preference's inboxEnabled property
  * @returns a FeedOperation to be performed. Possible values are SUBSCRIBED, UNSUBSCRIBED or NO_UPDATE
@@ -212,7 +216,9 @@ export const GetUpsertServicePreferencesHandler = (
   tableService: TableService,
   subscriptionFeedTableName: NonEmptyString,
   logPrefix: string = "GetUpsertServicePreferencesHandler"
+  // eslint-disable-next-line max-params, arrow-body-style
 ): IUpsertServicePreferencesHandler => {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   return async (context, fiscalCode, serviceId, servicePreference) =>
     pipe(
       sequenceS(TE.ApplicativeSeq)({
@@ -323,6 +329,7 @@ export const GetUpsertServicePreferencesHandler = (
 /**
  * Wraps a UpsertServicePreferences handler inside an Express request handler.
  */
+// eslint-disable-next-line max-params, prefer-arrow/prefer-arrow-functions
 export function UpsertServicePreferences(
   telemetryClient: ReturnType<typeof initAppInsights>,
   profileModels: ProfileModel,

@@ -1,3 +1,4 @@
+import { isObject } from "util";
 import { ITuple2, Tuple2 } from "@pagopa/ts-commons/lib/tuples";
 
 import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
@@ -10,8 +11,6 @@ import {
   RetrievedProfile
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
 
-import { isObject } from "util";
-
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
@@ -19,6 +18,7 @@ import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 /**
  * Converts a ApiProfile in a Profile model
  */
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function apiProfileToProfile(
   apiProfile: ApiProfile,
   fiscalCode: FiscalCode,
@@ -53,6 +53,7 @@ export function apiProfileToProfile(
 /**
  * Converts a RetrievedProfile model to an ExtendedProfile
  */
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function retrievedProfileToExtendedProfile(
   profile: RetrievedProfile
 ): ExtendedProfile {
@@ -108,6 +109,7 @@ export const diffBlockedServices = (
   newBlocked: Profile["blockedInboxOrChannels"] | undefined | null
 ): ITuple2<ReadonlyArray<string>, ReadonlyArray<string>> => {
   // we extract the services that have the inbox blocked from the old and the
+  // eslint-disable-next-line extra-rules/no-commented-out-code
   // new profile
   const oldInboxBlocked = isObject(oldBlocked)
     ? getInboxBlockedServices(oldBlocked)

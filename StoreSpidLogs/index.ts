@@ -4,10 +4,10 @@ import * as t from "io-ts";
 
 import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
 import { IPString, PatternString } from "@pagopa/ts-commons/lib/strings";
-import { encryptAndStore } from "./handler";
 
 import { initTelemetryClient } from "../utils/appinsights";
 import { getConfigOrThrow } from "../utils/config";
+import { encryptAndStore } from "./handler";
 
 const config = getConfigOrThrow();
 
@@ -49,5 +49,6 @@ initTelemetryClient();
 /**
  * Store SPID request / responses, read from a queue, into a blob storage.
  */
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const index = (context: Context, spidMsgItem: SpidMsgItem) =>
   encryptAndStore(context, spidMsgItem, config.SPID_LOGS_PUBLIC_KEY);

@@ -8,9 +8,8 @@ import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middl
 
 import createAzureFunctionHandler from "@pagopa/express-azure-functions/dist/src/createAzureFunctionsHandler";
 
-import { GetVisibleServices } from "./handler";
-
 import { getConfigOrThrow } from "../utils/config";
+import { GetVisibleServices } from "./handler";
 
 // Setup Express
 const app = express();
@@ -28,6 +27,7 @@ app.get(
 const azureFunctionHandler = createAzureFunctionHandler(app);
 
 // Binds the express app to an Azure Function handler
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function httpStart(context: Context): void {
   setAppContext(app, context);
   azureFunctionHandler(context);

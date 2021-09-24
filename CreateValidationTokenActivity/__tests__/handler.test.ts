@@ -1,4 +1,4 @@
-/* tslint:disable: no-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as lolex from "lolex";
 
@@ -17,7 +17,7 @@ import {
   getCreateValidationTokenActivityHandler
 } from "../handler";
 
-// tslint:disable-next-line: no-let
+// eslint-disable-next-line functional/no-let
 let clock: any;
 beforeEach(() => {
   // We need to mock time to test token expiration.

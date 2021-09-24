@@ -13,15 +13,17 @@ import * as packageJson from "../package.json";
 import { checkApplicationHealth, HealthCheck } from "../utils/healthcheck";
 
 interface IInfo {
-  name: string;
-  version: string;
+  readonly name: string;
+  readonly version: string;
 }
 
 type InfoHandler = () => Promise<
   IResponseSuccessJson<IInfo> | IResponseErrorInternal
 >;
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function InfoHandler(healthCheck: HealthCheck): InfoHandler {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   return () =>
     pipe(
       healthCheck,
@@ -37,6 +39,7 @@ export function InfoHandler(healthCheck: HealthCheck): InfoHandler {
     )();
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function Info(): express.RequestHandler {
   const handler = InfoHandler(checkApplicationHealth());
 

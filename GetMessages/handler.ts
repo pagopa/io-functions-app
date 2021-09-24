@@ -1,4 +1,5 @@
-// tslint:disable: ordered-imports
+// eslint-disable-next-line prettier/prettier
+
 import {
   asyncIteratorToPageArray,
   flattenAsyncIterator,
@@ -89,7 +90,7 @@ export const GetMessagesHandler = (
   maybeEnrichResultData,
   maybeMaximumId,
   maybeMinimumId
-) =>
+): Promise<IGetMessagesHandlerResponse> =>
   pipe(
     TE.Do,
     TE.bind("pageSize", () =>
@@ -159,11 +160,11 @@ export const GetMessagesHandler = (
 /**
  * Wraps a GetMessages handler inside an Express request handler.
  */
-export function GetMessages(
+export const GetMessages = (
   messageModel: MessageModel,
   serviceModel: ServiceModel,
   blobService: BlobService
-): express.RequestHandler {
+): express.RequestHandler => {
   const handler = GetMessagesHandler(messageModel, serviceModel, blobService);
   const middlewaresWrap = withRequestMiddlewares(
     FiscalCodeMiddleware,
@@ -173,4 +174,4 @@ export function GetMessages(
     OptionalQueryParamMiddleware("minimum_id", NonEmptyString)
   );
   return wrapRequestHandler(middlewaresWrap(handler));
-}
+};

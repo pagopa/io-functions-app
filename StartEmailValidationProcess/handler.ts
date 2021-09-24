@@ -47,7 +47,7 @@ import {
 } from "./orchestrators";
 
 type ReturnTypes =
-  // tslint:disable-next-line: max-union-size
+  // eslint-disable-next-line @typescript-eslint/ban-types
   | IResponseSuccessJson<{}>
   | IResponseErrorValidation
   | IResponseErrorQuery
@@ -63,9 +63,11 @@ type IStartEmailValidationProcessHandler = (
   fiscalCode: FiscalCode
 ) => Promise<ReturnTypes>;
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function StartEmailValidationProcessHandler(
   profileModel: ProfileModel
 ): IStartEmailValidationProcessHandler {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   return async (context, fiscalCode) => {
     const logPrefix = `StartEmailValidationProcessHandler|FISCAL_CODE=${fiscalCode}`;
 
@@ -147,6 +149,7 @@ export function StartEmailValidationProcessHandler(
 /**
  * Wraps an StartEmailValidationProcess handler inside an Express request handler.
  */
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function StartEmailValidationProcess(
   profileModel: ProfileModel
 ): express.RequestHandler {

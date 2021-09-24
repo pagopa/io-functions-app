@@ -1,10 +1,7 @@
-﻿import { getSendValidationEmailActivityHandler } from "./handler";
-
+﻿import { getMailerTransporter } from "@pagopa/io-functions-commons/dist/src/mailer";
 import { initTelemetryClient } from "../utils/appinsights";
-
 import { getConfigOrThrow } from "../utils/config";
-
-import { getMailerTransporter } from "@pagopa/io-functions-commons/dist/src/mailer";
+import { getSendValidationEmailActivityHandler } from "./handler";
 
 const config = getConfigOrThrow();
 

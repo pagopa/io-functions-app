@@ -1,4 +1,4 @@
-/* tslint:disable:no-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import {
@@ -82,7 +82,7 @@ const upsertServicePreferencesHandler = GetUpsertServicePreferencesHandler(
   "SubFeedTableName" as NonEmptyString
 );
 
-// tslint:disable-next-line: no-big-function
+// eslint-disable-next-line sonar/sonar-max-lines-per-function
 describe("UpsertServicePreferences", () => {
   beforeEach(() => jest.clearAllMocks());
 

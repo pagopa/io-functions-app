@@ -37,6 +37,7 @@ export type MigrateServicesPreferencesQueueMessage = t.TypeOf<
   typeof MigrateServicesPreferencesQueueMessage
 >;
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function isCosmosError(
   ce: CosmosErrors
 ): ce is ReturnType<typeof CosmosErrorResponse> {
@@ -61,8 +62,10 @@ export const createServicePreference = (
   settingsVersion: version
 });
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const blockedsToServicesPreferences = (
   blocked: {
+    // eslint-disable-next-line functional/prefer-readonly-type, @typescript-eslint/array-type
     [x: string]: readonly BlockedInboxOrChannelEnum[];
   },
   fiscalCode: FiscalCode,
@@ -72,7 +75,7 @@ export const blockedsToServicesPreferences = (
     O.fromNullable(blocked),
     O.map(b =>
       Object.entries(b)
-        // tslint:disable-next-line: readonly-array
+        // eslint-disable-next-line functional/prefer-readonly-type
         .filter((_): _ is [
           ServiceId,
           ReadonlyArray<BlockedInboxOrChannelEnum>
@@ -92,6 +95,7 @@ export const blockedsToServicesPreferences = (
 export const MigrateServicePreferenceFromLegacy = (
   servicePreferenceModel: ServicesPreferencesModel,
   tracker: ReturnType<typeof createTracker>
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => async (context: Context, input: unknown) =>
   pipe(
     MigrateServicesPreferencesQueueMessage.decode(input),
@@ -118,7 +122,7 @@ export const MigrateServicePreferenceFromLegacy = (
       const tasks = blockedsToServicesPreferences(
         migrateInput.oldProfile.blockedInboxOrChannels,
         migrateInput.newProfile.fiscalCode,
-        // tslint:disable-next-line: no-useless-cast
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         migrateInput.newProfile.servicePreferencesSettings
           .version as NonNegativeInteger // cast required: ts do not identify filterOrElse as a guard
       ).map(preference =>

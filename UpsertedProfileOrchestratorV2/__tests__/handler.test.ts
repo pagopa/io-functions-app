@@ -1,4 +1,4 @@
-/* tslint:disable:no-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as df from "durable-functions";
@@ -30,10 +30,10 @@ import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 
 const someRetryOptions = new df.RetryOptions(5000, 10);
-// tslint:disable-next-line: no-object-mutation
+// eslint-disable-next-line functional/immutable-data
 someRetryOptions.backoffCoefficient = 1.5;
 
-// tslint:disable-next-line: no-big-function
+// eslint-disable-next-line sonar/sonar-max-lines-per-function
 describe("UpsertedProfileOrchestratorV2", () => {
   it("should not start the EmailValidationProcessOrchestrator if the email is not changed", () => {
     const upsertedProfileOrchestratorInput = pipe(
