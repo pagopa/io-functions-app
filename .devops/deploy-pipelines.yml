@@ -183,7 +183,7 @@ stages:
       jobs:      
         - job: 'do_healthcheck_${{ app.Key }}'
           steps:
-            - checkout: false
+            - checkout: none
             - script: |
                 curl -f 'https://${{ app.Value.appname }}-staging.azurewebsites.net/$(HEALTHCHECK_PATH)'
               displayName: 'check info endpoint'
