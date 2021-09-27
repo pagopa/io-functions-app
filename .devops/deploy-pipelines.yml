@@ -185,7 +185,7 @@ stages:
           steps:
             - checkout: false
             - script: |
-                curl -f -I 'https://${{ app.Value.appname }}-staging.azurewebsites.net/$(HEALTHCHECK_PATH)'
+                curl -f 'https://${{ app.Value.appname }}-staging.azurewebsites.net/$(HEALTHCHECK_PATH)'
               displayName: 'check info endpoint'
 
   # Promote the staging instance to production
