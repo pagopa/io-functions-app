@@ -23,7 +23,7 @@ import {
   manualApiProfileServicePreferencesSettings,
   manualProfileServicePreferencesSettings
 } from "../../__mocks__/mocks";
-import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../../UpsertedProfileOrchestratorV2/handler";
+import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../../UpsertedProfileOrchestrator/handler";
 import { UpdateProfileHandler } from "../handler";
 
 import { createTracker } from "../../__mocks__/tracking";
@@ -673,7 +673,7 @@ describe("UpdateProfileHandler", () => {
 
     const dfClient = df.getClient(contextMock);
     expect(dfClient.startNew).toHaveBeenCalledWith(
-      "UpsertedProfileOrchestratorV2",
+      "UpsertedProfileOrchestrator",
       undefined,
       upsertedProfileOrchestratorInput
     );

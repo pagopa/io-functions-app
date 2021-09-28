@@ -18,7 +18,7 @@ import {
   aNewProfile,
   aRetrievedProfile
 } from "../../__mocks__/mocks";
-import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../../UpsertedProfileOrchestratorV2/handler";
+import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../../UpsertedProfileOrchestrator/handler";
 import { CreateProfileHandler } from "../handler";
 
 // eslint-disable-next-line functional/no-let
@@ -179,7 +179,7 @@ describe("CreateProfileHandler", () => {
 
     const dfClient = df.getClient(contextMock);
     expect(dfClient.startNew).toHaveBeenCalledWith(
-      "UpsertedProfileOrchestratorV2",
+      "UpsertedProfileOrchestrator",
       undefined,
       upsertedProfileOrchestratorInput
     );

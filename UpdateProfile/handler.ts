@@ -40,7 +40,7 @@ import {
 import { QueueClient, QueueSendMessageResponse } from "@azure/storage-queue";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { MigrateServicesPreferencesQueueMessage } from "../MigrateServicePreferenceFromLegacy/handler";
-import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestratorV2/handler";
+import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { ProfileMiddleware } from "../utils/middlewares/profile";
 import {
   apiProfileToProfile,
@@ -244,10 +244,10 @@ export function UpdateProfileHandler(
         updatedAt: new Date()
       }
     );
-    // TODO: To enable the new orchestration change to UpsertedProfileOrchestratorV2
+    // TODO: To enable the new orchestration change to UpsertedProfileOrchestrator
     // Change the orchestrator after that in production the code is available to enable rollback
     await dfClient.startNew(
-      "UpsertedProfileOrchestratorV2",
+      "UpsertedProfileOrchestrator",
       undefined,
       upsertedProfileOrchestratorInput
     );

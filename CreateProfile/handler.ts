@@ -35,7 +35,7 @@ import {
 import { isBefore } from "date-fns";
 import { pipe } from "fp-ts/lib/function";
 import { fromEither } from "fp-ts/lib/TaskEither";
-import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestratorV2/handler";
+import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { NewProfileMiddleware } from "../utils/middlewares/profile";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 
@@ -109,7 +109,7 @@ export function CreateProfileHandler(
 
     const dfClient = df.getClient(context);
     await dfClient.startNew(
-      "UpsertedProfileOrchestratorV2",
+      "UpsertedProfileOrchestrator",
       undefined,
       upsertedProfileOrchestratorInput
     );
