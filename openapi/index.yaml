@@ -530,12 +530,6 @@ definitions:
         type: string
     required:
       - auth_code
-  OrganizationFiscalCode:
-    type: string
-    description: Organization fiscal code.
-    format: OrganizationFiscalCode
-    x-import: '@pagopa/ts-commons/lib/strings'
-    example: '12345678901'
   LimitedProfile:
     description: |-
       Describes the citizen's profile, mostly interesting for preferences
@@ -583,16 +577,6 @@ definitions:
     format: FiscalCode
     x-import: '@pagopa/ts-commons/lib/strings'
     example: TCNZRO80R13C555Y
-  MessageContentBase:
-    type: object
-    properties:
-      subject:
-        $ref: '#/definitions/MessageSubject'
-      markdown:
-        $ref: '#/definitions/MessageBodyMarkdown'
-    required:
-      - subject
-      - markdown
   NewMessageContent:
     allOf:
       - $ref: '#/definitions/MessageContentBase'
@@ -629,7 +613,7 @@ definitions:
               - false
             description: It indicates that service is hidden
           service_metadata:
-            $ref: '#/definitions/ServiceMetadata'
+            $ref: '#/definitions/ServicePublic/properties/service_metadata'
   VisibleServicePayload:
     description: >-
       A payload used to create/update a service that appears in the service
@@ -644,7 +628,7 @@ definitions:
               - true
             description: It indicates that service appears in the service list
           service_metadata:
-            $ref: '#/definitions/ServiceMetadata'
+            $ref: '#/definitions/ServicePublic/properties/service_metadata'
         required:
           - is_visible
           - service_metadata
@@ -653,7 +637,7 @@ definitions:
     type: object
     properties:
       service_name:
-        $ref: '#/definitions/ServiceName'
+        $ref: '#/definitions/ServicePublic/properties/service_name'
       department_name:
         $ref: '#/definitions/DepartmentName'
       organization_name:
@@ -681,90 +665,6 @@ definitions:
       - organization_name
       - organization_fiscal_code
       - authorized_cidrs
-  Service:
-    description: A service tied to user's subscription.
-    allOf:
-      - $ref: '#/definitions/ServicePayload'
-      - type: object
-        properties:
-          id:
-            type: string
-          service_id:
-            $ref: '#/definitions/ServiceId'
-          authorized_recipients:
-            description: |-
-              If non empty, the service will be able
-              to send messages only to these fiscal codes.
-            type: array
-            items:
-              $ref: '#/definitions/FiscalCode'
-          max_allowed_payment_amount:
-            description: >-
-              Maximum amount in euro cents that a service is allowed to charge
-              to a user.
-            type: integer
-            minimum: 0
-            maximum: 9999999999
-            default: 0
-        required:
-          - service_id
-          - authorized_recipients
-  ServiceMetadata:
-    type: object
-    description: A set of metadata properties related to this service.
-    properties:
-      description:
-        type: string
-        minLength: 1
-      web_url:
-        type: string
-        minLength: 1
-      app_ios:
-        type: string
-        minLength: 1
-      app_android:
-        type: string
-        minLength: 1
-      tos_url:
-        type: string
-        minLength: 1
-      privacy_url:
-        type: string
-        minLength: 1
-      address:
-        type: string
-        minLength: 1
-      phone:
-        type: string
-        minLength: 1
-      email:
-        type: string
-        minLength: 1
-      pec:
-        type: string
-        minLength: 1
-      cta:
-        type: string
-        minLength: 1
-      token_name:
-        type: string
-        minLength: 1
-      support_url:
-        type: string
-        minLength: 1
-      scope:
-        $ref: '#/definitions/ServiceScope'
-    required:
-      - scope
-  ServiceScope:
-    type: string
-    x-extensible-enum:
-      - NATIONAL
-      - LOCAL
-  ServiceName:
-    type: string
-    description: The name of the service. Will be added to the content of sent messages.
-    minLength: 1
   OrganizationName:
     type: string
     description: |-
@@ -804,23 +704,6 @@ definitions:
     required:
       - amount
       - notice_number
-  Payee:
-    type: object
-    description: Metadata needed to explicit payment's payee.
-    properties:
-      fiscal_code:
-        $ref: '#/definitions/OrganizationFiscalCode'
-    required:
-      - fiscal_code
-  PaymentDataWithRequiredPayee:
-    allOf:
-      - $ref: '#/definitions/PaymentDataBase'
-      - type: object
-        properties:
-          payee:
-            $ref: '#/definitions/Payee'
-        required:
-          - payee
   ExtendedProfile:
     description: |-
       Describes the citizen's profile, mostly interesting for preferences
@@ -856,6 +739,17 @@ definitions:
       - is_webhook_enabled
       - service_preferences_settings
       - version
+  MessageResponseWithContent:
+    type: object
+    properties:
+      message:
+        $ref: '#/definitions/CreatedMessageWithContent'
+      notification:
+        $ref: '#/definitions/MessageResponseNotificationStatus'
+      status:
+        $ref: '#/definitions/MessageStatusValue'
+    required:
+      - message
   NewMessage:
     type: object
     properties:
@@ -1025,7 +919,11 @@ definitions:
       service_id:
         $ref: '#/definitions/ServiceId'
       service_name:
-        $ref: '#/definitions/ServiceName'
+        type: string
+        description: >-
+          The name of the service. Will be added to the content of sent
+          messages.
+        minLength: 1
       organization_name:
         $ref: '#/definitions/OrganizationName'
       department_name:
@@ -1040,7 +938,55 @@ definitions:
       version:
         type: integer
       service_metadata:
-        $ref: '#/definitions/ServiceMetadata'
+        type: object
+        description: A set of metadata properties related to this service.
+        properties:
+          description:
+            type: string
+            minLength: 1
+          web_url:
+            type: string
+            minLength: 1
+          app_ios:
+            type: string
+            minLength: 1
+          app_android:
+            type: string
+            minLength: 1
+          tos_url:
+            type: string
+            minLength: 1
+          privacy_url:
+            type: string
+            minLength: 1
+          address:
+            type: string
+            minLength: 1
+          phone:
+            type: string
+            minLength: 1
+          email:
+            type: string
+            minLength: 1
+          pec:
+            type: string
+            minLength: 1
+          cta:
+            type: string
+            minLength: 1
+          token_name:
+            type: string
+            minLength: 1
+          support_url:
+            type: string
+            minLength: 1
+          scope:
+            type: string
+            x-extensible-enum:
+              - NATIONAL
+              - LOCAL
+        required:
+          - scope
     required:
       - service_id
       - service_name
@@ -1153,6 +1099,16 @@ definitions:
             $ref: '#/definitions/EUCovidCert'
           due_date:
             $ref: '#/definitions/Timestamp'
+  MessageContentBase:
+    type: object
+    properties:
+      subject:
+        $ref: '#/definitions/MessageSubject'
+      markdown:
+        $ref: '#/definitions/MessageBodyMarkdown'
+    required:
+      - subject
+      - markdown
   MessageSubject:
     type: string
     description: |-
@@ -1183,6 +1139,21 @@ definitions:
         properties:
           payee:
             $ref: '#/definitions/Payee'
+  PaymentDataWithRequiredPayee:
+    allOf:
+      - $ref: '#/definitions/PaymentDataBase'
+      - type: object
+        properties:
+          payee:
+            $ref: '#/definitions/Payee'
+        required:
+          - payee
+  OrganizationFiscalCode:
+    type: string
+    description: Organization fiscal code.
+    format: OrganizationFiscalCode
+    x-import: '@pagopa/ts-commons/lib/strings'
+    example: '12345678901'
   CreatedMessageWithoutContentCollection:
     description: A collection of messages
     type: object
@@ -1210,6 +1181,27 @@ definitions:
       - id
       - fiscal_code
       - created_at
+      - sender_service_id
+  CreatedMessageWithContent:
+    type: object
+    properties:
+      id:
+        type: string
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+      time_to_live:
+        $ref: '#/definitions/TimeToLiveSeconds'
+      created_at:
+        $ref: '#/definitions/Timestamp'
+      content:
+        $ref: '#/definitions/NewMessageContent'
+      sender_service_id:
+        $ref: '#/definitions/ServiceId'
+    required:
+      - id
+      - fiscal_code
+      - created_at
+      - content
       - sender_service_id
   MessageResponseNotificationStatus:
     type: object
@@ -1257,7 +1249,8 @@ definitions:
             service_id:
               $ref: '#/definitions/ServiceId'
             scope:
-              $ref: '#/definitions/ServiceScope'
+              $ref: >-
+                #/definitions/ServicePublic/properties/service_metadata/properties/scope
             version:
               type: integer
           required:
@@ -1401,35 +1394,11 @@ definitions:
         $ref: '#/definitions/MessageStatusValue'
     required:
       - message
-  MessageResponseWithContent:
+  Payee:
     type: object
+    description: Metadata needed to explicit payment's payee.
     properties:
-      message:
-        $ref: '#/definitions/CreatedMessageWithContent'
-      notification:
-        $ref: '#/definitions/MessageResponseNotificationStatus'
-      status:
-        $ref: '#/definitions/MessageStatusValue'
-    required:
-      - message
-  CreatedMessageWithContent:
-    type: object
-    properties:
-      id:
-        type: string
       fiscal_code:
-        $ref: '#/definitions/FiscalCode'
-      time_to_live:
-        $ref: '#/definitions/TimeToLiveSeconds'
-      created_at:
-        $ref: '#/definitions/Timestamp'
-      content:
-        $ref: '#/definitions/NewMessageContent'
-      sender_service_id:
-        $ref: '#/definitions/ServiceId'
+        $ref: '#/definitions/OrganizationFiscalCode'
     required:
-      - id
       - fiscal_code
-      - created_at
-      - content
-      - sender_service_id
