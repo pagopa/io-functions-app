@@ -553,6 +553,305 @@ parameters:
     required: true
     x-example: DOWNLOAD
 definitions:
+  EUCovidCert:
+    type: object
+    description: Paylod with access token to retrieve a EU Covid Certificate
+    properties:
+      auth_code:
+        type: string
+    required:
+      - auth_code
+  OrganizationFiscalCode:
+    type: string
+    description: Organization fiscal code.
+    format: OrganizationFiscalCode
+    x-import: '@pagopa/ts-commons/lib/strings'
+    example: '12345678901'
+  LimitedProfile:
+    description: |-
+      Describes the citizen's profile, mostly interesting for preferences
+      attributes.
+    type: object
+    properties:
+      sender_allowed:
+        type: boolean
+        description: |-
+          True in case the service that made the request can send
+          messages to the user identified by this profile (false otherwise).
+      preferred_languages:
+        $ref: '#/definitions/PreferredLanguages'
+    required:
+      - sender_allowed
+  PrescriptionData:
+    type: object
+    description: Metadata needed to process medical prescriptions.
+    properties:
+      nre:
+        $ref: '#/definitions/PrescriptionNRE'
+      iup:
+        $ref: '#/definitions/PrescriptionIUP'
+      prescriber_fiscal_code:
+        $ref: '#/definitions/PrescriberFiscalCode'
+    required:
+      - nre
+  PrescriptionNRE:
+    description: >-
+      The field *Numero ricetta elettronica* identifies the medical prescription
+      at national level.
+    type: string
+    minLength: 15
+    maxLength: 15
+  PrescriptionIUP:
+    description: >-
+      The field *Identificativo Unico di Prescrizione* identifies the medical
+      prescription at regional level.
+    type: string
+    minLength: 1
+    maxLength: 16
+  PrescriberFiscalCode:
+    type: string
+    description: Fiscal code of the Doctor that made the prescription.
+    format: FiscalCode
+    x-import: '@pagopa/ts-commons/lib/strings'
+    example: TCNZRO80R13C555Y
+  MessageContentBase:
+    type: object
+    properties:
+      subject:
+        $ref: '#/definitions/MessageSubject'
+      markdown:
+        $ref: '#/definitions/MessageBodyMarkdown'
+    required:
+      - subject
+      - markdown
+  NewMessageContent:
+    allOf:
+      - $ref: '#/definitions/MessageContentBase'
+      - type: object
+        properties:
+          payment_data:
+            $ref: '#/definitions/PaymentDataWithRequiredPayee'
+          due_date:
+            $ref: '#/definitions/Timestamp'
+          prescription_data:
+            $ref: '#/definitions/PrescriptionData'
+          eu_covid_cert:
+            $ref: '#/definitions/EUCovidCert'
+  CIDR:
+    type: string
+    description: Describes a single IP or a range of IPs.
+    pattern: ^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$
+  ServicePayload:
+    description: A payload used to create/update a service for a user.
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/VisibleServicePayload'
+      - $ref: '#/definitions/HiddenServicePayload'
+  HiddenServicePayload:
+    description: A payload used to create/update a service that is hidden.
+    allOf:
+      - $ref: '#/definitions/CommonServicePayload'
+      - type: object
+        properties:
+          is_visible:
+            type: boolean
+            default: false
+            enum:
+              - false
+            description: It indicates that service is hidden
+          service_metadata:
+            $ref: '#/definitions/ServiceMetadata'
+  VisibleServicePayload:
+    description: >-
+      A payload used to create/update a service that appears in the service
+      list.
+    allOf:
+      - $ref: '#/definitions/CommonServicePayload'
+      - type: object
+        properties:
+          is_visible:
+            type: boolean
+            enum:
+              - true
+            description: It indicates that service appears in the service list
+          service_metadata:
+            $ref: '#/definitions/ServiceMetadata'
+        required:
+          - is_visible
+          - service_metadata
+  CommonServicePayload:
+    description: Common properties for a ServicePayload
+    type: object
+    properties:
+      service_name:
+        $ref: '#/definitions/ServiceName'
+      department_name:
+        $ref: '#/definitions/DepartmentName'
+      organization_name:
+        $ref: '#/definitions/OrganizationName'
+      organization_fiscal_code:
+        $ref: '#/definitions/OrganizationFiscalCode'
+      authorized_cidrs:
+        description: >-
+          Allowed source IPs or CIDRs for this service.
+
+          When empty, every IP address it's authorized to call the IO API on
+          behalf of the service.
+        type: array
+        items:
+          $ref: '#/definitions/CIDR'
+      version:
+        type: integer
+      require_secure_channels:
+        type: boolean
+        default: false
+        description: When true, messages won't trigger email notifications (only push).
+    required:
+      - service_name
+      - department_name
+      - organization_name
+      - organization_fiscal_code
+      - authorized_cidrs
+  Service:
+    description: A service tied to user's subscription.
+    allOf:
+      - $ref: '#/definitions/ServicePayload'
+      - type: object
+        properties:
+          id:
+            type: string
+          service_id:
+            $ref: '#/definitions/ServiceId'
+          authorized_recipients:
+            description: |-
+              If non empty, the service will be able
+              to send messages only to these fiscal codes.
+            type: array
+            items:
+              $ref: '#/definitions/FiscalCode'
+          max_allowed_payment_amount:
+            description: >-
+              Maximum amount in euro cents that a service is allowed to charge
+              to a user.
+            type: integer
+            minimum: 0
+            maximum: 9999999999
+            default: 0
+        required:
+          - service_id
+          - authorized_recipients
+  ServiceMetadata:
+    type: object
+    description: A set of metadata properties related to this service.
+    properties:
+      description:
+        type: string
+        minLength: 1
+      web_url:
+        type: string
+        minLength: 1
+      app_ios:
+        type: string
+        minLength: 1
+      app_android:
+        type: string
+        minLength: 1
+      tos_url:
+        type: string
+        minLength: 1
+      privacy_url:
+        type: string
+        minLength: 1
+      address:
+        type: string
+        minLength: 1
+      phone:
+        type: string
+        minLength: 1
+      email:
+        type: string
+        minLength: 1
+      pec:
+        type: string
+        minLength: 1
+      cta:
+        type: string
+        minLength: 1
+      token_name:
+        type: string
+        minLength: 1
+      support_url:
+        type: string
+        minLength: 1
+      scope:
+        $ref: '#/definitions/ServiceScope'
+    required:
+      - scope
+  ServiceScope:
+    type: string
+    x-extensible-enum:
+      - NATIONAL
+      - LOCAL
+  ServiceName:
+    type: string
+    description: The name of the service. Will be added to the content of sent messages.
+    minLength: 1
+  OrganizationName:
+    type: string
+    description: |-
+      The organization that runs the service. Will be added to the content
+      of sent messages to identify the sender.
+    minLength: 1
+  DepartmentName:
+    type: string
+    description: |-
+      The department inside the organization that runs the service. Will
+      be added to the content of sent messages.
+    minLength: 1
+  PaymentDataBase:
+    type: object
+    description: Metadata needed to process pagoPA payments.
+    properties:
+      amount:
+        description: >-
+          Amount of payment in euro cent. PagoPA accepts up to 9999999999 euro
+          cents.
+        type: integer
+        minimum: 1
+        maximum: 9999999999
+      notice_number:
+        description: >-
+          The field ["Numero
+          Avviso"](https://pagopa-specifichepagamenti.readthedocs.io/it/latest/_docs/Capitolo7.html#il-numero-avviso-e-larchivio-dei-pagamenti-in-attesa)
+          of pagoPa, needed to identify the payment. Format is `<aux digit
+          (1n)>[<application code> (2n)]<codice IUV (15|17n)>`. See [pagoPa
+          specs](https://www.agid.gov.it/sites/default/files/repository_files/specifiche_attuative_pagamenti_1_3_1_0.pdf)
+          for more info on this field and the IUV.
+        type: string
+        pattern: ^[0123][0-9]{17}$
+      invalid_after_due_date:
+        type: boolean
+        default: false
+    required:
+      - amount
+      - notice_number
+  Payee:
+    type: object
+    description: Metadata needed to explicit payment's payee.
+    properties:
+      fiscal_code:
+        $ref: '#/definitions/OrganizationFiscalCode'
+    required:
+      - fiscal_code
+  PaymentDataWithRequiredPayee:
+    allOf:
+      - $ref: '#/definitions/PaymentDataBase'
+      - type: object
+        properties:
+          payee:
+            $ref: '#/definitions/Payee'
+        required:
+          - payee
   ExtendedProfile:
     description: |-
       Describes the citizen's profile, mostly interesting for preferences
@@ -588,17 +887,6 @@ definitions:
       - is_webhook_enabled
       - service_preferences_settings
       - version
-  MessageResponseWithContent:
-    type: object
-    properties:
-      message:
-        $ref: '#/definitions/CreatedMessageWithContent'
-      notification:
-        $ref: '#/definitions/MessageResponseNotificationStatus'
-      status:
-        $ref: '#/definitions/MessageStatusValue'
-    required:
-      - message
   NewMessage:
     type: object
     properties:
@@ -662,8 +950,8 @@ definitions:
   PublicMessage:
     x-one-of: true
     allOf:
-      - $ref: '#/definitions/CreatedMessageWithoutContent'
       - $ref: '#/definitions/EnrichedMessage'
+      - $ref: '#/definitions/CreatedMessageWithoutContent'
   PublicMessagesCollection:
     description: A collection of messages
     type: object
@@ -768,29 +1056,13 @@ definitions:
       service_id:
         $ref: '#/definitions/ServiceId'
       service_name:
-        type: string
-        description: >-
-          The name of the service. Will be added to the content of sent
-          messages.
-        minLength: 1
+        $ref: '#/definitions/ServiceName'
       organization_name:
-        type: string
-        description: |-
-          The organization that runs the service. Will be added to the content
-          of sent messages to identify the sender.
-        minLength: 1
+        $ref: '#/definitions/OrganizationName'
       department_name:
-        type: string
-        description: |-
-          The department inside the organization that runs the service. Will
-          be added to the content of sent messages.
-        minLength: 1
+        $ref: '#/definitions/DepartmentName'
       organization_fiscal_code:
-        type: string
-        description: Organization fiscal code.
-        format: OrganizationFiscalCode
-        x-import: '@pagopa/ts-commons/lib/strings'
-        example: '12345678901'
+        $ref: '#/definitions/OrganizationFiscalCode'
       available_notification_channels:
         description: All the notification channels available for a service.
         type: array
@@ -799,55 +1071,7 @@ definitions:
       version:
         type: integer
       service_metadata:
-        type: object
-        description: A set of metadata properties related to this service.
-        properties:
-          description:
-            type: string
-            minLength: 1
-          web_url:
-            type: string
-            minLength: 1
-          app_ios:
-            type: string
-            minLength: 1
-          app_android:
-            type: string
-            minLength: 1
-          tos_url:
-            type: string
-            minLength: 1
-          privacy_url:
-            type: string
-            minLength: 1
-          address:
-            type: string
-            minLength: 1
-          phone:
-            type: string
-            minLength: 1
-          email:
-            type: string
-            minLength: 1
-          pec:
-            type: string
-            minLength: 1
-          cta:
-            type: string
-            minLength: 1
-          token_name:
-            type: string
-            minLength: 1
-          support_url:
-            type: string
-            minLength: 1
-          scope:
-            type: string
-            x-extensible-enum:
-              - NATIONAL
-              - LOCAL
-        required:
-          - scope
+        $ref: '#/definitions/ServiceMetadata'
     required:
       - service_id
       - service_name
@@ -948,53 +1172,18 @@ definitions:
     x-import: '@pagopa/ts-commons/lib/dates'
     example: '2018-10-13T00:00:00.000Z'
   MessageContent:
-    type: object
-    properties:
-      subject:
-        $ref: '#/definitions/MessageSubject'
-      markdown:
-        $ref: '#/definitions/MessageBodyMarkdown'
-      payment_data:
-        $ref: '#/definitions/PaymentData'
-      prescription_data:
-        type: object
-        description: Metadata needed to process medical prescriptions.
+    allOf:
+      - $ref: '#/definitions/MessageContentBase'
+      - type: object
         properties:
-          nre:
-            description: >-
-              The field *Numero ricetta elettronica* identifies the medical
-              prescription at national level.
-            type: string
-            minLength: 15
-            maxLength: 15
-          iup:
-            description: >-
-              The field *Identificativo Unico di Prescrizione* identifies the
-              medical prescription at regional level.
-            type: string
-            minLength: 1
-            maxLength: 16
-          prescriber_fiscal_code:
-            type: string
-            description: Fiscal code of the Doctor that made the prescription.
-            format: FiscalCode
-            x-import: '@pagopa/ts-commons/lib/strings'
-            example: TCNZRO80R13C555Y
-        required:
-          - nre
-      eu_covid_cert:
-        type: object
-        description: Paylod with access token to retrieve a EU Covid Certificate
-        properties:
-          auth_code:
-            type: string
-        required:
-          - auth_code
-      due_date:
-        $ref: '#/definitions/Timestamp'
-    required:
-      - subject
-      - markdown
+          payment_data:
+            $ref: '#/definitions/PaymentData'
+          prescription_data:
+            $ref: '#/definitions/PrescriptionData'
+          eu_covid_cert:
+            $ref: '#/definitions/EUCovidCert'
+          due_date:
+            $ref: '#/definitions/Timestamp'
   MessageSubject:
     type: string
     description: |-
@@ -1019,32 +1208,12 @@ definitions:
 
       Remember: this has to be a long text.
   PaymentData:
-    type: object
-    description: Metadata needed to process pagoPA payments.
-    properties:
-      amount:
-        description: >-
-          Amount of payment in euro cent. PagoPA accepts up to 9999999999 euro
-          cents.
-        type: integer
-        minimum: 1
-        maximum: 9999999999
-      notice_number:
-        description: >-
-          The field ["Numero
-          Avviso"](https://pagopa-specifichepagamenti.readthedocs.io/it/latest/_docs/Capitolo7.html#il-numero-avviso-e-larchivio-dei-pagamenti-in-attesa)
-          of pagoPa, needed to identify the payment. Format is `<aux digit
-          (1n)>[<application code> (2n)]<codice IUV (15|17n)>`. See [pagoPa
-          specs](https://www.agid.gov.it/sites/default/files/repository_files/specifiche_attuative_pagamenti_1_3_1_0.pdf)
-          for more info on this field and the IUV.
-        type: string
-        pattern: ^[0123][0-9]{17}$
-      invalid_after_due_date:
-        type: boolean
-        default: false
-    required:
-      - amount
-      - notice_number
+    allOf:
+      - $ref: '#/definitions/PaymentDataBase'
+      - type: object
+        properties:
+          payee:
+            $ref: '#/definitions/Payee'
   CreatedMessageWithoutContentCollection:
     description: A collection of messages
     type: object
@@ -1072,27 +1241,6 @@ definitions:
       - id
       - fiscal_code
       - created_at
-      - sender_service_id
-  CreatedMessageWithContent:
-    type: object
-    properties:
-      id:
-        type: string
-      fiscal_code:
-        $ref: '#/definitions/FiscalCode'
-      time_to_live:
-        $ref: '#/definitions/TimeToLiveSeconds'
-      created_at:
-        $ref: '#/definitions/Timestamp'
-      content:
-        $ref: '#/definitions/MessageContent'
-      sender_service_id:
-        $ref: '#/definitions/ServiceId'
-    required:
-      - id
-      - fiscal_code
-      - created_at
-      - content
       - sender_service_id
   MessageResponseNotificationStatus:
     type: object
@@ -1140,8 +1288,7 @@ definitions:
             service_id:
               $ref: '#/definitions/ServiceId'
             scope:
-              $ref: >-
-                #/definitions/ServicePublic/properties/service_metadata/properties/scope
+              $ref: '#/definitions/ServiceScope'
             version:
               type: integer
           required:
@@ -1274,3 +1421,46 @@ definitions:
       - is_inbox_enabled
       - is_webhook_enabled
       - settings_version
+  MessageResponseWithoutContent:
+    type: object
+    properties:
+      message:
+        $ref: '#/definitions/CreatedMessageWithoutContent'
+      notification:
+        $ref: '#/definitions/MessageResponseNotificationStatus'
+      status:
+        $ref: '#/definitions/MessageStatusValue'
+    required:
+      - message
+  MessageResponseWithContent:
+    type: object
+    properties:
+      message:
+        $ref: '#/definitions/CreatedMessageWithContent'
+      notification:
+        $ref: '#/definitions/MessageResponseNotificationStatus'
+      status:
+        $ref: '#/definitions/MessageStatusValue'
+    required:
+      - message
+  CreatedMessageWithContent:
+    type: object
+    properties:
+      id:
+        type: string
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+      time_to_live:
+        $ref: '#/definitions/TimeToLiveSeconds'
+      created_at:
+        $ref: '#/definitions/Timestamp'
+      content:
+        $ref: '#/definitions/NewMessageContent'
+      sender_service_id:
+        $ref: '#/definitions/ServiceId'
+    required:
+      - id
+      - fiscal_code
+      - created_at
+      - content
+      - sender_service_id

@@ -14,6 +14,10 @@ import { createBlobService } from "azure-storage";
 
 import createAzureFunctionHandler from "@pagopa/express-azure-functions/dist/src/createAzureFunctionsHandler";
 
+import {
+  ServiceModel,
+  SERVICE_COLLECTION_NAME
+} from "@pagopa/io-functions-commons/dist/src/models/service";
 import { cosmosdbInstance } from "../utils/cosmosdb";
 import { getConfigOrThrow } from "../utils/config";
 import { GetMessage } from "./handler";
@@ -31,9 +35,12 @@ const messageModel = new MessageModel(
 
 const blobService = createBlobService(config.QueueStorageConnection);
 
+const serviceModel = new ServiceModel(
+  cosmosdbInstance.container(SERVICE_COLLECTION_NAME)
+);
 app.get(
   "/api/v1/messages/:fiscalcode/:id",
-  GetMessage(messageModel, blobService)
+  GetMessage(messageModel, blobService, serviceModel)
 );
 
 const azureFunctionHandler = createAzureFunctionHandler(app);
