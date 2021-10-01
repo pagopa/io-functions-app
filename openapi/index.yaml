@@ -55,44 +55,15 @@ paths:
                 - id: 01BX9NSMKVXXS5PSP2FATZMYYY
                   fiscal_code: PUPFHK4TD3MWL20W
                   time_to_live: 3600
-                  content:
-                    subject: amet sunt dolor nulla esseesseanim
-                    markdown: >-
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                      Maecenas et mollis felis.
-
-                      Vivamus orci nisl, commodo ut sodales ut, eleifend a
-                      libero. Donec dapibus, turpis in mattis tempor,
-
-                      risus nunc malesuada ex, non aliquet metus nunc a lacus.
-                      Aenean in arcu vitae nisl porta
-
-                      fermentum nec non nibh. Phasellus tortor tellus, semper in
-                      metus eget, eleifend
-
-                      laoreet nibh. Aenean feugiat lectus ut nisl eleifend
-                      gravida.
                   sender_service_id: 01BX9NSMKVXXS5PSP2FATZMZZZ
+                  created_at: '2018-05-21T07:36:41.209Z'
                 - id: 01BX9NSMKVXXS5PSP2FATZM123
                   fiscal_code: PKTINH4QDQUV696L
                   time_to_live: 3600
-                  content:
-                    subject: idUt quis tempor esseesseanim
-                    markdown: >-
-                      Nullam dapibus metus sed elementum efficitur. Curabitur
-                      facilisis sagittis risus nec sodales.
-
-                      Vestibulum in eros sapien. Donec ac odio sit amet dui
-                      semper ornare eget nec odio. Pellentesque habitant
-
-                      morbi tristique senectus et netus et malesuada fames ac
-                      turpis egestas. Praesent nibh ex, mattis sit amet
-
-                      felis id, sodales euismod velit. Lorem ipsum dolor sit
-                      amet, consectetur adipiscing elit.
                   sender_service_id: 01BX9NSMKVXXS5PSP2FATZMWWW
-              page_size: 2
-              next: https://example.com/next
+                  created_at: '2018-05-21T07:36:41.209Z'
+              next: 01BX9NSMKVXXS5PSP2FATZMWWW
+              prev: 01BX9NSMKVXXS5PSP2FATZMWWW
         '401':
           description: Unauthorized
         '404':
@@ -101,6 +72,8 @@ paths:
             $ref: '#/definitions/ProblemJson'
         '429':
           description: Too many requests
+        '500':
+          description: Internal Server error
   /messages/{fiscal_code}/{id}:
     get:
       operationId: getMessage
@@ -522,25 +495,21 @@ parameters:
     in: query
     minimum: 1
     maximum: 100
-    required: false
     description: How many items a page should include.
   MaximumId:
     type: string
     name: maximum_id
     in: query
-    required: false
     description: The maximum id to get messages until to.
   MinimumId:
     type: string
     name: minimum_id
     in: query
-    required: false
     description: The minimum id to get messages from.
   EnrichResultData:
     type: boolean
     name: enrich_result_data
     in: query
-    required: false
     description: Indicates whether result data should be enriched or not.
   UserDataProcessingChoiceParam:
     name: choice
@@ -662,8 +631,8 @@ definitions:
   PublicMessage:
     x-one-of: true
     allOf:
-      - $ref: '#/definitions/CreatedMessageWithoutContent'
       - $ref: '#/definitions/EnrichedMessage'
+      - $ref: '#/definitions/CreatedMessageWithoutContent'
   PublicMessagesCollection:
     description: A collection of messages
     type: object
@@ -948,53 +917,56 @@ definitions:
     x-import: '@pagopa/ts-commons/lib/dates'
     example: '2018-10-13T00:00:00.000Z'
   MessageContent:
-    type: object
-    properties:
-      subject:
-        $ref: '#/definitions/MessageSubject'
-      markdown:
-        $ref: '#/definitions/MessageBodyMarkdown'
-      payment_data:
-        $ref: '#/definitions/PaymentData'
-      prescription_data:
-        type: object
-        description: Metadata needed to process medical prescriptions.
+    allOf:
+      - type: object
         properties:
-          nre:
-            description: >-
-              The field *Numero ricetta elettronica* identifies the medical
-              prescription at national level.
-            type: string
-            minLength: 15
-            maxLength: 15
-          iup:
-            description: >-
-              The field *Identificativo Unico di Prescrizione* identifies the
-              medical prescription at regional level.
-            type: string
-            minLength: 1
-            maxLength: 16
-          prescriber_fiscal_code:
-            type: string
-            description: Fiscal code of the Doctor that made the prescription.
-            format: FiscalCode
-            x-import: '@pagopa/ts-commons/lib/strings'
-            example: TCNZRO80R13C555Y
+          subject:
+            $ref: '#/definitions/MessageSubject'
+          markdown:
+            $ref: '#/definitions/MessageBodyMarkdown'
         required:
-          - nre
-      eu_covid_cert:
-        type: object
-        description: Paylod with access token to retrieve a EU Covid Certificate
+          - subject
+          - markdown
+      - type: object
         properties:
-          auth_code:
-            type: string
-        required:
-          - auth_code
-      due_date:
-        $ref: '#/definitions/Timestamp'
-    required:
-      - subject
-      - markdown
+          payment_data:
+            $ref: '#/definitions/PaymentData'
+          prescription_data:
+            type: object
+            description: Metadata needed to process medical prescriptions.
+            properties:
+              nre:
+                description: >-
+                  The field *Numero ricetta elettronica* identifies the medical
+                  prescription at national level.
+                type: string
+                minLength: 15
+                maxLength: 15
+              iup:
+                description: >-
+                  The field *Identificativo Unico di Prescrizione* identifies
+                  the medical prescription at regional level.
+                type: string
+                minLength: 1
+                maxLength: 16
+              prescriber_fiscal_code:
+                type: string
+                description: Fiscal code of the Doctor that made the prescription.
+                format: FiscalCode
+                x-import: '@pagopa/ts-commons/lib/strings'
+                example: TCNZRO80R13C555Y
+            required:
+              - nre
+          eu_covid_cert:
+            type: object
+            description: Paylod with access token to retrieve a EU Covid Certificate
+            properties:
+              auth_code:
+                type: string
+            required:
+              - auth_code
+          due_date:
+            $ref: '#/definitions/Timestamp'
   MessageSubject:
     type: string
     description: |-
@@ -1019,32 +991,44 @@ definitions:
 
       Remember: this has to be a long text.
   PaymentData:
-    type: object
-    description: Metadata needed to process pagoPA payments.
-    properties:
-      amount:
-        description: >-
-          Amount of payment in euro cent. PagoPA accepts up to 9999999999 euro
-          cents.
-        type: integer
-        minimum: 1
-        maximum: 9999999999
-      notice_number:
-        description: >-
-          The field ["Numero
-          Avviso"](https://pagopa-specifichepagamenti.readthedocs.io/it/latest/_docs/Capitolo7.html#il-numero-avviso-e-larchivio-dei-pagamenti-in-attesa)
-          of pagoPa, needed to identify the payment. Format is `<aux digit
-          (1n)>[<application code> (2n)]<codice IUV (15|17n)>`. See [pagoPa
-          specs](https://www.agid.gov.it/sites/default/files/repository_files/specifiche_attuative_pagamenti_1_3_1_0.pdf)
-          for more info on this field and the IUV.
-        type: string
-        pattern: ^[0123][0-9]{17}$
-      invalid_after_due_date:
-        type: boolean
-        default: false
-    required:
-      - amount
-      - notice_number
+    allOf:
+      - type: object
+        description: Metadata needed to process pagoPA payments.
+        properties:
+          amount:
+            description: >-
+              Amount of payment in euro cent. PagoPA accepts up to 9999999999
+              euro cents.
+            type: integer
+            minimum: 1
+            maximum: 9999999999
+          notice_number:
+            description: >-
+              The field ["Numero
+              Avviso"](https://pagopa-specifichepagamenti.readthedocs.io/it/latest/_docs/Capitolo7.html#il-numero-avviso-e-larchivio-dei-pagamenti-in-attesa)
+              of pagoPa, needed to identify the payment. Format is `<aux digit
+              (1n)>[<application code> (2n)]<codice IUV (15|17n)>`. See [pagoPa
+              specs](https://www.agid.gov.it/sites/default/files/repository_files/specifiche_attuative_pagamenti_1_3_1_0.pdf)
+              for more info on this field and the IUV.
+            type: string
+            pattern: ^[0123][0-9]{17}$
+          invalid_after_due_date:
+            type: boolean
+            default: false
+        required:
+          - amount
+          - notice_number
+      - type: object
+        properties:
+          payee:
+            type: object
+            description: Metadata needed to explicit payment's payee.
+            properties:
+              fiscal_code:
+                $ref: >-
+                  #/definitions/ServicePublic/properties/organization_fiscal_code
+            required:
+              - fiscal_code
   CreatedMessageWithoutContentCollection:
     description: A collection of messages
     type: object
