@@ -631,8 +631,8 @@ definitions:
   PublicMessage:
     x-one-of: true
     allOf:
-      - $ref: '#/definitions/CreatedMessageWithoutContent'
       - $ref: '#/definitions/EnrichedMessage'
+      - $ref: '#/definitions/CreatedMessageWithoutContent'
   PublicMessagesCollection:
     description: A collection of messages
     type: object
@@ -917,53 +917,56 @@ definitions:
     x-import: '@pagopa/ts-commons/lib/dates'
     example: '2018-10-13T00:00:00.000Z'
   MessageContent:
-    type: object
-    properties:
-      subject:
-        $ref: '#/definitions/MessageSubject'
-      markdown:
-        $ref: '#/definitions/MessageBodyMarkdown'
-      payment_data:
-        $ref: '#/definitions/PaymentData'
-      prescription_data:
-        type: object
-        description: Metadata needed to process medical prescriptions.
+    allOf:
+      - type: object
         properties:
-          nre:
-            description: >-
-              The field *Numero ricetta elettronica* identifies the medical
-              prescription at national level.
-            type: string
-            minLength: 15
-            maxLength: 15
-          iup:
-            description: >-
-              The field *Identificativo Unico di Prescrizione* identifies the
-              medical prescription at regional level.
-            type: string
-            minLength: 1
-            maxLength: 16
-          prescriber_fiscal_code:
-            type: string
-            description: Fiscal code of the Doctor that made the prescription.
-            format: FiscalCode
-            x-import: '@pagopa/ts-commons/lib/strings'
-            example: TCNZRO80R13C555Y
+          subject:
+            $ref: '#/definitions/MessageSubject'
+          markdown:
+            $ref: '#/definitions/MessageBodyMarkdown'
         required:
-          - nre
-      eu_covid_cert:
-        type: object
-        description: Paylod with access token to retrieve a EU Covid Certificate
+          - subject
+          - markdown
+      - type: object
         properties:
-          auth_code:
-            type: string
-        required:
-          - auth_code
-      due_date:
-        $ref: '#/definitions/Timestamp'
-    required:
-      - subject
-      - markdown
+          payment_data:
+            $ref: '#/definitions/PaymentData'
+          prescription_data:
+            type: object
+            description: Metadata needed to process medical prescriptions.
+            properties:
+              nre:
+                description: >-
+                  The field *Numero ricetta elettronica* identifies the medical
+                  prescription at national level.
+                type: string
+                minLength: 15
+                maxLength: 15
+              iup:
+                description: >-
+                  The field *Identificativo Unico di Prescrizione* identifies
+                  the medical prescription at regional level.
+                type: string
+                minLength: 1
+                maxLength: 16
+              prescriber_fiscal_code:
+                type: string
+                description: Fiscal code of the Doctor that made the prescription.
+                format: FiscalCode
+                x-import: '@pagopa/ts-commons/lib/strings'
+                example: TCNZRO80R13C555Y
+            required:
+              - nre
+          eu_covid_cert:
+            type: object
+            description: Paylod with access token to retrieve a EU Covid Certificate
+            properties:
+              auth_code:
+                type: string
+            required:
+              - auth_code
+          due_date:
+            $ref: '#/definitions/Timestamp'
   MessageSubject:
     type: string
     description: |-
@@ -988,32 +991,44 @@ definitions:
 
       Remember: this has to be a long text.
   PaymentData:
-    type: object
-    description: Metadata needed to process pagoPA payments.
-    properties:
-      amount:
-        description: >-
-          Amount of payment in euro cent. PagoPA accepts up to 9999999999 euro
-          cents.
-        type: integer
-        minimum: 1
-        maximum: 9999999999
-      notice_number:
-        description: >-
-          The field ["Numero
-          Avviso"](https://pagopa-specifichepagamenti.readthedocs.io/it/latest/_docs/Capitolo7.html#il-numero-avviso-e-larchivio-dei-pagamenti-in-attesa)
-          of pagoPa, needed to identify the payment. Format is `<aux digit
-          (1n)>[<application code> (2n)]<codice IUV (15|17n)>`. See [pagoPa
-          specs](https://www.agid.gov.it/sites/default/files/repository_files/specifiche_attuative_pagamenti_1_3_1_0.pdf)
-          for more info on this field and the IUV.
-        type: string
-        pattern: ^[0123][0-9]{17}$
-      invalid_after_due_date:
-        type: boolean
-        default: false
-    required:
-      - amount
-      - notice_number
+    allOf:
+      - type: object
+        description: Metadata needed to process pagoPA payments.
+        properties:
+          amount:
+            description: >-
+              Amount of payment in euro cent. PagoPA accepts up to 9999999999
+              euro cents.
+            type: integer
+            minimum: 1
+            maximum: 9999999999
+          notice_number:
+            description: >-
+              The field ["Numero
+              Avviso"](https://pagopa-specifichepagamenti.readthedocs.io/it/latest/_docs/Capitolo7.html#il-numero-avviso-e-larchivio-dei-pagamenti-in-attesa)
+              of pagoPa, needed to identify the payment. Format is `<aux digit
+              (1n)>[<application code> (2n)]<codice IUV (15|17n)>`. See [pagoPa
+              specs](https://www.agid.gov.it/sites/default/files/repository_files/specifiche_attuative_pagamenti_1_3_1_0.pdf)
+              for more info on this field and the IUV.
+            type: string
+            pattern: ^[0123][0-9]{17}$
+          invalid_after_due_date:
+            type: boolean
+            default: false
+        required:
+          - amount
+          - notice_number
+      - type: object
+        properties:
+          payee:
+            type: object
+            description: Metadata needed to explicit payment's payee.
+            properties:
+              fiscal_code:
+                $ref: >-
+                  #/definitions/ServicePublic/properties/organization_fiscal_code
+            required:
+              - fiscal_code
   CreatedMessageWithoutContentCollection:
     description: A collection of messages
     type: object
