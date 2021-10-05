@@ -66,6 +66,16 @@ type IGetMessageHandler = (
   | IResponseErrorInternal
 >;
 
+/**
+ * In case a payment data exists and does not already contain the `payee` field,
+ * it enriches the `payee` field with the sender service fiscal code.
+ *
+ * @param context
+ * @param serviceModel
+ * @param senderServiceId
+ * @param maybePaymentData
+ * @returns
+ */
 const getErrorOrPaymentData = async (
   context: Context,
   serviceModel: ServiceModel,
@@ -83,7 +93,7 @@ const getErrorOrPaymentData = async (
       context.log.error(
         `GetMessageHandler|${JSON.stringify(errorOrMaybeSenderService.left)}`
       );
-      return E.left<IResponseErrorInternal, O.Option<PaymentData>>(
+      return E.left(
         ResponseErrorInternal(
           `Cannot get message Sender Service|ERROR=${
             E.toError(errorOrMaybeSenderService.left).message
@@ -94,13 +104,13 @@ const getErrorOrPaymentData = async (
     const maybeSenderService = errorOrMaybeSenderService.right;
     if (O.isNone(maybeSenderService)) {
       // the message sender service does not exist
-      return E.left<IResponseErrorInternal, O.Option<PaymentData>>(
+      return E.left(
         ResponseErrorInternal(
           `Message Sender not found The message that you requested does not have a related sender service`
         )
       );
     }
-    return E.right<IResponseErrorInternal, O.Option<PaymentData>>(
+    return E.right(
       O.some({
         ...maybePaymentData.value,
         payee: {
@@ -109,9 +119,7 @@ const getErrorOrPaymentData = async (
       })
     );
   }
-  return E.right<IResponseErrorInternal, O.Option<PaymentData>>(
-    maybePaymentData
-  );
+  return E.right(maybePaymentData);
 };
 /**
  * Handles requests for getting a single message for a recipient.
