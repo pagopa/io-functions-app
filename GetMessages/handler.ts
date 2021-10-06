@@ -48,9 +48,9 @@ import {
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { BlobService } from "azure-storage";
 import * as O from "fp-ts/lib/Option";
-import { enrichMessagesData } from "../utils/messages";
 import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { Context } from "@azure/functions";
+import { enrichMessagesData } from "../utils/messages";
 
 type RetrievedNotPendingMessage = t.TypeOf<typeof RetrievedNotPendingMessage>;
 const RetrievedNotPendingMessage = t.intersection([
@@ -94,6 +94,7 @@ export const GetMessagesHandler = (
   maybeEnrichResultData,
   maybeMaximumId,
   maybeMinimumId
+  // eslint-disable-next-line max-params
 ): Promise<IGetMessagesHandlerResponse> =>
   pipe(
     TE.Do,
@@ -131,7 +132,12 @@ export const GetMessagesHandler = (
             TE.map(j =>
               mapAsyncIterator(
                 j,
-                enrichMessagesData(context, messageModel, serviceModel, blobService)
+                enrichMessagesData(
+                  context,
+                  messageModel,
+                  serviceModel,
+                  blobService
+                )
               )
             ),
             // we need to make a TaskEither of the Either[] mapped above

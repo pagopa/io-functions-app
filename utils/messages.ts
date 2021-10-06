@@ -4,8 +4,7 @@ import { EnrichedMessage } from "@pagopa/io-functions-commons/dist/generated/def
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { MessageModel } from "@pagopa/io-functions-commons/dist/src/models/message";
 import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
-import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { BlobService } from "azure-storage";
 import * as A from "fp-ts/lib/Apply";
 import * as E from "fp-ts/lib/Either";
@@ -16,6 +15,40 @@ import { initTelemetryClient } from "./appinsights";
 import { createTracker } from "./tracking";
 
 const telemetryClient = initTelemetryClient();
+
+const trackServiceErrorAndContinue = (
+  context: Context,
+  error: Error,
+  fiscalCode: FiscalCode,
+  messageId: string,
+  serviceId: ServiceId
+): Error => {
+  context.log.error(
+    `Cannot enrich service with id ${serviceId}|${JSON.stringify(error)}`
+  );
+  createTracker(telemetryClient).messages.trackServiceEnrichmentFailure(
+    fiscalCode,
+    messageId,
+    serviceId
+  );
+  return E.toError(error);
+};
+
+const trackContentErrorAndContinue = (
+  context: Context,
+  error: Error,
+  fiscalCode: FiscalCode,
+  messageId: string
+): Error => {
+  context.log.error(
+    `Cannot enrich message with id ${messageId}|${JSON.stringify(error)}`
+  );
+  createTracker(telemetryClient).messages.trackContentEnrichmentFailure(
+    fiscalCode,
+    messageId
+  );
+  return E.toError(error);
+};
 
 /**
  * This function enrich a CreatedMessageWithoutContent with
@@ -79,37 +112,3 @@ export const enrichMessagesData = (
       }))
     )()
   );
-
-const trackServiceErrorAndContinue = (
-  context: Context,
-  error: Error,
-  fiscalCode: FiscalCode,
-  messageId: string,
-  serviceId: ServiceId
-) => {
-  context.log.error(
-    `Cannot enrich service with id ${serviceId}|${JSON.stringify(error)}`
-  );
-  createTracker(telemetryClient).messages.trackServiceEnrichmentFailure(
-    fiscalCode,
-    messageId,
-    serviceId
-  );
-  return E.toError(error);
-};
-
-const trackContentErrorAndContinue = (
-  context: Context,
-  error: Error,
-  fiscalCode: FiscalCode,
-  messageId: string
-) => {
-  context.log.error(
-    `Cannot enrich message with id ${messageId}|${JSON.stringify(error)}`
-  );
-  createTracker(telemetryClient).messages.trackContentEnrichmentFailure(
-    fiscalCode,
-    messageId
-  );
-  return E.toError(error);
-};
