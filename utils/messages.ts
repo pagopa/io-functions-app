@@ -24,7 +24,7 @@ const trackServiceErrorAndContinue = (
   serviceId: ServiceId
 ): Error => {
   context.log.error(
-    `Cannot enrich service with id ${serviceId}|${JSON.stringify(error)}`
+    `Cannot enrich service with id ${serviceId}|${error}`
   );
   createTracker(telemetryClient).messages.trackServiceEnrichmentFailure(
     fiscalCode,
@@ -41,7 +41,7 @@ const trackContentErrorAndContinue = (
   messageId: string
 ): Error => {
   context.log.error(
-    `Cannot enrich message with id ${messageId}|${JSON.stringify(error)}`
+    `Cannot enrich message with id ${messageId}|${error}`
   );
   createTracker(telemetryClient).messages.trackContentEnrichmentFailure(
     fiscalCode,
