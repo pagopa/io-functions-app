@@ -49,6 +49,8 @@ import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { BlobService } from "azure-storage";
 import * as O from "fp-ts/lib/Option";
 import { enrichMessagesData } from "../utils/messages";
+import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { Context } from "@azure/functions";
 
 type RetrievedNotPendingMessage = t.TypeOf<typeof RetrievedNotPendingMessage>;
 const RetrievedNotPendingMessage = t.intersection([
@@ -70,6 +72,7 @@ type IGetMessagesHandlerResponse =
  *
  */
 type IGetMessagesHandler = (
+  context: Context,
   fiscalCode: FiscalCode,
   maybePageSize: O.Option<NonNegativeInteger>,
   maybeEnrichResultData: O.Option<boolean>,
@@ -85,6 +88,7 @@ export const GetMessagesHandler = (
   serviceModel: ServiceModel,
   blobService: BlobService
 ): IGetMessagesHandler => async (
+  context,
   fiscalCode,
   maybePageSize,
   maybeEnrichResultData,
@@ -127,7 +131,7 @@ export const GetMessagesHandler = (
             TE.map(j =>
               mapAsyncIterator(
                 j,
-                enrichMessagesData(messageModel, serviceModel, blobService)
+                enrichMessagesData(context, messageModel, serviceModel, blobService)
               )
             ),
             // we need to make a TaskEither of the Either[] mapped above
@@ -167,6 +171,7 @@ export const GetMessages = (
 ): express.RequestHandler => {
   const handler = GetMessagesHandler(messageModel, serviceModel, blobService);
   const middlewaresWrap = withRequestMiddlewares(
+    ContextMiddleware(),
     FiscalCodeMiddleware,
     OptionalQueryParamMiddleware("page_size", NonNegativeIntegerFromString),
     OptionalQueryParamMiddleware("enrich_result_data", BooleanFromString),

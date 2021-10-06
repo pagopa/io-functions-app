@@ -1,7 +1,9 @@
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
+import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { EventTelemetry } from "applicationinsights/out/Declarations/Contracts";
 import { UpdateSubscriptionFeedInput } from "../UpsertServicePreferences/subscription_feed";
 import { initTelemetryClient } from "./appinsights";
@@ -87,6 +89,38 @@ export const createTracker = (
     } as EventTelemetry);
   };
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const trackServiceEnrichmentFailure = (
+    fiscalCode: FiscalCode,
+    messageId: string,
+    serviceId: ServiceId,
+  ) => {
+    telemetryClient.trackEvent({
+      name: "messages.enrichMessages.failure",
+      properties: {
+        fiscalCode: toHash(fiscalCode),
+        messageId,
+        serviceId
+      },
+      tagOverrides: { samplingEnabled: "false" }
+    } as EventTelemetry);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const trackContentEnrichmentFailure = (
+    fiscalCode: FiscalCode,
+    messageId: string
+  ) => {
+    telemetryClient.trackEvent({
+      name: "messages.enrichMessages.failure",
+      properties: {
+        fiscalCode: toHash(fiscalCode),
+        messageId
+      },
+      tagOverrides: { samplingEnabled: "false" }
+    } as EventTelemetry);
+  };
+
   return {
     profile: {
       traceEmailValidationSend,
@@ -95,6 +129,10 @@ export const createTracker = (
     },
     subscriptionFeed: {
       trackSubscriptionFeedFailure
+    },
+    messages: {
+      trackServiceEnrichmentFailure,
+      trackContentEnrichmentFailure
     }
   };
 };

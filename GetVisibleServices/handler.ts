@@ -62,7 +62,6 @@ export function GetVisibleServicesHandler(
           const servicesTuples = pipe(
             maybeVisibleServicesJson,
             // eslint-disable-next-line prettier/prettier
-            
             O.getOrElse(() => ({})),
             Object.entries,
             _ => new Map<string, VisibleService>(_),
@@ -73,8 +72,7 @@ export function GetVisibleServicesHandler(
                 : arr
           );
           return ResponseSuccessJson({
-            items: servicesTuples,
-            page_size: servicesTuples.length
+            items: servicesTuples
           });
         }
       )

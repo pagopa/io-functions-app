@@ -22,6 +22,7 @@ import { MessageContent } from "@pagopa/io-functions-commons/dist/generated/defi
 import { BlobService } from "azure-storage";
 import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { toCosmosErrorResponse } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
+import { Context } from "@azure/functions";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
 const aMessageId = "A_MESSAGE_ID" as NonEmptyString;
@@ -87,6 +88,12 @@ const serviceModelMock = ({
   findLastVersionByModelId: jest.fn(() => TE.of(O.some(aRetrievedService)))
 } as unknown) as ServiceModel;
 
+const functionsContextMock = ({
+  log: {
+    error: jest.fn(console.log)
+  }
+} as unknown) as Context;
+
 describe("GetMessagesHandler", () => {
   it("should respond with query error if it cannot retrieve messages", async () => {
     const getMessagesHandler = GetMessagesHandler(
@@ -96,6 +103,7 @@ describe("GetMessagesHandler", () => {
     );
 
     const result = await getMessagesHandler(
+      functionsContextMock,
       aFiscalCode,
       O.none,
       O.none,
@@ -103,6 +111,7 @@ describe("GetMessagesHandler", () => {
       O.none
     );
     expect(result.kind).toBe("IResponseErrorQuery");
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
   });
 
   it("should respond with the messages for the recipient when no parameters are given", async () => {
@@ -117,6 +126,7 @@ describe("GetMessagesHandler", () => {
     );
 
     const result = await getMessagesHandler(
+      functionsContextMock,
       aFiscalCode,
       O.none,
       O.none,
@@ -125,6 +135,7 @@ describe("GetMessagesHandler", () => {
     );
     expect(result.kind).toBe("IResponseSuccessJson");
     expect(messageIterator.next).toHaveBeenCalledTimes(2);
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
   });
 
   it("should respond only with non-pending messages", async () => {
@@ -142,6 +153,7 @@ describe("GetMessagesHandler", () => {
     );
 
     const result = await getMessagesHandler(
+      functionsContextMock,
       aFiscalCode,
       O.none,
       O.none,
@@ -159,6 +171,7 @@ describe("GetMessagesHandler", () => {
     }
 
     expect(messageIterator.next).toHaveBeenCalledTimes(2);
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
   });
 
   it("should respond with a page of given page size", async () => {
@@ -180,6 +193,7 @@ describe("GetMessagesHandler", () => {
     const pageSize = 2 as NonNegativeInteger;
 
     const result = await getMessagesHandler(
+      functionsContextMock,
       aFiscalCode,
       O.some(pageSize),
       O.none,
@@ -201,6 +215,7 @@ describe("GetMessagesHandler", () => {
     }
 
     expect(messageIterator.next).toHaveBeenCalledTimes(1);
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
   });
 
   it("should respond with a page of messages when given maximum id", async () => {
@@ -224,6 +239,7 @@ describe("GetMessagesHandler", () => {
     const pageSize = 2 as NonNegativeInteger;
 
     const result = await getMessagesHandler(
+      functionsContextMock,
       aFiscalCode,
       O.some(pageSize),
       O.none,
@@ -244,6 +260,7 @@ describe("GetMessagesHandler", () => {
     }
 
     expect(messageIterator.next).toHaveBeenCalledTimes(1);
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
   });
 
   it("should respond with a page of messages above given minimum id", async () => {
@@ -267,6 +284,7 @@ describe("GetMessagesHandler", () => {
     const pageSize = 2 as NonNegativeInteger;
 
     const result = await getMessagesHandler(
+      functionsContextMock,
       aFiscalCode,
       O.some(pageSize),
       O.none,
@@ -288,6 +306,7 @@ describe("GetMessagesHandler", () => {
     }
 
     expect(messageIterator.next).toHaveBeenCalledTimes(1);
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
   });
 
   it("should respond with undefined next when last element of the page is the last of all", async () => {
@@ -307,6 +326,7 @@ describe("GetMessagesHandler", () => {
     const pageSize = 2 as NonNegativeInteger;
 
     const result = await getMessagesHandler(
+      functionsContextMock,
       aFiscalCode,
       O.some(pageSize),
       O.none,
@@ -328,6 +348,7 @@ describe("GetMessagesHandler", () => {
     }
 
     expect(messageIterator.next).toHaveBeenCalledTimes(2);
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
   });
 
   it("should respond with a page of messages when given enrichment parameter", async () => {
@@ -351,6 +372,7 @@ describe("GetMessagesHandler", () => {
     const pageSize = 2 as NonNegativeInteger;
 
     const result = await getMessagesHandler(
+      functionsContextMock,
       aFiscalCode,
       O.some(pageSize),
       O.some(true),
@@ -376,6 +398,7 @@ describe("GetMessagesHandler", () => {
     }
 
     expect(messageIterator.next).toHaveBeenCalledTimes(1);
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
   });
 
   it("should respond with internal error when messages cannot be enriched", async () => {
@@ -392,9 +415,7 @@ describe("GetMessagesHandler", () => {
 
     serviceModelMock.findLastVersionByModelId = jest
       .fn()
-      .mockImplementationOnce(() => {
-        throw Error();
-      });
+      .mockImplementationOnce(() => TE.left(new Error("Error")));
 
     const getMessagesHandler = GetMessagesHandler(
       messageModelMock,
@@ -405,6 +426,7 @@ describe("GetMessagesHandler", () => {
     const pageSize = 2 as NonNegativeInteger;
 
     const result = await getMessagesHandler(
+      functionsContextMock,
       aFiscalCode,
       O.some(pageSize),
       O.some(true),
@@ -414,5 +436,6 @@ describe("GetMessagesHandler", () => {
 
     expect(result.kind).toBe("IResponseErrorInternal");
     expect(messageIterator.next).toHaveBeenCalledTimes(1);
+    expect(functionsContextMock.log.error).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,13 +1,21 @@
+import { Context } from "@azure/functions";
 import { CreatedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
 import { EnrichedMessage } from "@pagopa/io-functions-commons/dist/generated/definitions/EnrichedMessage";
+import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { MessageModel } from "@pagopa/io-functions-commons/dist/src/models/message";
 import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
+import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { BlobService } from "azure-storage";
 import * as A from "fp-ts/lib/Apply";
 import * as E from "fp-ts/lib/Either";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import { initTelemetryClient } from "./appinsights";
+import { createTracker } from "./tracking";
+
+const telemetryClient = initTelemetryClient();
 
 /**
  * This function enrich a CreatedMessageWithoutContent with
@@ -19,6 +27,7 @@ import * as TE from "fp-ts/lib/TaskEither";
  * @returns
  */
 export const enrichMessagesData = (
+  context: Context,
   messageModel: MessageModel,
   serviceModel: ServiceModel,
   blobService: BlobService
@@ -32,7 +41,16 @@ export const enrichMessagesData = (
         service: pipe(
           serviceModel.findLastVersionByModelId([message.sender_service_id]),
           TE.mapLeft(E.toError),
-          TE.chain(TE.fromOption(() => new Error("Cannot retrieve service.")))
+          TE.chain(TE.fromOption(() => new Error("Cannot retrieve service."))),
+          TE.mapLeft(e =>
+            trackServiceErrorAndContinue(
+              context,
+              e,
+              message.fiscal_code,
+              message.id,
+              message.sender_service_id
+            )
+          )
         ),
         subject: pipe(
           messageModel.getContentFromBlob(blobService, message.id),
@@ -40,6 +58,14 @@ export const enrichMessagesData = (
             flow(
               O.map(content => content.subject),
               O.toUndefined
+            )
+          ),
+          TE.mapLeft(e =>
+            trackContentErrorAndContinue(
+              context,
+              e,
+              message.fiscal_code,
+              message.id
             )
           )
         )
@@ -53,3 +79,37 @@ export const enrichMessagesData = (
       }))
     )()
   );
+
+const trackServiceErrorAndContinue = (
+  context: Context,
+  error: Error,
+  fiscalCode: FiscalCode,
+  messageId: string,
+  serviceId: ServiceId
+) => {
+  context.log.error(
+    `Cannot enrich service with id ${serviceId}|${JSON.stringify(error)}`
+  );
+  createTracker(telemetryClient).messages.trackServiceEnrichmentFailure(
+    fiscalCode,
+    messageId,
+    serviceId
+  );
+  return E.toError(error);
+};
+
+const trackContentErrorAndContinue = (
+  context: Context,
+  error: Error,
+  fiscalCode: FiscalCode,
+  messageId: string
+) => {
+  context.log.error(
+    `Cannot enrich message with id ${messageId}|${JSON.stringify(error)}`
+  );
+  createTracker(telemetryClient).messages.trackContentEnrichmentFailure(
+    fiscalCode,
+    messageId
+  );
+  return E.toError(error);
+};
