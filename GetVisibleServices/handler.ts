@@ -72,7 +72,8 @@ export function GetVisibleServicesHandler(
                 : arr
           );
           return ResponseSuccessJson({
-            items: servicesTuples
+            items: servicesTuples,
+            prev: servicesTuples[0]?.service_id ?? "-"
           });
         }
       )
