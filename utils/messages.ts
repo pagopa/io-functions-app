@@ -14,8 +14,6 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { initTelemetryClient } from "./appinsights";
 import { createTracker } from "./tracking";
 
-const telemetryClient = initTelemetryClient();
-
 const trackErrorAndContinue = (
   context: Context,
   error: Error,
@@ -26,7 +24,7 @@ const trackErrorAndContinue = (
   // eslint-disable-next-line max-params
 ): Error => {
   context.log.error(`Cannot enrich message "${messageId}" | ${error}`);
-  createTracker(telemetryClient).messages.trackEnrichmentFailure(
+  createTracker(initTelemetryClient()).messages.trackEnrichmentFailure(
     kind,
     fiscalCode,
     messageId,
