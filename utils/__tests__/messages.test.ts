@@ -28,10 +28,11 @@ import {
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { TimeToLiveSeconds } from "../../generated/backend/TimeToLiveSeconds";
 import { retrievedMessageToPublic } from "@pagopa/io-functions-commons/dist/src/utils/messages";
-import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { EnrichedMessage } from "@pagopa/io-functions-commons/dist/generated/definitions/EnrichedMessage";
 import { pipe } from "fp-ts/lib/function";
 import { CreatedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
+import { Context } from "@azure/functions";
+import { toCosmosErrorResponse } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 
 const anOrganizationFiscalCode = "01234567890" as OrganizationFiscalCode;
 
@@ -100,6 +101,12 @@ const serviceModelMock = ({
   findLastVersionByModelId: () => TE.of(O.some(aRetrievedService))
 } as unknown) as ServiceModel;
 
+const functionsContextMock = ({
+  log: {
+    error: jest.fn(e => console.log(e))
+  }
+} as unknown) as Context;
+
 describe("Messages", () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -111,6 +118,7 @@ describe("Messages", () => {
     ] as readonly CreatedMessageWithoutContent[];
 
     const enrichMessages = enrichMessagesData(
+      functionsContextMock,
       messageModelMock,
       serviceModelMock,
       blobServiceMock
@@ -131,18 +139,20 @@ describe("Messages", () => {
         expect(EnrichedMessage.is(enrichedMessage.right)).toBe(true);
       }
     });
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
   });
 
-  it("should return left when message blob or service are not correctly retrieved", async () => {
+  it("should return left when service model return a cosmos error", async () => {
     serviceModelMock.findLastVersionByModelId = jest
       .fn()
-      .mockImplementationOnce(() => TE.left(new Error("error")));
+      .mockImplementationOnce(() => TE.left(toCosmosErrorResponse("Any error message")));
 
     const messages = [
       retrievedMessageToPublic(aRetrievedMessageWithoutContent)
     ] as readonly CreatedMessageWithoutContent[];
 
     const enrichMessages = enrichMessagesData(
+      functionsContextMock,
       messageModelMock,
       serviceModelMock,
       blobServiceMock
@@ -160,5 +170,126 @@ describe("Messages", () => {
     enrichedMessages.map(enrichedMessage => {
       expect(E.isLeft(enrichedMessage)).toBe(true);
     });
+
+    expect(functionsContextMock.log.error).toHaveBeenCalledTimes(1);
+    expect(functionsContextMock.log.error).toHaveBeenCalledWith(
+      `Cannot enrich message "${aRetrievedMessageWithoutContent.id}" | Error: COSMOS_ERROR_RESPONSE, ServiceId=${aRetrievedMessageWithoutContent.senderServiceId}`
+    );  });
+
+  it("should return left when service model return an empty result", async () => {
+    serviceModelMock.findLastVersionByModelId = jest
+      .fn()
+      .mockImplementationOnce(() => TE.right(O.none));
+
+    const messages = [
+      retrievedMessageToPublic(aRetrievedMessageWithoutContent)
+    ] as readonly CreatedMessageWithoutContent[];
+
+    const enrichMessages = enrichMessagesData(
+      functionsContextMock,
+      messageModelMock,
+      serviceModelMock,
+      blobServiceMock
+    );
+
+    const enrichedMessagesPromises = enrichMessages(messages);
+
+    const enrichedMessages = await pipe(
+      TE.tryCatch(async () => Promise.all(enrichedMessagesPromises), void 0),
+      TE.getOrElse(() => {
+        throw Error();
+      })
+    )();
+
+    enrichedMessages.map(enrichedMessage => {
+      expect(E.isLeft(enrichedMessage)).toBe(true);
+    });
+
+    expect(functionsContextMock.log.error).toHaveBeenCalledTimes(1);
+    expect(functionsContextMock.log.error).toHaveBeenCalledWith(
+      `Cannot enrich message "${aRetrievedMessageWithoutContent.id}" | Error: EMPTY_SERVICE, ServiceId=${aRetrievedMessageWithoutContent.senderServiceId}`
+    );  });
+
+  it("should return left when message model return an error", async () => {
+    serviceModelMock.findLastVersionByModelId = jest
+      .fn()
+      .mockImplementationOnce(() => TE.right(O.some(aRetrievedService)));
+
+    messageModelMock.getContentFromBlob = jest
+      .fn()
+      .mockImplementationOnce(() => TE.left(new Error("GENERIC_ERROR")));
+
+    const messages = [
+      retrievedMessageToPublic(aRetrievedMessageWithoutContent)
+    ] as readonly CreatedMessageWithoutContent[];
+
+    const enrichMessages = enrichMessagesData(
+      functionsContextMock,
+      messageModelMock,
+      serviceModelMock,
+      blobServiceMock
+    );
+
+    const enrichedMessagesPromises = enrichMessages(messages);
+
+    const enrichedMessages = await pipe(
+      TE.tryCatch(async () => Promise.all(enrichedMessagesPromises), void 0),
+      TE.getOrElse(() => {
+        throw Error();
+      })
+    )();
+
+    enrichedMessages.map(enrichedMessage => {
+      expect(E.isLeft(enrichedMessage)).toBe(true);
+    });
+
+    expect(functionsContextMock.log.error).toHaveBeenCalledTimes(1);
+    expect(functionsContextMock.log.error).toHaveBeenCalledWith(
+      `Cannot enrich message "${aRetrievedMessageWithoutContent.id}" | Error: GENERIC_ERROR`
+    );  });
+
+  it("should return left when both message and service models return errors", async () => {
+    serviceModelMock.findLastVersionByModelId = jest
+      .fn()
+      .mockImplementationOnce(() =>
+        TE.left(toCosmosErrorResponse("Any error message"))
+      );
+
+    messageModelMock.getContentFromBlob = jest
+      .fn()
+      .mockImplementationOnce(() => TE.left(new Error("GENERIC_ERROR")));
+
+    const messages = [
+      retrievedMessageToPublic(aRetrievedMessageWithoutContent)
+    ] as readonly CreatedMessageWithoutContent[];
+
+    const enrichMessages = enrichMessagesData(
+      functionsContextMock,
+      messageModelMock,
+      serviceModelMock,
+      blobServiceMock
+    );
+
+    const enrichedMessagesPromises = enrichMessages(messages);
+
+    const enrichedMessages = await pipe(
+      TE.tryCatch(async () => Promise.all(enrichedMessagesPromises), void 0),
+      TE.getOrElse(() => {
+        throw Error();
+      })
+    )();
+
+    enrichedMessages.map(enrichedMessage => {
+      expect(E.isLeft(enrichedMessage)).toBe(true);
+    });
+
+    // 2 errors means 2 calls to tracking
+    expect(functionsContextMock.log.error).toHaveBeenCalledTimes(2);
+    expect(functionsContextMock.log.error).toHaveBeenCalledWith(
+      `Cannot enrich message "${aRetrievedMessageWithoutContent.id}" | Error: COSMOS_ERROR_RESPONSE, ServiceId=${aRetrievedMessageWithoutContent.senderServiceId}`
+    );
+    expect(functionsContextMock.log.error).toHaveBeenCalledWith(
+      `Cannot enrich message "${aRetrievedMessageWithoutContent.id}" | Error: GENERIC_ERROR`
+    );
   });
 });

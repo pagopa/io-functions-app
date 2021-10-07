@@ -1,4 +1,5 @@
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
+import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
@@ -87,7 +88,29 @@ export const createTracker = (
     } as EventTelemetry);
   };
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const trackEnrichmentFailure = (
+    kind: "SERVICE" | "CONTENT",
+    fiscalCode: FiscalCode,
+    messageId: string,
+    serviceId?: ServiceId
+  ) => {
+    telemetryClient.trackEvent({
+      name: "messages.enrichMessages.failure",
+      properties: {
+        fiscalCode: toHash(fiscalCode),
+        kind,
+        messageId,
+        serviceId
+      },
+      tagOverrides: { samplingEnabled: "false" }
+    } as EventTelemetry);
+  };
+
   return {
+    messages: {
+      trackEnrichmentFailure
+    },
     profile: {
       traceEmailValidationSend,
       traceMigratingServicePreferences,
