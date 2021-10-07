@@ -415,7 +415,13 @@ describe("GetMessagesHandler", () => {
 
     serviceModelMock.findLastVersionByModelId = jest
       .fn()
-      .mockImplementationOnce(() => TE.left(new Error("Error")));
+      .mockImplementationOnce(() =>
+        TE.left(toCosmosErrorResponse("Any error message"))
+      );
+
+    messageModelMock.getContentFromBlob = jest
+      .fn()
+      .mockImplementationOnce(() => TE.left(new Error("GENERIC_ERROR")));
 
     const getMessagesHandler = GetMessagesHandler(
       messageModelMock,
@@ -436,6 +442,12 @@ describe("GetMessagesHandler", () => {
 
     expect(result.kind).toBe("IResponseErrorInternal");
     expect(messageIterator.next).toHaveBeenCalledTimes(1);
-    expect(functionsContextMock.log.error).toHaveBeenCalledTimes(1);
+    expect(functionsContextMock.log.error).toHaveBeenCalledTimes(2);
+    expect(functionsContextMock.log.error).toHaveBeenCalledWith(
+      `Cannot enrich message "${aRetrievedMessageWithoutContent.id}" | Error: COSMOS_ERROR_RESPONSE, ServiceId=${aRetrievedMessageWithoutContent.senderServiceId}`
+    );
+    expect(functionsContextMock.log.error).toHaveBeenCalledWith(
+      `Cannot enrich message "${aRetrievedMessageWithoutContent.id}" | Error: GENERIC_ERROR`
+    );
   });
 });

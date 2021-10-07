@@ -32,6 +32,7 @@ import { EnrichedMessage } from "@pagopa/io-functions-commons/dist/generated/def
 import { pipe } from "fp-ts/lib/function";
 import { CreatedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
 import { Context } from "@azure/functions";
+import { toCosmosErrorResponse } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 
 const anOrganizationFiscalCode = "01234567890" as OrganizationFiscalCode;
 
@@ -100,7 +101,7 @@ const serviceModelMock = ({
   findLastVersionByModelId: () => TE.of(O.some(aRetrievedService))
 } as unknown) as ServiceModel;
 
-const mockContext = ({
+const functionsContextMock = ({
   log: {
     error: jest.fn(e => console.log(e))
   }
@@ -117,7 +118,7 @@ describe("Messages", () => {
     ] as readonly CreatedMessageWithoutContent[];
 
     const enrichMessages = enrichMessagesData(
-      mockContext,
+      functionsContextMock,
       messageModelMock,
       serviceModelMock,
       blobServiceMock
@@ -138,19 +139,20 @@ describe("Messages", () => {
         expect(EnrichedMessage.is(enrichedMessage.right)).toBe(true);
       }
     });
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
   });
 
-  it("should return left when service model return an error", async () => {
+  it("should return left when service model return a cosmos error", async () => {
     serviceModelMock.findLastVersionByModelId = jest
       .fn()
-      .mockImplementationOnce(() => TE.left(new Error("error")));
+      .mockImplementationOnce(() => TE.left(toCosmosErrorResponse("Any error message")));
 
     const messages = [
       retrievedMessageToPublic(aRetrievedMessageWithoutContent)
     ] as readonly CreatedMessageWithoutContent[];
 
     const enrichMessages = enrichMessagesData(
-      mockContext,
+      functionsContextMock,
       messageModelMock,
       serviceModelMock,
       blobServiceMock
@@ -169,8 +171,10 @@ describe("Messages", () => {
       expect(E.isLeft(enrichedMessage)).toBe(true);
     });
 
-    expect(mockContext.log.error).toHaveBeenCalledTimes(1);
-  });
+    expect(functionsContextMock.log.error).toHaveBeenCalledTimes(1);
+    expect(functionsContextMock.log.error).toHaveBeenCalledWith(
+      `Cannot enrich message "${aRetrievedMessageWithoutContent.id}" | Error: COSMOS_ERROR_RESPONSE, ServiceId=${aRetrievedMessageWithoutContent.senderServiceId}`
+    );  });
 
   it("should return left when service model return an empty result", async () => {
     serviceModelMock.findLastVersionByModelId = jest
@@ -182,7 +186,7 @@ describe("Messages", () => {
     ] as readonly CreatedMessageWithoutContent[];
 
     const enrichMessages = enrichMessagesData(
-      mockContext,
+      functionsContextMock,
       messageModelMock,
       serviceModelMock,
       blobServiceMock
@@ -201,8 +205,10 @@ describe("Messages", () => {
       expect(E.isLeft(enrichedMessage)).toBe(true);
     });
 
-    expect(mockContext.log.error).toHaveBeenCalledTimes(1);
-  });
+    expect(functionsContextMock.log.error).toHaveBeenCalledTimes(1);
+    expect(functionsContextMock.log.error).toHaveBeenCalledWith(
+      `Cannot enrich message "${aRetrievedMessageWithoutContent.id}" | Error: EMPTY_SERVICE, ServiceId=${aRetrievedMessageWithoutContent.senderServiceId}`
+    );  });
 
   it("should return left when message model return an error", async () => {
     serviceModelMock.findLastVersionByModelId = jest
@@ -211,14 +217,14 @@ describe("Messages", () => {
 
     messageModelMock.getContentFromBlob = jest
       .fn()
-      .mockImplementationOnce(() => TE.left(new Error("Error")));
+      .mockImplementationOnce(() => TE.left(new Error("GENERIC_ERROR")));
 
     const messages = [
       retrievedMessageToPublic(aRetrievedMessageWithoutContent)
     ] as readonly CreatedMessageWithoutContent[];
 
     const enrichMessages = enrichMessagesData(
-      mockContext,
+      functionsContextMock,
       messageModelMock,
       serviceModelMock,
       blobServiceMock
@@ -237,24 +243,28 @@ describe("Messages", () => {
       expect(E.isLeft(enrichedMessage)).toBe(true);
     });
 
-    expect(mockContext.log.error).toHaveBeenCalledTimes(1);
-  });
+    expect(functionsContextMock.log.error).toHaveBeenCalledTimes(1);
+    expect(functionsContextMock.log.error).toHaveBeenCalledWith(
+      `Cannot enrich message "${aRetrievedMessageWithoutContent.id}" | Error: GENERIC_ERROR`
+    );  });
 
-  it("should return left when both message and service models return an error", async () => {
+  it("should return left when both message and service models return errors", async () => {
     serviceModelMock.findLastVersionByModelId = jest
       .fn()
-      .mockImplementationOnce(() => TE.left(new Error("Error")));
+      .mockImplementationOnce(() =>
+        TE.left(toCosmosErrorResponse("Any error message"))
+      );
 
     messageModelMock.getContentFromBlob = jest
       .fn()
-      .mockImplementationOnce(() => TE.left(new Error("Error")));
+      .mockImplementationOnce(() => TE.left(new Error("GENERIC_ERROR")));
 
     const messages = [
       retrievedMessageToPublic(aRetrievedMessageWithoutContent)
     ] as readonly CreatedMessageWithoutContent[];
 
     const enrichMessages = enrichMessagesData(
-      mockContext,
+      functionsContextMock,
       messageModelMock,
       serviceModelMock,
       blobServiceMock
@@ -273,7 +283,13 @@ describe("Messages", () => {
       expect(E.isLeft(enrichedMessage)).toBe(true);
     });
 
-    // 2 errors means 2 calls
-    expect(mockContext.log.error).toHaveBeenCalledTimes(2);
+    // 2 errors means 2 calls to tracking
+    expect(functionsContextMock.log.error).toHaveBeenCalledTimes(2);
+    expect(functionsContextMock.log.error).toHaveBeenCalledWith(
+      `Cannot enrich message "${aRetrievedMessageWithoutContent.id}" | Error: COSMOS_ERROR_RESPONSE, ServiceId=${aRetrievedMessageWithoutContent.senderServiceId}`
+    );
+    expect(functionsContextMock.log.error).toHaveBeenCalledWith(
+      `Cannot enrich message "${aRetrievedMessageWithoutContent.id}" | Error: GENERIC_ERROR`
+    );
   });
 });

@@ -89,15 +89,17 @@ export const createTracker = (
   };
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  const trackServiceEnrichmentFailure = (
+  const trackEnrichmentFailure = (
+    kind: "SERVICE" | "CONTENT",
     fiscalCode: FiscalCode,
     messageId: string,
-    serviceId: ServiceId
+    serviceId?: ServiceId
   ) => {
     telemetryClient.trackEvent({
       name: "messages.enrichMessages.failure",
       properties: {
         fiscalCode: toHash(fiscalCode),
+        kind,
         messageId,
         serviceId
       },
@@ -105,25 +107,9 @@ export const createTracker = (
     } as EventTelemetry);
   };
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  const trackContentEnrichmentFailure = (
-    fiscalCode: FiscalCode,
-    messageId: string
-  ) => {
-    telemetryClient.trackEvent({
-      name: "messages.enrichMessages.failure",
-      properties: {
-        fiscalCode: toHash(fiscalCode),
-        messageId
-      },
-      tagOverrides: { samplingEnabled: "false" }
-    } as EventTelemetry);
-  };
-
   return {
     messages: {
-      trackContentEnrichmentFailure,
-      trackServiceEnrichmentFailure
+      trackEnrichmentFailure
     },
     profile: {
       traceEmailValidationSend,

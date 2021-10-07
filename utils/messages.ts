@@ -16,34 +16,23 @@ import { createTracker } from "./tracking";
 
 const telemetryClient = initTelemetryClient();
 
-const trackServiceErrorAndContinue = (
+const trackErrorAndContinue = (
   context: Context,
   error: Error,
+  kind: "SERVICE" | "CONTENT",
   fiscalCode: FiscalCode,
   messageId: string,
-  serviceId: ServiceId
+  serviceId?: ServiceId
+  // eslint-disable-next-line max-params
 ): Error => {
-  context.log.error(`Cannot enrich service with id ${serviceId}|${error}`);
-  createTracker(telemetryClient).messages.trackServiceEnrichmentFailure(
+  context.log.error(`Cannot enrich message "${messageId}" | ${error}`);
+  createTracker(telemetryClient).messages.trackEnrichmentFailure(
+    kind,
     fiscalCode,
     messageId,
     serviceId
   );
-  return E.toError(error);
-};
-
-const trackContentErrorAndContinue = (
-  context: Context,
-  error: Error,
-  fiscalCode: FiscalCode,
-  messageId: string
-): Error => {
-  context.log.error(`Cannot enrich message with id ${messageId}|${error}`);
-  createTracker(telemetryClient).messages.trackContentEnrichmentFailure(
-    fiscalCode,
-    messageId
-  );
-  return E.toError(error);
+  return error;
 };
 
 /**
@@ -69,12 +58,22 @@ export const enrichMessagesData = (
       {
         service: pipe(
           serviceModel.findLastVersionByModelId([message.sender_service_id]),
-          TE.mapLeft(E.toError),
-          TE.chain(TE.fromOption(() => new Error("Cannot retrieve service."))),
+          TE.mapLeft(
+            e => new Error(`${e.kind}, ServiceId=${message.sender_service_id}`)
+          ),
+          TE.chain(
+            TE.fromOption(
+              () =>
+                new Error(
+                  `EMPTY_SERVICE, ServiceId=${message.sender_service_id}`
+                )
+            )
+          ),
           TE.mapLeft(e =>
-            trackServiceErrorAndContinue(
+            trackErrorAndContinue(
               context,
               e,
+              "SERVICE",
               message.fiscal_code,
               message.id,
               message.sender_service_id
@@ -90,9 +89,10 @@ export const enrichMessagesData = (
             )
           ),
           TE.mapLeft(e =>
-            trackContentErrorAndContinue(
+            trackErrorAndContinue(
               context,
               e,
+              "CONTENT",
               message.fiscal_code,
               message.id
             )
