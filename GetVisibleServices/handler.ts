@@ -73,6 +73,9 @@ export function GetVisibleServicesHandler(
           );
           return ResponseSuccessJson({
             items: servicesTuples,
+            // we need to send prev because of a bug on io-ts 1.x
+            // if we send just items backend will decode the response to a Right with {} value
+            // this will break the response parsing by the app
             prev: servicesTuples[0]?.service_id ?? "-"
           });
         }
