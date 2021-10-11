@@ -562,6 +562,10 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceId"
   ServiceMetadata:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceMetadata"
+  ServiceScope:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceScope"
+  ServiceName:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceName"
   ServicePublic:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServicePublic"
   EmailAddress:

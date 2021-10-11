@@ -637,7 +637,7 @@ definitions:
     type: object
     properties:
       service_name:
-        $ref: '#/definitions/ServicePublic/properties/service_name'
+        $ref: '#/definitions/ServiceName'
       department_name:
         $ref: '#/definitions/DepartmentName'
       organization_name:
@@ -955,12 +955,18 @@ definitions:
         type: string
         minLength: 1
       scope:
-        type: string
-        x-extensible-enum:
-          - NATIONAL
-          - LOCAL
+        $ref: '#/definitions/ServiceScope'
     required:
       - scope
+  ServiceScope:
+    type: string
+    x-extensible-enum:
+      - NATIONAL
+      - LOCAL
+  ServiceName:
+    type: string
+    description: The name of the service. Will be added to the content of sent messages.
+    minLength: 1
   ServicePublic:
     title: Service (public)
     description: A Service associated to an user's subscription.
@@ -969,11 +975,7 @@ definitions:
       service_id:
         $ref: '#/definitions/ServiceId'
       service_name:
-        type: string
-        description: >-
-          The name of the service. Will be added to the content of sent
-          messages.
-        minLength: 1
+        $ref: '#/definitions/ServiceName'
       organization_name:
         $ref: '#/definitions/OrganizationName'
       department_name:
@@ -1251,7 +1253,7 @@ definitions:
             service_id:
               $ref: '#/definitions/ServiceId'
             scope:
-              $ref: '#/definitions/ServiceMetadata/properties/scope'
+              $ref: '#/definitions/ServiceScope'
             version:
               type: integer
           required:
