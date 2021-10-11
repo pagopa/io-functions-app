@@ -613,7 +613,7 @@ definitions:
               - false
             description: It indicates that service is hidden
           service_metadata:
-            $ref: '#/definitions/ServicePublic/properties/service_metadata'
+            $ref: '#/definitions/ServiceMetadata'
   VisibleServicePayload:
     description: >-
       A payload used to create/update a service that appears in the service
@@ -628,7 +628,7 @@ definitions:
               - true
             description: It indicates that service appears in the service list
           service_metadata:
-            $ref: '#/definitions/ServicePublic/properties/service_metadata'
+            $ref: '#/definitions/ServiceMetadata'
         required:
           - is_visible
           - service_metadata
@@ -911,6 +911,56 @@ definitions:
       The ID of the Service. Equals the subscriptionId of a registered
       API user.
     minLength: 1
+  ServiceMetadata:
+    type: object
+    description: A set of metadata properties related to this service.
+    properties:
+      description:
+        type: string
+        minLength: 1
+      web_url:
+        type: string
+        minLength: 1
+      app_ios:
+        type: string
+        minLength: 1
+      app_android:
+        type: string
+        minLength: 1
+      tos_url:
+        type: string
+        minLength: 1
+      privacy_url:
+        type: string
+        minLength: 1
+      address:
+        type: string
+        minLength: 1
+      phone:
+        type: string
+        minLength: 1
+      email:
+        type: string
+        minLength: 1
+      pec:
+        type: string
+        minLength: 1
+      cta:
+        type: string
+        minLength: 1
+      token_name:
+        type: string
+        minLength: 1
+      support_url:
+        type: string
+        minLength: 1
+      scope:
+        type: string
+        x-extensible-enum:
+          - NATIONAL
+          - LOCAL
+    required:
+      - scope
   ServicePublic:
     title: Service (public)
     description: A Service associated to an user's subscription.
@@ -938,55 +988,7 @@ definitions:
       version:
         type: integer
       service_metadata:
-        type: object
-        description: A set of metadata properties related to this service.
-        properties:
-          description:
-            type: string
-            minLength: 1
-          web_url:
-            type: string
-            minLength: 1
-          app_ios:
-            type: string
-            minLength: 1
-          app_android:
-            type: string
-            minLength: 1
-          tos_url:
-            type: string
-            minLength: 1
-          privacy_url:
-            type: string
-            minLength: 1
-          address:
-            type: string
-            minLength: 1
-          phone:
-            type: string
-            minLength: 1
-          email:
-            type: string
-            minLength: 1
-          pec:
-            type: string
-            minLength: 1
-          cta:
-            type: string
-            minLength: 1
-          token_name:
-            type: string
-            minLength: 1
-          support_url:
-            type: string
-            minLength: 1
-          scope:
-            type: string
-            x-extensible-enum:
-              - NATIONAL
-              - LOCAL
-        required:
-          - scope
+        $ref: '#/definitions/ServiceMetadata'
     required:
       - service_id
       - service_name
@@ -1249,8 +1251,7 @@ definitions:
             service_id:
               $ref: '#/definitions/ServiceId'
             scope:
-              $ref: >-
-                #/definitions/ServicePublic/properties/service_metadata/properties/scope
+              $ref: '#/definitions/ServiceMetadata/properties/scope'
             version:
               type: integer
           required:
