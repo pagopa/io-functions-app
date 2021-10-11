@@ -62,7 +62,6 @@ export function GetVisibleServicesHandler(
           const servicesTuples = pipe(
             maybeVisibleServicesJson,
             // eslint-disable-next-line prettier/prettier
-            
             O.getOrElse(() => ({})),
             Object.entries,
             _ => new Map<string, VisibleService>(_),
@@ -74,7 +73,10 @@ export function GetVisibleServicesHandler(
           );
           return ResponseSuccessJson({
             items: servicesTuples,
-            page_size: servicesTuples.length
+            // we need to send prev because of a bug on io-ts 1.x
+            // if we send just items backend will decode the response to a Right with {} value
+            // this will break the response parsing by the app
+            prev: servicesTuples[0]?.service_id ?? "-"
           });
         }
       )

@@ -48,6 +48,8 @@ import {
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { BlobService } from "azure-storage";
 import * as O from "fp-ts/lib/Option";
+import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { Context } from "@azure/functions";
 import { enrichMessagesData } from "../utils/messages";
 
 type RetrievedNotPendingMessage = t.TypeOf<typeof RetrievedNotPendingMessage>;
@@ -70,6 +72,7 @@ type IGetMessagesHandlerResponse =
  *
  */
 type IGetMessagesHandler = (
+  context: Context,
   fiscalCode: FiscalCode,
   maybePageSize: O.Option<NonNegativeInteger>,
   maybeEnrichResultData: O.Option<boolean>,
@@ -85,11 +88,13 @@ export const GetMessagesHandler = (
   serviceModel: ServiceModel,
   blobService: BlobService
 ): IGetMessagesHandler => async (
+  context,
   fiscalCode,
   maybePageSize,
   maybeEnrichResultData,
   maybeMaximumId,
   maybeMinimumId
+  // eslint-disable-next-line max-params
 ): Promise<IGetMessagesHandlerResponse> =>
   pipe(
     TE.Do,
@@ -127,7 +132,12 @@ export const GetMessagesHandler = (
             TE.map(j =>
               mapAsyncIterator(
                 j,
-                enrichMessagesData(messageModel, serviceModel, blobService)
+                enrichMessagesData(
+                  context,
+                  messageModel,
+                  serviceModel,
+                  blobService
+                )
               )
             ),
             // we need to make a TaskEither of the Either[] mapped above
@@ -167,6 +177,7 @@ export const GetMessages = (
 ): express.RequestHandler => {
   const handler = GetMessagesHandler(messageModel, serviceModel, blobService);
   const middlewaresWrap = withRequestMiddlewares(
+    ContextMiddleware(),
     FiscalCodeMiddleware,
     OptionalQueryParamMiddleware("page_size", NonNegativeIntegerFromString),
     OptionalQueryParamMiddleware("enrich_result_data", BooleanFromString),
