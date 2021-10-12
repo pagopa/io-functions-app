@@ -506,6 +506,36 @@ parameters:
     required: true
     x-example: DOWNLOAD
 definitions:
+  EUCovidCert:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/EUCovidCert"
+  LimitedProfile:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/LimitedProfile"
+  PrescriptionData:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PrescriptionData"
+  PrescriptionNRE:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PrescriptionNRE"
+  PrescriptionIUP:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PrescriptionIUP"
+  PrescriberFiscalCode:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PrescriberFiscalCode"
+  NewMessageContent:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/NewMessageContent"
+  CIDR:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/CIDR"
+  ServicePayload:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServicePayload"
+  HiddenServicePayload:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/HiddenServicePayload"
+  VisibleServicePayload:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/VisibleServicePayload"   
+  CommonServicePayload:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/CommonServicePayload"
+  OrganizationName:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/OrganizationName"
+  DepartmentName:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/DepartmentName"
+  PaymentDataBase:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaymentDataBase"
   ExtendedProfile:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ExtendedProfile"
   MessageResponseWithContent:
@@ -530,6 +560,12 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Profile"
   ServiceId:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceId"
+  ServiceMetadata:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceMetadata"
+  ServiceScope:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceScope"
+  ServiceName:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceName"
   ServicePublic:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServicePublic"
   EmailAddress:
@@ -560,12 +596,16 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Timestamp"
   MessageContent:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageContent"
+  MessageContentBase:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageContentBase"
   MessageSubject:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageSubject"
   MessageBodyMarkdown:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageBodyMarkdown"
   PaymentData:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaymentData"
+  PaymentDataWithRequiredPayee:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaymentDataWithRequiredPayee"
   OrganizationFiscalCode:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/OrganizationFiscalCode"
   CreatedMessageWithoutContentCollection:
@@ -602,4 +642,8 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServicesPreferencesMode"
   ServicePreference:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServicePreference"
+  MessageResponseWithoutContent:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageResponseWithoutContent"
+  Payee:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Payee"
  
