@@ -23,6 +23,10 @@ import { GetUpsertServicePreferencesHandler } from "../handler";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { Context } from "@azure/functions";
+
+const makeContext = () =>
+  (({ ...context, bindings: {} } as unknown) as Context);
 
 const updateSubscriptionFeedMock = jest
   .fn()
@@ -88,7 +92,7 @@ describe("UpsertServicePreferences", () => {
 
   it("should return Success if user service preferences has been upserted", async () => {
     const response = await upsertServicePreferencesHandler(
-      context as any,
+      makeContext(),
       aFiscalCode,
       aServiceId,
       aServicePreference
@@ -107,7 +111,7 @@ describe("UpsertServicePreferences", () => {
 
   it("should return Success if user service preferences has been upserted without updatingSubscriptionFeed if isInboxEnabled has not been changed", async () => {
     const response = await upsertServicePreferencesHandler(
-      context as any,
+      makeContext(),
       aFiscalCode,
       aServiceId,
       aServicePreference
@@ -127,7 +131,7 @@ describe("UpsertServicePreferences", () => {
 
   it("should return Success if user service preferences has been upserted with subscriptionFeed UNSUBSCRIBED in case isInboxEnabled has been changed to false", async () => {
     const response = await upsertServicePreferencesHandler(
-      context as any,
+      makeContext(),
       aFiscalCode,
       aServiceId,
       aDisabledInboxServicePreference
@@ -158,7 +162,7 @@ describe("UpsertServicePreferences", () => {
       TE.of(O.some({ ...aRetrievedServicePreference, isInboxEnabled: false }))
     );
     const response = await upsertServicePreferencesHandler(
-      context as any,
+      makeContext(),
       aFiscalCode,
       aServiceId,
       aServicePreference
@@ -192,7 +196,7 @@ describe("UpsertServicePreferences", () => {
       Promise.reject(new Error("Subscription Feed Error"))
     );
     const response = await upsertServicePreferencesHandler(
-      context as any,
+      makeContext(),
       aFiscalCode,
       aServiceId,
       aServicePreference
@@ -227,7 +231,7 @@ describe("UpsertServicePreferences", () => {
       Promise.resolve("FAILURE")
     );
     const response = await upsertServicePreferencesHandler(
-      context as any,
+      makeContext(),
       aFiscalCode,
       aServiceId,
       aServicePreference
@@ -263,7 +267,7 @@ describe("UpsertServicePreferences", () => {
     });
 
     const response = await upsertServicePreferencesHandler(
-      context as any,
+      makeContext(),
       aFiscalCode,
       aServiceId,
       aServicePreference
@@ -284,7 +288,7 @@ describe("UpsertServicePreferences", () => {
     });
 
     const response = await upsertServicePreferencesHandler(
-      context as any,
+      makeContext(),
       aFiscalCode,
       aServiceId,
       aServicePreference
@@ -305,7 +309,7 @@ describe("UpsertServicePreferences", () => {
     });
 
     const response = await upsertServicePreferencesHandler(
-      context as any,
+      makeContext(),
       aFiscalCode,
       aServiceId,
       aServicePreference
@@ -324,7 +328,7 @@ describe("UpsertServicePreferences", () => {
     });
 
     const response = await upsertServicePreferencesHandler(
-      context as any,
+      makeContext(),
       aFiscalCode,
       aServiceId,
       aServicePreference
@@ -343,7 +347,7 @@ describe("UpsertServicePreferences", () => {
     });
 
     const response = await upsertServicePreferencesHandler(
-      context as any,
+      makeContext(),
       aFiscalCode,
       aServiceId,
       aServicePreference
@@ -362,7 +366,7 @@ describe("UpsertServicePreferences", () => {
     });
 
     const response = await upsertServicePreferencesHandler(
-      context as any,
+      makeContext(),
       aFiscalCode,
       aServiceId,
       aServicePreference
@@ -386,7 +390,7 @@ describe("UpsertServicePreferences", () => {
     });
 
     const response = await upsertServicePreferencesHandler(
-      context as any,
+      makeContext(),
       aFiscalCode,
       aServiceId,
       aServicePreference
@@ -401,7 +405,7 @@ describe("UpsertServicePreferences", () => {
 
   it("should return IResponseErrorConflict if service preference han a different version from profile's one", async () => {
     const response = await upsertServicePreferencesHandler(
-      context as any,
+      makeContext(),
       aFiscalCode,
       aServiceId,
       {
@@ -416,4 +420,60 @@ describe("UpsertServicePreferences", () => {
 
     expect(servicePreferenceModelMock.upsert).not.toHaveBeenCalled();
   });
+
+  it.each`
+    scenario                                                  | servicePreference     | maybeExistingServicePreference
+    ${"enabled preference and no previous preferences"}       | ${aServicePreference} | ${O.none}
+    ${"enabled preference and disabled previous preferences"} | ${aServicePreference} | ${O.some({ ...aRetrievedServicePreference, isInboxEnabled: false })}
+  `(
+    "should emit event subscription event on $scenario",
+    async ({ servicePreference, maybeExistingServicePreference }) => {
+      servicePreferenceFindModelMock.mockImplementationOnce(() =>
+        TE.of(maybeExistingServicePreference)
+      );
+
+      const ctx = makeContext();
+
+      const _ = await upsertServicePreferencesHandler(
+        ctx,
+        aFiscalCode,
+        aServiceId,
+        servicePreference
+      );
+
+      // we don't car of the event format, we just care relevant informations are there
+      expect(ctx.bindings.apievents).toEqual(
+        expect.stringContaining(aFiscalCode)
+      );
+      expect(ctx.bindings.apievents).toEqual(
+        expect.stringContaining(aServiceId)
+      );
+    }
+  );
+
+  it.each`
+    scenario                                                   | servicePreference                  | maybeExistingServicePreference
+    ${"disabled preference and no previous preferences"}       | ${aDisabledInboxServicePreference} | ${O.none}
+    ${"disabled preference and disabled previous preferences"} | ${aDisabledInboxServicePreference} | ${O.some({ ...aRetrievedServicePreference, isInboxEnabled: false })}
+    ${"enabled preference and enabled previous preferences"}   | ${aServicePreference}              | ${O.some({ ...aRetrievedServicePreference, isInboxEnabled: true })}
+  `(
+    "should NOT emit event subscription event on $scenario",
+    async ({ servicePreference, maybeExistingServicePreference }) => {
+      servicePreferenceFindModelMock.mockImplementationOnce(() =>
+        TE.of(maybeExistingServicePreference)
+      );
+
+      const ctx = makeContext();
+
+      const _ = await upsertServicePreferencesHandler(
+        ctx,
+        aFiscalCode,
+        aServiceId,
+        servicePreference
+      );
+
+      // we don't car of the event format, we just care relevant informations are there
+      expect(ctx.bindings.apievents).toBe(undefined);
+    }
+  );
 });

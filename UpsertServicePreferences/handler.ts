@@ -58,6 +58,7 @@ import {
   toUserServicePreferenceFromModel
 } from "../utils/service_preferences";
 import { createTracker } from "../utils/tracking";
+import { makeServiceSubscribedEvent } from "../utils/emitted_events";
 import { updateSubscriptionFeedTask } from "./subscription_feed";
 
 enum FeedOperationEnum {
@@ -277,6 +278,16 @@ export const GetUpsertServicePreferencesHandler = (
                   O.map(pref => pref.isInboxEnabled)
                 ),
                 results.servicePreferencesToUpsert.is_inbox_enabled
+              ),
+              // if the operation will determine a new subscription for the service
+              isSubscribing: pipe(
+                maybeExistingServicesPreference,
+                O.fold(
+                  () => results.servicePreferencesToUpsert.is_inbox_enabled,
+                  existing =>
+                    results.servicePreferencesToUpsert.is_inbox_enabled &&
+                    existing.isInboxEnabled === false
+                )
               )
             })
           )
@@ -293,6 +304,17 @@ export const GetUpsertServicePreferencesHandler = (
           }))
         )
       ),
+      TE.map(results => {
+        // if it's a new subscription, emit relative event
+        if (results.isSubscribing) {
+          // eslint-disable-next-line functional/immutable-data
+          context.bindings.apievents = pipe(
+            makeServiceSubscribedEvent(results.serviceId, results.fiscalCode),
+            JSON.stringify
+          );
+        }
+        return results;
+      }),
       TE.chain(
         ({
           feedOperation,

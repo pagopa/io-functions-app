@@ -11,6 +11,13 @@
       ]
     },
     {
+      "queueName": "%EventsQueueName%",
+      "connection": "EventsQueueStorageConnection",
+      "name": "apievents",
+      "type": "queue",
+      "direction": "out"
+    },
+    {
       "type": "http",
       "direction": "out",
       "name": "res"
