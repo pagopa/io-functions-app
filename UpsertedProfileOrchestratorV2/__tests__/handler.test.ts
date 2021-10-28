@@ -6,7 +6,6 @@ import {
   IOrchestrationFunctionContext,
   Task
 } from "durable-functions/lib/src/classes";
-import { fromArray } from "fp-ts/lib/NonEmptyArray";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aEmailChanged,
@@ -228,7 +227,6 @@ describe("UpsertedProfileOrchestrator", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      notifyOn: pipe(fromArray([expectedQueueName]), O.getOrElse(undefined)),
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
@@ -338,7 +336,6 @@ describe("UpsertedProfileOrchestrator", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      notifyOn: pipe(fromArray([expectedQueueName]), O.getOrElse(undefined)),
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
@@ -453,10 +450,6 @@ describe("UpsertedProfileOrchestrator", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      notifyOn: pipe(
-        fromArray([expectedQueueName]),
-        O.getOrElse(() => undefined)
-      ),
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
@@ -570,7 +563,6 @@ describe("UpsertedProfileOrchestrator", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      notifyOn: pipe(fromArray([expectedQueueName]), O.getOrElse(undefined)),
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
@@ -697,7 +689,6 @@ describe("UpsertedProfileOrchestrator", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      notifyOn: pipe(fromArray([expectedQueueName]), O.getOrElse(undefined)),
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
@@ -846,7 +837,6 @@ describe("UpsertedProfileOrchestrator", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      notifyOn: pipe(fromArray([expectedQueueName]), O.getOrElse(undefined)),
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
@@ -992,7 +982,6 @@ describe("UpsertedProfileOrchestrator", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      notifyOn: pipe(fromArray([expectedQueueName]), O.getOrElse(undefined)),
       sendCashbackMessage: true
     })(contextMockWithDf as any);
 
@@ -1188,7 +1177,6 @@ describe("UpsertedProfileOrchestrator |> emitted events", () => {
       } as unknown) as IOrchestrationFunctionContext;
 
       const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-        notifyOn: undefined,
         sendCashbackMessage: true
       })(mockContextWithDf);
 
