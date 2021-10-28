@@ -2,7 +2,10 @@
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as df from "durable-functions";
-import { Task } from "durable-functions/lib/src/classes";
+import {
+  IOrchestrationFunctionContext,
+  Task
+} from "durable-functions/lib/src/classes";
 import { fromArray } from "fp-ts/lib/NonEmptyArray";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
@@ -28,13 +31,20 @@ import { consumeGenerator } from "../../utils/durable";
 import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
+import {
+  makeProfileCompletedEvent,
+  makeServicePreferencesChangedEvent
+} from "../../utils/emitted_events";
+import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 
 const someRetryOptions = new df.RetryOptions(5000, 10);
 // eslint-disable-next-line functional/immutable-data
 someRetryOptions.backoffCoefficient = 1.5;
 
+beforeEach(() => jest.clearAllMocks());
+
 // eslint-disable-next-line sonar/sonar-max-lines-per-function
-describe("UpsertedProfileOrchestratorV2", () => {
+describe("UpsertedProfileOrchestrator", () => {
   it("should not start the EmailValidationProcessOrchestrator if the email is not changed", () => {
     const upsertedProfileOrchestratorInput = pipe(
       UpsertedProfileOrchestratorInput.decode({
@@ -54,6 +64,9 @@ describe("UpsertedProfileOrchestratorV2", () => {
     const contextMockWithDf = {
       ...contextMock,
       df: {
+        Task: {
+          all: (tasks: readonly Task[]) => tasks
+        },
         callSubOrchestratorWithRetry: jest.fn(() => undefined),
         getInput: jest.fn(() => upsertedProfileOrchestratorInput)
       }
@@ -106,6 +119,9 @@ describe("UpsertedProfileOrchestratorV2", () => {
     const contextMockWithDf = {
       ...contextMock,
       df: {
+        Task: {
+          all: (tasks: readonly Task[]) => tasks
+        },
         callActivityWithRetry: jest
           .fn()
           .mockReturnValueOnce(sendWelcomeMessagesActivityResult),
@@ -255,12 +271,13 @@ describe("UpsertedProfileOrchestratorV2", () => {
     );
 
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
-      "EnqueueProfileCreationEventActivity",
+      "EmitEventActivity",
       someRetryOptions,
-      {
-        fiscalCode: aFiscalCode,
-        queueName: expectedQueueName
-      }
+      makeProfileCompletedEvent(
+        upsertedProfileOrchestratorInput.newProfile.fiscalCode,
+        upsertedProfileOrchestratorInput.newProfile.servicePreferencesSettings
+          .mode
+      )
     );
   });
 
@@ -368,13 +385,15 @@ describe("UpsertedProfileOrchestratorV2", () => {
       someRetryOptions,
       {}
     );
+
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
-      "EnqueueProfileCreationEventActivity",
+      "EmitEventActivity",
       someRetryOptions,
-      {
-        fiscalCode: aFiscalCode,
-        queueName: expectedQueueName
-      }
+      makeProfileCompletedEvent(
+        upsertedProfileOrchestratorInput.newProfile.fiscalCode,
+        upsertedProfileOrchestratorInput.newProfile.servicePreferencesSettings
+          .mode
+      )
     );
   });
 
@@ -485,12 +504,13 @@ describe("UpsertedProfileOrchestratorV2", () => {
       {}
     );
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
-      "EnqueueProfileCreationEventActivity",
+      "EmitEventActivity",
       someRetryOptions,
-      {
-        fiscalCode: aFiscalCode,
-        queueName: expectedQueueName
-      }
+      makeProfileCompletedEvent(
+        upsertedProfileOrchestratorInput.newProfile.fiscalCode,
+        upsertedProfileOrchestratorInput.newProfile.servicePreferencesSettings
+          .mode
+      )
     );
   });
 
@@ -604,12 +624,13 @@ describe("UpsertedProfileOrchestratorV2", () => {
       }
     );
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
-      "EnqueueProfileCreationEventActivity",
+      "EmitEventActivity",
       someRetryOptions,
-      {
-        fiscalCode: aFiscalCode,
-        queueName: expectedQueueName
-      }
+      makeProfileCompletedEvent(
+        upsertedProfileOrchestratorInput.newProfile.fiscalCode,
+        upsertedProfileOrchestratorInput.newProfile.servicePreferencesSettings
+          .mode
+      )
     );
   });
 
@@ -752,12 +773,13 @@ describe("UpsertedProfileOrchestratorV2", () => {
 
     expect(contextMockWithDf.df.callActivityWithRetry).toHaveBeenNthCalledWith(
       6,
-      "EnqueueProfileCreationEventActivity",
+      "EmitEventActivity",
       someRetryOptions,
-      {
-        fiscalCode: aFiscalCode,
-        queueName: expectedQueueName
-      }
+      makeProfileCompletedEvent(
+        upsertedProfileOrchestratorInput.newProfile.fiscalCode,
+        upsertedProfileOrchestratorInput.newProfile.servicePreferencesSettings
+          .mode
+      )
     );
   });
 
@@ -898,12 +920,13 @@ describe("UpsertedProfileOrchestratorV2", () => {
 
     expect(contextMockWithDf.df.callActivityWithRetry).toHaveBeenNthCalledWith(
       nth++,
-      "EnqueueProfileCreationEventActivity",
+      "EmitEventActivity",
       someRetryOptions,
-      {
-        fiscalCode: aFiscalCode,
-        queueName: expectedQueueName
-      }
+      makeProfileCompletedEvent(
+        upsertedProfileOrchestratorInput.newProfile.fiscalCode,
+        upsertedProfileOrchestratorInput.newProfile.servicePreferencesSettings
+          .mode
+      )
     );
   });
 
@@ -1051,12 +1074,132 @@ describe("UpsertedProfileOrchestratorV2", () => {
     );
 
     expect(contextMockWithDf.df.callActivityWithRetry).toBeCalledWith(
-      "EnqueueProfileCreationEventActivity",
+      "EmitEventActivity",
       someRetryOptions,
-      {
-        fiscalCode: aFiscalCode,
-        queueName: expectedQueueName
-      }
+      makeProfileCompletedEvent(
+        upsertedProfileOrchestratorInput.newProfile.fiscalCode,
+        upsertedProfileOrchestratorInput.newProfile.servicePreferencesSettings
+          .mode
+      )
     );
   });
+});
+
+describe("UpsertedProfileOrchestrator |> emitted events", () => {
+  const anyProfileCompletedEvent = {
+    ...makeProfileCompletedEvent(
+      aFiscalCode,
+      ServicesPreferencesModeEnum.AUTO /* any value */
+    ),
+    payload: expect.objectContaining({ fiscalCode: aFiscalCode })
+  };
+
+  const anyPreferenceModeChangedEvent = {
+    ...makeServicePreferencesChangedEvent(
+      aFiscalCode,
+      ServicesPreferencesModeEnum.AUTO /* any value */,
+      ServicesPreferencesModeEnum.AUTO /* any value */
+    ),
+    payload: expect.objectContaining({ fiscalCode: aFiscalCode })
+  };
+
+  const { AUTO, MANUAL, LEGACY } = ServicesPreferencesModeEnum;
+
+  const withInboxEnabled = p => ({ ...p, isInboxEnabled: true });
+  const withInboxDisabled = p => ({ ...p, isInboxEnabled: false });
+  const withEmailChanged = p => ({ ...p, email: aEmailChanged });
+  const withPreferences = (mode: ServicesPreferencesModeEnum) => p => ({
+    ...p,
+    servicePreferencesSettings: {
+      mode,
+      version: mode === LEGACY ? -1 : 0
+    }
+  });
+
+  // just a helper to compose profile attributes
+  const profile = (...transformers) =>
+    // @ts-ignore
+    pipe(aRetrievedProfile, ...transformers);
+
+  const mockUpdateSubscriptionsFeedActivity = jest.fn();
+  const mockGetServicesPreferencesActivity = jest.fn().mockReturnValue({
+    kind: "SUCCESS",
+    preferences: []
+  });
+  const mockSendWelcomeMessagesActivity = jest.fn();
+  const mockEmitEventActivity = jest.fn();
+
+  const callActivityBase = (name, input) => {
+    switch (name) {
+      case "UpdateSubscriptionsFeedActivity":
+        return mockUpdateSubscriptionsFeedActivity(input);
+      case "GetServicesPreferencesActivity":
+        return mockGetServicesPreferencesActivity(input);
+      case "SendWelcomeMessagesActivity":
+        return mockSendWelcomeMessagesActivity(input);
+      case "EmitEventActivity":
+        return mockEmitEventActivity(input);
+    }
+  };
+
+  it.each`
+    scenario                                                                       | newProfile                                             | oldProfile                                             | expectedEvents
+    ${"profile just enabled its inbox"}                                            | ${profile(withInboxEnabled, withEmailChanged)}         | ${profile(withInboxDisabled)}                          | ${[anyProfileCompletedEvent]}
+    ${"profile just enabled its inbox and no old profile"}                         | ${profile(withInboxEnabled, withEmailChanged)}         | ${undefined}                                           | ${[anyProfileCompletedEvent]}
+    ${"profile already had inbox enabled"}                                         | ${profile(withInboxEnabled)}                           | ${profile(withInboxEnabled)}                           | ${[]}
+    ${"profile already had inbox enabled and email changed"}                       | ${profile(withInboxEnabled, withEmailChanged)}         | ${profile(withInboxEnabled)}                           | ${[]}
+    ${"preference mode is changed from AUTO to MANUAL with inbox already enabled"} | ${profile(withInboxEnabled, withPreferences(MANUAL))}  | ${profile(withInboxEnabled, withPreferences(AUTO))}    | ${[anyPreferenceModeChangedEvent]}
+    ${"preference mode is changed from MANUAL to AUTO with inbox already enabled"} | ${profile(withInboxEnabled, withPreferences(AUTO))}    | ${profile(withInboxEnabled, withPreferences(MANUAL))}  | ${[anyPreferenceModeChangedEvent]}
+    ${"preference mode is changed from AUTO to MANUAL with inbox not enabled"}     | ${profile(withInboxDisabled, withPreferences(MANUAL))} | ${profile(withInboxDisabled, withPreferences(AUTO))}   | ${[]}
+    ${"preference mode is changed from MANUAL to AUTO with inbox not enabled"}     | ${profile(withInboxDisabled, withPreferences(AUTO))}   | ${profile(withInboxDisabled, withPreferences(MANUAL))} | ${[]}
+  `(
+    "should emit expected events when $scenario",
+    ({ expectedEvents, newProfile, oldProfile }) => {
+      const orchestratorInput = pipe(
+        {
+          newProfile,
+          updatedAt: new Date(),
+          oldProfile
+        },
+        UpsertedProfileOrchestratorInput.decode,
+        E.getOrElseW(errs =>
+          fail(
+            `Cannot decode UpsertedProfileOrchestratorInput: ${readableReport(
+              errs
+            )}`
+          )
+        )
+      );
+
+      const mockContextWithDf = ({
+        ...contextMock,
+        df: {
+          Task: {
+            all: (tasks: readonly Task[]) => tasks
+          },
+          callActivityWithRetry: jest
+            .fn()
+            .mockImplementation((name, _, input) =>
+              callActivityBase(name, input)
+            ),
+          callSubOrchestratorWithRetry: jest.fn(),
+          getInput: jest.fn(() => orchestratorInput)
+        }
+      } as unknown) as IOrchestrationFunctionContext;
+
+      const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
+        notifyOn: undefined,
+        sendCashbackMessage: true
+      })(mockContextWithDf);
+
+      consumeGenerator(orchestratorHandler);
+
+      // expect every event to be emitted
+      expectedEvents.forEach(evt => {
+        expect(mockEmitEventActivity).toBeCalledWith(evt);
+      });
+
+      expect(mockEmitEventActivity).toBeCalledTimes(expectedEvents.length);
+    }
+  );
 });

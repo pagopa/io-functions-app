@@ -1,0 +1,17 @@
+{
+  "bindings": [
+    {
+      "name": "name",
+      "type": "activityTrigger",
+      "direction": "in"
+    },
+    {
+      "queueName": "%EventsQueueName%",
+      "connection": "EventsQueueStorageConnection",
+      "name": "apievents",
+      "type": "queue",
+      "direction": "out"
+    }
+  ],
+  "scriptFile": "../dist/EmitEventActivity/index.js"
+}
