@@ -15,8 +15,6 @@ import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitio
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import {
   OrchestratorInput as EmailValidationProcessOrchestratorInput,
   OrchestratorResult as EmailValidationProcessOrchestratorResult
@@ -54,7 +52,6 @@ export type OrchestratorInput = t.TypeOf<typeof OrchestratorInput>;
 // eslint-disable-next-line max-lines-per-function
 export const getUpsertedProfileOrchestratorHandler = (params: {
   readonly sendCashbackMessage: boolean;
-  readonly notifyOn?: NonEmptyArray<NonEmptyString>;
 }) =>
   // eslint-disable-next-line max-lines-per-function, complexity, sonarjs/cognitive-complexity
   function*(context: IOrchestrationFunctionContext): Generator<unknown> {
@@ -379,8 +376,7 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
             )
           : O.none
       ],
-      RA.filter(O.isSome),
-      RA.map(opt => opt.value)
+      RA.compact
     );
 
     yield context.df.Task.all(
