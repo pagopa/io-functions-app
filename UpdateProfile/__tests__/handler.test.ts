@@ -673,7 +673,7 @@ describe("UpdateProfileHandler", () => {
 
     const dfClient = df.getClient(contextMock);
     expect(dfClient.startNew).toHaveBeenCalledWith(
-      "UpsertedProfileOrchestrator",
+      "UpsertedProfileOrchestratorV2",
       undefined,
       upsertedProfileOrchestratorInput
     );
