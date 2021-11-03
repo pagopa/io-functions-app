@@ -109,7 +109,7 @@ export function CreateProfileHandler(
 
     const dfClient = df.getClient(context);
     await dfClient.startNew(
-      "UpsertedProfileOrchestratorV2",
+      "UpsertedProfileOrchestrator",
       undefined,
       upsertedProfileOrchestratorInput
     );
