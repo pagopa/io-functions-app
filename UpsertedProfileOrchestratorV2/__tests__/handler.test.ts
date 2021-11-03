@@ -43,7 +43,7 @@ someRetryOptions.backoffCoefficient = 1.5;
 beforeEach(() => jest.clearAllMocks());
 
 // eslint-disable-next-line sonar/sonar-max-lines-per-function
-describe("UpsertedProfileOrchestrator", () => {
+describe("UpsertedProfileOrchestratorV2", () => {
   it("should not start the EmailValidationProcessOrchestrator if the email is not changed", () => {
     const upsertedProfileOrchestratorInput = pipe(
       UpsertedProfileOrchestratorInput.decode({
