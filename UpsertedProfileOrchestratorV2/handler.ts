@@ -379,11 +379,13 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
       RA.compact
     );
 
-    yield context.df.Task.all(
-      emittedEvents.map(e =>
-        context.df.callActivityWithRetry("EmitEventActivity", retryOptions, e)
-      )
-    );
+    if (emittedEvents.length) {
+      yield context.df.Task.all(
+        emittedEvents.map(e =>
+          context.df.callActivityWithRetry("EmitEventActivity", retryOptions, e)
+        )
+      );
+    }
 
     return true;
   };
