@@ -1,5 +1,7 @@
 import * as t from "io-ts";
 
+import * as RA from "fp-ts/lib/ReadonlyArray";
+import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 
@@ -13,20 +15,21 @@ import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitio
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import {
   OrchestratorInput as EmailValidationProcessOrchestratorInput,
   OrchestratorResult as EmailValidationProcessOrchestratorResult
 } from "../EmailValidationProcessOrchestrator/handler";
 import { Input as UpdateServiceSubscriptionFeedActivityInput } from "../UpdateSubscriptionsFeedActivity/handler";
 import { diffBlockedServices } from "../utils/profiles";
-import { EnqueueProfileCreationEventActivityInput } from "../EnqueueProfileCreationEventActivity/handler";
 import {
   ActivityResult,
   ActivityResultSuccess
 } from "../GetServicesPreferencesActivity/handler";
 import { ActivityInput as SendWelcomeMessageActivityInput } from "../SendWelcomeMessagesActivity/handler";
+import {
+  makeProfileCompletedEvent,
+  makeServicePreferencesChangedEvent
+} from "../utils/emitted_events";
 
 /**
  * Carries information about created or updated profile.
@@ -49,7 +52,6 @@ export type OrchestratorInput = t.TypeOf<typeof OrchestratorInput>;
 // eslint-disable-next-line max-lines-per-function
 export const getUpsertedProfileOrchestratorHandler = (params: {
   readonly sendCashbackMessage: boolean;
-  readonly notifyOn?: NonEmptyArray<NonEmptyString>;
 }) =>
   // eslint-disable-next-line max-lines-per-function, complexity, sonarjs/cognitive-complexity
   function*(context: IOrchestrationFunctionContext): Generator<unknown> {
@@ -298,6 +300,7 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
               settingsVersion: oldProfile.servicePreferencesSettings.version
             }
           );
+
           const maybeServicesPreferences = pipe(
             ActivityResult.decode(activityResult),
             E.mapLeft(_ => new Error(readableReport(_))),
@@ -346,27 +349,42 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
       }
     }
 
-    // Create messages on specific queues when a user profile become enabled
-    // Moved at the end to mitigate orchestrator versioning https://docs.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-versioning
-    if (hasJustEnabledInbox && params.notifyOn) {
-      try {
-        yield context.df.Task.all(
-          params.notifyOn.map(serviceQueueName =>
-            context.df.callActivityWithRetry(
-              "EnqueueProfileCreationEventActivity",
-              retryOptions,
-              EnqueueProfileCreationEventActivityInput.encode({
-                fiscalCode: newProfile.fiscalCode,
-                queueName: serviceQueueName
-              })
+    const hasChangedPreferencesMode =
+      newProfile.isInboxEnabled &&
+      !hasJustEnabledInbox &&
+      oldProfile &&
+      newProfile.servicePreferencesSettings.mode !==
+        oldProfile.servicePreferencesSettings.mode;
+
+    const emittedEvents = pipe(
+      [
+        hasJustEnabledInbox
+          ? O.some(
+              makeProfileCompletedEvent(
+                newProfile.fiscalCode,
+                newProfile.servicePreferencesSettings.mode
+              )
             )
-          )
-        );
-      } catch (e) {
-        context.log.error(
-          `${logPrefix}|Send Profile creation event max retry exeded|ERROR=${e}`
-        );
-      }
+          : O.none,
+        hasChangedPreferencesMode
+          ? O.some(
+              makeServicePreferencesChangedEvent(
+                newProfile.fiscalCode,
+                newProfile.servicePreferencesSettings.mode,
+                oldProfile.servicePreferencesSettings.mode
+              )
+            )
+          : O.none
+      ],
+      RA.compact
+    );
+
+    if (emittedEvents.length) {
+      yield context.df.Task.all(
+        emittedEvents.map(e =>
+          context.df.callActivityWithRetry("EmitEventActivity", retryOptions, e)
+        )
+      );
     }
 
     return true;

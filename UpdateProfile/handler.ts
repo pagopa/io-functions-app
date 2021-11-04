@@ -247,7 +247,7 @@ export function UpdateProfileHandler(
     // TODO: To enable the new orchestration change to UpsertedProfileOrchestrator
     // Change the orchestrator after that in production the code is available to enable rollback
     await dfClient.startNew(
-      "UpsertedProfileOrchestratorV2",
+      "UpsertedProfileOrchestrator",
       undefined,
       upsertedProfileOrchestratorInput
     );
