@@ -49,17 +49,6 @@ export const ReqServiceIdConfig = t.union([
   })
 ]);
 
-export const EUCovidCertProfileQueueConfig = t.union([
-  t.interface({
-    EUCOVIDCERT_PROFILE_CREATED_QUEUE_NAME: NonEmptyString,
-    FF_NEW_USERS_EUCOVIDCERT_ENABLED: t.literal(true)
-  }),
-  t.interface({ FF_NEW_USERS_EUCOVIDCERT_ENABLED: t.literal(false) })
-]);
-export type EUCovidCertProfileQueueConfig = t.TypeOf<
-  typeof EUCovidCertProfileQueueConfig
->;
-
 // global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -99,8 +88,7 @@ export const IConfig = t.intersection([
     isProduction: t.boolean
   }),
   MailerConfig,
-  ReqServiceIdConfig,
-  EUCovidCertProfileQueueConfig
+  ReqServiceIdConfig
 ]);
 
 // Default value is expressed as a Unix timestamp so it can be safely compared with Cosmos timestamp
