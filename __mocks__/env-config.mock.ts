@@ -11,7 +11,6 @@ export const envConfig = {
   COSMOSDB_KEY: "aKey" as NonEmptyString,
   COSMOSDB_NAME: "aName" as NonEmptyString,
   COSMOSDB_URI: "aUri" as NonEmptyString,
-  EUCOVIDCERT_PROFILE_CREATED_QUEUE_NAME: "aQueue" as NonEmptyString,
 
   FUNCTIONS_PUBLIC_URL: "aaa" as NonEmptyString,
   MESSAGE_CONTAINER_NAME: "aaa" as NonEmptyString,
@@ -20,7 +19,7 @@ export const envConfig = {
   PUBLIC_API_URL: "aaa" as NonEmptyString,
 
   EventsQueueStorageConnection: "aaa" as NonEmptyString,
-  FN_APP_STORAGE_CONNECTION_STRING: "aaa" as NonEmptyString,
+  EventsQueueName: "aaa" as NonEmptyString,
   MIGRATE_SERVICES_PREFERENCES_PROFILE_QUEUE_NAME: "aaa" as NonEmptyString,
   QueueStorageConnection: "aaa" as NonEmptyString,
 
