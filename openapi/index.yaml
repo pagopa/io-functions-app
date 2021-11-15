@@ -600,38 +600,13 @@ definitions:
     allOf:
       - $ref: '#/definitions/VisibleServicePayload'
       - $ref: '#/definitions/HiddenServicePayload'
-  HiddenServicePayload:
-    description: A payload used to create/update a service that is hidden.
+  ExtendedServicePayload:
     allOf:
-      - $ref: '#/definitions/CommonServicePayload'
+      - $ref: '#/definitions/ServicePayload'
       - type: object
         properties:
-          is_visible:
-            type: boolean
-            default: false
-            enum:
-              - false
-            description: It indicates that service is hidden
           service_metadata:
             $ref: '#/definitions/ServiceMetadata'
-  VisibleServicePayload:
-    description: >-
-      A payload used to create/update a service that appears in the service
-      list.
-    allOf:
-      - $ref: '#/definitions/CommonServicePayload'
-      - type: object
-        properties:
-          is_visible:
-            type: boolean
-            enum:
-              - true
-            description: It indicates that service appears in the service list
-          service_metadata:
-            $ref: '#/definitions/ServiceMetadata'
-        required:
-          - is_visible
-          - service_metadata
   CommonServicePayload:
     description: Common properties for a ServicePayload
     type: object
@@ -665,6 +640,44 @@ definitions:
       - organization_name
       - organization_fiscal_code
       - authorized_cidrs
+  HiddenServicePayload:
+    description: A payload used to create/update a service that is hidden.
+    allOf:
+      - $ref: '#/definitions/CommonServicePayload'
+      - type: object
+        properties:
+          is_visible:
+            type: boolean
+            default: false
+            enum:
+              - false
+            description: It indicates that service is hidden
+          service_metadata:
+            description: >-
+              That service can't handle some ServiceMetadata fields (es.
+              category)
+            $ref: '#/definitions/CommonServiceMetadata'
+  VisibleServicePayload:
+    description: >-
+      A payload used to create/update a service that appears in the service
+      list.
+    allOf:
+      - $ref: '#/definitions/CommonServicePayload'
+      - type: object
+        properties:
+          is_visible:
+            type: boolean
+            enum:
+              - true
+            description: It indicates that service appears in the service list
+          service_metadata:
+            description: >-
+              That service can't handle some ServiceMetadata fields (es.
+              category)
+            $ref: '#/definitions/CommonServiceMetadata'
+        required:
+          - is_visible
+          - service_metadata
   OrganizationName:
     type: string
     description: |-
@@ -912,6 +925,33 @@ definitions:
       API user.
     minLength: 1
   ServiceMetadata:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/StandardServiceMetadata'
+      - $ref: '#/definitions/SpecialServiceMetadata'
+      - $ref: '#/definitions/CommonServiceMetadata'
+  StandardServiceMetadata:
+    allOf:
+      - $ref: '#/definitions/CommonServiceMetadata'
+      - type: object
+        properties:
+          category:
+            $ref: '#/definitions/StandardServiceCategory'
+        required:
+          - category
+  SpecialServiceMetadata:
+    allOf:
+      - $ref: '#/definitions/CommonServiceMetadata'
+      - type: object
+        properties:
+          category:
+            $ref: '#/definitions/SpecialServiceCategory'
+          custom_special_flow:
+            type: string
+            minLength: 1
+        required:
+          - category
+  CommonServiceMetadata:
     type: object
     description: A set of metadata properties related to this service.
     properties:
@@ -958,6 +998,19 @@ definitions:
         $ref: '#/definitions/ServiceScope'
     required:
       - scope
+  SpecialServiceCategory:
+    type: string
+    x-extensible-enum:
+      - SPECIAL
+  StandardServiceCategory:
+    type: string
+    x-extensible-enum:
+      - STANDARD
+  ServiceCategory:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/SpecialServiceCategory'
+      - $ref: '#/definitions/StandardServiceCategory'
   ServiceScope:
     type: string
     x-extensible-enum:
