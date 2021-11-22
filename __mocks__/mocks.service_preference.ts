@@ -1,5 +1,7 @@
+import { ActivationStatusEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ActivationStatus";
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServicePreference } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePreference";
+import { Activation } from "@pagopa/io-functions-commons/dist/src/models/activation";
 import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
 import {
   makeServicesPreferencesDocumentId,
@@ -41,3 +43,10 @@ export const aRetrievedService: RetrievedService = ({
   serviceName: "a Service",
   organizationName: "a Organization"
 } as any) as RetrievedService;
+
+export const anActiveActivation: Activation = {
+  ...aCosmosResourceMetadata,
+  fiscalCode: aFiscalCode,
+  serviceId: aServiceId,
+  status: ActivationStatusEnum.ACTIVE
+};

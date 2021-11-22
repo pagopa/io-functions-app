@@ -28,6 +28,7 @@ import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/de
 import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetVisibleServices, GetVisibleServicesHandler } from "../handler";
+import { StandardServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/StandardServiceCategory";
 
 afterEach(() => {
   jest.resetAllMocks();
@@ -77,7 +78,9 @@ const aVisibleService: VisibleService = {
 const aLocalVisibleService: VisibleService = {
   ...aVisibleService,
   serviceMetadata: {
-    scope: ServiceScopeEnum.LOCAL
+    scope: ServiceScopeEnum.LOCAL,
+    category: StandardServiceCategoryEnum.STANDARD,
+    customSpecialFlow: undefined
   }
 };
 

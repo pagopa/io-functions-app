@@ -21,14 +21,8 @@ import {
   ResponseErrorQuery
 } from "@pagopa/io-functions-commons/dist/src/utils/response";
 
-import {
-  Profile,
-  ProfileModel
-} from "@pagopa/io-functions-commons/dist/src/models/profile";
-import {
-  Service,
-  ServiceModel
-} from "@pagopa/io-functions-commons/dist/src/models/service";
+import { ProfileModel } from "@pagopa/io-functions-commons/dist/src/models/profile";
+import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
 import {
   makeServicesPreferencesDocumentId,
   ServicesPreferencesModel
@@ -40,7 +34,6 @@ import {
   IResponseErrorNotFound,
   IResponseSuccessJson,
   ResponseErrorConflict,
-  ResponseErrorNotFound,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
@@ -59,6 +52,8 @@ import {
 } from "../utils/service_preferences";
 import { createTracker } from "../utils/tracking";
 import { makeServiceSubscribedEvent } from "../utils/emitted_events";
+import { getProfileOrErrorResponse } from "../utils/profiles";
+import { getServiceOrErrorResponse } from "../utils/services";
 import { updateSubscriptionFeedTask } from "./subscription_feed";
 
 enum FeedOperationEnum {
@@ -91,48 +86,6 @@ type IUpsertServicePreferencesHandler = (
   serviceId: ServiceId,
   servicePreference: ServicePreference
 ) => Promise<IUpsertServicePreferencesHandlerResult>;
-
-/**
- * Return a task containing either an error or the required Profile
- */
-const getProfileOrErrorResponse = (profileModels: ProfileModel) => (
-  fiscalCode: FiscalCode
-): TE.TaskEither<IResponseErrorQuery | IResponseErrorNotFound, Profile> =>
-  pipe(
-    profileModels.findLastVersionByModelId([fiscalCode]),
-    TE.mapLeft(failure =>
-      ResponseErrorQuery("Error while retrieving the profile", failure)
-    ),
-    TE.chainW(
-      TE.fromOption(() =>
-        ResponseErrorNotFound(
-          "Profile not found",
-          "The profile you requested was not found in the system."
-        )
-      )
-    )
-  );
-
-/**
- * Return a task containing either an error or the required Service
- */
-const getServiceOrErrorResponse = (serviceModel: ServiceModel) => (
-  serviceId: ServiceId
-): TE.TaskEither<IResponseErrorQuery | IResponseErrorNotFound, Service> =>
-  pipe(
-    serviceModel.findLastVersionByModelId([serviceId]),
-    TE.mapLeft(failure =>
-      ResponseErrorQuery("Error while retrieving the service", failure)
-    ),
-    TE.chainW(
-      TE.fromOption(() =>
-        ResponseErrorNotFound(
-          "Service not found",
-          "The service you requested was not found in the system."
-        )
-      )
-    )
-  );
 
 /**
  * Return a function that returns the service preference for the

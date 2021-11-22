@@ -2,6 +2,7 @@ import * as express from "express";
 
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import { TaskEither } from "fp-ts/lib/TaskEither";
 
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
@@ -17,11 +18,7 @@ import {
   ResponseErrorQuery
 } from "@pagopa/io-functions-commons/dist/src/utils/response";
 
-import {
-  Profile,
-  ProfileModel,
-  RetrievedProfile
-} from "@pagopa/io-functions-commons/dist/src/models/profile";
+import { ProfileModel } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import {
   makeServicesPreferencesDocumentId,
   ServicesPreferencesModel
@@ -32,13 +29,19 @@ import {
   IResponseErrorNotFound,
   IResponseSuccessJson,
   ResponseErrorConflict,
-  ResponseErrorNotFound,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { pipe } from "fp-ts/lib/function";
+import { sequenceS } from "fp-ts/lib/Apply";
+import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
+import { ServiceCategory } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceCategory";
+import { SpecialServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/SpecialServiceCategory";
+import { ActivationModel } from "@pagopa/io-functions-commons/dist/src/models/activation";
+import { ActivationStatusEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ActivationStatus";
+import { StandardServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/StandardServiceCategory";
 import {
   getServicePreferenceSettingsVersion,
   nonLegacyServicePreferences,
@@ -46,6 +49,8 @@ import {
   toDefaultEnabledUserServicePreference,
   toUserServicePreferenceFromModel
 } from "../utils/service_preferences";
+import { getProfileOrErrorResponse } from "../utils/profiles";
+import { getServiceOrErrorResponse } from "../utils/services";
 
 type IGetServicePreferencesHandlerResult =
   | IResponseSuccessJson<ServicePreference>
@@ -65,21 +70,6 @@ type IGetServicePreferencesHandler = (
 ) => Promise<IGetServicePreferencesHandlerResult>;
 
 /**
- *
- * @param maybeProfile
- * @returns
- */
-const getProfileOrErrorResponse = (
-  maybeProfile: O.Option<RetrievedProfile>
-): TE.TaskEither<IResponseErrorNotFound, Profile> =>
-  TE.fromOption(() =>
-    ResponseErrorNotFound(
-      "Profile not found",
-      "The profile you requested was not found in the system."
-    )
-  )(maybeProfile);
-
-/**
  * Return a function that returns the service preference for the
  * given documentId and version, or a default value if not present
  * The default value depends on the user' settings (mode AUTO/MANUAL)
@@ -96,11 +86,24 @@ export declare type getUserServicePreferencesT = (params: {
     | ServicesPreferencesModeEnum.MANUAL;
   readonly version: NonNegativeInteger;
   readonly fiscalCode: FiscalCode;
-}) => TE.TaskEither<IResponseErrorQuery, ServicePreference>;
+  readonly serviceCategory: ServiceCategory;
+}) => TE.TaskEither<
+  IResponseErrorQuery,
+  {
+    readonly serviceCategory: ServiceCategory;
+    readonly servicePreferences: ServicePreference;
+  }
+>;
 const getUserServicePreferencesOrDefault = (
   servicePreferencesModel: ServicesPreferencesModel
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-): getUserServicePreferencesT => ({ fiscalCode, serviceId, mode, version }) =>
+): getUserServicePreferencesT => ({
+  fiscalCode,
+  serviceId,
+  mode,
+  version,
+  serviceCategory
+}) =>
   pipe(
     servicePreferencesModel.find([
       makeServicesPreferencesDocumentId(fiscalCode, serviceId, version),
@@ -128,29 +131,68 @@ const getUserServicePreferencesOrDefault = (
           pref => toUserServicePreferenceFromModel(pref)
         )
       )
-    )
+    ),
+    TE.map(_ => ({
+      serviceCategory,
+      servicePreferences: _
+    }))
+  );
+
+type ActivationForSpecialServices = (params: {
+  readonly serviceId: ServiceId;
+  readonly fiscalCode: FiscalCode;
+  readonly servicePreferences: ServicePreference;
+}) => TaskEither<IResponseErrorQuery, ServicePreference>;
+
+const getActivationForSpecialServices = (
+  activationModel: ActivationModel
+): ActivationForSpecialServices => ({
+  serviceId,
+  fiscalCode,
+  servicePreferences
+}): TaskEither<IResponseErrorQuery, ServicePreference> =>
+  pipe(
+    activationModel.findLastVersionByModelId([serviceId, fiscalCode]),
+    TE.mapLeft(err =>
+      ResponseErrorQuery("Error reading service Activation", err)
+    ),
+    TE.map(_ => {
+      if (O.isNone(_) || _.value.status !== ActivationStatusEnum.ACTIVE) {
+        // When the Activation is missing the default value is INACTIVE.
+        return {
+          ...servicePreferences,
+          is_inbox_enabled: false
+        };
+      }
+      return {
+        ...servicePreferences,
+        is_inbox_enabled: true
+      };
+    })
   );
 
 /**
  * Return a type safe GetServicePreferences handler.
  */
 export const GetServicePreferencesHandler = (
-  profileModels: ProfileModel,
-  servicePreferencesModel: ServicesPreferencesModel
+  profileModel: ProfileModel,
+  serviceModel: ServiceModel,
+  servicePreferencesModel: ServicesPreferencesModel,
+  activationModel: ActivationModel
   // eslint-disable-next-line arrow-body-style
 ): IGetServicePreferencesHandler => {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   return async (fiscalCode, serviceId) =>
     pipe(
-      profileModels.findLastVersionByModelId([fiscalCode]),
-      TE.mapLeft(failure =>
-        ResponseErrorQuery("Error while retrieving the profile", failure)
+      sequenceS(TE.ApplicativeSeq)({
+        profile: getProfileOrErrorResponse(profileModel)(fiscalCode),
+        service: getServiceOrErrorResponse(serviceModel)(serviceId)
+      }),
+      TE.filterOrElseW(
+        ({ profile }) => nonLegacyServicePreferences(profile),
+        () => ResponseErrorConflict("Legacy service preferences not allowed")
       ),
-      TE.chainW(getProfileOrErrorResponse),
-      TE.filterOrElseW(nonLegacyServicePreferences, () =>
-        ResponseErrorConflict("Legacy service preferences not allowed")
-      ),
-      TE.chain(profile =>
+      TE.chain(({ profile, service }) =>
         pipe(
           getServicePreferenceSettingsVersion(profile),
           TE.mapLeft(_ =>
@@ -159,12 +201,25 @@ export const GetServicePreferencesHandler = (
           TE.map(version => ({
             fiscalCode,
             mode: profile.servicePreferencesSettings.mode,
+            serviceCategory: service.serviceMetadata
+              ? service.serviceMetadata.category
+              : StandardServiceCategoryEnum.STANDARD,
             serviceId,
             version
           }))
         )
       ),
       TE.chainW(getUserServicePreferencesOrDefault(servicePreferencesModel)),
+      TE.chain(({ serviceCategory, servicePreferences }) => {
+        if (serviceCategory === SpecialServiceCategoryEnum.SPECIAL) {
+          return getActivationForSpecialServices(activationModel)({
+            fiscalCode,
+            serviceId,
+            servicePreferences
+          });
+        }
+        return TE.of(servicePreferences);
+      }),
       TE.map(ResponseSuccessJson),
       TE.toUnion
     )();
@@ -175,12 +230,16 @@ export const GetServicePreferencesHandler = (
  */
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function GetServicePreferences(
-  profileModels: ProfileModel,
-  servicePreferencesModel: ServicesPreferencesModel
+  profileModel: ProfileModel,
+  serviceModel: ServiceModel,
+  servicePreferencesModel: ServicesPreferencesModel,
+  activationModel: ActivationModel
 ): express.RequestHandler {
   const handler = GetServicePreferencesHandler(
-    profileModels,
-    servicePreferencesModel
+    profileModel,
+    serviceModel,
+    servicePreferencesModel,
+    activationModel
   );
 
   const middlewaresWrap = withRequestMiddlewares(
