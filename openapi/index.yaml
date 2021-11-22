@@ -802,6 +802,11 @@ definitions:
         type: string
       message_title:
         type: string
+      category:
+        $ref: '#/definitions/MessageCategory'
+      has_attachments:
+        type: boolean
+        default: false
     required:
       - id
       - fiscal_code
@@ -810,11 +815,12 @@ definitions:
       - service_name
       - organization_name
       - message_title
+      - category
   PublicMessage:
     x-one-of: true
     allOf:
-      - $ref: '#/definitions/EnrichedMessage'
       - $ref: '#/definitions/CreatedMessageWithoutContent'
+      - $ref: '#/definitions/EnrichedMessage'
   PublicMessagesCollection:
     description: A collection of messages
     type: object
@@ -1405,3 +1411,8 @@ definitions:
         $ref: '#/definitions/OrganizationFiscalCode'
     required:
       - fiscal_code
+  MessageCategory:
+    type: string
+    enum:
+      - GREEN_PASS
+      - GENERIC
