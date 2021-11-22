@@ -33,6 +33,7 @@ import { pipe } from "fp-ts/lib/function";
 import { CreatedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
 import { Context } from "@azure/functions";
 import { toCosmosErrorResponse } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
+import { MessageCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategory";
 
 const anOrganizationFiscalCode = "01234567890" as OrganizationFiscalCode;
 
@@ -87,18 +88,21 @@ const blobServiceMock = ({
   getBlobToText: jest.fn()
 } as unknown) as BlobService;
 
+const getContentFromBlobMock = jest.fn().mockImplementation(() =>
+TE.of(
+  O.some({
+    subject: "a subject",
+    markdown: "a markdown"
+  } as MessageContent)
+));
+
 const messageModelMock = ({
-  getContentFromBlob: () =>
-    TE.of(
-      O.some({
-        subject: "a subject",
-        markdown: "a markdown"
-      } as MessageContent)
-    )
+  getContentFromBlob: getContentFromBlobMock
 } as unknown) as MessageModel;
 
+const findLastVersionByModelIdMock = jest.fn().mockImplementation(() => TE.of(O.some(aRetrievedService)));
 const serviceModelMock = ({
-  findLastVersionByModelId: () => TE.of(O.some(aRetrievedService))
+  findLastVersionByModelId: findLastVersionByModelIdMock
 } as unknown) as ServiceModel;
 
 const functionsContextMock = ({
@@ -109,7 +113,7 @@ const functionsContextMock = ({
 
 describe("Messages", () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it("should return right when message blob and service are correctly retrieved", async () => {
@@ -137,15 +141,54 @@ describe("Messages", () => {
       expect(E.isRight(enrichedMessage)).toBe(true);
       if (E.isRight(enrichedMessage)) {
         expect(EnrichedMessage.is(enrichedMessage.right)).toBe(true);
+        expect(enrichedMessage.right.category).toEqual(MessageCategoryEnum.GENERIC);
+      }
+    });
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
+  });
+
+  it("should return right with right message category when message content is retrieved", async () => {
+    const messages = [
+      retrievedMessageToPublic(aRetrievedMessageWithoutContent)
+    ] as readonly CreatedMessageWithoutContent[];
+
+    getContentFromBlobMock.mockImplementationOnce(() => TE.of(
+      O.some({
+        subject: "a subject".repeat(10),
+        markdown: "a markdown".repeat(80),
+        eu_covid_cert: {
+          auth_code: "an_auth_code"
+        }
+      } as MessageContent)
+    ));
+    const enrichMessages = enrichMessagesData(
+      functionsContextMock,
+      messageModelMock,
+      serviceModelMock,
+      blobServiceMock
+    );
+
+    const enrichedMessagesPromises = enrichMessages(messages);
+
+    const enrichedMessages = await pipe(
+      TE.tryCatch(async () => Promise.all(enrichedMessagesPromises), void 0),
+      TE.getOrElse(() => {
+        throw Error();
+      })
+    )();
+
+    enrichedMessages.map(enrichedMessage => {
+      expect(E.isRight(enrichedMessage)).toBe(true);
+      if (E.isRight(enrichedMessage)) {
+        expect(EnrichedMessage.is(enrichedMessage.right)).toBe(true);
+        expect(enrichedMessage.right.category).toEqual(MessageCategoryEnum.GREEN_PASS);
       }
     });
     expect(functionsContextMock.log.error).not.toHaveBeenCalled();
   });
 
   it("should return left when service model return a cosmos error", async () => {
-    serviceModelMock.findLastVersionByModelId = jest
-      .fn()
-      .mockImplementationOnce(() => TE.left(toCosmosErrorResponse("Any error message")));
+    findLastVersionByModelIdMock.mockImplementationOnce(() => TE.left(toCosmosErrorResponse("Any error message")));
 
     const messages = [
       retrievedMessageToPublic(aRetrievedMessageWithoutContent)
@@ -177,9 +220,7 @@ describe("Messages", () => {
     );  });
 
   it("should return left when service model return an empty result", async () => {
-    serviceModelMock.findLastVersionByModelId = jest
-      .fn()
-      .mockImplementationOnce(() => TE.right(O.none));
+    findLastVersionByModelIdMock.mockImplementationOnce(() => TE.right(O.none));
 
     const messages = [
       retrievedMessageToPublic(aRetrievedMessageWithoutContent)
@@ -211,13 +252,9 @@ describe("Messages", () => {
     );  });
 
   it("should return left when message model return an error", async () => {
-    serviceModelMock.findLastVersionByModelId = jest
-      .fn()
-      .mockImplementationOnce(() => TE.right(O.some(aRetrievedService)));
+    findLastVersionByModelIdMock.mockImplementationOnce(() => TE.right(O.some(aRetrievedService)));
 
-    messageModelMock.getContentFromBlob = jest
-      .fn()
-      .mockImplementationOnce(() => TE.left(new Error("GENERIC_ERROR")));
+    getContentFromBlobMock.mockImplementationOnce(() => TE.left(new Error("GENERIC_ERROR")));
 
     const messages = [
       retrievedMessageToPublic(aRetrievedMessageWithoutContent)
@@ -249,15 +286,11 @@ describe("Messages", () => {
     );  });
 
   it("should return left when both message and service models return errors", async () => {
-    serviceModelMock.findLastVersionByModelId = jest
-      .fn()
-      .mockImplementationOnce(() =>
+    findLastVersionByModelIdMock.mockImplementationOnce(() =>
         TE.left(toCosmosErrorResponse("Any error message"))
       );
 
-    messageModelMock.getContentFromBlob = jest
-      .fn()
-      .mockImplementationOnce(() => TE.left(new Error("GENERIC_ERROR")));
+    getContentFromBlobMock.mockImplementationOnce(() => TE.left(new Error("GENERIC_ERROR")));
 
     const messages = [
       retrievedMessageToPublic(aRetrievedMessageWithoutContent)
