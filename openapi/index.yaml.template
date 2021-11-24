@@ -648,4 +648,8 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Payee"
   MessageCategory:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageCategory"
+  MessageCategoryBase:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageCategoryBase"
+  MessageCategoryPayment:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageCategoryPayment"
  

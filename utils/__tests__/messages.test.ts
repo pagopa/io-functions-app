@@ -33,7 +33,8 @@ import { pipe } from "fp-ts/lib/function";
 import { CreatedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
 import { Context } from "@azure/functions";
 import { toCosmosErrorResponse } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
-import { MessageCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategory";
+import { TagEnum as TagEnumBase } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategoryBase";
+import { TagEnum as TagEnumPayment } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategoryPayment";
 
 const anOrganizationFiscalCode = "01234567890" as OrganizationFiscalCode;
 
@@ -88,19 +89,39 @@ const blobServiceMock = ({
   getBlobToText: jest.fn()
 } as unknown) as BlobService;
 
-const getContentFromBlobMock = jest.fn().mockImplementation(() =>
-TE.of(
-  O.some({
-    subject: "a subject",
-    markdown: "a markdown"
-  } as MessageContent)
-));
+const mockedGenericContent = {
+  subject: "a subject",
+  markdown: "a markdown"
+} as MessageContent;
+
+const mockedGreenPassContent = {
+  subject: "a subject".repeat(10),
+  markdown: "a markdown".repeat(80),
+  eu_covid_cert: {
+    auth_code: "an_auth_code"
+  }
+} as MessageContent;
+
+const mockedPaymentContent = {
+  subject: "a subject".repeat(10),
+  markdown: "a markdown".repeat(80),
+  payment_data: {
+    amount: 1,
+    notice_number: "012345678901234567"
+  }
+} as MessageContent;
+
+const getContentFromBlobMock = jest
+  .fn()
+  .mockImplementation(() => TE.of(O.some(mockedGenericContent)));
 
 const messageModelMock = ({
   getContentFromBlob: getContentFromBlobMock
 } as unknown) as MessageModel;
 
-const findLastVersionByModelIdMock = jest.fn().mockImplementation(() => TE.of(O.some(aRetrievedService)));
+const findLastVersionByModelIdMock = jest
+  .fn()
+  .mockImplementation(() => TE.of(O.some(aRetrievedService)));
 const serviceModelMock = ({
   findLastVersionByModelId: findLastVersionByModelIdMock
 } as unknown) as ServiceModel;
@@ -111,7 +132,7 @@ const functionsContextMock = ({
   }
 } as unknown) as Context;
 
-describe("Messages", () => {
+describe("enrichMessagesData", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -141,26 +162,22 @@ describe("Messages", () => {
       expect(E.isRight(enrichedMessage)).toBe(true);
       if (E.isRight(enrichedMessage)) {
         expect(EnrichedMessage.is(enrichedMessage.right)).toBe(true);
-        expect(enrichedMessage.right.category).toEqual(MessageCategoryEnum.GENERIC);
+        expect(enrichedMessage.right.category).toEqual({
+          tag: TagEnumBase.GENERIC
+        });
       }
     });
     expect(functionsContextMock.log.error).not.toHaveBeenCalled();
   });
 
-  it("should return right with right message category when message content is retrieved", async () => {
+  it("should return right with right message GREEN_PASS category when message content is retrieved", async () => {
     const messages = [
       retrievedMessageToPublic(aRetrievedMessageWithoutContent)
     ] as readonly CreatedMessageWithoutContent[];
 
-    getContentFromBlobMock.mockImplementationOnce(() => TE.of(
-      O.some({
-        subject: "a subject".repeat(10),
-        markdown: "a markdown".repeat(80),
-        eu_covid_cert: {
-          auth_code: "an_auth_code"
-        }
-      } as MessageContent)
-    ));
+    getContentFromBlobMock.mockImplementationOnce(() =>
+      TE.of(O.some(mockedGreenPassContent))
+    );
     const enrichMessages = enrichMessagesData(
       functionsContextMock,
       messageModelMock,
@@ -181,14 +198,55 @@ describe("Messages", () => {
       expect(E.isRight(enrichedMessage)).toBe(true);
       if (E.isRight(enrichedMessage)) {
         expect(EnrichedMessage.is(enrichedMessage.right)).toBe(true);
-        expect(enrichedMessage.right.category).toEqual(MessageCategoryEnum.GREEN_PASS);
+        expect(enrichedMessage.right.category).toEqual({
+          tag: TagEnumBase.GREEN_PASS
+        });
+      }
+    });
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
+  });
+
+  it("should return right with right PAYMENT category when message content is retrieved", async () => {
+    const messages = [
+      retrievedMessageToPublic(aRetrievedMessageWithoutContent)
+    ] as readonly CreatedMessageWithoutContent[];
+
+    getContentFromBlobMock.mockImplementationOnce(() =>
+      TE.of(O.some(mockedPaymentContent))
+    );
+    const enrichMessages = enrichMessagesData(
+      functionsContextMock,
+      messageModelMock,
+      serviceModelMock,
+      blobServiceMock
+    );
+
+    const enrichedMessagesPromises = enrichMessages(messages);
+
+    const enrichedMessages = await pipe(
+      TE.tryCatch(async () => Promise.all(enrichedMessagesPromises), void 0),
+      TE.getOrElse(() => {
+        throw Error();
+      })
+    )();
+
+    enrichedMessages.map(enrichedMessage => {
+      expect(E.isRight(enrichedMessage)).toBe(true);
+      if (E.isRight(enrichedMessage)) {
+        expect(EnrichedMessage.is(enrichedMessage.right)).toBe(true);
+        expect(enrichedMessage.right.category).toEqual({
+          tag: TagEnumPayment.PAYMENT,
+          rptId: "01234567890012345678901234567"
+        });
       }
     });
     expect(functionsContextMock.log.error).not.toHaveBeenCalled();
   });
 
   it("should return left when service model return a cosmos error", async () => {
-    findLastVersionByModelIdMock.mockImplementationOnce(() => TE.left(toCosmosErrorResponse("Any error message")));
+    findLastVersionByModelIdMock.mockImplementationOnce(() =>
+      TE.left(toCosmosErrorResponse("Any error message"))
+    );
 
     const messages = [
       retrievedMessageToPublic(aRetrievedMessageWithoutContent)
@@ -217,7 +275,8 @@ describe("Messages", () => {
     expect(functionsContextMock.log.error).toHaveBeenCalledTimes(1);
     expect(functionsContextMock.log.error).toHaveBeenCalledWith(
       `Cannot enrich message "${aRetrievedMessageWithoutContent.id}" | Error: COSMOS_ERROR_RESPONSE, ServiceId=${aRetrievedMessageWithoutContent.senderServiceId}`
-    );  });
+    );
+  });
 
   it("should return left when service model return an empty result", async () => {
     findLastVersionByModelIdMock.mockImplementationOnce(() => TE.right(O.none));
@@ -249,12 +308,17 @@ describe("Messages", () => {
     expect(functionsContextMock.log.error).toHaveBeenCalledTimes(1);
     expect(functionsContextMock.log.error).toHaveBeenCalledWith(
       `Cannot enrich message "${aRetrievedMessageWithoutContent.id}" | Error: EMPTY_SERVICE, ServiceId=${aRetrievedMessageWithoutContent.senderServiceId}`
-    );  });
+    );
+  });
 
   it("should return left when message model return an error", async () => {
-    findLastVersionByModelIdMock.mockImplementationOnce(() => TE.right(O.some(aRetrievedService)));
+    findLastVersionByModelIdMock.mockImplementationOnce(() =>
+      TE.right(O.some(aRetrievedService))
+    );
 
-    getContentFromBlobMock.mockImplementationOnce(() => TE.left(new Error("GENERIC_ERROR")));
+    getContentFromBlobMock.mockImplementationOnce(() =>
+      TE.left(new Error("GENERIC_ERROR"))
+    );
 
     const messages = [
       retrievedMessageToPublic(aRetrievedMessageWithoutContent)
@@ -283,14 +347,17 @@ describe("Messages", () => {
     expect(functionsContextMock.log.error).toHaveBeenCalledTimes(1);
     expect(functionsContextMock.log.error).toHaveBeenCalledWith(
       `Cannot enrich message "${aRetrievedMessageWithoutContent.id}" | Error: GENERIC_ERROR`
-    );  });
+    );
+  });
 
   it("should return left when both message and service models return errors", async () => {
     findLastVersionByModelIdMock.mockImplementationOnce(() =>
-        TE.left(toCosmosErrorResponse("Any error message"))
-      );
+      TE.left(toCosmosErrorResponse("Any error message"))
+    );
 
-    getContentFromBlobMock.mockImplementationOnce(() => TE.left(new Error("GENERIC_ERROR")));
+    getContentFromBlobMock.mockImplementationOnce(() =>
+      TE.left(new Error("GENERIC_ERROR"))
+    );
 
     const messages = [
       retrievedMessageToPublic(aRetrievedMessageWithoutContent)
