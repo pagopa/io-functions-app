@@ -14,6 +14,7 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { BlobService } from "azure-storage";
+import * as AR from "fp-ts/lib/Array";
 import * as A from "fp-ts/lib/Apply";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
@@ -102,7 +103,7 @@ export const mapMessageCategory = (
       )
       .filter(MessageCategory.is),
     O.fromPredicate(arr => arr.length > 0),
-    O.map(arr => arr[0]),
+    O.chain(AR.head),
     O.getOrElse(() => ({ tag: TagEnumBase.GENERIC }))
   );
 
