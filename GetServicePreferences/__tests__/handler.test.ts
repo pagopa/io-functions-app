@@ -47,6 +47,9 @@ const serviceModelMock = {
 };
 
 describe("GetServicePreferences", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it("should return existing service preference for user", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
