@@ -2,7 +2,6 @@ import * as express from "express";
 
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { TaskEither } from "fp-ts/lib/TaskEither";
 
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
@@ -40,10 +39,10 @@ import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/servi
 import { ServiceCategory } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceCategory";
 import { SpecialServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/SpecialServiceCategory";
 import { ActivationModel } from "@pagopa/io-functions-commons/dist/src/models/activation";
-import { ActivationStatusEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ActivationStatus";
 import { StandardServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/StandardServiceCategory";
 import {
   getServicePreferenceSettingsVersion,
+  getServicePreferencesForSpecialServices,
   nonLegacyServicePreferences,
   toDefaultDisabledUserServicePreference,
   toDefaultEnabledUserServicePreference,
@@ -138,39 +137,6 @@ const getUserServicePreferencesOrDefault = (
     }))
   );
 
-type ActivationForSpecialServices = (params: {
-  readonly serviceId: ServiceId;
-  readonly fiscalCode: FiscalCode;
-  readonly servicePreferences: ServicePreference;
-}) => TaskEither<IResponseErrorQuery, ServicePreference>;
-
-const getActivationForSpecialServices = (
-  activationModel: ActivationModel
-): ActivationForSpecialServices => ({
-  serviceId,
-  fiscalCode,
-  servicePreferences
-}): TaskEither<IResponseErrorQuery, ServicePreference> =>
-  pipe(
-    activationModel.findLastVersionByModelId([serviceId, fiscalCode]),
-    TE.mapLeft(err =>
-      ResponseErrorQuery("Error reading service Activation", err)
-    ),
-    TE.map(_ => {
-      if (O.isNone(_) || _.value.status !== ActivationStatusEnum.ACTIVE) {
-        // When the Activation is missing the default value is INACTIVE.
-        return {
-          ...servicePreferences,
-          is_inbox_enabled: false
-        };
-      }
-      return {
-        ...servicePreferences,
-        is_inbox_enabled: true
-      };
-    })
-  );
-
 /**
  * Return a type safe GetServicePreferences handler.
  */
@@ -212,7 +178,7 @@ export const GetServicePreferencesHandler = (
       TE.chainW(getUserServicePreferencesOrDefault(servicePreferencesModel)),
       TE.chain(({ serviceCategory, servicePreferences }) => {
         if (serviceCategory === SpecialServiceCategoryEnum.SPECIAL) {
-          return getActivationForSpecialServices(activationModel)({
+          return getServicePreferencesForSpecialServices(activationModel)({
             fiscalCode,
             serviceId,
             servicePreferences

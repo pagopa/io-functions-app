@@ -45,8 +45,12 @@ import { enumType } from "@pagopa/ts-commons/lib/types";
 import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { TableService } from "azure-storage";
+import { ActivationModel } from "@pagopa/io-functions-commons/dist/src/models/activation";
+import { SpecialServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/SpecialServiceCategory";
+import { StandardServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/StandardServiceCategory";
 import {
   getServicePreferenceSettingsVersion,
+  getServicePreferencesForSpecialServices,
   nonLegacyServicePreferences,
   toUserServicePreferenceFromModel
 } from "../utils/service_preferences";
@@ -167,6 +171,7 @@ export const GetUpsertServicePreferencesHandler = (
   profileModels: ProfileModel,
   serviceModels: ServiceModel,
   servicePreferencesModel: ServicesPreferencesModel,
+  activationModel: ActivationModel,
   tableService: TableService,
   subscriptionFeedTableName: NonEmptyString,
   logPrefix: string = "GetUpsertServicePreferencesHandler"
@@ -192,7 +197,7 @@ export const GetUpsertServicePreferencesHandler = (
             "Setting Preferences version not compatible with Profile's one"
           )
       ),
-      TE.chain(({ profile }) =>
+      TE.chain(({ profile, service }) =>
         pipe(
           profile,
           getServicePreferenceSettingsVersion,
@@ -201,6 +206,9 @@ export const GetUpsertServicePreferencesHandler = (
           ),
           TE.map(version => ({
             fiscalCode,
+            serviceCategory:
+              service.serviceMetadata?.category ||
+              StandardServiceCategoryEnum.STANDARD,
             serviceId,
             servicePreferencesToUpsert: servicePreference,
             version
@@ -246,6 +254,32 @@ export const GetUpsertServicePreferencesHandler = (
           )
         )
       ),
+      TE.chain(_ => {
+        if (_.serviceCategory === SpecialServiceCategoryEnum.SPECIAL) {
+          return pipe(
+            getServicePreferencesForSpecialServices(activationModel)({
+              fiscalCode,
+              serviceId,
+              servicePreferences: servicePreference
+            }),
+            TE.chainW(
+              TE.fromPredicate(
+                specialServicePreference =>
+                  specialServicePreference.is_inbox_enabled ===
+                  servicePreference.is_inbox_enabled,
+                () => ResponseErrorConflict("Unexpected is_inbox_enabled value")
+              )
+            ),
+            TE.map(specialServicePreference => ({
+              ..._,
+              feedOperation: FeedOperationEnum.NO_UPDATE,
+              isSubscribing: false,
+              servicePreferencesToUpsert: specialServicePreference
+            }))
+          );
+        }
+        return TE.of(_);
+      }),
       TE.chainW(results =>
         pipe(
           results,
@@ -310,6 +344,7 @@ export function UpsertServicePreferences(
   profileModels: ProfileModel,
   serviceModels: ServiceModel,
   servicePreferencesModel: ServicesPreferencesModel,
+  activationModel: ActivationModel,
   tableService: TableService,
   subscriptionFeedTableName: NonEmptyString
 ): express.RequestHandler {
@@ -318,6 +353,7 @@ export function UpsertServicePreferences(
     profileModels,
     serviceModels,
     servicePreferencesModel,
+    activationModel,
     tableService,
     subscriptionFeedTableName
   );

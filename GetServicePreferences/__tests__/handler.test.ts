@@ -24,10 +24,19 @@ import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmos
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 import { SpecialServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/SpecialServiceCategory";
 import { ActivationStatusEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ActivationStatus";
+import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
 
 const aRetrievedProfileInValidState = {
   ...aRetrievedProfileWithEmail,
   servicePreferencesSettings: autoProfileServicePreferencesSettings
+};
+
+const aRetrievedSpecialService: RetrievedService = {
+  ...aRetrievedService,
+  serviceMetadata: {
+    scope: ServiceScopeEnum.LOCAL,
+    category: SpecialServiceCategoryEnum.SPECIAL
+  }
 };
 
 const mockServiceFindLastVersionByModelId = jest.fn(_ =>
@@ -282,7 +291,6 @@ describe("GetServicePreferences", () => {
     );
 
     const response = await getServicePreferencesHandler(
-      // (context as any) as Context,
       aFiscalCode,
       aServiceId
     );
@@ -292,11 +300,11 @@ describe("GetServicePreferences", () => {
     });
   });
   it.each`
-    scenario                                            | profileResult                                 | serviceResult                                                                                                                                | servicePreferencesResult                    | activationResult                                                                   | is_inbox_enabled
-    ${"inbox enabled if exists an ACTIVE activation"}   | ${TE.of(some(aRetrievedProfileInValidState))} | ${TE.of(O.some({ ...aRetrievedService, serviceMetadata: { scope: ServiceScopeEnum.LOCAL, category: SpecialServiceCategoryEnum.SPECIAL } }))} | ${TE.of(some(aRetrievedServicePreference))} | ${TE.of(O.some(anActiveActivation))}                                               | ${true}
-    ${"inbox disabled if don't exists an activation"}   | ${TE.of(some(aRetrievedProfileInValidState))} | ${TE.of(O.some({ ...aRetrievedService, serviceMetadata: { scope: ServiceScopeEnum.LOCAL, category: SpecialServiceCategoryEnum.SPECIAL } }))} | ${TE.of(some(aRetrievedServicePreference))} | ${TE.of(O.none)}                                                                   | ${false}
-    ${"inbox disabled if exists a PENDING activation"}  | ${TE.of(some(aRetrievedProfileInValidState))} | ${TE.of(O.some({ ...aRetrievedService, serviceMetadata: { scope: ServiceScopeEnum.LOCAL, category: SpecialServiceCategoryEnum.SPECIAL } }))} | ${TE.of(some(aRetrievedServicePreference))} | ${TE.of(O.some({ ...anActiveActivation, status: ActivationStatusEnum.PENDING }))}  | ${false}
-    ${"inbox disabled if exists a INACTIVE activation"} | ${TE.of(some(aRetrievedProfileInValidState))} | ${TE.of(O.some({ ...aRetrievedService, serviceMetadata: { scope: ServiceScopeEnum.LOCAL, category: SpecialServiceCategoryEnum.SPECIAL } }))} | ${TE.of(some(aRetrievedServicePreference))} | ${TE.of(O.some({ ...anActiveActivation, status: ActivationStatusEnum.INACTIVE }))} | ${false}
+    scenario                                            | profileResult                                 | serviceResult                              | servicePreferencesResult                    | activationResult                                                                   | is_inbox_enabled
+    ${"inbox enabled if exists an ACTIVE activation"}   | ${TE.of(some(aRetrievedProfileInValidState))} | ${TE.of(O.some(aRetrievedSpecialService))} | ${TE.of(some(aRetrievedServicePreference))} | ${TE.of(O.some(anActiveActivation))}                                               | ${true}
+    ${"inbox disabled if don't exists an activation"}   | ${TE.of(some(aRetrievedProfileInValidState))} | ${TE.of(O.some(aRetrievedSpecialService))} | ${TE.of(some(aRetrievedServicePreference))} | ${TE.of(O.none)}                                                                   | ${false}
+    ${"inbox disabled if exists a PENDING activation"}  | ${TE.of(some(aRetrievedProfileInValidState))} | ${TE.of(O.some(aRetrievedSpecialService))} | ${TE.of(some(aRetrievedServicePreference))} | ${TE.of(O.some({ ...anActiveActivation, status: ActivationStatusEnum.PENDING }))}  | ${false}
+    ${"inbox disabled if exists a INACTIVE activation"} | ${TE.of(some(aRetrievedProfileInValidState))} | ${TE.of(O.some(aRetrievedSpecialService))} | ${TE.of(some(aRetrievedServicePreference))} | ${TE.of(O.some({ ...anActiveActivation, status: ActivationStatusEnum.INACTIVE }))} | ${false}
   `(
     "should return $scenario",
     async ({
@@ -350,4 +358,42 @@ describe("GetServicePreferences", () => {
       expect(mockActivation.findLastVersionByModelId).toBeCalledTimes(1);
     }
   );
+
+  it("should return IResponseErrorQuery if activation model raise an error for special service", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() => {
+        return TE.of(some(aRetrievedProfileInValidState));
+      })
+    };
+    mockServiceFindLastVersionByModelId.mockImplementationOnce(() =>
+      TE.of(O.some(aRetrievedSpecialService))
+    );
+    const servicePreferenceModelMock = {
+      find: jest.fn(_ => {
+        return TE.of(none);
+      })
+    };
+
+    const mockActivation = {
+      findLastVersionByModelId: jest.fn(_ => TE.left({}))
+    };
+    const getServicePreferencesHandler = GetServicePreferencesHandler(
+      profileModelMock as any,
+      serviceModelMock as any,
+      servicePreferenceModelMock as any,
+      mockActivation as any
+    );
+
+    const response = await getServicePreferencesHandler(
+      aFiscalCode,
+      aServiceId
+    );
+
+    expect(response).toMatchObject({
+      kind: "IResponseErrorQuery"
+    });
+    expect(mockServiceFindLastVersionByModelId).toBeCalledTimes(1);
+    expect(servicePreferenceModelMock.find).toBeCalledTimes(1);
+    expect(mockActivation.findLastVersionByModelId).toBeCalledTimes(1);
+  });
 });
