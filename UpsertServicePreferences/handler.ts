@@ -252,8 +252,11 @@ export const GetUpsertServicePreferencesHandler = (
           )
         )
       ),
-      TE.chain(_ => {
-        if (_.serviceCategory === SpecialServiceCategoryEnum.SPECIAL) {
+      TE.chain(resultsWithSubFeedInfo => {
+        if (
+          resultsWithSubFeedInfo.serviceCategory ===
+          SpecialServiceCategoryEnum.SPECIAL
+        ) {
           return pipe(
             getServicePreferencesForSpecialServices(activationModel)({
               fiscalCode,
@@ -269,36 +272,39 @@ export const GetUpsertServicePreferencesHandler = (
               )
             ),
             TE.map(specialServicePreference => ({
-              ..._,
+              ...resultsWithSubFeedInfo,
               feedOperation: FeedOperationEnum.NO_UPDATE,
               isSubscribing: false,
               servicePreferencesToUpsert: specialServicePreference
             }))
           );
         }
-        return TE.of(_);
+        return TE.of(resultsWithSubFeedInfo);
       }),
-      TE.chainW(results =>
+      TE.chainW(resultsWithSubFeedInfo =>
         pipe(
-          results,
+          resultsWithSubFeedInfo,
           upsertUserServicePreferences(servicePreferencesModel),
           TE.map(upsertedUserServicePreference => ({
-            ...results,
+            ...resultsWithSubFeedInfo,
             updatedAt: new Date().getTime(),
             upsertedUserServicePreference
           }))
         )
       ),
-      TE.map(results => {
+      TE.map(resultsWithSubFeedInfo => {
         // if it's a new subscription, emit relative event
-        if (results.isSubscribing) {
+        if (resultsWithSubFeedInfo.isSubscribing) {
           // eslint-disable-next-line functional/immutable-data
           context.bindings.apievents = pipe(
-            makeServiceSubscribedEvent(results.serviceId, results.fiscalCode),
+            makeServiceSubscribedEvent(
+              resultsWithSubFeedInfo.serviceId,
+              resultsWithSubFeedInfo.fiscalCode
+            ),
             JSON.stringify
           );
         }
-        return results;
+        return resultsWithSubFeedInfo;
       }),
       TE.chain(
         ({
