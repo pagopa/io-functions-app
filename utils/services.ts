@@ -1,3 +1,5 @@
+import { ServiceCategory } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceCategory";
+import { StandardServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/StandardServiceCategory";
 import {
   ServiceModel,
   Service
@@ -34,3 +36,15 @@ export const getServiceOrErrorResponse = (serviceModel: ServiceModel) => (
       )
     )
   );
+
+/**
+ * Returns the Service Category from a Service.
+ * If serviceMetadata are not defined the default value STANDARD is returned.
+ *
+ * @param service
+ * @returns ServiceCategory or StandardServiceCategoryEnum.STANDARD
+ */
+export const getServiceCategoryOrStandard = (
+  service: Service
+): ServiceCategory =>
+  service.serviceMetadata?.category || StandardServiceCategoryEnum.STANDARD;

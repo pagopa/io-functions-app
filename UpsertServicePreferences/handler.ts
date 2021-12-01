@@ -47,7 +47,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { TableService } from "azure-storage";
 import { ActivationModel } from "@pagopa/io-functions-commons/dist/src/models/activation";
 import { SpecialServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/SpecialServiceCategory";
-import { StandardServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/StandardServiceCategory";
+import { getServiceCategoryOrStandard } from "../utils/services";
 import {
   getServicePreferenceSettingsVersion,
   getServicePreferencesForSpecialServices,
@@ -206,9 +206,7 @@ export const GetUpsertServicePreferencesHandler = (
           ),
           TE.map(version => ({
             fiscalCode,
-            serviceCategory:
-              service.serviceMetadata?.category ||
-              StandardServiceCategoryEnum.STANDARD,
+            serviceCategory: getServiceCategoryOrStandard(service),
             serviceId,
             servicePreferencesToUpsert: servicePreference,
             version

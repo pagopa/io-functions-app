@@ -39,7 +39,7 @@ import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/servi
 import { ServiceCategory } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceCategory";
 import { SpecialServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/SpecialServiceCategory";
 import { ActivationModel } from "@pagopa/io-functions-commons/dist/src/models/activation";
-import { StandardServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/StandardServiceCategory";
+import { getServiceCategoryOrStandard } from "../utils/services";
 import {
   getServicePreferenceSettingsVersion,
   getServicePreferencesForSpecialServices,
@@ -167,9 +167,7 @@ export const GetServicePreferencesHandler = (
           TE.map(version => ({
             fiscalCode,
             mode: profile.servicePreferencesSettings.mode,
-            serviceCategory: service.serviceMetadata
-              ? service.serviceMetadata.category
-              : StandardServiceCategoryEnum.STANDARD,
+            serviceCategory: getServiceCategoryOrStandard(service),
             serviceId,
             version
           }))
