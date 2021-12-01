@@ -1,4 +1,4 @@
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as O from "fp-ts/lib/Option";
 
@@ -116,17 +116,18 @@ export const getServicePreferencesForSpecialServices = (
     TE.mapLeft(err =>
       ResponseErrorQuery("Error reading service Activation", err)
     ),
-    TE.map(_ => {
-      if (O.isNone(_) || _.value.status !== ActivationStatusEnum.ACTIVE) {
-        // When the Activation is missing the default value is INACTIVE.
-        return {
-          ...servicePreferences,
-          is_inbox_enabled: false
-        };
-      }
-      return {
-        ...servicePreferences,
-        is_inbox_enabled: true
-      };
-    })
+    TE.map(
+      flow(
+        O.filter(
+          activation => activation.status === ActivationStatusEnum.ACTIVE
+        ),
+        O.foldW(
+          () => ({ ...servicePreferences, is_inbox_enabled: false }),
+          _ => ({
+            ...servicePreferences,
+            is_inbox_enabled: true
+          })
+        )
+      )
+    )
   );
