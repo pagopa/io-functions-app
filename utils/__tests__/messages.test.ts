@@ -170,7 +170,7 @@ describe("enrichMessagesData", () => {
     expect(functionsContextMock.log.error).not.toHaveBeenCalled();
   });
 
-  it("should return right with right message GREEN_PASS category when message content is retrieved", async () => {
+  it("should return right with right message EU_COVID_CERT category when message content is retrieved", async () => {
     const messages = [
       retrievedMessageToPublic(aRetrievedMessageWithoutContent)
     ] as readonly CreatedMessageWithoutContent[];
@@ -199,7 +199,7 @@ describe("enrichMessagesData", () => {
       if (E.isRight(enrichedMessage)) {
         expect(EnrichedMessage.is(enrichedMessage.right)).toBe(true);
         expect(enrichedMessage.right.category).toEqual({
-          tag: TagEnumBase.GREEN_PASS
+          tag: TagEnumBase.EU_COVID_CERT
         });
       }
     });

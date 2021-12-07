@@ -1493,7 +1493,7 @@ definitions:
       tag:
         type: string
         enum:
-          - GREEN_PASS
+          - EU_COVID_CERT
           - GENERIC
     required:
       - tag

@@ -57,7 +57,7 @@ interface IMessageCategoryMapping {
 const messageCategoryMappings: ReadonlyArray<IMessageCategoryMapping> = [
   {
     pattern: t.interface({ eu_covid_cert: EUCovidCert }),
-    tag: TagEnumBase.GREEN_PASS
+    tag: TagEnumBase.EU_COVID_CERT
   },
   {
     buildOtherCategoryProperties: (_, s, c): Record<string, string> => ({
