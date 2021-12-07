@@ -78,7 +78,9 @@ const aVisibleService: VisibleService = {
 const aLocalVisibleService: VisibleService = {
   ...aVisibleService,
   serviceMetadata: {
-    scope: ServiceScopeEnum.LOCAL
+    scope: ServiceScopeEnum.LOCAL,
+    category: StandardServiceCategoryEnum.STANDARD,
+    customSpecialFlow: undefined
   }
 };
 

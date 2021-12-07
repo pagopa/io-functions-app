@@ -8,6 +8,7 @@ import {
   legacyProfileServicePreferencesSettings
 } from "../../__mocks__/mocks";
 import {
+  aNewServicePreference,
   aRetrievedService,
   aRetrievedServicePreference,
   aServiceId,
@@ -24,6 +25,11 @@ import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/p
 import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { Context } from "@azure/functions";
+import { Activation } from "@pagopa/io-functions-commons/dist/src/models/activation";
+import { ActivationStatusEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ActivationStatus";
+import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
+import { SpecialServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/SpecialServiceCategory";
+import { makeServicesPreferencesDocumentId } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
 
 const makeContext = () =>
   (({ ...context, bindings: {} } as unknown) as Context);
@@ -77,11 +83,29 @@ const aDisabledInboxServicePreference = {
   is_inbox_enabled: false
 };
 
+const mockActivationModel = {
+  findLastVersionByModelId: jest.fn()
+};
+const anActiveActivation: Activation = {
+  fiscalCode: aFiscalCode,
+  serviceId: aServiceId,
+  status: ActivationStatusEnum.ACTIVE
+};
+
+const aSpecialRetrievedService: RetrievedService = {
+  ...aRetrievedService,
+  serviceMetadata: {
+    scope: ServiceScopeEnum.LOCAL,
+    category: SpecialServiceCategoryEnum.SPECIAL
+  }
+};
+
 const upsertServicePreferencesHandler = GetUpsertServicePreferencesHandler(
   telemetryClientMock as any,
   profileModelMock as any,
   serviceModelMock as any,
   servicePreferenceModelMock as any,
+  mockActivationModel as any,
   {} as any,
   "SubFeedTableName" as NonEmptyString
 );
@@ -258,6 +282,55 @@ describe("UpsertServicePreferences", () => {
     expect(telemetryClientMock.trackEvent).toHaveBeenCalled();
   });
 
+  it.each`
+    scenario                                            | serviceResult                              | servicePreference                                     | servicePreferencesResult                      | activationResult                                                                   | is_inbox_enabled
+    ${"inbox enabled if exists an ACTIVE activation"}   | ${TE.of(O.some(aSpecialRetrievedService))} | ${aServicePreference}                                 | ${TE.of(O.some(aRetrievedServicePreference))} | ${TE.of(O.some(anActiveActivation))}                                               | ${true}
+    ${"inbox disabled if don't exists an activation"}   | ${TE.of(O.some(aSpecialRetrievedService))} | ${{ ...aServicePreference, is_inbox_enabled: false }} | ${TE.of(O.some(aRetrievedServicePreference))} | ${TE.of(O.none)}                                                                   | ${false}
+    ${"inbox disabled if exists a PENDING activation"}  | ${TE.of(O.some(aSpecialRetrievedService))} | ${{ ...aServicePreference, is_inbox_enabled: false }} | ${TE.of(O.some(aRetrievedServicePreference))} | ${TE.of(O.some({ ...anActiveActivation, status: ActivationStatusEnum.PENDING }))}  | ${false}
+    ${"inbox disabled if exists a INACTIVE activation"} | ${TE.of(O.some(aSpecialRetrievedService))} | ${{ ...aServicePreference, is_inbox_enabled: false }} | ${TE.of(O.some(aRetrievedServicePreference))} | ${TE.of(O.some({ ...anActiveActivation, status: ActivationStatusEnum.INACTIVE }))} | ${false}
+  `(
+    "should return $scenario",
+    async ({
+      serviceResult,
+      servicePreference,
+      servicePreferencesResult,
+      activationResult,
+      is_inbox_enabled
+    }) => {
+      servicePreferenceFindModelMock.mockImplementationOnce(
+        () => servicePreferencesResult
+      );
+      serviceModelMock.findLastVersionByModelId.mockImplementationOnce(
+        () => serviceResult
+      );
+      mockActivationModel.findLastVersionByModelId.mockImplementationOnce(
+        () => activationResult
+      );
+      const response = await upsertServicePreferencesHandler(
+        makeContext(),
+        aFiscalCode,
+        aServiceId,
+        servicePreference
+      );
+
+      expect(response).toMatchObject({
+        kind: "IResponseSuccessJson",
+        value: { ...aServicePreference, is_inbox_enabled }
+      });
+
+      expect(profileModelMock.findLastVersionByModelId).toHaveBeenCalled();
+      expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalled();
+      expect(servicePreferenceModelMock.find).toHaveBeenCalled();
+      expect(servicePreferenceModelMock.upsert).toHaveBeenCalledWith({
+        ...aNewServicePreference,
+        isInboxEnabled: is_inbox_enabled
+      });
+      // Subscription feed never be update for SPECIAL servies preferences changes.
+      expect(updateSubscriptionFeedMock).not.toBeCalled();
+      expect(telemetryClientMock.trackEvent).not.toHaveBeenCalled();
+    }
+  );
+
   // ---------------------------------------------
   // Errors
   // ---------------------------------------------
@@ -379,6 +452,30 @@ describe("UpsertServicePreferences", () => {
     expect(servicePreferenceModelMock.upsert).toHaveBeenCalled();
   });
 
+  it("should return IResponseErrorQuery if activation model find raise an error for special services", async () => {
+    serviceModelMock.findLastVersionByModelId.mockImplementationOnce(() =>
+      TE.of(O.some(aSpecialRetrievedService))
+    );
+    mockActivationModel.findLastVersionByModelId.mockImplementationOnce(() =>
+      TE.left({} as CosmosErrors)
+    );
+
+    const response = await upsertServicePreferencesHandler(
+      makeContext(),
+      aFiscalCode,
+      aServiceId,
+      aServicePreference
+    );
+
+    expect(response).toMatchObject({
+      kind: "IResponseErrorQuery"
+    });
+
+    expect(servicePreferenceModelMock.find).toBeCalledTimes(1);
+    expect(mockActivationModel.findLastVersionByModelId).toBeCalledTimes(1);
+    expect(servicePreferenceModelMock.upsert).not.toHaveBeenCalled();
+  });
+
   it("should return IResponseErrorConflict if profile is in LEGACY mode", async () => {
     profileFindLastVersionByModelIdMock.mockImplementationOnce(() => {
       return TE.of(
@@ -403,7 +500,7 @@ describe("UpsertServicePreferences", () => {
     expect(servicePreferenceModelMock.upsert).not.toHaveBeenCalled();
   });
 
-  it("should return IResponseErrorConflict if service preference han a different version from profile's one", async () => {
+  it("should return IResponseErrorConflict if service preference has a different version from profile's one", async () => {
     const response = await upsertServicePreferencesHandler(
       makeContext(),
       aFiscalCode,
@@ -418,6 +515,32 @@ describe("UpsertServicePreferences", () => {
       kind: "IResponseErrorConflict"
     });
 
+    expect(servicePreferenceModelMock.upsert).not.toHaveBeenCalled();
+  });
+
+  it("should return IResponseErrorConflict if is_inbox_enabled value missmatch the activation for a special service", async () => {
+    serviceModelMock.findLastVersionByModelId.mockImplementationOnce(() =>
+      TE.of(O.some(aSpecialRetrievedService))
+    );
+    mockActivationModel.findLastVersionByModelId.mockImplementationOnce(() =>
+      TE.of(O.some(anActiveActivation))
+    );
+    const response = await upsertServicePreferencesHandler(
+      makeContext(),
+      aFiscalCode,
+      aServiceId,
+      {
+        ...aServicePreference,
+        is_inbox_enabled: false
+      }
+    );
+
+    expect(response).toMatchObject({
+      kind: "IResponseErrorConflict"
+    });
+
+    expect(serviceModelMock.findLastVersionByModelId).toBeCalledTimes(1);
+    expect(mockActivationModel.findLastVersionByModelId).toBeCalledTimes(1);
     expect(servicePreferenceModelMock.upsert).not.toHaveBeenCalled();
   });
 
