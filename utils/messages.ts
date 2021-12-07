@@ -1,10 +1,7 @@
 import { Context } from "@azure/functions";
 import { CreatedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
 import { EnrichedMessage } from "@pagopa/io-functions-commons/dist/generated/definitions/EnrichedMessage";
-import {
-  MessageContent,
-  MessageContent2
-} from "@pagopa/io-functions-commons/dist/generated/definitions/MessageContent";
+import { MessageContent } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageContent";
 import { EUCovidCert } from "@pagopa/io-functions-commons/dist/generated/definitions/EUCovidCert";
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { MessageModel } from "@pagopa/io-functions-commons/dist/src/models/message";
@@ -24,13 +21,9 @@ import * as t from "io-ts";
 import { MessageCategory } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategory";
 import { TagEnum as TagEnumBase } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategoryBase";
 import { TagEnum as TagEnumPayment } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategoryPayment";
-import { ITuple2, Tuple2 } from "@pagopa/ts-commons/lib/tuples";
-import { createTracker } from "./tracking";
-import { initTelemetryClient } from "./appinsights";
 import { PaymentData } from "@pagopa/io-functions-commons/dist/generated/definitions/PaymentData";
-import { IResponseErrorInternal } from "@pagopa/ts-commons/lib/responses";
-import { PaymentDataWithRequiredPayee } from "@pagopa/io-functions-commons/dist/generated/definitions/PaymentDataWithRequiredPayee";
-import { some } from "fp-ts/lib/ReadonlyRecord";
+import { initTelemetryClient } from "./appinsights";
+import { createTracker } from "./tracking";
 
 const trackErrorAndContinue = (
   context: Context,
@@ -51,27 +44,27 @@ const trackErrorAndContinue = (
   return error;
 };
 
-type MessageCategoryMapping = {
-  tag: MessageCategory["tag"];
-  pattern: t.Type<Partial<MessageContent>>;
-  buildOtherCategoryProperties?: (
+interface IMessageCategoryMapping {
+  readonly tag: MessageCategory["tag"];
+  readonly pattern: t.Type<Partial<MessageContent>>;
+  readonly buildOtherCategoryProperties?: (
     m: CreatedMessageWithoutContent,
     s: Service,
     c: MessageContent
-  ) => object;
-};
+  ) => Record<string, string>;
+}
 
-const messageCategoryMappings: ReadonlyArray<MessageCategoryMapping> = [
+const messageCategoryMappings: ReadonlyArray<IMessageCategoryMapping> = [
   {
-    tag: TagEnumBase.GREEN_PASS,
-    pattern: t.interface({ eu_covid_cert: EUCovidCert })
+    pattern: t.interface({ eu_covid_cert: EUCovidCert }),
+    tag: TagEnumBase.GREEN_PASS
   },
   {
-    tag: TagEnumPayment.PAYMENT,
-    pattern: t.interface({ payment_data: PaymentData }),
-    buildOtherCategoryProperties: (_, s, c) => ({
+    buildOtherCategoryProperties: (_, s, c): Record<string, string> => ({
       rptId: `${s.organizationFiscalCode}${c.payment_data.notice_number}`
-    })
+    }),
+    pattern: t.interface({ payment_data: PaymentData }),
+    tag: TagEnumPayment.PAYMENT
   }
 ];
 
