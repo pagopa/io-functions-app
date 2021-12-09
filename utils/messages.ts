@@ -14,7 +14,7 @@ import { BlobService } from "azure-storage";
 import * as AR from "fp-ts/lib/Array";
 import * as A from "fp-ts/lib/Apply";
 import * as E from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
+import { constVoid, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
@@ -74,29 +74,25 @@ export const mapMessageCategory = (
   messageContent: MessageContent
 ): MessageCategory =>
   pipe(
-    messageCategoryMappings
-      .map(mapping =>
-        pipe(
-          messageContent,
-          mapping.pattern.decode,
-          E.fold(
-            () => void 0,
-            () => ({
-              tag: mapping.tag,
-              ...pipe(
-                O.fromNullable(mapping.buildOtherCategoryProperties),
-                O.fold(
-                  () => ({}),
-                  f => f(message, service, messageContent)
-                )
-              )
-            })
+    messageCategoryMappings,
+    AR.map(mapping =>
+      pipe(
+        messageContent,
+        mapping.pattern.decode,
+        E.fold(constVoid, () => ({
+          tag: mapping.tag,
+          ...pipe(
+            O.fromNullable(mapping.buildOtherCategoryProperties),
+            O.fold(
+              () => ({}),
+              f => f(message, service, messageContent)
+            )
           )
-        )
+        }))
       )
-      .filter(MessageCategory.is),
-    O.fromPredicate(arr => arr.length > 0),
-    O.chain(AR.head),
+    ),
+    AR.filter(MessageCategory.is),
+    AR.head,
     O.getOrElse(() => ({ tag: TagEnumBase.GENERIC }))
   );
 
