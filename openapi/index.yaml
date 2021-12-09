@@ -815,6 +815,11 @@ definitions:
         type: string
       message_title:
         type: string
+      category:
+        $ref: '#/definitions/MessageCategory'
+      has_attachments:
+        type: boolean
+        default: false
     required:
       - id
       - fiscal_code
@@ -1152,6 +1157,25 @@ definitions:
             $ref: '#/definitions/PaymentData'
           prescription_data:
             $ref: '#/definitions/PrescriptionData'
+          legal_data:
+            type: object
+            properties:
+              sender_mail_from:
+                type: string
+                minLength: 1
+              has_attachment:
+                type: boolean
+                default: false
+              message_unique_id:
+                type: string
+                minLength: 1
+              original_message_url:
+                type: string
+                minLength: 1
+            required:
+              - sender_mail_from
+              - has_attachment
+              - message_unique_id
           eu_covid_cert:
             $ref: '#/definitions/EUCovidCert'
           due_date:
@@ -1458,3 +1482,30 @@ definitions:
         $ref: '#/definitions/OrganizationFiscalCode'
     required:
       - fiscal_code
+  MessageCategory:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/MessageCategoryPayment'
+      - $ref: '#/definitions/MessageCategoryBase'
+  MessageCategoryBase:
+    type: object
+    properties:
+      tag:
+        type: string
+        enum:
+          - EU_COVID_CERT
+          - GENERIC
+    required:
+      - tag
+  MessageCategoryPayment:
+    type: object
+    properties:
+      tag:
+        type: string
+        enum:
+          - PAYMENT
+      rptId:
+        type: string
+    required:
+      - tag
+      - rptId

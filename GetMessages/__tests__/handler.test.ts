@@ -23,6 +23,7 @@ import { BlobService } from "azure-storage";
 import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { toCosmosErrorResponse } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { Context } from "@azure/functions";
+import { TagEnum as TagEnumBase } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategoryBase";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
 const aMessageId = "A_MESSAGE_ID" as NonEmptyString;
@@ -384,6 +385,7 @@ describe("GetMessagesHandler", () => {
 
     const expectedEnrichedMessage = {
       ...retrievedMessageToPublic(aRetrievedMessageWithoutContent),
+      category: { tag: TagEnumBase.GENERIC },
       message_title: "a subject",
       organization_name: aRetrievedService.organizationName,
       service_name: aRetrievedService.serviceName
