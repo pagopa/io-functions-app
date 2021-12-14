@@ -613,7 +613,10 @@ definitions:
               - false
             description: It indicates that service is hidden
           service_metadata:
-            $ref: '#/definitions/ServiceMetadata'
+            description: >-
+              That service can't handle some ServiceMetadata fields (es.
+              category)
+            $ref: '#/definitions/CommonServiceMetadata'
   VisibleServicePayload:
     description: >-
       A payload used to create/update a service that appears in the service
@@ -628,7 +631,10 @@ definitions:
               - true
             description: It indicates that service appears in the service list
           service_metadata:
-            $ref: '#/definitions/ServiceMetadata'
+            description: >-
+              That service can't handle some ServiceMetadata fields (es.
+              category)
+            $ref: '#/definitions/CommonServiceMetadata'
         required:
           - is_visible
           - service_metadata
@@ -802,6 +808,33 @@ definitions:
         type: string
       message_title:
         type: string
+      category:
+        x-one-of: true
+        allOf:
+          - type: object
+            properties:
+              tag:
+                type: string
+                enum:
+                  - PAYMENT
+              rptId:
+                type: string
+            required:
+              - tag
+              - rptId
+          - type: object
+            properties:
+              tag:
+                type: string
+                enum:
+                  - LEGAL_MESSAGE
+                  - GREEN_PASS
+                  - GENERIC
+            required:
+              - tag
+      has_attachments:
+        type: boolean
+        default: false
     required:
       - id
       - fiscal_code
@@ -912,52 +945,11 @@ definitions:
       API user.
     minLength: 1
   ServiceMetadata:
-    type: object
-    description: A set of metadata properties related to this service.
-    properties:
-      description:
-        type: string
-        minLength: 1
-      web_url:
-        type: string
-        minLength: 1
-      app_ios:
-        type: string
-        minLength: 1
-      app_android:
-        type: string
-        minLength: 1
-      tos_url:
-        type: string
-        minLength: 1
-      privacy_url:
-        type: string
-        minLength: 1
-      address:
-        type: string
-        minLength: 1
-      phone:
-        type: string
-        minLength: 1
-      email:
-        type: string
-        minLength: 1
-      pec:
-        type: string
-        minLength: 1
-      cta:
-        type: string
-        minLength: 1
-      token_name:
-        type: string
-        minLength: 1
-      support_url:
-        type: string
-        minLength: 1
-      scope:
-        $ref: '#/definitions/ServiceScope'
-    required:
-      - scope
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/StandardServiceMetadata'
+      - $ref: '#/definitions/SpecialServiceMetadata'
+      - $ref: '#/definitions/CommonServiceMetadata'
   ServiceScope:
     type: string
     x-extensible-enum:
@@ -1099,6 +1091,25 @@ definitions:
             $ref: '#/definitions/PaymentData'
           prescription_data:
             $ref: '#/definitions/PrescriptionData'
+          legal_data:
+            type: object
+            properties:
+              sender_mail_from:
+                type: string
+                minLength: 1
+              has_attachment:
+                type: boolean
+                default: false
+              message_unique_id:
+                type: string
+                minLength: 1
+              original_message_url:
+                type: string
+                minLength: 1
+            required:
+              - sender_mail_from
+              - has_attachment
+              - message_unique_id
           eu_covid_cert:
             $ref: '#/definitions/EUCovidCert'
           due_date:
@@ -1405,3 +1416,79 @@ definitions:
         $ref: '#/definitions/OrganizationFiscalCode'
     required:
       - fiscal_code
+  StandardServiceMetadata:
+    allOf:
+      - $ref: '#/definitions/CommonServiceMetadata'
+      - type: object
+        properties:
+          category:
+            $ref: '#/definitions/StandardServiceCategory'
+        required:
+          - category
+  SpecialServiceMetadata:
+    allOf:
+      - $ref: '#/definitions/CommonServiceMetadata'
+      - type: object
+        properties:
+          category:
+            $ref: '#/definitions/SpecialServiceCategory'
+          custom_special_flow:
+            type: string
+            minLength: 1
+        required:
+          - category
+  CommonServiceMetadata:
+    type: object
+    description: A set of metadata properties related to this service.
+    properties:
+      description:
+        type: string
+        minLength: 1
+      web_url:
+        type: string
+        minLength: 1
+      app_ios:
+        type: string
+        minLength: 1
+      app_android:
+        type: string
+        minLength: 1
+      tos_url:
+        type: string
+        minLength: 1
+      privacy_url:
+        type: string
+        minLength: 1
+      address:
+        type: string
+        minLength: 1
+      phone:
+        type: string
+        minLength: 1
+      email:
+        type: string
+        minLength: 1
+      pec:
+        type: string
+        minLength: 1
+      cta:
+        type: string
+        minLength: 1
+      token_name:
+        type: string
+        minLength: 1
+      support_url:
+        type: string
+        minLength: 1
+      scope:
+        $ref: '#/definitions/ServiceScope'
+    required:
+      - scope
+  SpecialServiceCategory:
+    type: string
+    x-extensible-enum:
+      - SPECIAL
+  StandardServiceCategory:
+    type: string
+    x-extensible-enum:
+      - STANDARD
