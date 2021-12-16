@@ -658,3 +658,5 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/StandardServiceCategory"
   MessageCategory:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageCategory"
+  LegalData:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/LegalData"
