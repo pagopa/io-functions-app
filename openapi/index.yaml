@@ -616,7 +616,7 @@ definitions:
             description: >-
               That service can't handle some ServiceMetadata fields (es.
               category)
-            $ref: '#/definitions/ServiceMetadata/allOf/2'
+            $ref: '#/definitions/CommonServiceMetadata'
   VisibleServicePayload:
     description: >-
       A payload used to create/update a service that appears in the service
@@ -634,7 +634,7 @@ definitions:
             description: >-
               That service can't handle some ServiceMetadata fields (es.
               category)
-            $ref: '#/definitions/ServiceMetadata/allOf/2'
+            $ref: '#/definitions/CommonServiceMetadata'
         required:
           - is_visible
           - service_metadata
@@ -809,29 +809,7 @@ definitions:
       message_title:
         type: string
       category:
-        x-one-of: true
-        allOf:
-          - type: object
-            properties:
-              tag:
-                type: string
-                enum:
-                  - PAYMENT
-              rptId:
-                type: string
-            required:
-              - tag
-              - rptId
-          - type: object
-            properties:
-              tag:
-                type: string
-                enum:
-                  - LEGAL_MESSAGE
-                  - GREEN_PASS
-                  - GENERIC
-            required:
-              - tag
+        $ref: '#/definitions/MessageCategory'
       has_attachments:
         type: boolean
         default: false
@@ -947,75 +925,9 @@ definitions:
   ServiceMetadata:
     x-one-of: true
     allOf:
-      - allOf:
-          - $ref: '#/definitions/ServiceMetadata/allOf/2'
-          - type: object
-            properties:
-              category:
-                type: string
-                x-extensible-enum:
-                  - STANDARD
-            required:
-              - category
-      - allOf:
-          - $ref: '#/definitions/ServiceMetadata/allOf/2'
-          - type: object
-            properties:
-              category:
-                type: string
-                x-extensible-enum:
-                  - SPECIAL
-              custom_special_flow:
-                type: string
-                minLength: 1
-            required:
-              - category
-      - type: object
-        description: A set of metadata properties related to this service.
-        properties:
-          description:
-            type: string
-            minLength: 1
-          web_url:
-            type: string
-            minLength: 1
-          app_ios:
-            type: string
-            minLength: 1
-          app_android:
-            type: string
-            minLength: 1
-          tos_url:
-            type: string
-            minLength: 1
-          privacy_url:
-            type: string
-            minLength: 1
-          address:
-            type: string
-            minLength: 1
-          phone:
-            type: string
-            minLength: 1
-          email:
-            type: string
-            minLength: 1
-          pec:
-            type: string
-            minLength: 1
-          cta:
-            type: string
-            minLength: 1
-          token_name:
-            type: string
-            minLength: 1
-          support_url:
-            type: string
-            minLength: 1
-          scope:
-            $ref: '#/definitions/ServiceScope'
-        required:
-          - scope
+      - $ref: '#/definitions/StandardServiceMetadata'
+      - $ref: '#/definitions/SpecialServiceMetadata'
+      - $ref: '#/definitions/CommonServiceMetadata'
   ServiceScope:
     type: string
     x-extensible-enum:
@@ -1482,3 +1394,103 @@ definitions:
         $ref: '#/definitions/OrganizationFiscalCode'
     required:
       - fiscal_code
+  StandardServiceMetadata:
+    allOf:
+      - $ref: '#/definitions/CommonServiceMetadata'
+      - type: object
+        properties:
+          category:
+            $ref: '#/definitions/StandardServiceCategory'
+        required:
+          - category
+  SpecialServiceMetadata:
+    allOf:
+      - $ref: '#/definitions/CommonServiceMetadata'
+      - type: object
+        properties:
+          category:
+            $ref: '#/definitions/SpecialServiceCategory'
+          custom_special_flow:
+            type: string
+            minLength: 1
+        required:
+          - category
+  CommonServiceMetadata:
+    type: object
+    description: A set of metadata properties related to this service.
+    properties:
+      description:
+        type: string
+        minLength: 1
+      web_url:
+        type: string
+        minLength: 1
+      app_ios:
+        type: string
+        minLength: 1
+      app_android:
+        type: string
+        minLength: 1
+      tos_url:
+        type: string
+        minLength: 1
+      privacy_url:
+        type: string
+        minLength: 1
+      address:
+        type: string
+        minLength: 1
+      phone:
+        type: string
+        minLength: 1
+      email:
+        type: string
+        minLength: 1
+      pec:
+        type: string
+        minLength: 1
+      cta:
+        type: string
+        minLength: 1
+      token_name:
+        type: string
+        minLength: 1
+      support_url:
+        type: string
+        minLength: 1
+      scope:
+        $ref: '#/definitions/ServiceScope'
+    required:
+      - scope
+  SpecialServiceCategory:
+    type: string
+    x-extensible-enum:
+      - SPECIAL
+  StandardServiceCategory:
+    type: string
+    x-extensible-enum:
+      - STANDARD
+  MessageCategory:
+    x-one-of: true
+    allOf:
+      - type: object
+        properties:
+          tag:
+            type: string
+            enum:
+              - PAYMENT
+          rptId:
+            type: string
+        required:
+          - tag
+          - rptId
+      - type: object
+        properties:
+          tag:
+            type: string
+            enum:
+              - LEGAL_MESSAGE
+              - GREEN_PASS
+              - GENERIC
+        required:
+          - tag
