@@ -591,7 +591,7 @@ definitions:
           eu_covid_cert:
             $ref: '#/definitions/EUCovidCert'
           legal_data:
-            $ref: '#/definitions/MessageContent/allOf/1/properties/legal_data'
+            $ref: '#/definitions/LegalData'
   CIDR:
     type: string
     description: Describes a single IP or a range of IPs.
@@ -1072,24 +1072,7 @@ definitions:
           prescription_data:
             $ref: '#/definitions/PrescriptionData'
           legal_data:
-            type: object
-            properties:
-              sender_mail_from:
-                type: string
-                minLength: 1
-              has_attachment:
-                type: boolean
-                default: false
-              message_unique_id:
-                type: string
-                minLength: 1
-              original_message_url:
-                type: string
-                minLength: 1
-            required:
-              - sender_mail_from
-              - has_attachment
-              - message_unique_id
+            $ref: '#/definitions/LegalData'
           eu_covid_cert:
             $ref: '#/definitions/EUCovidCert'
           due_date:
@@ -1496,3 +1479,22 @@ definitions:
               - GENERIC
         required:
           - tag
+  LegalData:
+    type: object
+    properties:
+      sender_mail_from:
+        type: string
+        minLength: 1
+      has_attachment:
+        type: boolean
+        default: false
+      message_unique_id:
+        type: string
+        minLength: 1
+      original_message_url:
+        type: string
+        minLength: 1
+    required:
+      - sender_mail_from
+      - has_attachment
+      - message_unique_id
