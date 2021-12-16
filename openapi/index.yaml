@@ -590,6 +590,8 @@ definitions:
             $ref: '#/definitions/PrescriptionData'
           eu_covid_cert:
             $ref: '#/definitions/EUCovidCert'
+          legal_data:
+            $ref: '#/definitions/MessageContent/allOf/1/properties/legal_data'
   CIDR:
     type: string
     description: Describes a single IP or a range of IPs.
