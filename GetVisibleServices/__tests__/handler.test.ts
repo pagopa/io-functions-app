@@ -28,6 +28,10 @@ import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/de
 import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetVisibleServices, GetVisibleServicesHandler } from "../handler";
+import { StandardServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/StandardServiceCategory";
+import { SpecialServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/SpecialServiceCategory";
+
+import * as E from "fp-ts/Either";
 
 afterEach(() => {
   jest.resetAllMocks();
@@ -74,12 +78,16 @@ const aVisibleService: VisibleService = {
   version: aRetrievedService.version
 };
 
-const aLocalVisibleService: VisibleService = {
-  ...aVisibleService,
-  serviceMetadata: {
-    scope: ServiceScopeEnum.LOCAL
-  }
-};
+const aLocalVisibleService: VisibleService = E.getOrElseW(() => {
+  throw new Error("wrong dummy visible service ");
+})(
+  VisibleService.decode({
+    ...aVisibleService,
+    serviceMetadata: {
+      scope: ServiceScopeEnum.LOCAL
+    }
+  })
+);
 
 describe("GetVisibleServicesHandler", () => {
   it("should get all visible services", async () => {
