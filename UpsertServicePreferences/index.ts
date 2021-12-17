@@ -18,6 +18,10 @@ import { secureExpressApp } from "@pagopa/io-functions-commons/dist/src/utils/ex
 import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 
 import { createTableService } from "azure-storage";
+import {
+  ActivationModel,
+  ACTIVATION_COLLECTION_NAME
+} from "@pagopa/io-functions-commons/dist/src/models/activation";
 import { initTelemetryClient } from "../utils/appinsights";
 import { getConfigOrThrow } from "../utils/config";
 import { cosmosdbInstance } from "../utils/cosmosdb";
@@ -41,6 +45,10 @@ const servicePreferencesModel = new ServicesPreferencesModel(
   SERVICE_PREFERENCES_COLLECTION_NAME
 );
 
+const activationModel = new ActivationModel(
+  cosmosdbInstance.container(ACTIVATION_COLLECTION_NAME)
+);
+
 const tableService = createTableService(config.QueueStorageConnection);
 app.post(
   "/api/v1/profiles/:fiscalcode/services/:serviceId/preferences",
@@ -49,6 +57,7 @@ app.post(
     profileModel,
     serviceModel,
     servicePreferencesModel,
+    activationModel,
     tableService,
     config.SUBSCRIPTIONS_FEED_TABLE
   )

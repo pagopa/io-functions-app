@@ -13,6 +13,14 @@ import {
 import { secureExpressApp } from "@pagopa/io-functions-commons/dist/src/utils/express";
 import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 
+import {
+  ServiceModel,
+  SERVICE_COLLECTION_NAME
+} from "@pagopa/io-functions-commons/dist/src/models/service";
+import {
+  ActivationModel,
+  ACTIVATION_COLLECTION_NAME
+} from "@pagopa/io-functions-commons/dist/src/models/activation";
 import { cosmosdbInstance } from "../utils/cosmosdb";
 
 import { GetServicePreferences } from "./handler";
@@ -30,9 +38,22 @@ const servicePreferencesModel = new ServicesPreferencesModel(
   SERVICE_PREFERENCES_COLLECTION_NAME
 );
 
+const serviceModel = new ServiceModel(
+  cosmosdbInstance.container(SERVICE_COLLECTION_NAME)
+);
+
+const activationModel = new ActivationModel(
+  cosmosdbInstance.container(ACTIVATION_COLLECTION_NAME)
+);
+
 app.get(
   "/api/v1/profiles/:fiscalcode/services/:serviceId/preferences",
-  GetServicePreferences(profileModel, servicePreferencesModel)
+  GetServicePreferences(
+    profileModel,
+    serviceModel,
+    servicePreferencesModel,
+    activationModel
+  )
 );
 
 const azureFunctionHandler = createAzureFunctionHandler(app);

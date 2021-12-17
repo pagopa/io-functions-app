@@ -1,16 +1,27 @@
 import { Context } from "@azure/functions";
 import { CreatedMessageWithoutContent } from "@pagopa/io-functions-commons/dist/generated/definitions/CreatedMessageWithoutContent";
 import { EnrichedMessage } from "@pagopa/io-functions-commons/dist/generated/definitions/EnrichedMessage";
+import { MessageContent } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageContent";
+import { EUCovidCert } from "@pagopa/io-functions-commons/dist/generated/definitions/EUCovidCert";
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { MessageModel } from "@pagopa/io-functions-commons/dist/src/models/message";
-import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
+import {
+  Service,
+  ServiceModel
+} from "@pagopa/io-functions-commons/dist/src/models/service";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { BlobService } from "azure-storage";
+import * as AR from "fp-ts/lib/Array";
 import * as A from "fp-ts/lib/Apply";
 import * as E from "fp-ts/lib/Either";
-import { flow, pipe } from "fp-ts/lib/function";
+import { constVoid, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as t from "io-ts";
+import { MessageCategory } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategory";
+import { TagEnum as TagEnumBase } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategoryBase";
+import { TagEnum as TagEnumPayment } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategoryPayment";
+import { PaymentData } from "@pagopa/io-functions-commons/dist/generated/definitions/PaymentData";
 import { initTelemetryClient } from "./appinsights";
 import { createTracker } from "./tracking";
 
@@ -33,6 +44,58 @@ const trackErrorAndContinue = (
   return error;
 };
 
+interface IMessageCategoryMapping {
+  readonly tag: MessageCategory["tag"];
+  readonly pattern: t.Type<Partial<MessageContent>>;
+  readonly buildOtherCategoryProperties?: (
+    m: CreatedMessageWithoutContent,
+    s: Service,
+    c: MessageContent
+  ) => Record<string, string>;
+}
+
+const messageCategoryMappings: ReadonlyArray<IMessageCategoryMapping> = [
+  {
+    pattern: t.interface({ eu_covid_cert: EUCovidCert }),
+    tag: TagEnumBase.EU_COVID_CERT
+  },
+  {
+    buildOtherCategoryProperties: (_, s, c): Record<string, string> => ({
+      rptId: `${s.organizationFiscalCode}${c.payment_data.notice_number}`
+    }),
+    pattern: t.interface({ payment_data: PaymentData }),
+    tag: TagEnumPayment.PAYMENT
+  }
+];
+
+export const mapMessageCategory = (
+  message: CreatedMessageWithoutContent,
+  service: Service,
+  messageContent: MessageContent
+): MessageCategory =>
+  pipe(
+    messageCategoryMappings,
+    AR.map(mapping =>
+      pipe(
+        messageContent,
+        mapping.pattern.decode,
+        E.fold(constVoid, () => ({
+          tag: mapping.tag,
+          ...pipe(
+            O.fromNullable(mapping.buildOtherCategoryProperties),
+            O.fold(
+              () => ({}),
+              f => f(message, service, messageContent)
+            )
+          )
+        }))
+      )
+    ),
+    AR.filter(MessageCategory.is),
+    AR.head,
+    O.getOrElse(() => ({ tag: TagEnumBase.GENERIC }))
+  );
+
 /**
  * This function enrich a CreatedMessageWithoutContent with
  * service's details and message's subject.
@@ -54,6 +117,19 @@ export const enrichMessagesData = (
   messages.map(message =>
     pipe(
       {
+        content: pipe(
+          messageModel.getContentFromBlob(blobService, message.id),
+          TE.map(O.toUndefined),
+          TE.mapLeft(e =>
+            trackErrorAndContinue(
+              context,
+              e,
+              "CONTENT",
+              message.fiscal_code,
+              message.id
+            )
+          )
+        ),
         service: pipe(
           serviceModel.findLastVersionByModelId([message.sender_service_id]),
           TE.mapLeft(
@@ -77,30 +153,13 @@ export const enrichMessagesData = (
               message.sender_service_id
             )
           )
-        ),
-        subject: pipe(
-          messageModel.getContentFromBlob(blobService, message.id),
-          TE.map(
-            flow(
-              O.map(content => content.subject),
-              O.toUndefined
-            )
-          ),
-          TE.mapLeft(e =>
-            trackErrorAndContinue(
-              context,
-              e,
-              "CONTENT",
-              message.fiscal_code,
-              message.id
-            )
-          )
         )
       },
       A.sequenceS(TE.ApplicativePar),
-      TE.map(({ service, subject }) => ({
+      TE.map(({ service, content }) => ({
         ...message,
-        message_title: subject,
+        category: mapMessageCategory(message, service, content),
+        message_title: content.subject,
         organization_name: service.organizationName,
         service_name: service.serviceName
       }))

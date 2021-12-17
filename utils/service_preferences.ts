@@ -1,11 +1,20 @@
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as O from "fp-ts/lib/Option";
 
 import { ServicePreference } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePreference";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { Profile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { RetrievedServicePreference } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
+import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
+import {
+  IResponseErrorQuery,
+  ResponseErrorQuery
+} from "@pagopa/io-functions-commons/dist/src/utils/response";
+import { ActivationModel } from "@pagopa/io-functions-commons/dist/src/models/activation";
+import { ActivationStatusEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ActivationStatus";
 
 const toUserServicePreference = (
   emailEnabled: boolean,
@@ -88,3 +97,37 @@ export function getServicePreferenceSettingsVersion(
     TE.mapLeft(_ => Error("Service Preferences Version < 0 not allowed"))
   );
 }
+
+export type ServicePreferencesForSpecialServices = (params: {
+  readonly serviceId: ServiceId;
+  readonly fiscalCode: FiscalCode;
+  readonly servicePreferences: ServicePreference;
+}) => TE.TaskEither<IResponseErrorQuery, ServicePreference>;
+
+export const getServicePreferencesForSpecialServices = (
+  activationModel: ActivationModel
+): ServicePreferencesForSpecialServices => ({
+  serviceId,
+  fiscalCode,
+  servicePreferences
+}): TE.TaskEither<IResponseErrorQuery, ServicePreference> =>
+  pipe(
+    activationModel.findLastVersionByModelId([serviceId, fiscalCode]),
+    TE.mapLeft(err =>
+      ResponseErrorQuery("Error reading service Activation", err)
+    ),
+    TE.map(
+      flow(
+        O.filter(
+          activation => activation.status === ActivationStatusEnum.ACTIVE
+        ),
+        O.foldW(
+          () => ({ ...servicePreferences, is_inbox_enabled: false }),
+          _ => ({
+            ...servicePreferences,
+            is_inbox_enabled: true
+          })
+        )
+      )
+    )
+  );

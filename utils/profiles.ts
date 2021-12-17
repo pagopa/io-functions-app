@@ -7,6 +7,7 @@ import { IsEmailValidated } from "@pagopa/io-functions-commons/dist/generated/de
 import { Profile as ApiProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/Profile";
 import {
   Profile,
+  ProfileModel,
   PROFILE_SERVICE_PREFERENCES_SETTINGS_LEGACY_VERSION,
   RetrievedProfile
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
@@ -14,6 +15,16 @@ import {
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import {
+  IResponseErrorQuery,
+  ResponseErrorQuery
+} from "@pagopa/io-functions-commons/dist/src/utils/response";
+import {
+  IResponseErrorNotFound,
+  ResponseErrorNotFound
+} from "@pagopa/ts-commons/lib/responses";
+import * as TE from "fp-ts/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 
 /**
  * Converts a ApiProfile in a Profile model
@@ -131,3 +142,24 @@ export const diffBlockedServices = (
 
   return Tuple2(addedBlockedServices, removedBlockedServices);
 };
+
+/**
+ * Return a task containing either an error or the required Profile
+ */
+export const getProfileOrErrorResponse = (profileModels: ProfileModel) => (
+  fiscalCode: FiscalCode
+): TE.TaskEither<IResponseErrorQuery | IResponseErrorNotFound, Profile> =>
+  pipe(
+    profileModels.findLastVersionByModelId([fiscalCode]),
+    TE.mapLeft(failure =>
+      ResponseErrorQuery("Error while retrieving the profile", failure)
+    ),
+    TE.chainW(
+      TE.fromOption(() =>
+        ResponseErrorNotFound(
+          "Profile not found",
+          "The profile you requested was not found in the system."
+        )
+      )
+    )
+  );
