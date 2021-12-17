@@ -564,18 +564,6 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceId"
   ServiceMetadata:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceMetadata"
-  StandardServiceMetadata:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/StandardServiceMetadata"
-  SpecialServiceMetadata:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/SpecialServiceMetadata"
-  CommonServiceMetadata:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/CommonServiceMetadata"
-  SpecialServiceCategory:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/SpecialServiceCategory"
-  StandardServiceCategory:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/StandardServiceCategory"
-  ServiceCategory:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceCategory"
   ServiceScope:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceScope"
   ServiceName:

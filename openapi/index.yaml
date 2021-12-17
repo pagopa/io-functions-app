@@ -608,31 +608,7 @@ definitions:
       - type: object
         properties:
           service_metadata:
-            description: >-
-              That service can't handle some ServiceMetadata fields (es.
-              category)
-            $ref: '#/definitions/CommonServiceMetadata'
-  VisibleServicePayload:
-    description: >-
-      A payload used to create/update a service that appears in the service
-      list.
-    allOf:
-      - $ref: '#/definitions/CommonServicePayload'
-      - type: object
-        properties:
-          is_visible:
-            type: boolean
-            enum:
-              - true
-            description: It indicates that service appears in the service list
-          service_metadata:
-            description: >-
-              That service can't handle some ServiceMetadata fields (es.
-              category)
-            $ref: '#/definitions/CommonServiceMetadata'
-        required:
-          - is_visible
-          - service_metadata
+            $ref: '#/definitions/ServiceMetadata'
   CommonServicePayload:
     description: Common properties for a ServicePayload
     type: object
@@ -1489,27 +1465,8 @@ definitions:
   MessageCategory:
     x-one-of: true
     allOf:
-      - type: object
-        properties:
-          tag:
-            type: string
-            enum:
-              - PAYMENT
-          rptId:
-            type: string
-        required:
-          - tag
-          - rptId
-      - type: object
-        properties:
-          tag:
-            type: string
-            enum:
-              - LEGAL_MESSAGE
-              - EU_COVID_CERT
-              - GENERIC
-        required:
-          - tag
+      - $ref: '#/definitions/MessageCategoryPayment'
+      - $ref: '#/definitions/MessageCategoryBase'
   LegalData:
     type: object
     properties:
@@ -1529,3 +1486,26 @@ definitions:
       - sender_mail_from
       - has_attachment
       - message_unique_id
+  MessageCategoryBase:
+    type: object
+    properties:
+      tag:
+        type: string
+        enum:
+          - LEGAL_MESSAGE
+          - EU_COVID_CERT
+          - GENERIC
+    required:
+      - tag
+  MessageCategoryPayment:
+    type: object
+    properties:
+      tag:
+        type: string
+        enum:
+          - PAYMENT
+      rptId:
+        type: string
+    required:
+      - tag
+      - rptId
