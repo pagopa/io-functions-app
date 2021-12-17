@@ -22,6 +22,7 @@ import { MessageCategory } from "@pagopa/io-functions-commons/dist/generated/def
 import { TagEnum as TagEnumBase } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategoryBase";
 import { TagEnum as TagEnumPayment } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategoryPayment";
 import { PaymentData } from "@pagopa/io-functions-commons/dist/generated/definitions/PaymentData";
+import { LegalData } from "../generated/backend/LegalData";
 import { initTelemetryClient } from "./appinsights";
 import { createTracker } from "./tracking";
 
@@ -58,6 +59,10 @@ const messageCategoryMappings: ReadonlyArray<IMessageCategoryMapping> = [
   {
     pattern: t.interface({ eu_covid_cert: EUCovidCert }),
     tag: TagEnumBase.EU_COVID_CERT
+  },
+  {
+    pattern: t.interface({ legal_data: LegalData }),
+    tag: TagEnumBase.LEGAL_MESSAGE
   },
   {
     buildOtherCategoryProperties: (_, s, c): Record<string, string> => ({
