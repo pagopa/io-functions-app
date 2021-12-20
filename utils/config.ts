@@ -17,6 +17,11 @@ import { DateFromTimestamp } from "@pagopa/ts-commons/lib/dates";
 import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { withDefault } from "@pagopa/ts-commons/lib/types";
+import {
+  VISIBLE_SERVICE_BLOB_ID,
+  VISIBLE_SERVICE_CONTAINER
+} from "@pagopa/io-functions-commons/dist/src/models/visible_service";
 
 // exclude a specific value from a type
 // as strict equality is performed, allowed input types are constrained to be values not references (object, arrays, etc)
@@ -48,6 +53,18 @@ export const ReqServiceIdConfig = t.union([
     REQ_SERVICE_ID: NonEmptyString
   })
 ]);
+
+export type VisibleServiceConfig = t.TypeOf<typeof VisibleServiceConfig>;
+export const VisibleServiceConfig = t.interface({
+  VISIBLE_SERVICE_BLOB_ID: withDefault(
+    NonEmptyString,
+    VISIBLE_SERVICE_BLOB_ID as NonEmptyString
+  ),
+  VISIBLE_SERVICE_CONTAINER: withDefault(
+    NonEmptyString,
+    VISIBLE_SERVICE_CONTAINER as NonEmptyString
+  )
+});
 
 // global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
@@ -88,7 +105,8 @@ export const IConfig = t.intersection([
     isProduction: t.boolean
   }),
   MailerConfig,
-  ReqServiceIdConfig
+  ReqServiceIdConfig,
+  VisibleServiceConfig
 ]);
 
 // Default value is expressed as a Unix timestamp so it can be safely compared with Cosmos timestamp

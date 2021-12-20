@@ -16,8 +16,6 @@ import {
 
 import {
   toServicesTuple,
-  VISIBLE_SERVICE_BLOB_ID,
-  VISIBLE_SERVICE_CONTAINER,
   VisibleService
 } from "@pagopa/io-functions-commons/dist/src/models/visible_service";
 
@@ -28,6 +26,7 @@ import { PaginatedServiceTupleCollection } from "@pagopa/io-functions-commons/di
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 import { pipe } from "fp-ts/lib/function";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 type IGetVisibleServicesHandlerRet =
   | IResponseSuccessJson<PaginatedServiceTupleCollection>
@@ -41,7 +40,9 @@ type IGetVisibleServicesHandler = () => Promise<IGetVisibleServicesHandlerRet>;
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function GetVisibleServicesHandler(
   blobService: BlobService,
-  onlyNationalService: boolean
+  onlyNationalService: boolean,
+  VISIBLE_SERVICE_BLOB_ID: NonEmptyString,
+  VISIBLE_SERVICE_CONTAINER: NonEmptyString
 ): IGetVisibleServicesHandler {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   return async () => {
@@ -90,8 +91,15 @@ export function GetVisibleServicesHandler(
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function GetVisibleServices(
   blobService: BlobService,
-  onlyNationalService: boolean
+  onlyNationalService: boolean,
+  visibleServiceBlobId: NonEmptyString,
+  visibleServiceContainer: NonEmptyString
 ): express.RequestHandler {
-  const handler = GetVisibleServicesHandler(blobService, onlyNationalService);
+  const handler = GetVisibleServicesHandler(
+    blobService,
+    onlyNationalService,
+    visibleServiceBlobId,
+    visibleServiceContainer
+  );
   return wrapRequestHandler(handler);
 }
