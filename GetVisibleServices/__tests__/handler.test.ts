@@ -15,11 +15,7 @@ import {
   toAuthorizedCIDRs,
   toAuthorizedRecipients
 } from "@pagopa/io-functions-commons/dist/src/models/service";
-import {
-  VISIBLE_SERVICE_BLOB_ID,
-  VISIBLE_SERVICE_CONTAINER,
-  VisibleService
-} from "@pagopa/io-functions-commons/dist/src/models/visible_service";
+import { VisibleService } from "@pagopa/io-functions-commons/dist/src/models/visible_service";
 
 import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
 
@@ -34,6 +30,9 @@ afterEach(() => {
   jest.resetAllMocks();
   jest.restoreAllMocks();
 });
+
+const A_VISIBLE_SERVICE_BLOB_ID = "blob-id.json" as NonEmptyString;
+const A_VISIBLE_SERVICE_CONTAINER = "container" as NonEmptyString;
 
 const anOrganizationFiscalCode = "01234567890" as OrganizationFiscalCode;
 
@@ -100,15 +99,17 @@ describe("GetVisibleServicesHandler", () => {
     };
     const getVisibleServicesHandler = GetVisibleServicesHandler(
       blobStorageMock as any,
-      false
+      false,
+      A_VISIBLE_SERVICE_CONTAINER,
+      A_VISIBLE_SERVICE_BLOB_ID
     );
     const response = await getVisibleServicesHandler();
     response.apply(MockResponse());
 
     await Promise.resolve(); // needed to let the response promise complete
     expect(blobStorageMock.getBlobToText).toHaveBeenCalledWith(
-      VISIBLE_SERVICE_CONTAINER,
-      VISIBLE_SERVICE_BLOB_ID,
+      A_VISIBLE_SERVICE_CONTAINER,
+      A_VISIBLE_SERVICE_BLOB_ID,
       {},
       expect.any(Function)
     );
@@ -134,15 +135,17 @@ describe("GetVisibleServicesHandler", () => {
     };
     const getVisibleServicesHandler = GetVisibleServicesHandler(
       blobStorageMock as any,
-      true
+      true,
+      A_VISIBLE_SERVICE_CONTAINER,
+      A_VISIBLE_SERVICE_BLOB_ID
     );
     const response = await getVisibleServicesHandler();
     response.apply(MockResponse());
 
     await Promise.resolve(); // needed to let the response promise complete
     expect(blobStorageMock.getBlobToText).toHaveBeenCalledWith(
-      VISIBLE_SERVICE_CONTAINER,
-      VISIBLE_SERVICE_BLOB_ID,
+      A_VISIBLE_SERVICE_CONTAINER,
+      A_VISIBLE_SERVICE_BLOB_ID,
       {},
       expect.any(Function)
     );
@@ -166,15 +169,17 @@ describe("GetVisibleServicesHandler", () => {
     };
     const getVisibleServicesHandler = GetVisibleServicesHandler(
       blobStorageMock as any,
-      true
+      true,
+      A_VISIBLE_SERVICE_CONTAINER,
+      A_VISIBLE_SERVICE_BLOB_ID
     );
     const response = await getVisibleServicesHandler();
     response.apply(MockResponse());
 
     await Promise.resolve(); // needed to let the response promise complete
     expect(blobStorageMock.getBlobToText).toHaveBeenCalledWith(
-      VISIBLE_SERVICE_CONTAINER,
-      VISIBLE_SERVICE_BLOB_ID,
+      A_VISIBLE_SERVICE_CONTAINER,
+      A_VISIBLE_SERVICE_BLOB_ID,
       {},
       expect.any(Function)
     );
@@ -188,6 +193,11 @@ describe("GetVisibleServicesHandler", () => {
 
 describe("GetVisibleServices", () => {
   it("should set up authentication middleware", async () => {
-    GetVisibleServices({} as any, false);
+    GetVisibleServices(
+      {} as any,
+      false,
+      A_VISIBLE_SERVICE_CONTAINER,
+      A_VISIBLE_SERVICE_BLOB_ID
+    );
   });
 });
