@@ -100,8 +100,8 @@ describe("GetVisibleServicesHandler", () => {
     const getVisibleServicesHandler = GetVisibleServicesHandler(
       blobStorageMock as any,
       false,
-      A_VISIBLE_SERVICE_CONTAINER,
-      A_VISIBLE_SERVICE_BLOB_ID
+      A_VISIBLE_SERVICE_BLOB_ID,
+      A_VISIBLE_SERVICE_CONTAINER
     );
     const response = await getVisibleServicesHandler();
     response.apply(MockResponse());
@@ -136,8 +136,8 @@ describe("GetVisibleServicesHandler", () => {
     const getVisibleServicesHandler = GetVisibleServicesHandler(
       blobStorageMock as any,
       true,
-      A_VISIBLE_SERVICE_CONTAINER,
-      A_VISIBLE_SERVICE_BLOB_ID
+      A_VISIBLE_SERVICE_BLOB_ID,
+      A_VISIBLE_SERVICE_CONTAINER
     );
     const response = await getVisibleServicesHandler();
     response.apply(MockResponse());
@@ -170,8 +170,8 @@ describe("GetVisibleServicesHandler", () => {
     const getVisibleServicesHandler = GetVisibleServicesHandler(
       blobStorageMock as any,
       true,
-      A_VISIBLE_SERVICE_CONTAINER,
-      A_VISIBLE_SERVICE_BLOB_ID
+      A_VISIBLE_SERVICE_BLOB_ID,
+      A_VISIBLE_SERVICE_CONTAINER
     );
     const response = await getVisibleServicesHandler();
     response.apply(MockResponse());
@@ -196,8 +196,8 @@ describe("GetVisibleServices", () => {
     GetVisibleServices(
       {} as any,
       false,
-      A_VISIBLE_SERVICE_CONTAINER,
-      A_VISIBLE_SERVICE_BLOB_ID
+      A_VISIBLE_SERVICE_BLOB_ID,
+      A_VISIBLE_SERVICE_CONTAINER
     );
   });
 });

@@ -41,8 +41,8 @@ type IGetVisibleServicesHandler = () => Promise<IGetVisibleServicesHandlerRet>;
 export function GetVisibleServicesHandler(
   blobService: BlobService,
   onlyNationalService: boolean,
-  VISIBLE_SERVICE_CONTAINER: NonEmptyString,
-  VISIBLE_SERVICE_BLOB_ID: NonEmptyString
+  VISIBLE_SERVICE_BLOB_ID: NonEmptyString,
+  VISIBLE_SERVICE_CONTAINER: NonEmptyString
 ): IGetVisibleServicesHandler {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   return async () => {
