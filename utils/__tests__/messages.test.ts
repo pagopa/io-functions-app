@@ -102,6 +102,16 @@ const mockedGreenPassContent = {
   }
 } as MessageContent;
 
+const mockedLegalDataContent = {
+  subject: "a subject".repeat(10),
+  markdown: "a markdown".repeat(80),
+  legal_data: {
+    has_attachment: false,
+    message_unique_id: "dummy_mvl_id",
+    sender_mail_from: "dummy@sender.it"
+  }
+} as MessageContent;
+
 const mockedPaymentContent = {
   subject: "a subject".repeat(10),
   markdown: "a markdown".repeat(80),
@@ -200,6 +210,42 @@ describe("enrichMessagesData", () => {
         expect(EnrichedMessage.is(enrichedMessage.right)).toBe(true);
         expect(enrichedMessage.right.category).toEqual({
           tag: TagEnumBase.EU_COVID_CERT
+        });
+      }
+    });
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
+  });
+
+  it("GIVEN a message with a valid legal_data WHEN a message retrieved from cosmos is enriched THEN the message category must be LEGAL_MESSAGE", async () => {
+    const messages = [
+      retrievedMessageToPublic(aRetrievedMessageWithoutContent)
+    ] as readonly CreatedMessageWithoutContent[];
+
+    getContentFromBlobMock.mockImplementationOnce(() =>
+      TE.of(O.some(mockedLegalDataContent))
+    );
+    const enrichMessages = enrichMessagesData(
+      functionsContextMock,
+      messageModelMock,
+      serviceModelMock,
+      blobServiceMock
+    );
+
+    const enrichedMessagesPromises = enrichMessages(messages);
+
+    const enrichedMessages = await pipe(
+      TE.tryCatch(async () => Promise.all(enrichedMessagesPromises), void 0),
+      TE.getOrElse(() => {
+        throw Error();
+      })
+    )();
+
+    enrichedMessages.map(enrichedMessage => {
+      expect(E.isRight(enrichedMessage)).toBe(true);
+      if (E.isRight(enrichedMessage)) {
+        expect(EnrichedMessage.is(enrichedMessage.right)).toBe(true);
+        expect(enrichedMessage.right.category).toEqual({
+          tag: TagEnumBase.LEGAL_MESSAGE
         });
       }
     });
