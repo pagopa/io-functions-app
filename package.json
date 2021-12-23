@@ -16,7 +16,7 @@
     "openapi:bundle": "bundle-api-spec -i openapi/index.yaml.template -o openapi/index.yaml -V $npm_package_version",
     "pregenerate": "npm run openapi:bundle && rimraf ./generated",
     "generate": "npm-run-all generate:backend:*",
-    "generate:backend:api-models": "shx rm -rf generated/backend && shx mkdir -p generated/backend && gen-api-models --strict 0 --api-spec https://raw.githubusercontent.com/pagopa/io-backend/IC-69--update-io-backend-with-legal-message-endpoints/api_backend.yaml --out-dir generated/backend",
+    "generate:backend:api-models": "shx rm -rf generated/backend && shx mkdir -p generated/backend && gen-api-models --strict 0 --api-spec https://raw.githubusercontent.com/pagopa/io-backend/master/api_backend.yaml --out-dir generated/backend",
     "generate:backend:notification-models": "shx rm -rf generated/notifications && shx mkdir -p generated/notifications && gen-api-models --strict 0 --api-spec https://raw.githubusercontent.com/pagopa/io-backend/v7.16.0/api_notifications.yaml --out-dir generated/notifications",
     "generate:backend:notification-hub": "shx rm -rf generated/notifications && shx mkdir -p generated/notifications && gen-api-models --strict 0 --api-spec https://raw.githubusercontent.com/pagopa/io-backend/v7.16.0/notification_queue_messages.yaml --out-dir generated/notifications",
     "deploy": "npm run build && func azure functionapp publish agid-functions-app-test",
