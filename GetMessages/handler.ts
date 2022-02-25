@@ -225,7 +225,7 @@ export const GetMessages = (
     FiscalCodeMiddleware,
     OptionalQueryParamMiddleware("page_size", NonNegativeIntegerFromString),
     OptionalQueryParamMiddleware("enrich_result_data", BooleanFromString),
-    OptionalQueryParamMiddleware("get_archived", BooleanFromString),
+    OptionalQueryParamMiddleware("archived", BooleanFromString),
     OptionalQueryParamMiddleware("maximum_id", NonEmptyString),
     OptionalQueryParamMiddleware("minimum_id", NonEmptyString)
   );
