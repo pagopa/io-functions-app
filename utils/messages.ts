@@ -9,7 +9,7 @@ import {
   Service,
   ServiceModel
 } from "@pagopa/io-functions-commons/dist/src/models/service";
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { BlobService } from "azure-storage";
 import * as AR from "fp-ts/lib/Array";
 import * as A from "fp-ts/lib/Apply";
@@ -17,11 +17,13 @@ import * as E from "fp-ts/lib/Either";
 import { constVoid, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as T from "fp-ts/lib/Task";
 import * as t from "io-ts";
 import { MessageCategory } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategory";
 import { TagEnum as TagEnumBase } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategoryBase";
 import { TagEnum as TagEnumPayment } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategoryPayment";
 import { PaymentData } from "@pagopa/io-functions-commons/dist/generated/definitions/PaymentData";
+import { MessageStatusModel } from "@pagopa/io-functions-commons/dist/src/models/message_status";
 import { LegalData } from "../generated/backend/LegalData";
 import { initTelemetryClient } from "./appinsights";
 import { createTracker } from "./tracking";
@@ -29,7 +31,7 @@ import { createTracker } from "./tracking";
 const trackErrorAndContinue = (
   context: Context,
   error: Error,
-  kind: "SERVICE" | "CONTENT",
+  kind: "SERVICE" | "CONTENT" | "STATUS",
   fiscalCode: FiscalCode,
   messageId: string,
   serviceId?: ServiceId
@@ -43,6 +45,11 @@ const trackErrorAndContinue = (
     serviceId
   );
   return error;
+};
+
+export type CreatedMessageWithoutContentWithStatus = CreatedMessageWithoutContent & {
+  readonly is_archived: boolean;
+  readonly is_read: boolean;
 };
 
 interface IMessageCategoryMapping {
@@ -116,7 +123,7 @@ export const enrichMessagesData = (
   serviceModel: ServiceModel,
   blobService: BlobService
 ) => (
-  messages: ReadonlyArray<CreatedMessageWithoutContent>
+  messages: ReadonlyArray<CreatedMessageWithoutContentWithStatus>
   // eslint-disable-next-line functional/prefer-readonly-type, @typescript-eslint/array-type
 ): Promise<E.Either<Error, EnrichedMessage>>[] =>
   messages.map(message =>
@@ -169,4 +176,50 @@ export const enrichMessagesData = (
         service_name: service.serviceName
       }))
     )()
+  );
+
+/**
+ * This function enrich a CreatedMessageWithoutContent with
+ * message status details
+ *
+ * @param messageModel
+ * @param serviceModel
+ * @param blobService
+ * @returns
+ */
+export const enrichMessagesStatus = (
+  context: Context,
+  messageStatusModel: MessageStatusModel
+) => (
+  messages: ReadonlyArray<CreatedMessageWithoutContent>
+  // eslint-disable-next-line functional/prefer-readonly-type, @typescript-eslint/array-type
+): T.Task<E.Either<Error, CreatedMessageWithoutContentWithStatus>[]> =>
+  pipe(
+    messages.map(message =>
+      pipe(
+        messageStatusModel.findLastVersionByModelId([
+          message.id as NonEmptyString
+        ]),
+        TE.mapLeft(e => new Error(`${e.kind}, MessageStatus`)),
+        TE.chain(
+          TE.fromOption(() => new Error(`EMPTY_MESSAGE_STATUS, MessageId`))
+        ),
+        TE.mapLeft(e =>
+          trackErrorAndContinue(
+            context,
+            e,
+            "STATUS",
+            message.fiscal_code,
+            message.id,
+            message.sender_service_id
+          )
+        ),
+        TE.map(_messageStatus => ({
+          ...message,
+          is_archived: false, // TODO - Waiting updated model
+          is_read: false // TODO - Waiting updated model
+        }))
+      )
+    ),
+    AR.sequence(T.ApplicativePar)
   );

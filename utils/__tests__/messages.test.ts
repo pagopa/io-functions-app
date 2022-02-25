@@ -19,7 +19,10 @@ import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import { BlobService } from "azure-storage";
 import { MessageContent } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageContent";
-import { enrichMessagesData } from "../messages";
+import {
+  CreatedMessageWithoutContentWithStatus,
+  enrichMessagesData
+} from "../messages";
 import {
   MessageModel,
   NewMessageWithoutContent,
@@ -142,16 +145,24 @@ const functionsContextMock = ({
   }
 } as unknown) as Context;
 
+const messages = [
+  {
+    ...retrievedMessageToPublic(aRetrievedMessageWithoutContent),
+    is_archived: false,
+    is_read: false
+  }
+] as readonly CreatedMessageWithoutContentWithStatus[];
+
+// ------------------------
+// Tests
+// ------------------------
+
 describe("enrichMessagesData", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("should return right when message blob and service are correctly retrieved", async () => {
-    const messages = [
-      retrievedMessageToPublic(aRetrievedMessageWithoutContent)
-    ] as readonly CreatedMessageWithoutContent[];
-
     const enrichMessages = enrichMessagesData(
       functionsContextMock,
       messageModelMock,
@@ -181,10 +192,6 @@ describe("enrichMessagesData", () => {
   });
 
   it("should return right with right message EU_COVID_CERT category when message content is retrieved", async () => {
-    const messages = [
-      retrievedMessageToPublic(aRetrievedMessageWithoutContent)
-    ] as readonly CreatedMessageWithoutContent[];
-
     getContentFromBlobMock.mockImplementationOnce(() =>
       TE.of(O.some(mockedGreenPassContent))
     );
@@ -217,10 +224,6 @@ describe("enrichMessagesData", () => {
   });
 
   it("GIVEN a message with a valid legal_data WHEN a message retrieved from cosmos is enriched THEN the message category must be LEGAL_MESSAGE", async () => {
-    const messages = [
-      retrievedMessageToPublic(aRetrievedMessageWithoutContent)
-    ] as readonly CreatedMessageWithoutContent[];
-
     getContentFromBlobMock.mockImplementationOnce(() =>
       TE.of(O.some(mockedLegalDataContent))
     );
@@ -253,10 +256,6 @@ describe("enrichMessagesData", () => {
   });
 
   it("should return right with right PAYMENT category when message content is retrieved", async () => {
-    const messages = [
-      retrievedMessageToPublic(aRetrievedMessageWithoutContent)
-    ] as readonly CreatedMessageWithoutContent[];
-
     getContentFromBlobMock.mockImplementationOnce(() =>
       TE.of(O.some(mockedPaymentContent))
     );
@@ -294,10 +293,6 @@ describe("enrichMessagesData", () => {
       TE.left(toCosmosErrorResponse("Any error message"))
     );
 
-    const messages = [
-      retrievedMessageToPublic(aRetrievedMessageWithoutContent)
-    ] as readonly CreatedMessageWithoutContent[];
-
     const enrichMessages = enrichMessagesData(
       functionsContextMock,
       messageModelMock,
@@ -326,10 +321,6 @@ describe("enrichMessagesData", () => {
 
   it("should return left when service model return an empty result", async () => {
     findLastVersionByModelIdMock.mockImplementationOnce(() => TE.right(O.none));
-
-    const messages = [
-      retrievedMessageToPublic(aRetrievedMessageWithoutContent)
-    ] as readonly CreatedMessageWithoutContent[];
 
     const enrichMessages = enrichMessagesData(
       functionsContextMock,
@@ -366,10 +357,6 @@ describe("enrichMessagesData", () => {
       TE.left(new Error("GENERIC_ERROR"))
     );
 
-    const messages = [
-      retrievedMessageToPublic(aRetrievedMessageWithoutContent)
-    ] as readonly CreatedMessageWithoutContent[];
-
     const enrichMessages = enrichMessagesData(
       functionsContextMock,
       messageModelMock,
@@ -404,10 +391,6 @@ describe("enrichMessagesData", () => {
     getContentFromBlobMock.mockImplementationOnce(() =>
       TE.left(new Error("GENERIC_ERROR"))
     );
-
-    const messages = [
-      retrievedMessageToPublic(aRetrievedMessageWithoutContent)
-    ] as readonly CreatedMessageWithoutContent[];
 
     const enrichMessages = enrichMessagesData(
       functionsContextMock,
