@@ -1,5 +1,3 @@
-// eslint-disable-next-line prettier/prettier
-
 import {
   asyncIteratorToPageArray,
   flattenAsyncIterator,
@@ -51,7 +49,11 @@ import * as O from "fp-ts/lib/Option";
 import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { Context } from "@azure/functions";
 import { MessageStatusModel } from "@pagopa/io-functions-commons/dist/src/models/message_status";
-import { enrichMessagesData, enrichMessagesStatus } from "../utils/messages";
+import {
+  CreatedMessageWithoutContentWithStatus,
+  enrichMessagesData,
+  enrichMessagesStatus
+} from "../utils/messages";
 
 type RetrievedNotPendingMessage = t.TypeOf<typeof RetrievedNotPendingMessage>;
 const RetrievedNotPendingMessage = t.intersection([
@@ -81,6 +83,23 @@ type IGetMessagesHandler = (
   maybeMaximumId: O.Option<NonEmptyString>,
   maybeMinimumId: O.Option<NonEmptyString>
 ) => Promise<IGetMessagesHandlerResponse>;
+
+const filterMessages = (shouldGetArchivedMessages: boolean) => (
+  // eslint-disable-next-line functional/prefer-readonly-type, @typescript-eslint/array-type
+  messages: E.Either<Error, CreatedMessageWithoutContentWithStatus>[]
+  // eslint-disable-next-line functional/prefer-readonly-type, @typescript-eslint/array-type
+): E.Either<Error, CreatedMessageWithoutContentWithStatus>[] =>
+  pipe(
+    messages,
+    A.filter(
+      flow(
+        // never filter away errors
+        E.mapLeft(() => true),
+        E.map(mess => mess.is_archived === shouldGetArchivedMessages),
+        E.toUnion
+      )
+    )
+  );
 
 /**
  * Handles requests for getting all message for a recipient.
@@ -149,19 +168,7 @@ export const GetMessagesHandler = (
                 )
               ),
               TE.map(j =>
-                mapAsyncIterator(
-                  j,
-                  A.filter(
-                    flow(
-                      // never filter away errors
-                      E.mapLeft(() => true),
-                      E.map(
-                        mess => mess.is_archived === shouldGetArchivedMessages
-                      ),
-                      E.toUnion
-                    )
-                  )
-                )
+                mapAsyncIterator(j, filterMessages(shouldGetArchivedMessages))
               ),
               TE.map(j =>
                 mapAsyncIterator(j, x => [
@@ -170,12 +177,15 @@ export const GetMessagesHandler = (
                     A.lefts(x),
                     A.map(async y => E.left(y))
                   ),
-                  ...enrichMessagesData(
-                    context,
-                    messageModel,
-                    serviceModel,
-                    blobService
-                  )(A.rights(x))
+                  ...pipe(
+                    A.rights(x),
+                    enrichMessagesData(
+                      context,
+                      messageModel,
+                      serviceModel,
+                      blobService
+                    )
+                  )
                 ])
               ),
               // we need to make a TaskEither of the Either[] mapped above
