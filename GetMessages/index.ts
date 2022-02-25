@@ -9,6 +9,10 @@ import {
   MESSAGE_COLLECTION_NAME,
   MessageModel
 } from "@pagopa/io-functions-commons/dist/src/models/message";
+import {
+  MESSAGE_STATUS_COLLECTION_NAME,
+  MessageStatusModel
+} from "@pagopa/io-functions-commons/dist/src/models/message_status";
 
 import createAzureFunctionHandler from "@pagopa/express-azure-functions/dist/src/createAzureFunctionsHandler";
 
@@ -31,6 +35,9 @@ const messageModel = new MessageModel(
   cosmosdbInstance.container(MESSAGE_COLLECTION_NAME),
   config.MESSAGE_CONTAINER_NAME
 );
+const messageStatusModel = new MessageStatusModel(
+  cosmosdbInstance.container(MESSAGE_STATUS_COLLECTION_NAME)
+);
 
 const serviceModel = new ServiceModel(
   cosmosdbInstance.container(SERVICE_COLLECTION_NAME)
@@ -40,7 +47,7 @@ const blobService = createBlobService(config.QueueStorageConnection);
 
 app.get(
   "/api/v1/messages/:fiscalcode",
-  GetMessages(messageModel, serviceModel, blobService)
+  GetMessages(messageModel, messageStatusModel, serviceModel, blobService)
 );
 
 const azureFunctionHandler = createAzureFunctionHandler(app);

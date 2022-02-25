@@ -29,7 +29,7 @@ import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/
 import * as express from "express";
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
@@ -50,7 +50,8 @@ import { BlobService } from "azure-storage";
 import * as O from "fp-ts/lib/Option";
 import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { Context } from "@azure/functions";
-import { enrichMessagesData } from "../utils/messages";
+import { MessageStatusModel } from "@pagopa/io-functions-commons/dist/src/models/message_status";
+import { enrichMessagesData, enrichMessagesStatus } from "../utils/messages";
 
 type RetrievedNotPendingMessage = t.TypeOf<typeof RetrievedNotPendingMessage>;
 const RetrievedNotPendingMessage = t.intersection([
@@ -76,6 +77,7 @@ type IGetMessagesHandler = (
   fiscalCode: FiscalCode,
   maybePageSize: O.Option<NonNegativeInteger>,
   maybeEnrichResultData: O.Option<boolean>,
+  maybeGetArchived: O.Option<boolean>,
   maybeMaximumId: O.Option<NonEmptyString>,
   maybeMinimumId: O.Option<NonEmptyString>
 ) => Promise<IGetMessagesHandlerResponse>;
@@ -85,6 +87,7 @@ type IGetMessagesHandler = (
  */
 export const GetMessagesHandler = (
   messageModel: MessageModel,
+  messageStatusModel: MessageStatusModel,
   serviceModel: ServiceModel,
   blobService: BlobService
 ): IGetMessagesHandler => async (
@@ -92,6 +95,7 @@ export const GetMessagesHandler = (
   fiscalCode,
   maybePageSize,
   maybeEnrichResultData,
+  maybeGetArchived,
   maybeMaximumId,
   maybeMinimumId
   // eslint-disable-next-line max-params
@@ -104,64 +108,98 @@ export const GetMessagesHandler = (
     TE.bind("shouldEnrichResultData", () =>
       TE.of(O.getOrElse(() => false)(maybeEnrichResultData))
     ),
+    TE.bind("shouldGetArchivedMessages", () =>
+      TE.of(O.getOrElse(() => false)(maybeGetArchived))
+    ),
     TE.bind("maximumId", () => TE.of(O.toUndefined(maybeMaximumId))),
     TE.bind("minimumId", () => TE.of(O.toUndefined(maybeMinimumId))),
-    TE.chain(({ pageSize, shouldEnrichResultData, maximumId, minimumId }) =>
-      pipe(
-        messageModel.findMessages(fiscalCode, pageSize, maximumId, minimumId),
-        TE.mapLeft(failure => ResponseErrorQuery(failure.kind, failure)),
-        TE.map(i => mapAsyncIterator(i, A.rights)),
-        TE.map(i =>
-          mapAsyncIterator(i, A.filter(RetrievedNotPendingMessage.is))
-        ),
-        TE.map(i => mapAsyncIterator(i, A.map(retrievedMessageToPublic))),
-        TE.chainW(i =>
-          // check whether we should enrich messages or not
-          pipe(
-            TE.fromPredicate(
-              () => shouldEnrichResultData === true,
-              () =>
-                // if no enrichment is requested we just wrap messages
+    TE.chain(
+      ({
+        pageSize,
+        shouldEnrichResultData,
+        shouldGetArchivedMessages,
+        maximumId,
+        minimumId
+      }) =>
+        pipe(
+          messageModel.findMessages(fiscalCode, pageSize, maximumId, minimumId),
+          TE.mapLeft(failure => ResponseErrorQuery(failure.kind, failure)),
+          TE.map(i => mapAsyncIterator(i, A.rights)),
+          TE.map(i =>
+            mapAsyncIterator(i, A.filter(RetrievedNotPendingMessage.is))
+          ),
+          TE.map(i => mapAsyncIterator(i, A.map(retrievedMessageToPublic))),
+          TE.chainW(i =>
+            // check whether we should enrich messages or not
+            pipe(
+              TE.fromPredicate(
+                () => shouldEnrichResultData === true,
+                () =>
+                  // if no enrichment is requested we just wrap messages
+                  mapAsyncIterator(
+                    i,
+                    A.map(async e =>
+                      E.right<Error, CreatedMessageWithoutContent>(e)
+                    )
+                  )
+              )(i),
+              TE.map(j =>
+                mapAsyncIterator(j, async m =>
+                  enrichMessagesStatus(context, messageStatusModel)(m)()
+                )
+              ),
+              TE.map(j =>
                 mapAsyncIterator(
-                  i,
-                  A.map(async e =>
-                    E.right<Error, CreatedMessageWithoutContent>(e)
+                  j,
+                  A.filter(
+                    flow(
+                      // never filter away errors
+                      E.mapLeft(() => true),
+                      E.map(
+                        mess => mess.is_archived === shouldGetArchivedMessages
+                      ),
+                      E.toUnion
+                    )
                   )
                 )
-            )(i),
-            TE.map(j =>
-              mapAsyncIterator(
-                j,
-                enrichMessagesData(
-                  context,
-                  messageModel,
-                  serviceModel,
-                  blobService
+              ),
+              TE.map(j =>
+                mapAsyncIterator(j, x => [
+                  // Do not enrich messages if errors occurred
+                  ...pipe(
+                    A.lefts(x),
+                    A.map(async y => E.left(y))
+                  ),
+                  ...enrichMessagesData(
+                    context,
+                    messageModel,
+                    serviceModel,
+                    blobService
+                  )(A.rights(x))
+                ])
+              ),
+              // we need to make a TaskEither of the Either[] mapped above
+              TE.orElse(TE.of),
+              TE.map(flattenAsyncIterator),
+              TE.chain(_ =>
+                TE.tryCatch(
+                  () => asyncIteratorToPageArray(_, pageSize),
+                  E.toError
                 )
-              )
-            ),
-            // we need to make a TaskEither of the Either[] mapped above
-            TE.orElse(TE.of),
-            TE.map(flattenAsyncIterator),
-            TE.chain(_ =>
-              TE.tryCatch(
-                () => asyncIteratorToPageArray(_, pageSize),
-                E.toError
-              )
-            ),
-            TE.chain(
-              TE.fromPredicate(
-                page => !page.results.some(E.isLeft),
-                () => new Error("Cannot enrich data")
-              )
-            ),
-            TE.map(({ hasMoreResults, results }) =>
-              toPageResults(A.rights([...results]), hasMoreResults)
-            ),
-            TE.mapLeft(e => ResponseErrorInternal(e.message))
+              ),
+              TE.chain(
+                TE.fromPredicate(
+                  page => !page.results.some(E.isLeft),
+                  () => new Error("Cannot enrich data")
+                )
+              ),
+              TE.map(({ hasMoreResults, results }) =>
+                toPageResults(A.rights([...results]), hasMoreResults)
+              ),
+              TE.mapLeft(e => ResponseErrorInternal(e.message))
+            )
           )
         )
-      )
     ),
     TE.map(ResponseSuccessJson),
     TE.toUnion
@@ -172,15 +210,22 @@ export const GetMessagesHandler = (
  */
 export const GetMessages = (
   messageModel: MessageModel,
+  messageStatusModel: MessageStatusModel,
   serviceModel: ServiceModel,
   blobService: BlobService
 ): express.RequestHandler => {
-  const handler = GetMessagesHandler(messageModel, serviceModel, blobService);
+  const handler = GetMessagesHandler(
+    messageModel,
+    messageStatusModel,
+    serviceModel,
+    blobService
+  );
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
     FiscalCodeMiddleware,
     OptionalQueryParamMiddleware("page_size", NonNegativeIntegerFromString),
     OptionalQueryParamMiddleware("enrich_result_data", BooleanFromString),
+    OptionalQueryParamMiddleware("get_archived", BooleanFromString),
     OptionalQueryParamMiddleware("maximum_id", NonEmptyString),
     OptionalQueryParamMiddleware("minimum_id", NonEmptyString)
   );
