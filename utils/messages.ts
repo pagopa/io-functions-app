@@ -214,10 +214,10 @@ export const enrichMessagesStatus = (
             message.sender_service_id
           )
         ),
-        TE.map(_messageStatus => ({
+        TE.map(messageStatus => ({
           ...message,
-          is_archived: false, // TODO - Waiting updated model
-          is_read: false // TODO - Waiting updated model
+          is_archived: messageStatus.isArchived ?? false,
+          is_read: messageStatus.isRead ?? false
         }))
       )
     ),
