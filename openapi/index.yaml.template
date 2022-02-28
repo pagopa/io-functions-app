@@ -513,162 +513,162 @@ parameters:
     x-example: DOWNLOAD
 definitions:
   EUCovidCert:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/EUCovidCert"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/EUCovidCert"
   LimitedProfile:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/LimitedProfile"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/LimitedProfile"
   PrescriptionData:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/PrescriptionData"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PrescriptionData"
   PrescriptionNRE:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/PrescriptionNRE"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PrescriptionNRE"
   PrescriptionIUP:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/PrescriptionIUP"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PrescriptionIUP"
   PrescriberFiscalCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/PrescriberFiscalCode"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PrescriberFiscalCode"
   NewMessageContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/NewMessageContent"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/NewMessageContent"
   CIDR:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/CIDR"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/CIDR"
   ServicePayload:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/ServicePayload"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServicePayload"
   ExtendedServicePayload:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/ExtendedServicePayload"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ExtendedServicePayload"
   CommonServicePayload:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/CommonServicePayload"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/CommonServicePayload"
   HiddenServicePayload:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/HiddenServicePayload"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/HiddenServicePayload"
   VisibleServicePayload:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/VisibleServicePayload"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/VisibleServicePayload"
   OrganizationName:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/OrganizationName"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/OrganizationName"
   DepartmentName:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/DepartmentName"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/DepartmentName"
   PaymentDataBase:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/PaymentDataBase"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaymentDataBase"
   ExtendedProfile:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/ExtendedProfile"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ExtendedProfile"
   MessageResponseWithContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/MessageResponseWithContent"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageResponseWithContent"
   NewMessage:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/NewMessage"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/NewMessage"
   NewProfile:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/NewProfile"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/NewProfile"
   EnrichedMessage:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/EnrichedMessage"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/EnrichedMessage"
   PublicMessage:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/PublicMessage"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PublicMessage"
   PublicMessagesCollection:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/PublicMessagesCollection"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PublicMessagesCollection"
   PaginatedPublicMessagesCollection:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/PaginatedPublicMessagesCollection"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaginatedPublicMessagesCollection"
   PaginatedServiceTupleCollection:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/ProblemJson"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
   Profile:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/Profile"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Profile"
   ServiceId:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/ServiceId"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceId"
   ServiceMetadata:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/ServiceMetadata"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceMetadata"
   ServiceScope:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/ServiceScope"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceScope"
   ServiceName:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/ServiceName"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceName"
   ServicePublic:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/ServicePublic"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServicePublic"
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/EmailAddress"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/EmailAddress"
   BlockedInboxOrChannel:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/BlockedInboxOrChannel"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/BlockedInboxOrChannel"
   BlockedInboxOrChannels:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/BlockedInboxOrChannels"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/BlockedInboxOrChannels"
   PreferredLanguage:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/PreferredLanguage"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PreferredLanguage"
   PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/PreferredLanguages"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PreferredLanguages"
   IsInboxEnabled:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/IsInboxEnabled"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/IsInboxEnabled"
   IsEmailEnabled:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/IsEmailEnabled"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/IsEmailEnabled"
   AcceptedTosVersion:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/AcceptedTosVersion"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/AcceptedTosVersion"
   IsWebhookEnabled:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/IsWebhookEnabled"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/IsWebhookEnabled"
   IsEmailValidated:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/IsEmailValidated"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/IsEmailValidated"
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/FiscalCode"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/FiscalCode"
   TimeToLiveSeconds:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/TimeToLiveSeconds"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/TimeToLiveSeconds"
   Timestamp:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/Timestamp"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Timestamp"
   MessageContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/MessageContent"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageContent"
   MessageContentBase:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/MessageContentBase"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageContentBase"
   MessageSubject:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/MessageSubject"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageSubject"
   MessageBodyMarkdown:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/MessageBodyMarkdown"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageBodyMarkdown"
   PaymentData:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/PaymentData"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaymentData"
   PaymentDataWithRequiredPayee:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/PaymentDataWithRequiredPayee"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaymentDataWithRequiredPayee"
   OrganizationFiscalCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/OrganizationFiscalCode"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/OrganizationFiscalCode"
   CreatedMessageWithoutContentCollection:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/CreatedMessageWithoutContentCollection"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/CreatedMessageWithoutContentCollection"
   CreatedMessageWithoutContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/CreatedMessageWithoutContent"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/CreatedMessageWithoutContent"
   CreatedMessageWithContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/CreatedMessageWithContent"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/CreatedMessageWithContent"
   MessageResponseNotificationStatus:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/MessageResponseNotificationStatus"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageResponseNotificationStatus"
   MessageStatusValue:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/MessageStatusValue"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageStatusValue"
   ServiceTupleCollection:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/ServiceTupleCollection"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceTupleCollection"
   PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/PaginationResponse"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaginationResponse"
   NotificationChannel:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/NotificationChannel"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/NotificationChannel"
   NotificationChannelStatusValue:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/NotificationChannelStatusValue"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/NotificationChannelStatusValue"
   UserDataProcessing:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/UserDataProcessing"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/UserDataProcessing"
   UserDataProcessingStatus:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/UserDataProcessingStatus"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/UserDataProcessingStatus"
   UserDataProcessingChoice:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/UserDataProcessingChoice"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/UserDataProcessingChoice"
   UserDataProcessingChoiceRequest:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/UserDataProcessingChoiceRequest"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/UserDataProcessingChoiceRequest"
   IsTestProfile:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/IsTestProfile"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/IsTestProfile"
   ServicePreferencesSettings:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/ServicePreferencesSettings"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServicePreferencesSettings"
   ServicesPreferencesMode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/ServicesPreferencesMode"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServicesPreferencesMode"
   ServicePreference:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/ServicePreference"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServicePreference"
   MessageResponseWithoutContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/MessageResponseWithoutContent"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageResponseWithoutContent"
   Payee:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/Payee"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Payee"
   StandardServiceMetadata:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/StandardServiceMetadata"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/StandardServiceMetadata"
   SpecialServiceMetadata:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/SpecialServiceMetadata"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/SpecialServiceMetadata"
   CommonServiceMetadata:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/CommonServiceMetadata"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/CommonServiceMetadata"
   SpecialServiceCategory:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/SpecialServiceCategory"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/SpecialServiceCategory"
   StandardServiceCategory:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/StandardServiceCategory"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/StandardServiceCategory"
   MessageCategory:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/MessageCategory"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageCategory"
   LegalData:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/LegalData"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/LegalData"
   MessageCategoryBase:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/MessageCategoryBase"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageCategoryBase"
   MessageCategoryPayment:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-294--update-openapi-message-model/openapi/definitions.yaml#/MessageCategoryPayment"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageCategoryPayment"
