@@ -216,8 +216,8 @@ export const enrichMessagesStatus = (
         ),
         TE.map(messageStatus => ({
           ...message,
-          is_archived: messageStatus.isArchived ?? false,
-          is_read: messageStatus.isRead ?? false
+          is_archived: messageStatus.isArchived,
+          is_read: messageStatus.isRead
         }))
       )
     ),

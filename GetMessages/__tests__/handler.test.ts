@@ -47,6 +47,8 @@ const aRetrievedMessageStatus: RetrievedMessageStatus = {
   status: MessageStatusValueEnum.PROCESSED,
   updatedAt: new Date(),
   version: 2 as NonNegativeInteger,
+  isRead: false,
+  isArchived: false,
   kind: "IRetrievedMessageStatus"
 };
 
