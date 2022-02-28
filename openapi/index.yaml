@@ -130,6 +130,46 @@ paths:
             $ref: '#/definitions/ProblemJson'
         '429':
           description: Too many requests
+    put:
+      operationId: upsertMessageStatusAttributes
+      summary: UpsertMessageStatusAttributes
+      description: Updates the status of a message with attributes
+      parameters:
+        - $ref: '#/parameters/FiscalCode'
+        - name: id
+          in: path
+          type: string
+          required: true
+          description: The ID of the message.
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/MessageStatusAttributes'
+          required: true
+          x-examples:
+            application/json: |
+              is_archived: true,
+              is_read: false
+      responses:
+        '200':
+          description: Success.
+          schema:
+            $ref: '#/definitions/MessageStatus'
+          examples:
+            application/json: |
+              status: ACCEPTED,
+              version: 1,
+              updated_at: 2022-02-28T16:35:15.993Z,
+              is_read: true,
+              is_archived: false
+        '401':
+          description: Unauthorized
+        '404':
+          description: No message found for the provided ID.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '429':
+          description: Too many requests
   /services:
     get:
       operationId: getVisibleServices
@@ -1511,3 +1551,54 @@ definitions:
     required:
       - tag
       - rptId
+  MessageStatus:
+    allOf:
+      - type: object
+        properties:
+          status:
+            type: string
+            description: >-
+              The processing status of a message.
+
+              "ACCEPTED": the message has been accepted and will be processed
+              for delivery;
+                we'll try to store its content in the user's inbox and notify him on his preferred channels
+              "THROTTLED": a temporary failure caused a retry during the message
+              processing;
+                any notification associated with this message will be delayed for a maximum of 7 days
+              "FAILED": a permanent failure caused the process to exit with an
+              error, no notification will be sent for this message
+
+              "PROCESSED": the message was succesfully processed and is now
+              stored in the user's inbox;
+                we'll try to send a notification for each of the selected channels
+              "REJECTED": either the recipient does not exist, or the sender has
+              been blocked
+            x-extensible-enum:
+              - ACCEPTED
+              - THROTTLED
+              - FAILED
+              - PROCESSED
+              - REJECTED
+            example: ACCEPTED
+          updated_at:
+            type: string
+            format: UTCISODateFromString
+            description: A date-time field in ISO-8601 format and UTC timezone.
+            x-import: '@pagopa/ts-commons/lib/dates'
+            example: '2018-10-13T00:00:00.000Z'
+          version:
+            type: integer
+        required:
+          - status
+          - updated_at
+      - $ref: '#/definitions/MessageStatusAttributes'
+  MessageStatusAttributes:
+    type: object
+    properties:
+      is_archived:
+        type: boolean
+        default: false
+      is_read:
+        type: boolean
+        default: false
