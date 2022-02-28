@@ -76,6 +76,19 @@ const aRetrievedPendingMessageWithoutContent: RetrievedMessageWithoutContent = {
   kind: "IRetrievedMessageWithoutContent"
 };
 
+const aMessageList = [
+  E.right(aRetrievedMessageWithoutContent),
+  E.right(aRetrievedMessageWithoutContent),
+  E.right(aRetrievedMessageWithoutContent),
+  E.right(aRetrievedMessageWithoutContent),
+  E.right(aRetrievedMessageWithoutContent),
+  E.right(aRetrievedPendingMessageWithoutContent)
+];
+
+//----------------------------
+// Mocks
+//----------------------------
+
 const blobServiceMock = ({
   getBlobToText: jest.fn()
 } as unknown) as BlobService;
@@ -220,14 +233,7 @@ describe("GetMessagesHandler", () => {
   });
 
   it("should respond with a page of given page size", async () => {
-    const messages = [
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedPendingMessageWithoutContent)
-    ];
-    const messageIterator = getMockIterator(messages);
+    const messageIterator = getMockIterator(aMessageList);
     const messageModelMock = getMessageModelMock(messageIterator);
 
     const getMessagesHandler = GetMessagesHandler(
@@ -266,15 +272,7 @@ describe("GetMessagesHandler", () => {
   });
 
   it("should respond with a page of messages when given maximum id", async () => {
-    const messages = [
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedPendingMessageWithoutContent)
-    ];
-    const messageIterator = getMockIterator(messages);
+    const messageIterator = getMockIterator(aMessageList);
     const messageModelMock = getMessageModelMock(messageIterator);
 
     const getMessagesHandler = GetMessagesHandler(
@@ -313,15 +311,7 @@ describe("GetMessagesHandler", () => {
   });
 
   it("should respond with a page of messages above given minimum id", async () => {
-    const messages = [
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedPendingMessageWithoutContent)
-    ];
-    const messageIterator = getMockIterator(messages);
+    const messageIterator = getMockIterator(aMessageList);
     const messageModelMock = getMessageModelMock(messageIterator);
 
     const getMessagesHandler = GetMessagesHandler(
@@ -405,15 +395,7 @@ describe("GetMessagesHandler", () => {
   });
 
   it("should respond with a page of messages when given enrichment parameter", async () => {
-    const messages = [
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedPendingMessageWithoutContent)
-    ];
-    const messageIterator = getMockIterator(messages);
+    const messageIterator = getMockIterator(aMessageList);
     const messageModelMock = getMessageModelMock(messageIterator);
 
     const getMessagesHandler = GetMessagesHandler(
@@ -460,15 +442,7 @@ describe("GetMessagesHandler", () => {
   });
 
   it("should respond with no messages when archived is requested", async () => {
-    const messages = [
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedPendingMessageWithoutContent)
-    ];
-    const messageIterator = getMockIterator(messages);
+    const messageIterator = getMockIterator(aMessageList);
     const messageModelMock = getMessageModelMock(messageIterator);
 
     const getMessagesHandler = GetMessagesHandler(
@@ -504,16 +478,65 @@ describe("GetMessagesHandler", () => {
     expect(functionsContextMock.log.error).not.toHaveBeenCalled();
   });
 
+  it("should respond with archived messages only when archived filter is true", async () => {
+    const messageIterator = getMockIterator(aMessageList);
+    const messageModelMock = getMessageModelMock(messageIterator);
+
+    mockFindLastMessageStatusVersion.mockImplementationOnce(messageId =>
+      TE.of<CosmosErrors, O.Option<RetrievedMessageStatus>>(
+        O.some({
+          ...aRetrievedMessageStatus,
+          isArchived: true,
+          messageId: messageId
+        })
+      )
+    );
+
+    const getMessagesHandler = GetMessagesHandler(
+      messageModelMock,
+      messageStatusModelMock,
+      serviceModelMock,
+      blobServiceMock
+    );
+
+    const pageSize = 2 as NonNegativeInteger;
+
+    const result = await getMessagesHandler(
+      functionsContextMock,
+      aFiscalCode,
+      O.some(pageSize),
+      O.some(true),
+      O.some(true),
+      O.none,
+      O.none
+    );
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+
+    const expectedEnrichedMessage = {
+      ...retrievedMessageToPublic(aRetrievedMessageWithoutContent),
+      category: { tag: TagEnumBase.GENERIC },
+      message_title: "a subject",
+      is_archived: true,
+      is_read: false,
+      organization_name: aRetrievedService.organizationName,
+      service_name: aRetrievedService.serviceName
+    };
+
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual({
+        items: [expectedEnrichedMessage],
+        prev: aRetrievedMessageWithoutContent.id,
+        next: undefined
+      });
+    }
+
+    expect(messageIterator.next).toHaveBeenCalledTimes(2);
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
+  });
+
   it("should respond with internal error when messages cannot be enriched with content and service info", async () => {
-    const messages = [
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedPendingMessageWithoutContent)
-    ];
-    const messageIterator = getMockIterator(messages);
+    const messageIterator = getMockIterator(aMessageList);
     const messageModelMock = getMessageModelMock(messageIterator);
 
     serviceModelMock.findLastVersionByModelId = jest
@@ -557,15 +580,7 @@ describe("GetMessagesHandler", () => {
   });
 
   it("should respond with internal error when messages cannot be enriched with message status info", async () => {
-    const messages = [
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedPendingMessageWithoutContent)
-    ];
-    const messageIterator = getMockIterator(messages);
+    const messageIterator = getMockIterator(aMessageList);
     const messageModelMock = getMessageModelMock(messageIterator);
 
     mockFindLastMessageStatusVersion.mockImplementationOnce(() =>
