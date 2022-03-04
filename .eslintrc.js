@@ -9,10 +9,11 @@ module.exports = {
         "generated",
         "**/__tests__/*",
         "**/__mocks__/*",
-        "**/__integrations__/jest.config.js",
         "Dangerfile.*",
         "*.d.ts",
-        "docker"
+        "docker",
+        "jest.config.js",
+        "**/__integrations__/jest.config.js",
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
