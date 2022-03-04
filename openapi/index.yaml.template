@@ -116,7 +116,7 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "429":
           description: Too many requests
-  "/message-status/{fiscal_code}/{id}":
+  "/messages/{fiscal_code}/{id}/message-status":
     put:
       operationId: upsertMessageStatusAttributes
       summary: UpsertMessageStatusAttributes
@@ -131,12 +131,13 @@ paths:
         - name: body
           in: body
           schema:
-            $ref: "#/definitions/MessageStatusAttributesChange"
+            $ref: "#/definitions/MessageStatusChange"
           required: true
           x-examples:
             application/json: |
+              change_type: bulk,
               is_archived: true,
-              is_read: false
+              is_read: true
       responses:
         "200":
           description: Success.
@@ -711,11 +712,11 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatus"
   MessageStatusAttributes:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusAttributes"
-  MessageStatusReadChange:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusReadChange"
-  MessageStatusArchivedChange:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusArchivedChange"
+  MessageStatusReadingChange:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusReadingChange"
+  MessageStatusArchivingChange:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusArchivingChange"
   MessageStatusBulkChange:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusBulkChange"
-  MessageStatusAttributesChange:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusAttributesChange"
+  MessageStatusChange:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusChange"

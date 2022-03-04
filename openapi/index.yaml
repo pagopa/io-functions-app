@@ -130,6 +130,7 @@ paths:
             $ref: '#/definitions/ProblemJson'
         '429':
           description: Too many requests
+  /messages/{fiscal_code}/{id}/message-status:
     put:
       operationId: upsertMessageStatusAttributes
       summary: UpsertMessageStatusAttributes
@@ -144,12 +145,13 @@ paths:
         - name: body
           in: body
           schema:
-            $ref: '#/definitions/MessageStatusAttributes'
+            $ref: '#/definitions/MessageStatusChange'
           required: true
           x-examples:
             application/json: |
+              change_type: bulk,
               is_archived: true,
-              is_read: false
+              is_read: true
       responses:
         '200':
           description: Success.
@@ -1602,49 +1604,51 @@ definitions:
       is_archived:
         type: boolean
         default: false
-  MessageStatusReadChange:
+  MessageStatusReadingChange:
     type: object
     properties:
-      operation:
+      change_type:
         type: string
         enum:
-          - read
+          - reading
       is_read:
         type: boolean
         enum:
           - true
     required:
-      - operation
+      - change_type
       - is_read
-  MessageStatusArchivedChange:
+  MessageStatusArchivingChange:
     type: object
     properties:
-      operation:
+      change_type:
         type: string
         enum:
-          - archive
+          - archiving
       is_archived:
         type: boolean
     required:
-      - operation
+      - change_type
       - is_archived
-  MessageStatusAttributesChange:
+  MessageStatusBulkChange:
+    type: object
+    properties:
+      change_type:
+        type: string
+        enum:
+          - bulk
+      is_archived:
+        type: boolean
+      is_read:
+        type: boolean
+        enum:
+          - true
+    required:
+      - change_type
+      - is_archived
+  MessageStatusChange:
     x-one-of: true
     allOf:
-      - $ref: '#/definitions/MessageStatusReadChange'
-      - $ref: '#/definitions/MessageStatusArchivedChange'
-      - type: object
-        properties:
-          operation:
-            type: string
-            enum:
-              - bulk
-          is_archived:
-            type: boolean
-          is_read:
-            type: boolean
-            enum:
-              - true
-        required:
-          - operation
-          - is_archived
+      - $ref: '#/definitions/MessageStatusReadingChange'
+      - $ref: '#/definitions/MessageStatusArchivingChange'
+      - $ref: '#/definitions/MessageStatusBulkChange'
