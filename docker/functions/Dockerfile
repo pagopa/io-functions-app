@@ -1,16 +1,11 @@
-FROM node:10.14.1
+FROM functions-node-14
 
-WORKDIR /usr/src/app
+COPY . /usr/src/app
+COPY ./__integrations__/__mocks__/ /usr/src/app
 
-RUN apt-get update \
-    && apt-get install -y apt-transport-https \
-    && wget https://packages.microsoft.com/config/ubuntu/19.10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
-    && dpkg -i packages-microsoft-prod.deb \
-    && apt-get update \
-    && apt-get install -y dotnet-sdk-3.1 \
-    && apt-get install azure-functions-core-tools-3
+RUN func extensions install
 
-ENV AzureWebJobsScriptRoot=/usr/src/app \
-    AzureFunctionsJobHost__Logging__Console__IsEnabled=true
+RUN yarn install --frozen-lockfile
+RUN yarn build
 
-CMD ["yarn", "start"]
+CMD ["func", "start", "--javascript"]
