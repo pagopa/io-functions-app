@@ -116,6 +116,7 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "429":
           description: Too many requests
+  "/message-status/{fiscal_code}/{id}":
     put:
       operationId: upsertMessageStatusAttributes
       summary: UpsertMessageStatusAttributes
@@ -130,7 +131,7 @@ paths:
         - name: body
           in: body
           schema:
-            $ref: "#/definitions/MessageStatusAttributes"
+            $ref: "#/definitions/MessageStatusAttributesChange"
           required: true
           x-examples:
             application/json: |
@@ -710,3 +711,11 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatus"
   MessageStatusAttributes:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusAttributes"
+  MessageStatusReadChange:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusReadChange"
+  MessageStatusArchivedChange:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusArchivedChange"
+  MessageStatusBulkChange:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusBulkChange"
+  MessageStatusAttributesChange:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusAttributesChange"

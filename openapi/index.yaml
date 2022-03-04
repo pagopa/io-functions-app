@@ -1596,9 +1596,55 @@ definitions:
   MessageStatusAttributes:
     type: object
     properties:
-      is_archived:
-        type: boolean
-        default: false
       is_read:
         type: boolean
         default: false
+      is_archived:
+        type: boolean
+        default: false
+  MessageStatusReadChange:
+    type: object
+    properties:
+      operation:
+        type: string
+        enum:
+          - read
+      is_read:
+        type: boolean
+        enum:
+          - true
+    required:
+      - operation
+      - is_read
+  MessageStatusArchivedChange:
+    type: object
+    properties:
+      operation:
+        type: string
+        enum:
+          - archive
+      is_archived:
+        type: boolean
+    required:
+      - operation
+      - is_archived
+  MessageStatusAttributesChange:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/MessageStatusReadChange'
+      - $ref: '#/definitions/MessageStatusArchivedChange'
+      - type: object
+        properties:
+          operation:
+            type: string
+            enum:
+              - bulk
+          is_archived:
+            type: boolean
+          is_read:
+            type: boolean
+            enum:
+              - true
+        required:
+          - operation
+          - is_archived
