@@ -9,6 +9,7 @@ module.exports = {
         "generated",
         "**/__tests__/*",
         "**/__mocks__/*",
+        "**/__integrations__/jest.config.js",
         "Dangerfile.*",
         "*.d.ts",
         "docker"
