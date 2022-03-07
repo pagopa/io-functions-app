@@ -13,7 +13,7 @@ module.exports = {
         "*.d.ts",
         "docker",
         "jest.config.js",
-        "**/__integrations__/jest.config.js",
+        "**/__integrations__/*",
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
