@@ -1,0 +1,60 @@
+version: "3.2"
+
+services:
+
+  functions-node-14:
+    image: functions-node-14
+    build:
+      context: ..
+      dockerfile: ./docker/functions-node-14/Dockerfile
+    command: /bin/true
+
+  cosmosdb:
+    image: cosmosdb
+    env_file:
+      - ./environments/generated/env.cosmosdb
+    build:
+      context: ../docker/cosmosdb
+      dockerfile: ./Dockerfile
+    ports:
+      - ${COSMOSDB_PORT}:3000
+
+  storage-account:
+    image: azurite
+    build:
+      context: ../docker/azurite
+      dockerfile: ./Dockerfile
+    ports:
+      - 10000:10000
+      - 10001:10001
+      - 10002:10002
+
+  function:
+    image: fn
+    env_file:
+      - ./environments/generated/env.function
+    build:
+      context: ..
+      dockerfile: ./docker/functions/Dockerfile
+    ports:
+      - ${FUNCTION_PORT}:7071
+    links:
+      - cosmosdb
+      - storage-account
+    depends_on:
+      - functions-node-14
+
+  testagent:
+    image: node:16-alpine
+    working_dir: /usr/src/app
+    command: tail -f /dev/null # to keep it   up&running
+    env_file:
+      - environments/generated/env.integration-tests
+    volumes:
+      - "./:/usr/src/app"
+      - "../openapi:/usr/src/openapi"
+    depends_on:
+      - cosmosdb
+      - storage-account
+    links:
+      - function
