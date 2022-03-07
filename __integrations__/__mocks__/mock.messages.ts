@@ -11,6 +11,14 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { aServiceID, serviceList } from "./mock.services";
 import { RetrievedMessage } from "@pagopa/io-functions-commons/dist/src/models/message";
+import { pipe } from "fp-ts/lib/function";
+
+import * as RA from "fp-ts/ReadonlyArray";
+import {
+  MessageStatus,
+  NewMessageStatus
+} from "@pagopa/io-functions-commons/dist/src/models/message_status";
+import { MessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageStatusValue";
 
 export const aFiscalCodeWithoutMessages = "FFLFRC74E04B157I" as FiscalCode;
 export const aFiscalCodeWithMessages = "FRLFRC74E04B157I" as FiscalCode;
@@ -44,6 +52,33 @@ export const messagesList = Array.from(
   })
 );
 
+export const messageStatusList = pipe(
+  messagesList,
+  RA.map(m => [
+    {
+      messageId: m.id,
+      id: `${m.id}-${"0".repeat(15)}0`,
+      version: 0,
+      isArchived: false,
+      isRead: false,
+      status: MessageStatusValueEnum.ACCEPTED,
+      updatedAt: new Date(),
+      kind: "INewMessageStatus"
+    },
+    {
+      messageId: m.id,
+      id: `${m.id}-${"0".repeat(15)}1`,
+      version: 1,
+      isArchived: false,
+      isRead: false,
+      status: MessageStatusValueEnum.PROCESSED,
+      updatedAt: new Date(),
+      kind: "INewMessageStatus"
+    }
+  ]),
+  RA.flatten
+) as ReadonlyArray<NewMessageStatus>;
+
 // -------
 
 export const mockEnrichMessage = (
@@ -58,6 +93,8 @@ export const mockEnrichMessage = (
     message_title: message.content.subject,
     service_name: service.serviceName,
     organization_name: service.organizationName,
-    category: { tag: TagEnumBase.GENERIC }
+    category: { tag: TagEnumBase.GENERIC },
+    is_archived: false,
+    is_read: false
   };
 };

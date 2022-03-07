@@ -184,8 +184,7 @@ export const fillMessages = async (
         messages,
         RA.filter(m => m.isPending === false),
         RA.map(m => model.storeContentAsBlob(blobService, m.id, m.content)),
-        RA.sequence(TE.ApplicativePar),
-        x => x
+        RA.sequence(TE.ApplicativePar)
       )
     ),
     TE.map(_ => log(`${_.length} Messages created`)),
@@ -216,3 +215,22 @@ export const fillServices = async (
     })
   )();
 };
+
+export const fillMessagesStatus = async (
+  db: Database,
+  messageStatuses: ReadonlyArray<MessageStatusCollection.NewMessageStatus>
+) =>
+  pipe(
+    db.container(MessageStatusCollection.MESSAGE_STATUS_COLLECTION_NAME),
+    TE.of,
+    TE.map(c => new MessageStatusCollection.MessageStatusModel(c)),
+    TE.chain(messageStatusModel =>
+      pipe(
+        messageStatuses,
+        RA.mapWithIndex((i, m) =>
+          i === 0 ? messageStatusModel.create(m) : messageStatusModel.upsert(m)
+        ),
+        RA.sequence(TE.ApplicativeSeq)
+      )
+    )
+  )();

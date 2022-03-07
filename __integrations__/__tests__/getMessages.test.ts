@@ -15,6 +15,7 @@ import { RetrievedMessage } from "@pagopa/io-functions-commons/dist/src/models/m
 import {
   createCosmosDbAndCollections,
   fillMessages,
+  fillMessagesStatus,
   fillServices
 } from "../__mocks__/fixtures";
 
@@ -22,6 +23,7 @@ import {
   aFiscalCodeWithMessages,
   aFiscalCodeWithoutMessages,
   messagesList,
+  messageStatusList,
   mockEnrichMessage
 } from "../__mocks__/mock.messages";
 import { serviceList } from "../__mocks__/mock.services";
@@ -78,6 +80,7 @@ beforeAll(async () => {
   )();
 
   await fillMessages(database, blobService, messagesList);
+  await fillMessagesStatus(database, messageStatusList);
   await fillServices(database, serviceList);
 
   await waitFunctionToSetup();
