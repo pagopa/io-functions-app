@@ -841,37 +841,39 @@ definitions:
     required:
       - is_email_validated
   EnrichedMessage:
-    type: object
-    properties:
-      id:
-        type: string
-      fiscal_code:
-        $ref: '#/definitions/FiscalCode'
-      time_to_live:
-        $ref: '#/definitions/TimeToLiveSeconds'
-      created_at:
-        $ref: '#/definitions/Timestamp'
-      sender_service_id:
-        $ref: '#/definitions/ServiceId'
-      service_name:
-        type: string
-      organization_name:
-        type: string
-      message_title:
-        type: string
-      category:
-        $ref: '#/definitions/MessageCategory'
-      has_attachments:
-        type: boolean
-        default: false
-    required:
-      - id
-      - fiscal_code
-      - created_at
-      - sender_service_id
-      - service_name
-      - organization_name
-      - message_title
+    allOf:
+      - type: object
+        properties:
+          id:
+            type: string
+          fiscal_code:
+            $ref: '#/definitions/FiscalCode'
+          time_to_live:
+            $ref: '#/definitions/TimeToLiveSeconds'
+          created_at:
+            $ref: '#/definitions/Timestamp'
+          sender_service_id:
+            $ref: '#/definitions/ServiceId'
+          service_name:
+            type: string
+          organization_name:
+            type: string
+          message_title:
+            type: string
+          category:
+            $ref: '#/definitions/MessageCategory'
+          has_attachments:
+            type: boolean
+            default: false
+        required:
+          - id
+          - fiscal_code
+          - created_at
+          - sender_service_id
+          - service_name
+          - organization_name
+          - message_title
+      - $ref: '#/definitions/MessageStatusAttributes'
   PublicMessage:
     x-one-of: true
     allOf:
@@ -1554,47 +1556,17 @@ definitions:
       - tag
       - rptId
   MessageStatus:
-    allOf:
-      - type: object
-        properties:
-          status:
-            type: string
-            description: >-
-              The processing status of a message.
-
-              "ACCEPTED": the message has been accepted and will be processed
-              for delivery;
-                we'll try to store its content in the user's inbox and notify him on his preferred channels
-              "THROTTLED": a temporary failure caused a retry during the message
-              processing;
-                any notification associated with this message will be delayed for a maximum of 7 days
-              "FAILED": a permanent failure caused the process to exit with an
-              error, no notification will be sent for this message
-
-              "PROCESSED": the message was succesfully processed and is now
-              stored in the user's inbox;
-                we'll try to send a notification for each of the selected channels
-              "REJECTED": either the recipient does not exist, or the sender has
-              been blocked
-            x-extensible-enum:
-              - ACCEPTED
-              - THROTTLED
-              - FAILED
-              - PROCESSED
-              - REJECTED
-            example: ACCEPTED
-          updated_at:
-            type: string
-            format: UTCISODateFromString
-            description: A date-time field in ISO-8601 format and UTC timezone.
-            x-import: '@pagopa/ts-commons/lib/dates'
-            example: '2018-10-13T00:00:00.000Z'
-          version:
-            type: integer
-        required:
-          - status
-          - updated_at
-      - $ref: '#/definitions/MessageStatusAttributes'
+    type: object
+    properties:
+      status:
+        $ref: '#/definitions/MessageStatusValue'
+      updated_at:
+        $ref: '#/definitions/Timestamp'
+      version:
+        type: integer
+    required:
+      - status
+      - updated_at
   MessageStatusAttributes:
     type: object
     properties:
@@ -1604,6 +1576,9 @@ definitions:
       is_archived:
         type: boolean
         default: false
+    required:
+      - is_read
+      - is_archived
   MessageStatusReadingChange:
     type: object
     properties:
