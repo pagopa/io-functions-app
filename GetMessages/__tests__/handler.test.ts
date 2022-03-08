@@ -20,14 +20,37 @@ import {
 import { GetMessagesHandler } from "../handler";
 import { MessageContent } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageContent";
 import { BlobService } from "azure-storage";
-import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
-import { toCosmosErrorResponse } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
+import {
+  RetrievedService,
+  ServiceModel
+} from "@pagopa/io-functions-commons/dist/src/models/service";
+import {
+  CosmosErrors,
+  toCosmosErrorResponse
+} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { Context } from "@azure/functions";
 import { TagEnum as TagEnumBase } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategoryBase";
+import {
+  MessageStatusModel,
+  RetrievedMessageStatus
+} from "@pagopa/io-functions-commons/dist/src/models/message_status";
+import { MessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageStatusValue";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
 const aMessageId = "A_MESSAGE_ID" as NonEmptyString;
 const aPendingMessageId = "A_PENDING_MESSAGE_ID" as NonEmptyString;
+
+const aRetrievedMessageStatus: RetrievedMessageStatus = {
+  ...aCosmosResourceMetadata,
+  id: "1" as NonEmptyString,
+  messageId: "1" as NonEmptyString,
+  status: MessageStatusValueEnum.PROCESSED,
+  updatedAt: new Date(),
+  version: 2 as NonNegativeInteger,
+  isRead: false,
+  isArchived: false,
+  kind: "IRetrievedMessageStatus"
+};
 
 const aNewMessageWithoutContent: NewMessageWithoutContent = {
   createdAt: new Date(),
@@ -54,6 +77,19 @@ const aRetrievedPendingMessageWithoutContent: RetrievedMessageWithoutContent = {
   isPending: true,
   kind: "IRetrievedMessageWithoutContent"
 };
+
+const aMessageList = [
+  E.right(aRetrievedMessageWithoutContent),
+  E.right(aRetrievedMessageWithoutContent),
+  E.right(aRetrievedMessageWithoutContent),
+  E.right(aRetrievedMessageWithoutContent),
+  E.right(aRetrievedMessageWithoutContent),
+  E.right(aRetrievedPendingMessageWithoutContent)
+];
+
+//----------------------------
+// Mocks
+//----------------------------
 
 const blobServiceMock = ({
   getBlobToText: jest.fn()
@@ -95,10 +131,28 @@ const functionsContextMock = ({
   }
 } as unknown) as Context;
 
+// MessageStatus Mocks
+const mockFindLastMessageStatusVersion = jest.fn(messageId =>
+  TE.of<CosmosErrors, O.Option<RetrievedMessageStatus>>(
+    O.some({ ...aRetrievedMessageStatus, messageId: messageId })
+  )
+);
+
+const messageStatusModelMock = ({
+  findLastVersionByModelId: mockFindLastMessageStatusVersion
+} as unknown) as MessageStatusModel;
+
+// ---------------------
+// Tests
+// ---------------------
+
 describe("GetMessagesHandler", () => {
+  beforeEach(() => jest.clearAllMocks());
+
   it("should respond with query error if it cannot retrieve messages", async () => {
     const getMessagesHandler = GetMessagesHandler(
       errorMessageModelMock,
+      messageStatusModelMock,
       serviceModelMock,
       blobServiceMock
     );
@@ -106,6 +160,7 @@ describe("GetMessagesHandler", () => {
     const result = await getMessagesHandler(
       functionsContextMock,
       aFiscalCode,
+      O.none,
       O.none,
       O.none,
       O.none,
@@ -122,6 +177,7 @@ describe("GetMessagesHandler", () => {
 
     const getMessagesHandler = GetMessagesHandler(
       messageModelMock,
+      messageStatusModelMock,
       serviceModelMock,
       blobServiceMock
     );
@@ -129,6 +185,7 @@ describe("GetMessagesHandler", () => {
     const result = await getMessagesHandler(
       functionsContextMock,
       aFiscalCode,
+      O.none,
       O.none,
       O.none,
       O.none,
@@ -149,6 +206,7 @@ describe("GetMessagesHandler", () => {
 
     const getMessagesHandler = GetMessagesHandler(
       messageModelMock,
+      messageStatusModelMock,
       serviceModelMock,
       blobServiceMock
     );
@@ -156,6 +214,7 @@ describe("GetMessagesHandler", () => {
     const result = await getMessagesHandler(
       functionsContextMock,
       aFiscalCode,
+      O.none,
       O.none,
       O.none,
       O.none,
@@ -176,18 +235,12 @@ describe("GetMessagesHandler", () => {
   });
 
   it("should respond with a page of given page size", async () => {
-    const messages = [
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedPendingMessageWithoutContent)
-    ];
-    const messageIterator = getMockIterator(messages);
+    const messageIterator = getMockIterator(aMessageList);
     const messageModelMock = getMessageModelMock(messageIterator);
 
     const getMessagesHandler = GetMessagesHandler(
       messageModelMock,
+      messageStatusModelMock,
       serviceModelMock,
       blobServiceMock
     );
@@ -197,6 +250,7 @@ describe("GetMessagesHandler", () => {
       functionsContextMock,
       aFiscalCode,
       O.some(pageSize),
+      O.none,
       O.none,
       O.none,
       O.none
@@ -220,19 +274,12 @@ describe("GetMessagesHandler", () => {
   });
 
   it("should respond with a page of messages when given maximum id", async () => {
-    const messages = [
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedPendingMessageWithoutContent)
-    ];
-    const messageIterator = getMockIterator(messages);
+    const messageIterator = getMockIterator(aMessageList);
     const messageModelMock = getMessageModelMock(messageIterator);
 
     const getMessagesHandler = GetMessagesHandler(
       messageModelMock,
+      messageStatusModelMock,
       serviceModelMock,
       blobServiceMock
     );
@@ -243,6 +290,7 @@ describe("GetMessagesHandler", () => {
       functionsContextMock,
       aFiscalCode,
       O.some(pageSize),
+      O.none,
       O.none,
       O.some(aRetrievedMessageWithoutContent.id),
       O.none
@@ -265,19 +313,12 @@ describe("GetMessagesHandler", () => {
   });
 
   it("should respond with a page of messages above given minimum id", async () => {
-    const messages = [
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedPendingMessageWithoutContent)
-    ];
-    const messageIterator = getMockIterator(messages);
+    const messageIterator = getMockIterator(aMessageList);
     const messageModelMock = getMessageModelMock(messageIterator);
 
     const getMessagesHandler = GetMessagesHandler(
       messageModelMock,
+      messageStatusModelMock,
       serviceModelMock,
       blobServiceMock
     );
@@ -288,6 +329,7 @@ describe("GetMessagesHandler", () => {
       functionsContextMock,
       aFiscalCode,
       O.some(pageSize),
+      O.none,
       O.none,
       O.none,
       O.some(aRetrievedMessageWithoutContent.id)
@@ -320,6 +362,7 @@ describe("GetMessagesHandler", () => {
 
     const getMessagesHandler = GetMessagesHandler(
       messageModelMock,
+      messageStatusModelMock,
       serviceModelMock,
       blobServiceMock
     );
@@ -330,6 +373,7 @@ describe("GetMessagesHandler", () => {
       functionsContextMock,
       aFiscalCode,
       O.some(pageSize),
+      O.none,
       O.none,
       O.none,
       O.some(aRetrievedMessageWithoutContent.id)
@@ -353,19 +397,12 @@ describe("GetMessagesHandler", () => {
   });
 
   it("should respond with a page of messages when given enrichment parameter", async () => {
-    const messages = [
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedPendingMessageWithoutContent)
-    ];
-    const messageIterator = getMockIterator(messages);
+    const messageIterator = getMockIterator(aMessageList);
     const messageModelMock = getMessageModelMock(messageIterator);
 
     const getMessagesHandler = GetMessagesHandler(
       messageModelMock,
+      messageStatusModelMock,
       serviceModelMock,
       blobServiceMock
     );
@@ -378,6 +415,7 @@ describe("GetMessagesHandler", () => {
       O.some(pageSize),
       O.some(true),
       O.none,
+      O.none,
       O.none
     );
 
@@ -387,6 +425,8 @@ describe("GetMessagesHandler", () => {
       ...retrievedMessageToPublic(aRetrievedMessageWithoutContent),
       category: { tag: TagEnumBase.GENERIC },
       message_title: "a subject",
+      is_archived: false,
+      is_read: false,
       organization_name: aRetrievedService.organizationName,
       service_name: aRetrievedService.serviceName
     };
@@ -403,16 +443,102 @@ describe("GetMessagesHandler", () => {
     expect(functionsContextMock.log.error).not.toHaveBeenCalled();
   });
 
-  it("should respond with internal error when messages cannot be enriched", async () => {
-    const messages = [
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedMessageWithoutContent),
-      E.right(aRetrievedPendingMessageWithoutContent)
-    ];
-    const messageIterator = getMockIterator(messages);
+  it("should respond with no messages when archived is requested", async () => {
+    const messageIterator = getMockIterator(aMessageList);
+    const messageModelMock = getMessageModelMock(messageIterator);
+
+    const getMessagesHandler = GetMessagesHandler(
+      messageModelMock,
+      messageStatusModelMock,
+      serviceModelMock,
+      blobServiceMock
+    );
+
+    const pageSize = 2 as NonNegativeInteger;
+
+    const result = await getMessagesHandler(
+      functionsContextMock,
+      aFiscalCode,
+      O.some(pageSize),
+      O.some(true),
+      O.some(true),
+      O.none,
+      O.none
+    );
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual({
+        items: [],
+        prev: undefined,
+        next: undefined
+      });
+    }
+
+    expect(messageIterator.next).toHaveBeenCalledTimes(2);
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
+  });
+
+  it("should respond with archived messages only when archived filter is true", async () => {
+    const messageIterator = getMockIterator(aMessageList);
+    const messageModelMock = getMessageModelMock(messageIterator);
+
+    mockFindLastMessageStatusVersion.mockImplementationOnce(messageId =>
+      TE.of<CosmosErrors, O.Option<RetrievedMessageStatus>>(
+        O.some({
+          ...aRetrievedMessageStatus,
+          isArchived: true,
+          messageId: messageId
+        })
+      )
+    );
+
+    const getMessagesHandler = GetMessagesHandler(
+      messageModelMock,
+      messageStatusModelMock,
+      serviceModelMock,
+      blobServiceMock
+    );
+
+    const pageSize = 2 as NonNegativeInteger;
+
+    const result = await getMessagesHandler(
+      functionsContextMock,
+      aFiscalCode,
+      O.some(pageSize),
+      O.some(true),
+      O.some(true),
+      O.none,
+      O.none
+    );
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+
+    const expectedEnrichedMessage = {
+      ...retrievedMessageToPublic(aRetrievedMessageWithoutContent),
+      category: { tag: TagEnumBase.GENERIC },
+      message_title: "a subject",
+      is_archived: true,
+      is_read: false,
+      organization_name: aRetrievedService.organizationName,
+      service_name: aRetrievedService.serviceName
+    };
+
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value).toEqual({
+        items: [expectedEnrichedMessage],
+        prev: aRetrievedMessageWithoutContent.id,
+        next: undefined
+      });
+    }
+
+    expect(messageIterator.next).toHaveBeenCalledTimes(2);
+    expect(functionsContextMock.log.error).not.toHaveBeenCalled();
+  });
+
+  it("should respond with internal error when messages cannot be enriched with content and service info", async () => {
+    const messageIterator = getMockIterator(aMessageList);
     const messageModelMock = getMessageModelMock(messageIterator);
 
     serviceModelMock.findLastVersionByModelId = jest
@@ -427,6 +553,7 @@ describe("GetMessagesHandler", () => {
 
     const getMessagesHandler = GetMessagesHandler(
       messageModelMock,
+      messageStatusModelMock,
       serviceModelMock,
       blobServiceMock
     );
@@ -439,6 +566,7 @@ describe("GetMessagesHandler", () => {
       O.some(pageSize),
       O.some(true),
       O.none,
+      O.none,
       O.none
     );
 
@@ -450,6 +578,41 @@ describe("GetMessagesHandler", () => {
     );
     expect(functionsContextMock.log.error).toHaveBeenCalledWith(
       `Cannot enrich message "${aRetrievedMessageWithoutContent.id}" | Error: GENERIC_ERROR`
+    );
+  });
+
+  it("should respond with internal error when messages cannot be enriched with message status info", async () => {
+    const messageIterator = getMockIterator(aMessageList);
+    const messageModelMock = getMessageModelMock(messageIterator);
+
+    mockFindLastMessageStatusVersion.mockImplementationOnce(() =>
+      TE.left(toCosmosErrorResponse("Any error message"))
+    );
+
+    const getMessagesHandler = GetMessagesHandler(
+      messageModelMock,
+      messageStatusModelMock,
+      serviceModelMock,
+      blobServiceMock
+    );
+
+    const pageSize = 2 as NonNegativeInteger;
+
+    const result = await getMessagesHandler(
+      functionsContextMock,
+      aFiscalCode,
+      O.some(pageSize),
+      O.some(true),
+      O.none,
+      O.none,
+      O.none
+    );
+
+    expect(result.kind).toBe("IResponseErrorInternal");
+    expect(messageIterator.next).toHaveBeenCalledTimes(1);
+    expect(functionsContextMock.log.error).toHaveBeenCalledTimes(1);
+    expect(functionsContextMock.log.error).toHaveBeenCalledWith(
+      `Cannot enrich message "${aRetrievedMessageWithoutContent.id}" | Error: COSMOS_ERROR_RESPONSE, MessageStatus`
     );
   });
 });

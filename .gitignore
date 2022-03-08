@@ -54,3 +54,8 @@ generated/**/*
 # eslint section
 !.eslintrc.js
 .eslintcache
+
+
+# integration tests
+docker-compose.override.yml
+__integrations__/environments/generated/**

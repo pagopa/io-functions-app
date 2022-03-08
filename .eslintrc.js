@@ -11,7 +11,9 @@ module.exports = {
         "**/__mocks__/*",
         "Dangerfile.*",
         "*.d.ts",
-        "docker"
+        "docker",
+        "jest.config.js",
+        "**/__integrations__/*",
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
