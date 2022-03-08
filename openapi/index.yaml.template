@@ -39,6 +39,7 @@ paths:
         - $ref: '#/parameters/MaximumId'
         - $ref: '#/parameters/MinimumId'
         - $ref: '#/parameters/EnrichResultData'
+        - $ref: '#/parameters/GetArchivedMessages'
       responses:
         "200":
           description: Found.
@@ -497,6 +498,11 @@ parameters:
     name: enrich_result_data
     in: query
     description: Indicates whether result data should be enriched or not.
+  GetArchivedMessages:
+    type: boolean
+    name: archived
+    in: query
+    description: Indicates whether to retrieve archived/not archived messages.
   UserDataProcessingChoiceParam:
     name: choice
     in: path

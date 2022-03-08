@@ -2,6 +2,7 @@ import { CosmosClient, Database } from "@azure/cosmos";
 
 import * as TE from "fp-ts/lib/TaskEither";
 import * as RA from "fp-ts/ReadonlyArray";
+import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/lib/function";
 
 import * as MessageCollection from "@pagopa/io-functions-commons/dist/src/models/message";
@@ -21,6 +22,8 @@ import { toCosmosErrorResponse } from "@pagopa/io-functions-commons/dist/src/uti
 import { Container } from "@azure/cosmos";
 import { BlobService } from "azure-storage";
 import { MESSAGE_CONTAINER_NAME } from "../env";
+import { flow } from "fp-ts/lib/function";
+import { toError } from "fp-ts/lib/Either";
 
 /**
  * Create "messages" collection, with indexing policy
@@ -184,8 +187,7 @@ export const fillMessages = async (
         messages,
         RA.filter(m => m.isPending === false),
         RA.map(m => model.storeContentAsBlob(blobService, m.id, m.content)),
-        RA.sequence(TE.ApplicativePar),
-        x => x
+        RA.sequence(TE.ApplicativePar)
       )
     ),
     TE.map(_ => log(`${_.length} Messages created`)),
@@ -216,3 +218,56 @@ export const fillServices = async (
     })
   )();
 };
+
+export const fillMessagesStatus = async (
+  db: Database,
+  messageStatuses: ReadonlyArray<MessageStatusCollection.NewMessageStatus>
+) =>
+  pipe(
+    db.container(MessageStatusCollection.MESSAGE_STATUS_COLLECTION_NAME),
+    TE.of,
+    TE.map(c => new MessageStatusCollection.MessageStatusModel(c)),
+    TE.chain(messageStatusModel =>
+      pipe(
+        messageStatuses,
+        RA.mapWithIndex((i, m) =>
+          i === 0 ? messageStatusModel.create(m) : messageStatusModel.upsert(m)
+        ),
+        RA.sequence(TE.ApplicativeSeq)
+      )
+    )
+  )();
+
+export const setMessagesAsArchived = async (
+  db: Database,
+  messageIds: ReadonlyArray<NonEmptyString>
+) =>
+  pipe(
+    db.container(MessageStatusCollection.MESSAGE_STATUS_COLLECTION_NAME),
+    TE.of,
+    TE.map(c => new MessageStatusCollection.MessageStatusModel(c)),
+    TE.chain(messageStatusModel =>
+      pipe(
+        messageIds,
+        RA.map(m => messageStatusModel.findLastVersionByModelId([m])),
+        RA.sequence(TE.ApplicativeSeq),
+        TE.chainW(
+          flow(
+            RA.map(ms =>
+              O.isSome(ms)
+                ? pipe(
+                    messageStatusModel.upsert({
+                      ...ms.value,
+                      kind: "INewMessageStatus",
+                      isArchived: true
+                    }),
+                    TE.mapLeft(toError)
+                  )
+                : TE.left(Error("Cannot find message status"))
+            ),
+            RA.sequence(TE.ApplicativeSeq)
+          )
+        )
+      )
+    )
+  )();

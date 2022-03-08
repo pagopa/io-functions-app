@@ -15,13 +15,16 @@ import { RetrievedMessage } from "@pagopa/io-functions-commons/dist/src/models/m
 import {
   createCosmosDbAndCollections,
   fillMessages,
-  fillServices
+  fillMessagesStatus,
+  fillServices,
+  setMessagesAsArchived
 } from "../__mocks__/fixtures";
 
 import {
   aFiscalCodeWithMessages,
   aFiscalCodeWithoutMessages,
   messagesList,
+  messageStatusList,
   mockEnrichMessage
 } from "../__mocks__/mock.messages";
 import { serviceList } from "../__mocks__/mock.services";
@@ -39,6 +42,7 @@ import {
   QueueStorageConnection,
   MESSAGE_CONTAINER_NAME
 } from "../env";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 const MAX_ATTEMPT = 50;
 
@@ -78,6 +82,7 @@ beforeAll(async () => {
   )();
 
   await fillMessages(database, blobService, messagesList);
+  await fillMessagesStatus(database, messageStatusList);
   await fillServices(database, serviceList);
 
   await waitFunctionToSetup();
@@ -129,24 +134,33 @@ describe("Get Messages |> Success Results, No Enrichment", () => {
 
 describe("Get Messages |> Success Results, With Enrichment", () => {
   it.each`
-    title                                                       | fiscalCode                    | pageSize | maximum_id            | expectedItems                | expectedPrev           | expectedNext
-    ${"should return and empty list when user has no messages"} | ${aFiscalCodeWithoutMessages} | ${5}     | ${undefined}          | ${[]}                        | ${undefined}           | ${undefined}
-    ${"should return first page "}                              | ${aFiscalCodeWithMessages}    | ${5}     | ${undefined}          | ${messagesList.slice(0, 5)}  | ${messagesList[0]?.id} | ${messagesList[4]?.id}
-    ${"should return second page"}                              | ${aFiscalCodeWithMessages}    | ${5}     | ${messagesList[4].id} | ${messagesList.slice(5, 10)} | ${messagesList[5]?.id} | ${messagesList[9]?.id}
+    title                                                                             | fiscalCode                    | messagesArchived        | retrieveArchived | pageSize | maximum_id            | expectedItems                | expectedPrev           | expectedNext
+    ${"should return and empty list when user has no messages"}                       | ${aFiscalCodeWithoutMessages} | ${[]}                   | ${undefined}     | ${5}     | ${undefined}          | ${[]}                        | ${undefined}           | ${undefined}
+    ${"should return first page "}                                                    | ${aFiscalCodeWithMessages}    | ${[]}                   | ${undefined}     | ${5}     | ${undefined}          | ${messagesList.slice(0, 5)}  | ${messagesList[0]?.id} | ${messagesList[4]?.id}
+    ${"should return second page"}                                                    | ${aFiscalCodeWithMessages}    | ${[]}                   | ${undefined}     | ${5}     | ${messagesList[4].id} | ${messagesList.slice(5, 10)} | ${messagesList[5]?.id} | ${messagesList[9]?.id}
+    ${"should return and empty list when user has no archived messages"}              | ${aFiscalCodeWithMessages}    | ${[]}                   | ${true}          | ${5}     | ${undefined}          | ${[]}                        | ${undefined}           | ${undefined}
+    ${"should return only archived messages "}                                        | ${aFiscalCodeWithMessages}    | ${[messagesList[0].id]} | ${true}          | ${5}     | ${undefined}          | ${messagesList.slice(0, 1)}  | ${messagesList[0]?.id} | ${undefined}
+    ${"should return only not archived messages when 'archived' flag is not present"} | ${aFiscalCodeWithMessages}    | ${[messagesList[0].id]} | ${undefined}     | ${5}     | ${undefined}          | ${messagesList.slice(1, 6)}  | ${messagesList[1]?.id} | ${messagesList[5]?.id}
+    ${"should return only not archived messages when 'archived' flag is 'true'"}      | ${aFiscalCodeWithMessages}    | ${[messagesList[0].id]} | ${false}         | ${5}     | ${undefined}          | ${messagesList.slice(1, 6)}  | ${messagesList[1]?.id} | ${messagesList[5]?.id}
   `(
     "$title, page size: $pageSize",
     async ({
       fiscalCode,
+      messagesArchived,
+      retrieveArchived,
       pageSize,
       maximum_id,
       expectedItems,
       expectedPrev,
       expectedNext
     }) => {
+      await setMessagesAsArchived(database, messagesArchived);
+
       const response = await getMessagesWithEnrichment(fetch, baseUrl)(
         fiscalCode,
         pageSize,
-        maximum_id
+        maximum_id,
+        retrieveArchived
       );
       expect(response.status).toEqual(200);
 
@@ -155,7 +169,10 @@ describe("Get Messages |> Success Results, With Enrichment", () => {
       // strip away undefind properties by stringify/parsing to JSON
       const expected = JSON.parse(
         JSON.stringify({
-          items: expectedItems.map(mockEnrichMessage),
+          items: expectedItems.map(mockEnrichMessage).map(m => ({
+            ...m,
+            is_archived: (messagesArchived as NonEmptyString[]).includes(m.id)
+          })),
           prev: expectedPrev,
           next: expectedNext
         })
