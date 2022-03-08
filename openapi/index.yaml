@@ -131,6 +131,48 @@ paths:
             $ref: '#/definitions/ProblemJson'
         '429':
           description: Too many requests
+  /messages/{fiscal_code}/{id}/message-status:
+    put:
+      operationId: upsertMessageStatusAttributes
+      summary: UpsertMessageStatusAttributes
+      description: Updates the status of a message with attributes
+      parameters:
+        - $ref: '#/parameters/FiscalCode'
+        - name: id
+          in: path
+          type: string
+          required: true
+          description: The ID of the message.
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/MessageStatusChange'
+          required: true
+          x-examples:
+            application/json: |
+              change_type: bulk,
+              is_archived: true,
+              is_read: true
+      responses:
+        '200':
+          description: Success.
+          schema:
+            $ref: '#/definitions/MessageStatus'
+          examples:
+            application/json: |
+              status: ACCEPTED,
+              version: 1,
+              updated_at: 2022-02-28T16:35:15.993Z,
+              is_read: true,
+              is_archived: false
+        '401':
+          description: Unauthorized
+        '404':
+          description: No message found for the provided ID.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '429':
+          description: Too many requests
   /services:
     get:
       operationId: getVisibleServices
@@ -837,17 +879,7 @@ definitions:
           - service_name
           - organization_name
           - message_title
-      - type: object
-        properties:
-          is_read:
-            type: boolean
-            default: false
-          is_archived:
-            type: boolean
-            default: false
-        required:
-          - is_read
-          - is_archived
+      - $ref: '#/definitions/MessageStatusAttributes'
   PublicMessage:
     x-one-of: true
     allOf:
@@ -1529,3 +1561,75 @@ definitions:
     required:
       - tag
       - rptId
+  MessageStatus:
+    type: object
+    properties:
+      status:
+        $ref: '#/definitions/MessageStatusValue'
+      updated_at:
+        $ref: '#/definitions/Timestamp'
+      version:
+        type: integer
+    required:
+      - status
+      - updated_at
+  MessageStatusAttributes:
+    type: object
+    properties:
+      is_read:
+        type: boolean
+        default: false
+      is_archived:
+        type: boolean
+        default: false
+    required:
+      - is_read
+      - is_archived
+  MessageStatusReadingChange:
+    type: object
+    properties:
+      change_type:
+        type: string
+        enum:
+          - reading
+      is_read:
+        type: boolean
+        enum:
+          - true
+    required:
+      - change_type
+      - is_read
+  MessageStatusArchivingChange:
+    type: object
+    properties:
+      change_type:
+        type: string
+        enum:
+          - archiving
+      is_archived:
+        type: boolean
+    required:
+      - change_type
+      - is_archived
+  MessageStatusBulkChange:
+    type: object
+    properties:
+      change_type:
+        type: string
+        enum:
+          - bulk
+      is_archived:
+        type: boolean
+      is_read:
+        type: boolean
+        enum:
+          - true
+    required:
+      - change_type
+      - is_archived
+  MessageStatusChange:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/MessageStatusReadingChange'
+      - $ref: '#/definitions/MessageStatusArchivingChange'
+      - $ref: '#/definitions/MessageStatusBulkChange'
