@@ -157,7 +157,7 @@ paths:
         '200':
           description: Success.
           schema:
-            $ref: '#/definitions/MessageStatus'
+            $ref: '#/definitions/MessageStatusWithAttributes'
           examples:
             application/json: |
               status: ACCEPTED,
@@ -1585,6 +1585,10 @@ definitions:
     required:
       - is_read
       - is_archived
+  MessageStatusWithAttributes:
+    allOf:
+      - $ref: '#/definitions/MessageStatus'
+      - $ref: '#/definitions/MessageStatusAttributes'
   MessageStatusReadingChange:
     type: object
     properties:

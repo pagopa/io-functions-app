@@ -143,7 +143,7 @@ paths:
         "200":
           description: Success.
           schema:
-            $ref: "#/definitions/MessageStatus"
+            $ref: "#/definitions/MessageStatusWithAttributes"
           examples:
             application/json: |
               status: ACCEPTED,
@@ -718,6 +718,8 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageStatus"
   MessageStatusAttributes:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageStatusAttributes"
+  MessageStatusWithAttributes:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageStatusWithAttributes"
   MessageStatusReadingChange:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageStatusReadingChange"
   MessageStatusArchivingChange:
