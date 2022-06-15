@@ -5,7 +5,11 @@ import * as O from "fp-ts/lib/Option";
 import { ServicePreference } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePreference";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { Profile } from "@pagopa/io-functions-commons/dist/src/models/profile";
-import { RetrievedServicePreference } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
+import {
+  AccessReadMessageStatus,
+  AccessReadMessageStatusEnum,
+  RetrievedServicePreference
+} from "@pagopa/io-functions-commons/dist/src/models/service_preference";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
@@ -17,11 +21,14 @@ import { ActivationModel } from "@pagopa/io-functions-commons/dist/src/models/ac
 import { ActivationStatusEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ActivationStatus";
 
 const toUserServicePreference = (
+  accessReadMessageStatus: AccessReadMessageStatus,
   emailEnabled: boolean,
   inboxEnabled: boolean,
   webhookEnabled: boolean,
   version: NonNegativeInteger
 ): ServicePreference => ({
+  can_access_message_read_status:
+    accessReadMessageStatus !== AccessReadMessageStatusEnum.DENY,
   is_email_enabled: emailEnabled,
   is_inbox_enabled: inboxEnabled,
   is_webhook_enabled: webhookEnabled,
@@ -38,6 +45,7 @@ export const toUserServicePreferenceFromModel = (
   servicePref: RetrievedServicePreference
 ): ServicePreference =>
   toUserServicePreference(
+    servicePref.accessReadMessageStatus,
     servicePref.isEmailEnabled,
     servicePref.isInboxEnabled,
     servicePref.isWebhookEnabled,
@@ -52,7 +60,14 @@ export const toUserServicePreferenceFromModel = (
  */
 export const toDefaultEnabledUserServicePreference = (
   version: NonNegativeInteger
-): ServicePreference => toUserServicePreference(true, true, true, version);
+): ServicePreference =>
+  toUserServicePreference(
+    AccessReadMessageStatusEnum.UNKNOWN,
+    true,
+    true,
+    true,
+    version
+  );
 
 /**
  * Create a default DISABLED ServicePreference
@@ -62,7 +77,14 @@ export const toDefaultEnabledUserServicePreference = (
  */
 export const toDefaultDisabledUserServicePreference = (
   version: NonNegativeInteger
-): ServicePreference => toUserServicePreference(false, false, false, version);
+): ServicePreference =>
+  toUserServicePreference(
+    AccessReadMessageStatusEnum.DENY,
+    false,
+    false,
+    false,
+    version
+  );
 
 /**
  *

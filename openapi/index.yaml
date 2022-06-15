@@ -638,6 +638,8 @@ definitions:
             $ref: '#/definitions/PrescriptionData'
           eu_covid_cert:
             $ref: '#/definitions/EUCovidCert'
+          third_party_data:
+            $ref: '#/definitions/MessageContent/allOf/1/properties/third_party_data'
           legal_data:
             $ref: '#/definitions/LegalData'
   CIDR:
@@ -830,6 +832,13 @@ definitions:
             $ref: '#/definitions/EmailAddress'
       fiscal_code:
         $ref: '#/definitions/FiscalCode'
+      feature_level_type:
+        type: string
+        default: STANDARD
+        x-extensible-enum:
+          - STANDARD
+          - ADVANCED
+        example: STANDARD
     required:
       - content
   NewProfile:
@@ -1132,6 +1141,34 @@ definitions:
             $ref: '#/definitions/LegalData'
           eu_covid_cert:
             $ref: '#/definitions/EUCovidCert'
+          third_party_data:
+            type: object
+            description: >-
+              Payload containing all information needed to retrieve and
+              visualize third party message details
+            properties:
+              id:
+                type: string
+                description: >-
+                  Unique id for retrieving third party enriched information
+                  about the message
+                minLength: 1
+              original_sender:
+                type: string
+                description: >-
+                  Either a ServiceId or a simple string representing the sender
+                  name
+                minLength: 1
+              original_receipt_date:
+                $ref: '#/definitions/Timestamp'
+              has_attachments:
+                type: boolean
+                default: false
+              summary:
+                type: string
+                minLength: 1
+            required:
+              - id
           due_date:
             $ref: '#/definitions/Timestamp'
   MessageContentBase:
@@ -1396,27 +1433,37 @@ definitions:
       - AUTO
       - MANUAL
   ServicePreference:
-    description: >-
-      Define a set of preferences of a Citizen for a given Service.
+    description: |-
+      Return the set of preferences of a Citizen for a given Service.
+      It's needed by Citizens to read previoulsy expressed preferences.
+    allOf:
+      - description: >-
+          Define a set of required preferences of a Citizen for a given Service.
 
-      It's needed by Citizens to express how they want Services to get in touch
-      with them.
-    type: object
-    properties:
-      is_email_enabled:
-        type: boolean
-      is_inbox_enabled:
-        type: boolean
-      is_webhook_enabled:
-        type: boolean
-      settings_version:
-        type: integer
-        minimum: 0
-    required:
-      - is_email_enabled
-      - is_inbox_enabled
-      - is_webhook_enabled
-      - settings_version
+          It's needed by Citizens to express how they want Services to get in
+          touch with them.
+        type: object
+        properties:
+          is_email_enabled:
+            type: boolean
+          is_inbox_enabled:
+            type: boolean
+          is_webhook_enabled:
+            type: boolean
+          settings_version:
+            type: integer
+            minimum: 0
+        required:
+          - is_email_enabled
+          - is_inbox_enabled
+          - is_webhook_enabled
+          - settings_version
+      - type: object
+        properties:
+          can_access_message_read_status:
+            type: boolean
+        required:
+          - can_access_message_read_status
   MessageResponseWithoutContent:
     type: object
     properties:
@@ -1517,6 +1564,16 @@ definitions:
     allOf:
       - $ref: '#/definitions/MessageCategoryPayment'
       - $ref: '#/definitions/MessageCategoryBase'
+      - allOf:
+          - $ref: '#/definitions/MessageContent/allOf/1/properties/third_party_data'
+          - type: object
+            properties:
+              tag:
+                type: string
+                enum:
+                  - PN
+            required:
+              - tag
   LegalData:
     type: object
     properties:

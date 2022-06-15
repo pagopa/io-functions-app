@@ -2,6 +2,7 @@ import { Context } from "@azure/functions";
 import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import {
+  AccessReadMessageStatusEnum,
   makeServicesPreferencesDocumentId,
   NewServicePreference,
   ServicesPreferencesModel
@@ -50,6 +51,7 @@ export const createServicePreference = (
   fiscalCode: FiscalCode,
   version: NonNegativeInteger
 ): NewServicePreference => ({
+  accessReadMessageStatus: AccessReadMessageStatusEnum.UNKNOWN,
   fiscalCode,
   id: makeServicesPreferencesDocumentId(fiscalCode, serviceId, version),
   isEmailEnabled: !blockedChannels.includes(BlockedInboxOrChannelEnum.EMAIL),

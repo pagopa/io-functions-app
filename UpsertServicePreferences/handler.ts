@@ -3,13 +3,15 @@ import * as express from "express";
 import * as t from "io-ts";
 
 import { sequenceS } from "fp-ts/lib/Apply";
-import { pipe } from "fp-ts/lib/function";
+import { identity, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as E from "fp-ts/lib/Either";
 
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServicePreference } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePreference";
+import { UpsertServicePreference } from "@pagopa/io-functions-commons/dist/generated/definitions/UpsertServicePreference";
 import { FiscalCodeMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/fiscalcode";
 import {
   withRequestMiddlewares,
@@ -24,16 +26,20 @@ import {
 import { ProfileModel } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
 import {
+  AccessReadMessageStatusEnum,
   makeServicesPreferencesDocumentId,
-  ServicesPreferencesModel
+  ServicesPreferencesModel,
+  NewServicePreference
 } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
 import { RequiredBodyPayloadMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_body_payload";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
 import {
   IResponseErrorConflict,
   IResponseErrorNotFound,
+  IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorConflict,
+  ResponseErrorValidation,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
@@ -59,6 +65,10 @@ import { makeServiceSubscribedEvent } from "../utils/emitted_events";
 import { getProfileOrErrorResponse } from "../utils/profiles";
 import { getServiceOrErrorResponse } from "../utils/services";
 import { updateSubscriptionFeedTask } from "./subscription_feed";
+import {
+  errorsToReadableMessages,
+  readableReport
+} from "@pagopa/ts-commons/lib/reporters";
 
 enum FeedOperationEnum {
   "SUBSCRIBED" = "SUBSCRIBED",
@@ -76,6 +86,7 @@ type IUpsertServicePreferencesHandlerResult =
   | IResponseSuccessJson<ServicePreference>
   | IResponseErrorNotFound
   | IResponseErrorConflict
+  | IResponseErrorValidation
   | IResponseErrorQuery;
 
 /**
@@ -105,8 +116,11 @@ export declare type upsertUserServicePreferencesT = (params: {
   readonly serviceId: ServiceId;
   readonly version: NonNegativeInteger;
   readonly fiscalCode: FiscalCode;
-  readonly servicePreferencesToUpsert: ServicePreference;
-}) => TE.TaskEither<IResponseErrorQuery, ServicePreference>;
+  readonly servicePreferencesToUpsert: UpsertServicePreference;
+}) => TE.TaskEither<
+  IResponseErrorQuery | IResponseErrorValidation,
+  ServicePreference
+>;
 const upsertUserServicePreferences = (
   servicePreferencesModel: ServicesPreferencesModel
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -117,18 +131,39 @@ const upsertUserServicePreferences = (
   servicePreferencesToUpsert
 }) =>
   pipe(
-    servicePreferencesModel.upsert({
-      fiscalCode,
-      id: makeServicesPreferencesDocumentId(fiscalCode, serviceId, version),
-      isEmailEnabled: servicePreferencesToUpsert.is_email_enabled,
-      isInboxEnabled: servicePreferencesToUpsert.is_inbox_enabled,
-      isWebhookEnabled: servicePreferencesToUpsert.is_webhook_enabled,
-      kind: "INewServicePreference",
-      serviceId,
-      settingsVersion: version
-    }),
-    TE.mapLeft(l =>
-      ResponseErrorQuery("Error while saving user' service preferences", l)
+    O.fromNullable(servicePreferencesToUpsert.can_access_message_read_status),
+    O.map(choice =>
+      choice
+        ? AccessReadMessageStatusEnum.ALLOW
+        : AccessReadMessageStatusEnum.DENY
+    ),
+    O.getOrElse(() => AccessReadMessageStatusEnum.UNKNOWN),
+    accessReadMessageStatus =>
+      NewServicePreference.decode({
+        accessReadMessageStatus,
+        fiscalCode,
+        id: makeServicesPreferencesDocumentId(fiscalCode, serviceId, version),
+        isEmailEnabled: servicePreferencesToUpsert.is_email_enabled,
+        isInboxEnabled: servicePreferencesToUpsert.is_inbox_enabled,
+        isWebhookEnabled: servicePreferencesToUpsert.is_webhook_enabled,
+        kind: "INewServicePreference",
+        serviceId,
+        settingsVersion: version
+      }),
+    E.mapLeft(e =>
+      ResponseErrorValidation(
+        "Cannot decode NewServicePreference",
+        errorsToReadableMessages(e).join(" | ")
+      )
+    ),
+    TE.fromEither,
+    TE.chainW(newServicePreference =>
+      pipe(
+        servicePreferencesModel.upsert(newServicePreference),
+        TE.mapLeft(l =>
+          ResponseErrorQuery("Error while saving user' service preferences", l)
+        )
+      )
     ),
     TE.map(toUserServicePreferenceFromModel)
   );

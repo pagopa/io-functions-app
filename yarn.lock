@@ -709,13 +709,13 @@
   resolved "https://registry.yarnpkg.com/@pagopa/express-azure-functions/-/express-azure-functions-2.0.0.tgz#eb52a0b997d931c1509372e2a9bea22a8ca85c17"
   integrity sha512-IFZqtk0e2sfkMZIxYqPORzxcKRkbIrVJesR6eMLNwzh1rA4bl2uh9ZHk1m55LNq4ZmaxREDu+1JcGlIaZQgKNQ==
 
-"@pagopa/io-functions-commons@^23.7.0":
-  version "23.7.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-23.7.0.tgz#08ad8c828d1db5e9ff9a04ee7de6d294522ba9b1"
-  integrity sha512-HUgfq/vVPVuT2UObWjIHc0RolubJdzd59G9AefoU9fLODiHYpCglTsP4wXy64rwQgsy5ubkVf5u4M4cvTYXRnw==
+"@pagopa/io-functions-commons@^25.4.0":
+  version "25.4.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-25.4.0.tgz#815ebb1c8ed37bad87dbbe854edd6d4db1493379"
+  integrity sha512-dTnq0Xo0/xT0RxDla9CDQf0HaIkHGf7o9XI346W3+gM6UUyD1fC35ai8kg/lIGPeZ6eIJN7ClLg1iBu0gWdwaw==
   dependencies:
     "@azure/cosmos" "^3.15.1"
-    "@pagopa/ts-commons" "^10.0.1"
+    "@pagopa/ts-commons" "^10.3.0"
     applicationinsights "^1.8.10"
     azure-storage "^2.10.5"
     cidr-matcher "^2.1.1"
@@ -764,7 +764,7 @@
     node-fetch "^2.6.0"
     validator "^10.1.0"
 
-"@pagopa/ts-commons@^10.0.1", "@pagopa/ts-commons@^10.1.0":
+"@pagopa/ts-commons@^10.1.0":
   version "10.1.0"
   resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.1.0.tgz#899698e31c4fbf32bc7abd88614e6d411cc1e2cd"
   integrity sha512-MqktlOQS+0m2bIuVEWfFnSvNDr5NepJ/Ut9Qo+VKZDJD2afdiBXnuMTtB6SyUHawB0pOxcQioguyYn5yB5KlNA==
@@ -777,6 +777,20 @@
     json-set-map "^1.1.2"
     node-fetch "^2.6.0"
     validator "^10.1.0"
+
+"@pagopa/ts-commons@^10.3.0":
+  version "10.5.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.5.0.tgz#5c22cf3bc16af087beac5b0dfb3eef8f9231ab80"
+  integrity sha512-gD0X6inD0knEU4IJtHGqJ622AIAq11pdstrFDpt87tHLRsTpOk9EJ/4yhrokGPhfInKbOEkIV1TydUZIqEQ6Vw==
+  dependencies:
+    abort-controller "^3.0.0"
+    agentkeepalive "^4.1.4"
+    applicationinsights "^1.8.10"
+    fp-ts "^2.11.0"
+    io-ts "^2.2.16"
+    json-set-map "^1.1.2"
+    node-fetch "^2.6.0"
+    validator "^13.7.0"
 
 "@sendgrid/client@^6.5.5":
   version "6.5.5"
@@ -3799,6 +3813,11 @@ fp-ts@^2.10.5:
   version "2.11.1"
   resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-2.11.1.tgz#b1eeb2540728b6328542664888442f8f805d2443"
   integrity sha512-CJOfs+Heq/erkE5mqH2mhpsxCKABGmcLyeEwPxtbTlkLkItGUs6bmk2WqjB2SgoVwNwzTE5iKjPQJiq06CPs5g==
+
+fp-ts@^2.11.0:
+  version "2.12.1"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-2.12.1.tgz#e389488bfd1507af06bd5965e97367edcd4fabad"
+  integrity sha512-oxvgqUYR6O9VkKXrxkJ0NOyU0FrE705MeqgBUMEPWyTu6Pwn768cJbHChw2XOBlgFLKfIHxjr2OOBFpv2mUGZw==
 
 fragment-cache@^0.2.1:
   version "0.2.1"
@@ -9029,6 +9048,11 @@ validator@^13.6.0, validator@~13.6.0:
   version "13.6.0"
   resolved "https://registry.yarnpkg.com/validator/-/validator-13.6.0.tgz#1e71899c14cdc7b2068463cb24c1cc16f6ec7059"
   integrity sha512-gVgKbdbHgtxpRyR8K0O6oFZPhhB5tT1jeEHZR0Znr9Svg03U0+r9DXWMrnRAB+HtCStDQKlaIZm42tVsVjqtjg==
+
+validator@^13.7.0:
+  version "13.7.0"
+  resolved "https://registry.yarnpkg.com/validator/-/validator-13.7.0.tgz#4f9658ba13ba8f3d82ee881d3516489ea85c0857"
+  integrity sha512-nYXQLCBkpJ8X6ltALua9dRrZDHVYxjJ1wgskNt1lH9fzGjs3tgojGSCBjmEPwkWS1y29+DrizMTW19Pr9uB2nw==
 
 validator@~10.8.0:
   version "10.8.0"
