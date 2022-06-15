@@ -3,7 +3,7 @@ import * as express from "express";
 import * as t from "io-ts";
 
 import { sequenceS } from "fp-ts/lib/Apply";
-import { identity, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
@@ -53,6 +53,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { TableService } from "azure-storage";
 import { ActivationModel } from "@pagopa/io-functions-commons/dist/src/models/activation";
 import { SpecialServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/SpecialServiceCategory";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { getServiceCategoryOrStandard } from "../utils/services";
 import {
   getServicePreferenceSettingsVersion,
@@ -65,10 +66,6 @@ import { makeServiceSubscribedEvent } from "../utils/emitted_events";
 import { getProfileOrErrorResponse } from "../utils/profiles";
 import { getServiceOrErrorResponse } from "../utils/services";
 import { updateSubscriptionFeedTask } from "./subscription_feed";
-import {
-  errorsToReadableMessages,
-  readableReport
-} from "@pagopa/ts-commons/lib/reporters";
 
 enum FeedOperationEnum {
   "SUBSCRIBED" = "SUBSCRIBED",

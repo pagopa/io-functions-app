@@ -31,11 +31,6 @@ import { PaymentNoticeNumber } from "../../generated/backend/PaymentNoticeNumber
 import { MessageBodyMarkdown } from "../../generated/backend/MessageBodyMarkdown";
 import { MessageSubject } from "../../generated/backend/MessageSubject";
 import { FeatureLevelTypeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/FeatureLevelType";
-import {
-  IWithinRangeIntegerTag,
-  NonNegativeInteger,
-  WithinRangeInteger
-} from "@pagopa/ts-commons/lib/numbers";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
 const aDate = new Date();
