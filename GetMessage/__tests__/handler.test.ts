@@ -30,12 +30,19 @@ import { PaymentAmount } from "../../generated/backend/PaymentAmount";
 import { PaymentNoticeNumber } from "../../generated/backend/PaymentNoticeNumber";
 import { MessageBodyMarkdown } from "../../generated/backend/MessageBodyMarkdown";
 import { MessageSubject } from "../../generated/backend/MessageSubject";
+import { FeatureLevelTypeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/FeatureLevelType";
+import {
+  IWithinRangeIntegerTag,
+  NonNegativeInteger,
+  WithinRangeInteger
+} from "@pagopa/ts-commons/lib/numbers";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
 const aDate = new Date();
 
 const aNewMessageWithoutContent: NewMessageWithoutContent = {
   createdAt: aDate,
+  featureLevelType: FeatureLevelTypeEnum.STANDARD,
   fiscalCode: aFiscalCode,
   id: "A_MESSAGE_ID" as NonEmptyString,
   indexedId: "A_MESSAGE_ID" as NonEmptyString,
@@ -56,8 +63,9 @@ const aPublicExtendedMessage: CreatedMessageWithoutContent = {
   created_at: aDate,
   fiscal_code: aNewMessageWithoutContent.fiscalCode,
   id: "A_MESSAGE_ID",
-  sender_service_id: aNewMessageWithoutContent.senderServiceId
-};
+  sender_service_id: aNewMessageWithoutContent.senderServiceId,
+  time_to_live: 3600
+} as CreatedMessageWithoutContent;
 
 const aPublicExtendedMessageResponse: MessageResponseWithoutContent = {
   message: aPublicExtendedMessage
@@ -259,7 +267,8 @@ describe("GetMessageHandler", () => {
             fiscal_code: aSenderService.organizationFiscalCode
           }
         }
-      }
+      },
+      time_to_live: 3600
     };
 
     expect(result.kind).toBe("IResponseSuccessJson");

@@ -35,6 +35,7 @@ import {
   RetrievedMessageStatus
 } from "@pagopa/io-functions-commons/dist/src/models/message_status";
 import { MessageStatusValueEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageStatusValue";
+import { FeatureLevelTypeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/FeatureLevelType";
 
 const aFiscalCode = "FRLFRC74E04B157I" as FiscalCode;
 const aMessageId = "A_MESSAGE_ID" as NonEmptyString;
@@ -54,6 +55,7 @@ const aRetrievedMessageStatus: RetrievedMessageStatus = {
 
 const aNewMessageWithoutContent: NewMessageWithoutContent = {
   createdAt: new Date(),
+  featureLevelType: FeatureLevelTypeEnum.STANDARD,
   fiscalCode: aFiscalCode,
   id: aMessageId,
   indexedId: "A_MESSAGE_ID" as NonEmptyString,

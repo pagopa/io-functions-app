@@ -6,6 +6,7 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 
 import {
+  AccessReadMessageStatusEnum,
   makeServicesPreferencesDocumentId,
   NewServicePreference,
   ServicesPreferencesModel
@@ -106,6 +107,7 @@ describe("MigrateServicePreferenceFromLegacy", () => {
     );
     expect(mockServicesPreferencesModel.create).toHaveBeenCalledTimes(1);
     expect(mockServicesPreferencesModel.create).toHaveBeenCalledWith({
+      accessReadMessageStatus: AccessReadMessageStatusEnum.UNKNOWN,
       fiscalCode: autoProfile.fiscalCode,
       id: makeServicesPreferencesDocumentId(
         autoProfile.fiscalCode as FiscalCode,
