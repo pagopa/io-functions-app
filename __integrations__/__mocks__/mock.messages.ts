@@ -1,16 +1,10 @@
-import { EnrichedMessage } from "@pagopa/io-functions-commons/dist/generated/definitions/EnrichedMessage";
 import { MessageContent } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageContent";
 import { TimeToLiveSeconds } from "@pagopa/io-functions-commons/dist/generated/definitions/TimeToLiveSeconds";
 
-import { TagEnum as TagEnumBase } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategoryBase";
-import { TagEnum as TagEnumPayment } from "@pagopa/io-functions-commons/dist/generated/definitions/MessageCategoryPayment";
-
 import { NewMessageWithContent } from "@pagopa/io-functions-commons/dist/src/models/message";
-import { retrievedMessageToPublic } from "@pagopa/io-functions-commons/dist/src/utils/messages";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import { aServiceID, serviceList } from "./mock.services";
-import { RetrievedMessage } from "@pagopa/io-functions-commons/dist/src/models/message";
+import { aServiceID } from "./mock.services";
 import { pipe } from "fp-ts/lib/function";
 
 import * as RA from "fp-ts/ReadonlyArray";
@@ -78,23 +72,3 @@ export const messageStatusList = pipe(
   ]),
   RA.flatten
 ) as ReadonlyArray<NewMessageStatus>;
-
-// -------
-
-export const mockEnrichMessage = (
-  message: NewMessageWithContent
-): EnrichedMessage => {
-  const service = serviceList.find(
-    s => s.serviceId === message.senderServiceId
-  );
-
-  return {
-    ...retrievedMessageToPublic((message as any) as RetrievedMessage),
-    message_title: message.content.subject,
-    service_name: service.serviceName,
-    organization_name: service.organizationName,
-    category: { tag: TagEnumBase.GENERIC },
-    is_archived: false,
-    is_read: false
-  };
-};
