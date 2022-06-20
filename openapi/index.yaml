@@ -541,6 +541,8 @@ definitions:
         $ref: '#/definitions/IsEmailValidated'
       is_test_profile:
         $ref: '#/definitions/IsTestProfile'
+      last_app_version:
+        $ref: '#/definitions/Profile/properties/last_app_version'
       version:
         type: integer
     required:
@@ -635,6 +637,12 @@ definitions:
         $ref: '#/definitions/IsWebhookEnabled'
       is_email_enabled:
         $ref: '#/definitions/IsEmailEnabled'
+      last_app_version:
+        type: string
+        format: Semver
+        description: A string field in Semantic Versioning format
+        x-import: '@pagopa/ts-commons/lib/strings'
+        example: 1.10.11
       version:
         type: integer
     required:

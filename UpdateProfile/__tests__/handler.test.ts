@@ -28,6 +28,8 @@ import { UpdateProfileHandler } from "../handler";
 
 import { createTracker } from "../../__mocks__/tracking";
 
+import { Semver } from "@pagopa/ts-commons/lib/strings";
+
 const mockSendMessage = jest.fn().mockImplementation(() => Promise.resolve());
 const mockQueueClient = ({
   sendMessage: mockSendMessage
