@@ -913,32 +913,34 @@ definitions:
       - LEGACY
       - AUTO
       - MANUAL
+  BasicServicePreference:
+    description: >-
+      Define a set of required preferences of a Citizen for a given Service.
+
+      It's needed by Citizens to express how they want Services to get in touch
+      with them.
+    type: object
+    properties:
+      is_email_enabled:
+        type: boolean
+      is_inbox_enabled:
+        type: boolean
+      is_webhook_enabled:
+        type: boolean
+      settings_version:
+        type: integer
+        minimum: 0
+    required:
+      - is_email_enabled
+      - is_inbox_enabled
+      - is_webhook_enabled
+      - settings_version
   ServicePreference:
     description: |-
       Return the set of preferences of a Citizen for a given Service.
       It's needed by Citizens to read previoulsy expressed preferences.
     allOf:
-      - description: >-
-          Define a set of required preferences of a Citizen for a given Service.
-
-          It's needed by Citizens to express how they want Services to get in
-          touch with them.
-        type: object
-        properties:
-          is_email_enabled:
-            type: boolean
-          is_inbox_enabled:
-            type: boolean
-          is_webhook_enabled:
-            type: boolean
-          settings_version:
-            type: integer
-            minimum: 0
-        required:
-          - is_email_enabled
-          - is_inbox_enabled
-          - is_webhook_enabled
-          - settings_version
+      - $ref: '#/definitions/BasicServicePreference'
       - type: object
         properties:
           can_access_message_read_status:

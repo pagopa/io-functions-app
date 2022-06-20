@@ -484,6 +484,8 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServicePreferencesSettings"
   ServicesPreferencesMode:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServicesPreferencesMode"
+  BasicServicePreference:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/BasicServicePreference"
   ServicePreference:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServicePreference"
   StandardServiceMetadata:
