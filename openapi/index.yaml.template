@@ -23,142 +23,6 @@ schemes:
 security:
   - SubscriptionKey: []
 paths:
-  "/messages/{fiscal_code}":
-    get:
-      operationId: getMessagesByUser
-      summary: GetMessages
-      description: |-
-        Returns the messages for the user identified by the provided fiscal code.
-        Messages will be returned in inverse acceptance order (from last to first).
-        The "next" field, when present, contains an URL pointing to the next page of results.
-      tags:
-        - restricted
-      parameters:
-        - $ref: "#/parameters/FiscalCode"
-        - $ref: '#/parameters/PageSize'
-        - $ref: '#/parameters/MaximumId'
-        - $ref: '#/parameters/MinimumId'
-        - $ref: '#/parameters/EnrichResultData'
-        - $ref: '#/parameters/GetArchivedMessages'
-      responses:
-        "200":
-          description: Found.
-          schema:
-            $ref: "#/definitions/PaginatedPublicMessagesCollection"
-          examples:
-            application/json:
-              items:
-                - id: 01BX9NSMKVXXS5PSP2FATZMYYY
-                  fiscal_code: PUPFHK4TD3MWL20W
-                  time_to_live: 3600
-                  sender_service_id: 01BX9NSMKVXXS5PSP2FATZMZZZ
-                  created_at: "2018-05-21T07:36:41.209Z"
-                - id: 01BX9NSMKVXXS5PSP2FATZM123
-                  fiscal_code: PKTINH4QDQUV696L
-                  time_to_live: 3600
-                  sender_service_id: 01BX9NSMKVXXS5PSP2FATZMWWW
-                  created_at: "2018-05-21T07:36:41.209Z"
-              next: 01BX9NSMKVXXS5PSP2FATZMWWW
-              prev: 01BX9NSMKVXXS5PSP2FATZMWWW
-        "401":
-          description: Unauthorized
-        "404":
-          description: No message found.
-          schema:
-            $ref: "#/definitions/ProblemJson"
-        "429":
-          description: Too many requests
-        "500":
-          description: Internal Server error
-  "/messages/{fiscal_code}/{id}":
-    get:
-      operationId: getMessage
-      summary: GetMessage
-      description: |-
-        The previously created message with the provided message ID is
-        returned.
-      tags:
-        - public
-        - restricted
-      parameters:
-        - $ref: "#/parameters/FiscalCode"
-        - name: id
-          in: path
-          type: string
-          required: true
-          description: The ID of the message.
-      responses:
-        "200":
-          description: Message found.
-          schema:
-            $ref: "#/definitions/MessageResponseWithContent"
-          examples:
-            application/json:
-              message:
-                id: 01BX9NSMKAAAS5PSP2FATZM6BQ
-                fiscal_code: QXJNTX9RCRVD6V4O
-                time_to_live: 3600
-                content:
-                  subject: message subject, aliquip sint nulla in estinut
-                  markdown: |-
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
-                    Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
-                    risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
-                    fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
-                    laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
-                sender_service_id: 01BX9NSMKVXXS5PSP2FATZM6QX
-              notification:
-                email: QUEUED
-        "401":
-          description: Unauthorized
-        "404":
-          description: No message found for the provided ID.
-          schema:
-            $ref: "#/definitions/ProblemJson"
-        "429":
-          description: Too many requests
-  "/messages/{fiscal_code}/{id}/message-status":
-    put:
-      operationId: upsertMessageStatusAttributes
-      summary: UpsertMessageStatusAttributes
-      description: Updates the status of a message with attributes
-      parameters:
-        - $ref: "#/parameters/FiscalCode"
-        - name: id
-          in: path
-          type: string
-          required: true
-          description: The ID of the message.
-        - name: body
-          in: body
-          schema:
-            $ref: "#/definitions/MessageStatusChange"
-          required: true
-          x-examples:
-            application/json: |
-              change_type: bulk,
-              is_archived: true,
-              is_read: true
-      responses:
-        "200":
-          description: Success.
-          schema:
-            $ref: "#/definitions/MessageStatusWithAttributes"
-          examples:
-            application/json: |
-              status: ACCEPTED,
-              version: 1,
-              updated_at: 2022-02-28T16:35:15.993Z,
-              is_read: true,
-              is_archived: false
-        "401":
-          description: Unauthorized
-        "404":
-          description: No message found for the provided ID.
-          schema:
-            $ref: "#/definitions/ProblemJson"
-        "429":
-          description: Too many requests
   "/services":
     get:
       operationId: getVisibleServices
@@ -523,28 +387,6 @@ parameters:
     minimum: 1
     maximum: 100
     description: How many items a page should include.
-  MaximumId:
-    type: string
-    name: maximum_id
-    in: query
-    description: >-
-      The maximum id to get messages until to.
-  MinimumId:
-    type: string
-    name: minimum_id
-    in: query
-    description: >-
-      The minimum id to get messages from.
-  EnrichResultData:
-    type: boolean
-    name: enrich_result_data
-    in: query
-    description: Indicates whether result data should be enriched or not.
-  GetArchivedMessages:
-    type: boolean
-    name: archived
-    in: query
-    description: Indicates whether to retrieve archived/not archived messages.
   UserDataProcessingChoiceParam:
     name: choice
     in: path
@@ -554,20 +396,8 @@ parameters:
     required: true
     x-example: DOWNLOAD
 definitions:
-  EUCovidCert:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/EUCovidCert"
   LimitedProfile:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/LimitedProfile"
-  PrescriptionData:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PrescriptionData"
-  PrescriptionNRE:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PrescriptionNRE"
-  PrescriptionIUP:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PrescriptionIUP"
-  PrescriberFiscalCode:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PrescriberFiscalCode"
-  NewMessageContent:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/NewMessageContent"
   CIDR:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/CIDR"
   ServicePayload:
@@ -584,24 +414,10 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/OrganizationName"
   DepartmentName:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/DepartmentName"
-  PaymentDataBase:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaymentDataBase"
   ExtendedProfile:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ExtendedProfile"
-  MessageResponseWithContent:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageResponseWithContent"
-  NewMessage:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/NewMessage"
   NewProfile:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/NewProfile"
-  EnrichedMessage:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/EnrichedMessage"
-  PublicMessage:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PublicMessage"
-  PublicMessagesCollection:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PublicMessagesCollection"
-  PaginatedPublicMessagesCollection:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaginatedPublicMessagesCollection"
   PaginatedServiceTupleCollection:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
   ProblemJson:
@@ -644,30 +460,8 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/TimeToLiveSeconds"
   Timestamp:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Timestamp"
-  MessageContent:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageContent"
-  MessageContentBase:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageContentBase"
-  MessageSubject:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageSubject"
-  MessageBodyMarkdown:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageBodyMarkdown"
-  PaymentData:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaymentData"
-  PaymentDataWithRequiredPayee:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaymentDataWithRequiredPayee"
   OrganizationFiscalCode:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/OrganizationFiscalCode"
-  CreatedMessageWithoutContentCollection:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/CreatedMessageWithoutContentCollection"
-  CreatedMessageWithoutContent:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/CreatedMessageWithoutContent"
-  CreatedMessageWithContent:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/CreatedMessageWithContent"
-  MessageResponseNotificationStatus:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageResponseNotificationStatus"
-  MessageStatusValue:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageStatusValue"
   ServiceTupleCollection:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServiceTupleCollection"
   PaginationResponse:
@@ -692,10 +486,6 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServicesPreferencesMode"
   ServicePreference:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServicePreference"
-  MessageResponseWithoutContent:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageResponseWithoutContent"
-  Payee:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Payee"
   StandardServiceMetadata:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/StandardServiceMetadata"
   SpecialServiceMetadata:
@@ -706,25 +496,3 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/SpecialServiceCategory"
   StandardServiceCategory:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/StandardServiceCategory"
-  MessageCategory:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageCategory"
-  LegalData:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/LegalData"
-  MessageCategoryBase:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageCategoryBase"
-  MessageCategoryPayment:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageCategoryPayment"
-  MessageStatus:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageStatus"
-  MessageStatusAttributes:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageStatusAttributes"
-  MessageStatusWithAttributes:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageStatusWithAttributes"
-  MessageStatusReadingChange:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageStatusReadingChange"
-  MessageStatusArchivingChange:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageStatusArchivingChange"
-  MessageStatusBulkChange:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageStatusBulkChange"
-  MessageStatusChange:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/MessageStatusChange"
