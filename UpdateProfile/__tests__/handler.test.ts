@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import * as lolex from "lolex";
 
 import { none, some } from "fp-ts/lib/Option";
@@ -35,7 +33,6 @@ const mockQueueClient = ({
   sendMessage: mockSendMessage
 } as unknown) as QueueClient;
 
-// eslint-disable-next-line functional/no-let
 let clock: any;
 beforeEach(() => {
   (df.getClient as any).mockClear();
@@ -50,7 +47,6 @@ afterEach(() => {
 
 const mockTracker = createTracker("" as any);
 
-// eslint-disable-next-line sonar/sonar-max-lines-per-function
 describe("UpdateProfileHandler", () => {
   it("should return a query error when an error occurs retrieving the existing profile", async () => {
     const profileModelMock = {
@@ -849,4 +845,76 @@ describe("UpdateProfileHandler", () => {
 
     expect(mockSendMessage).toBeCalledTimes(0);
   });
+
+  it("GIVEN a profile with a valid last_app_version, the handler should write the field and return successfully", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() => TE.of(some({ ...aRetrievedProfile, lastAppVersion: undefined }))),
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient,
+      mockTracker
+    );
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      last_app_version: "0.0.1" as Semver
+    });
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value.last_app_version).toBe("0.0.1");
+    }
+  })
+
+  it("GIVEN a profile with a valid last_app_version, the handler should overwrite the field and return successfully", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() => TE.of(some({ ...aRetrievedProfile, lastAppVersion: "UNKNOWN" }))),
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient,
+      mockTracker
+    );
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      last_app_version: "0.0.1" as Semver
+    });
+
+    expect(result.kind).toBe("IResponseSuccessJson");
+    if (result.kind === "IResponseSuccessJson") {
+      expect(result.value.last_app_version).toBe("0.0.1");
+    }
+  })
+
+  it("GIVEN a profile without last_app_version field, the update function will take that field as undefined", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() => TE.of(some({ ...aRetrievedProfile, lastAppVersion: "0.0.1" }))),
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
+    };
+
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient,
+      mockTracker
+    );
+
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      last_app_version: undefined
+    });
+
+    expect(profileModelMock.update).toBeCalledWith(
+      expect.objectContaining({
+        // The decode in the real update function will sort this to UNKNOWN
+        lastAppVersion: undefined
+      })
+    )
+    expect(result.kind).toBe("IResponseSuccessJson");
+  })
 });
