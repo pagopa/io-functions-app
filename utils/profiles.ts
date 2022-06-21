@@ -25,6 +25,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
 
 /**
  * Converts a ApiProfile in a Profile model
@@ -69,7 +70,7 @@ export function apiProfileToProfile(
 export function retrievedProfileToExtendedProfile(
   profile: RetrievedProfile
 ): ExtendedProfile {
-  return {
+  return withoutUndefinedValues({
     accepted_tos_version: profile.acceptedTosVersion,
     blocked_inbox_or_channels: profile.blockedInboxOrChannels,
     email: profile.email,
@@ -83,7 +84,7 @@ export function retrievedProfileToExtendedProfile(
     preferred_languages: profile.preferredLanguages,
     service_preferences_settings: profile.servicePreferencesSettings,
     version: profile.version
-  };
+  });
 }
 
 /**

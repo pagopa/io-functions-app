@@ -196,7 +196,7 @@ export function UpdateProfileHandler(
       ...overriddenInboxAndWebhook,
       // Override blockedInboxOrChannel when mode change from LEGACY to MANUAL or AUTO
       blockedInboxOrChannels: overrideBlockedInboxOrChannels,
-      // This property ovverride is necessary if a user went for an app downgrade which doesnt provide the property in the request payload
+      // Override lastAppVersion for users switched to a downgraded app version that doesn't provide the value in the request payload
       lastAppVersion: profile.lastAppVersion
     })();
 
