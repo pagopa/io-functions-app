@@ -871,7 +871,7 @@ describe("UpdateProfileHandler", () => {
 
   it("GIVEN a profile without last_app_version field, the update function will take that field as undefined", async () => {
     const profileModelMock = {
-      findLastVersionByModelId: jest.fn(() => TE.of(some({ ...aRetrievedProfile }))),
+      findLastVersionByModelId: jest.fn(() => TE.of(some(aRetrievedProfile))),
       update: jest.fn(_ =>
         // lastAppVersion is set to “UNKNOWN“ by the decode inside the update method
         TE.of({ ...aRetrievedProfile, ..._, lastAppVersion: "UNKNOWN" })
