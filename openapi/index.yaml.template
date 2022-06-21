@@ -200,7 +200,7 @@ paths:
         - in: body
           name: body
           schema:
-           $ref: "#/definitions/ServicePreference"
+           $ref: "#/definitions/UpsertServicePreference"
       responses:
         "200":
           description: User's Service Preference Upserted
@@ -488,6 +488,8 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/BasicServicePreference"
   ServicePreference:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ServicePreference"
+  UpsertServicePreference:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/UpsertServicePreference"
   StandardServiceMetadata:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/StandardServiceMetadata"
   SpecialServiceMetadata:

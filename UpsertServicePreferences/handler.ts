@@ -398,7 +398,7 @@ export function UpsertServicePreferences(
     ContextMiddleware(),
     FiscalCodeMiddleware,
     RequiredParamMiddleware("serviceId", ServiceId),
-    RequiredBodyPayloadMiddleware(ServicePreference)
+    RequiredBodyPayloadMiddleware(UpsertServicePreference)
   );
   return wrapRequestHandler(middlewaresWrap(handler));
 }

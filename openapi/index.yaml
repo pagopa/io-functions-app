@@ -201,7 +201,7 @@ paths:
         - in: body
           name: body
           schema:
-            $ref: '#/definitions/ServicePreference'
+            $ref: '#/definitions/UpsertServicePreference'
       responses:
         '200':
           description: User's Service Preference Upserted
@@ -947,6 +947,18 @@ definitions:
             type: boolean
         required:
           - can_access_message_read_status
+  UpsertServicePreference:
+    description: >-
+      Define a set of preferences of a Citizen for a given Service.
+
+      Extends the BasicServicePreference with new optional preferences for
+      backward compatibility.
+    allOf:
+      - $ref: '#/definitions/BasicServicePreference'
+      - type: object
+        properties:
+          can_access_message_read_status:
+            type: boolean
   StandardServiceMetadata:
     allOf:
       - $ref: '#/definitions/CommonServiceMetadata'
