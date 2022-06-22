@@ -29,7 +29,10 @@ import { Activation } from "@pagopa/io-functions-commons/dist/src/models/activat
 import { ActivationStatusEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ActivationStatus";
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 import { SpecialServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/SpecialServiceCategory";
-import { makeServicesPreferencesDocumentId } from "@pagopa/io-functions-commons/dist/src/models/service_preference";
+import {
+  AccessReadMessageStatusEnum,
+  makeServicesPreferencesDocumentId
+} from "@pagopa/io-functions-commons/dist/src/models/service_preference";
 
 const makeContext = () =>
   (({ ...context, bindings: {} } as unknown) as Context);
@@ -80,7 +83,8 @@ const servicePreferenceModelMock = {
 
 const aDisabledInboxServicePreference = {
   ...aServicePreference,
-  is_inbox_enabled: false
+  is_inbox_enabled: false,
+  can_access_message_read_status: false
 };
 
 const mockActivationModel = {
@@ -283,11 +287,13 @@ describe("UpsertServicePreferences", () => {
   });
 
   it.each`
-    scenario                                            | serviceResult                              | servicePreference                                     | servicePreferencesResult                      | activationResult                                                                   | is_inbox_enabled
-    ${"inbox enabled if exists an ACTIVE activation"}   | ${TE.of(O.some(aSpecialRetrievedService))} | ${aServicePreference}                                 | ${TE.of(O.some(aRetrievedServicePreference))} | ${TE.of(O.some(anActiveActivation))}                                               | ${true}
-    ${"inbox disabled if don't exists an activation"}   | ${TE.of(O.some(aSpecialRetrievedService))} | ${{ ...aServicePreference, is_inbox_enabled: false }} | ${TE.of(O.some(aRetrievedServicePreference))} | ${TE.of(O.none)}                                                                   | ${false}
-    ${"inbox disabled if exists a PENDING activation"}  | ${TE.of(O.some(aSpecialRetrievedService))} | ${{ ...aServicePreference, is_inbox_enabled: false }} | ${TE.of(O.some(aRetrievedServicePreference))} | ${TE.of(O.some({ ...anActiveActivation, status: ActivationStatusEnum.PENDING }))}  | ${false}
-    ${"inbox disabled if exists a INACTIVE activation"} | ${TE.of(O.some(aSpecialRetrievedService))} | ${{ ...aServicePreference, is_inbox_enabled: false }} | ${TE.of(O.some(aRetrievedServicePreference))} | ${TE.of(O.some({ ...anActiveActivation, status: ActivationStatusEnum.INACTIVE }))} | ${false}
+    scenario                                                                                        | serviceResult                              | servicePreference                                                                            | servicePreferencesResult                      | activationResult                                                                   | is_inbox_enabled | can_access_message_read_status
+    ${"inbox enabled if exists an ACTIVE activation with undefined can_access_message_read_status"} | ${TE.of(O.some(aSpecialRetrievedService))} | ${{ ...aServicePreference, can_access_message_read_status: undefined }}                      | ${TE.of(O.some(aRetrievedServicePreference))} | ${TE.of(O.some(anActiveActivation))}                                               | ${true}          | ${true}
+    ${"inbox enabled if exists an ACTIVE activation with false can_access_message_read_status"}     | ${TE.of(O.some(aSpecialRetrievedService))} | ${{ ...aServicePreference, can_access_message_read_status: false }}                          | ${TE.of(O.some(aRetrievedServicePreference))} | ${TE.of(O.some(anActiveActivation))}                                               | ${true}          | ${false}
+    ${"inbox enabled if exists an ACTIVE activation with true can_access_message_read_status"}      | ${TE.of(O.some(aSpecialRetrievedService))} | ${aServicePreference}                                                                        | ${TE.of(O.some(aRetrievedServicePreference))} | ${TE.of(O.some(anActiveActivation))}                                               | ${true}          | ${true}
+    ${"inbox disabled if don't exists an activation"}                                               | ${TE.of(O.some(aSpecialRetrievedService))} | ${{ ...aServicePreference, is_inbox_enabled: false, can_access_message_read_status: false }} | ${TE.of(O.some(aRetrievedServicePreference))} | ${TE.of(O.none)}                                                                   | ${false}         | ${false}
+    ${"inbox disabled if exists a PENDING activation"}                                              | ${TE.of(O.some(aSpecialRetrievedService))} | ${{ ...aServicePreference, is_inbox_enabled: false, can_access_message_read_status: false }} | ${TE.of(O.some(aRetrievedServicePreference))} | ${TE.of(O.some({ ...anActiveActivation, status: ActivationStatusEnum.PENDING }))}  | ${false}         | ${false}
+    ${"inbox disabled if exists a INACTIVE activation"}                                             | ${TE.of(O.some(aSpecialRetrievedService))} | ${{ ...aServicePreference, is_inbox_enabled: false, can_access_message_read_status: false }} | ${TE.of(O.some(aRetrievedServicePreference))} | ${TE.of(O.some({ ...anActiveActivation, status: ActivationStatusEnum.INACTIVE }))} | ${false}         | ${false}
   `(
     "should return $scenario",
     async ({
@@ -295,7 +301,8 @@ describe("UpsertServicePreferences", () => {
       servicePreference,
       servicePreferencesResult,
       activationResult,
-      is_inbox_enabled
+      is_inbox_enabled,
+      can_access_message_read_status
     }) => {
       servicePreferenceFindModelMock.mockImplementationOnce(
         () => servicePreferencesResult
@@ -315,7 +322,11 @@ describe("UpsertServicePreferences", () => {
 
       expect(response).toMatchObject({
         kind: "IResponseSuccessJson",
-        value: { ...aServicePreference, is_inbox_enabled }
+        value: {
+          ...aServicePreference,
+          is_inbox_enabled,
+          can_access_message_read_status
+        }
       });
 
       expect(profileModelMock.findLastVersionByModelId).toHaveBeenCalled();
@@ -323,7 +334,13 @@ describe("UpsertServicePreferences", () => {
       expect(servicePreferenceModelMock.find).toHaveBeenCalled();
       expect(servicePreferenceModelMock.upsert).toHaveBeenCalledWith({
         ...aNewServicePreference,
-        isInboxEnabled: is_inbox_enabled
+        isInboxEnabled: is_inbox_enabled,
+        accessReadMessageStatus:
+          servicePreference.can_access_message_read_status === undefined
+            ? AccessReadMessageStatusEnum.UNKNOWN
+            : can_access_message_read_status
+            ? AccessReadMessageStatusEnum.ALLOW
+            : AccessReadMessageStatusEnum.DENY
       });
       // Subscription feed never be update for SPECIAL servies preferences changes.
       expect(updateSubscriptionFeedMock).not.toBeCalled();
@@ -334,6 +351,23 @@ describe("UpsertServicePreferences", () => {
   // ---------------------------------------------
   // Errors
   // ---------------------------------------------
+  it("should return IResponseErrorValidation when is_inbox_enabled=false and can_access_message_read_status=true", async () => {
+    const response = await upsertServicePreferencesHandler(
+      makeContext(),
+      aFiscalCode,
+      aServiceId,
+      { ...aServicePreference, is_inbox_enabled: false }
+    );
+
+    expect(response).toMatchObject({
+      kind: "IResponseErrorValidation"
+    });
+
+    expect(profileModelMock.findLastVersionByModelId).toHaveBeenCalled();
+    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalled();
+    expect(servicePreferenceModelMock.upsert).not.toHaveBeenCalled();
+  });
+
   it("should return IResponseErrorNotFound if no profile is found in db", async () => {
     profileFindLastVersionByModelIdMock.mockImplementationOnce(() => {
       return TE.of(O.none);
