@@ -116,7 +116,6 @@ export function UpdateProfileHandler(
         "Could not find a profile with the provided fiscalcode"
       );
     }
-
     const existingProfile = maybeExistingProfile.value;
 
     // Verify that the client asked to update the latest version
@@ -196,7 +195,9 @@ export function UpdateProfileHandler(
       ...withoutUndefinedValues(profile),
       ...overriddenInboxAndWebhook,
       // Override blockedInboxOrChannel when mode change from LEGACY to MANUAL or AUTO
-      blockedInboxOrChannels: overrideBlockedInboxOrChannels
+      blockedInboxOrChannels: overrideBlockedInboxOrChannels,
+      // Override lastAppVersion for users switched to a downgraded app version that doesn't provide the value in the request payload
+      lastAppVersion: profile.lastAppVersion
     })();
 
     if (E.isLeft(errorOrMaybeUpdatedProfile)) {

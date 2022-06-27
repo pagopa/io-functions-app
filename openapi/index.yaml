@@ -541,6 +541,8 @@ definitions:
         $ref: '#/definitions/IsEmailValidated'
       is_test_profile:
         $ref: '#/definitions/IsTestProfile'
+      last_app_version:
+        $ref: '#/definitions/AppVersion'
       version:
         type: integer
     required:
@@ -635,6 +637,8 @@ definitions:
         $ref: '#/definitions/IsWebhookEnabled'
       is_email_enabled:
         $ref: '#/definitions/IsEmailEnabled'
+      last_app_version:
+        $ref: '#/definitions/AppVersion'
       version:
         type: integer
     required:
@@ -1035,3 +1039,8 @@ definitions:
     type: string
     x-extensible-enum:
       - STANDARD
+  AppVersion:
+    type: string
+    pattern: ^((0|[1-9]\\d*)\\.){2}(0|[1-9]\\d*)(\\.(0|[1-9]\\d*)){0,1}$
+    description: A string field in Semantic Versioning format
+    example: 1.10.11

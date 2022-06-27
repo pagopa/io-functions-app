@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import * as lolex from "lolex";
 
 import * as df from "durable-functions";
@@ -21,7 +19,6 @@ import {
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../../UpsertedProfileOrchestrator/handler";
 import { CreateProfileHandler } from "../handler";
 
-// eslint-disable-next-line functional/no-let
 let clock: any;
 beforeEach(() => {
   (df.getClient as any).mockClear();

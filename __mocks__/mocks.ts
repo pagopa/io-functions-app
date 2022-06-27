@@ -2,7 +2,8 @@ import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   EmailString,
   FiscalCode,
-  NonEmptyString
+  NonEmptyString,
+  Semver
 } from "@pagopa/ts-commons/lib/strings";
 
 import { NewProfile } from "@pagopa/io-functions-commons/dist/generated/definitions/NewProfile";
@@ -64,7 +65,8 @@ export const aProfile: Profile = {
   is_inbox_enabled: false,
   is_webhook_enabled: false,
   service_preferences_settings: legacyApiProfileServicePreferencesSettings,
-  version: 0 as NonNegativeInteger
+  version: 0 as NonNegativeInteger,
+  last_app_version: "0.0.1" as Semver
 };
 
 export const legacyProfileServicePreferencesSettings: RetrievedProfile["servicePreferencesSettings"] = {
@@ -93,7 +95,8 @@ export const aRetrievedProfile: RetrievedProfile = {
   isWebhookEnabled: false,
   kind: "IRetrievedProfile",
   servicePreferencesSettings: legacyProfileServicePreferencesSettings,
-  version: 0 as NonNegativeInteger
+  version: 0 as NonNegativeInteger,
+  lastAppVersion: "0.0.1" as Semver
 };
 
 export const aRetrievedProfileWithEmail: RetrievedProfile = {
@@ -106,7 +109,8 @@ export const aRetrievedProfileWithEmail: RetrievedProfile = {
   isWebhookEnabled: false,
   kind: "IRetrievedProfile",
   servicePreferencesSettings: legacyProfileServicePreferencesSettings,
-  version: 0 as NonNegativeInteger
+  version: 0 as NonNegativeInteger,
+  lastAppVersion: "0.0.1" as Semver
 };
 
 export const aNewDate = new Date();

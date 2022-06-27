@@ -25,6 +25,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
 
 /**
  * Converts a ApiProfile in a Profile model
@@ -45,6 +46,7 @@ export function apiProfileToProfile(
     isEmailValidated,
     isInboxEnabled: apiProfile.is_inbox_enabled,
     isWebhookEnabled: apiProfile.is_webhook_enabled,
+    lastAppVersion: apiProfile.last_app_version,
     preferredLanguages: apiProfile.preferred_languages,
     servicePreferencesSettings:
       apiProfile.service_preferences_settings === undefined ||
@@ -68,7 +70,7 @@ export function apiProfileToProfile(
 export function retrievedProfileToExtendedProfile(
   profile: RetrievedProfile
 ): ExtendedProfile {
-  return {
+  return withoutUndefinedValues({
     accepted_tos_version: profile.acceptedTosVersion,
     blocked_inbox_or_channels: profile.blockedInboxOrChannels,
     email: profile.email,
@@ -77,10 +79,12 @@ export function retrievedProfileToExtendedProfile(
     is_inbox_enabled: profile.isInboxEnabled === true,
     is_test_profile: profile.isTestProfile === true,
     is_webhook_enabled: profile.isWebhookEnabled === true,
+    last_app_version:
+      profile.lastAppVersion !== "UNKNOWN" ? profile.lastAppVersion : undefined,
     preferred_languages: profile.preferredLanguages,
     service_preferences_settings: profile.servicePreferencesSettings,
     version: profile.version
-  };
+  });
 }
 
 /**
