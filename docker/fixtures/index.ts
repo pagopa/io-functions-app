@@ -102,17 +102,14 @@ const aNewProfile = pipe(
 
 pipe(
   createDatabase(config.COSMOSDB_NAME),
-  TE.chain(db =>
-    pipe(
-      sequenceT(TE.ApplySeq)(
-        createCollection(db, "message-status", "messageId"),
-        createCollection(db, "messages", "fiscalCode"),
-        createCollection(db, "notification-status", "notificationId"),
-        createCollection(db, "notifications", "messageId"),
-        createCollection(db, "profiles", "fiscalCode"),
-        createCollection(db, "services", "serviceId")
-      ),
-      TE.map(_ => db)
+  TE.chainFirst(db =>
+    sequenceT(TE.ApplySeq)(
+      createCollection(db, "message-status", "messageId"),
+      createCollection(db, "messages", "fiscalCode"),
+      createCollection(db, "notification-status", "notificationId"),
+      createCollection(db, "notifications", "messageId"),
+      createCollection(db, "profiles", "fiscalCode"),
+      createCollection(db, "services", "serviceId")
     )
   ),
   TE.chain(db =>
