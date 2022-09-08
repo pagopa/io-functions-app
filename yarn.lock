@@ -709,13 +709,11 @@
   resolved "https://registry.yarnpkg.com/@pagopa/express-azure-functions/-/express-azure-functions-2.0.0.tgz#eb52a0b997d931c1509372e2a9bea22a8ca85c17"
   integrity sha512-IFZqtk0e2sfkMZIxYqPORzxcKRkbIrVJesR6eMLNwzh1rA4bl2uh9ZHk1m55LNq4ZmaxREDu+1JcGlIaZQgKNQ==
 
-"@pagopa/io-functions-commons@^25.5.1":
-  version "25.5.1"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-25.5.1.tgz#2aab22a6e84aa23c7d03acecaed852130c80afbb"
-  integrity sha512-oNAfnGwCvujf3XbT5usMFjJo9lTAQY86Zt54HW/NK0X67fx/ZPtDRhOGFjhm/qe+eXd/xofJJxeVzvcCo8jwWg==
+"@pagopa/io-functions-commons@../../commons/io-functions-commons":
+  version "25.7.0"
   dependencies:
     "@azure/cosmos" "^3.15.1"
-    "@pagopa/ts-commons" "^10.5.0"
+    "@pagopa/ts-commons" "^10.9.0"
     applicationinsights "^1.8.10"
     azure-storage "^2.10.5"
     cidr-matcher "^2.1.1"
@@ -764,10 +762,10 @@
     node-fetch "^2.6.0"
     validator "^10.1.0"
 
-"@pagopa/ts-commons@^10.5.0":
-  version "10.5.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.5.0.tgz#5c22cf3bc16af087beac5b0dfb3eef8f9231ab80"
-  integrity sha512-gD0X6inD0knEU4IJtHGqJ622AIAq11pdstrFDpt87tHLRsTpOk9EJ/4yhrokGPhfInKbOEkIV1TydUZIqEQ6Vw==
+"@pagopa/ts-commons@^10.10.0", "@pagopa/ts-commons@^10.9.0":
+  version "10.10.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.10.0.tgz#9eae84003956ac44aad710b91abd7614bb09665e"
+  integrity sha512-/bIEHIvswrp9mi+NdBOJftPAP9YeI5Z1+mK1WV/RDTvy6nb5Zd7C9kwdBJbXjl4zW/eiQsb5PqLHEC6odQKlWg==
   dependencies:
     abort-controller "^3.0.0"
     agentkeepalive "^4.1.4"

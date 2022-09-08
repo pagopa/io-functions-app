@@ -848,7 +848,9 @@ describe("UpdateProfileHandler", () => {
 
   it("GIVEN a profile with a valid last_app_version, the handler should write the field and return successfully", async () => {
     const profileModelMock = {
-      findLastVersionByModelId: jest.fn(() => TE.of(some({ ...aRetrievedProfile, lastAppVersion: "UNKNOWN" }))),
+      findLastVersionByModelId: jest.fn(() =>
+        TE.of(some({ ...aRetrievedProfile, lastAppVersion: "UNKNOWN" }))
+      ),
       update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
     };
 
@@ -867,7 +869,7 @@ describe("UpdateProfileHandler", () => {
     if (result.kind === "IResponseSuccessJson") {
       expect(result.value.last_app_version).toBe("0.0.1");
     }
-  })
+  });
 
   it("GIVEN a profile without last_app_version field, the update function will take that field as undefined", async () => {
     const profileModelMock = {
@@ -893,10 +895,56 @@ describe("UpdateProfileHandler", () => {
       expect.objectContaining({
         lastAppVersion: undefined
       })
-    )
+    );
     expect(result.kind).toBe("IResponseSuccessJson");
     if (result.kind === "IResponseSuccessJson") {
       expect(result.value.last_app_version).toBeUndefined();
     }
-  })
+  });
+
+  it.each`
+    givenProfile                   | model                                                 | is_reminder_enabled | expectedIsReminderEnabled
+    ${"without isReminderEnabled"} | ${aRetrievedProfile}                                  | ${undefined}        | ${false}
+    ${"without isReminderEnabled"} | ${aRetrievedProfile}                                  | ${false}            | ${false}
+    ${"without isReminderEnabled"} | ${aRetrievedProfile}                                  | ${true}             | ${true}
+    ${"with isReminderEnabled"}    | ${{ ...aRetrievedProfile, isReminderEnabled: false }} | ${undefined}        | ${false}
+    ${"with isReminderEnabled"}    | ${{ ...aRetrievedProfile, isReminderEnabled: false }} | ${false}            | ${false}
+    ${"with isReminderEnabled"}    | ${{ ...aRetrievedProfile, isReminderEnabled: false }} | ${true}             | ${true}
+  `(
+    "GIVEN a profile item $givenProfile and is_reminder_enabled = $is_reminder_enabled from payload, the handler SHOULD save isReminderEnabled = $expectedIsReminderEnabled",
+    async ({
+      _,
+      __,
+      model,
+      is_reminder_enabled,
+      expectedIsReminderEnabled
+    }) => {
+      const profileModelMock = {
+        findLastVersionByModelId: jest.fn(() => TE.of(some(model))),
+        update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
+      };
+
+      const updateProfileHandler = UpdateProfileHandler(
+        profileModelMock as any,
+        mockQueueClient,
+        mockTracker
+      );
+
+      const result = await updateProfileHandler(
+        contextMock as any,
+        aFiscalCode,
+        {
+          ...aProfile,
+          is_reminder_enabled: is_reminder_enabled
+        }
+      );
+
+      expect(result.kind).toBe("IResponseSuccessJson");
+      if (result.kind === "IResponseSuccessJson") {
+        expect(result.value.is_reminder_enabled).toBe(
+          expectedIsReminderEnabled
+        );
+      }
+    }
+  );
 });
