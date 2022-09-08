@@ -45,8 +45,8 @@ export function apiProfileToProfile(
     isEmailEnabled: apiProfile.is_email_enabled,
     isEmailValidated,
     isInboxEnabled: apiProfile.is_inbox_enabled,
-    isWebhookEnabled: apiProfile.is_webhook_enabled,
     isReminderEnabled: apiProfile.is_reminder_enabled,
+    isWebhookEnabled: apiProfile.is_webhook_enabled,
     lastAppVersion: apiProfile.last_app_version,
     preferredLanguages: apiProfile.preferred_languages,
     servicePreferencesSettings:
