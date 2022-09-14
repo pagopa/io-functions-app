@@ -907,9 +907,12 @@ describe("UpdateProfileHandler", () => {
     ${"without isReminderEnabled"} | ${aRetrievedProfile}                                  | ${undefined}        | ${false}
     ${"without isReminderEnabled"} | ${aRetrievedProfile}                                  | ${false}            | ${false}
     ${"without isReminderEnabled"} | ${aRetrievedProfile}                                  | ${true}             | ${true}
-    ${"with isReminderEnabled"}    | ${{ ...aRetrievedProfile, isReminderEnabled: false }} | ${undefined}        | ${false}
-    ${"with isReminderEnabled"}    | ${{ ...aRetrievedProfile, isReminderEnabled: false }} | ${false}            | ${false}
-    ${"with isReminderEnabled"}    | ${{ ...aRetrievedProfile, isReminderEnabled: false }} | ${true}             | ${true}
+    ${"with disabled isReminderEnabled"} | ${{ ...aRetrievedProfile, isReminderEnabled: false }} | ${undefined}        | ${false}
+    ${"with disabled isReminderEnabled"} | ${{ ...aRetrievedProfile, isReminderEnabled: false }} | ${false}            | ${false}
+    ${"with disabled isReminderEnabled"} | ${{ ...aRetrievedProfile, isReminderEnabled: false }} | ${true}             | ${true}
+    ${"with enabled isReminderEnabled"}  | ${{ ...aRetrievedProfile, isReminderEnabled: true }}  | ${undefined}        | ${false}
+    ${"with enabled isReminderEnabled"}  | ${{ ...aRetrievedProfile, isReminderEnabled: true }}  | ${false}            | ${false}
+    ${"with enabled isReminderEnabled"}  | ${{ ...aRetrievedProfile, isReminderEnabled: true }}  | ${true}             | ${true}
   `(
     "GIVEN a profile item $givenProfile and is_reminder_enabled = $is_reminder_enabled from payload, the handler SHOULD save isReminderEnabled = $expectedIsReminderEnabled",
     async ({
