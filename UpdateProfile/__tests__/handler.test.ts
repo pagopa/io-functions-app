@@ -903,10 +903,10 @@ describe("UpdateProfileHandler", () => {
   });
 
   it.each`
-    givenProfile                   | model                                                 | is_reminder_enabled | expectedIsReminderEnabled
-    ${"without isReminderEnabled"} | ${aRetrievedProfile}                                  | ${undefined}        | ${false}
-    ${"without isReminderEnabled"} | ${aRetrievedProfile}                                  | ${false}            | ${false}
-    ${"without isReminderEnabled"} | ${aRetrievedProfile}                                  | ${true}             | ${true}
+    givenProfile                         | model                                                 | is_reminder_enabled | expectedIsReminderEnabled
+    ${"without isReminderEnabled"}       | ${aRetrievedProfile}                                  | ${undefined}        | ${false}
+    ${"without isReminderEnabled"}       | ${aRetrievedProfile}                                  | ${false}            | ${false}
+    ${"without isReminderEnabled"}       | ${aRetrievedProfile}                                  | ${true}             | ${true}
     ${"with disabled isReminderEnabled"} | ${{ ...aRetrievedProfile, isReminderEnabled: false }} | ${undefined}        | ${false}
     ${"with disabled isReminderEnabled"} | ${{ ...aRetrievedProfile, isReminderEnabled: false }} | ${false}            | ${false}
     ${"with disabled isReminderEnabled"} | ${{ ...aRetrievedProfile, isReminderEnabled: false }} | ${true}             | ${true}

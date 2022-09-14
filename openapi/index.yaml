@@ -761,7 +761,7 @@ definitions:
   IsReminderEnabled:
     type: boolean
     default: false
-    description: True if the user wants reminders about not read messages.
+    description: True if the user wants reminders about unread messages.
   AcceptedTosVersion:
     type: number
     minimum: 1
