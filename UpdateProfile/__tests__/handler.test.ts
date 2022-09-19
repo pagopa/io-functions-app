@@ -8,6 +8,7 @@ import { QueueClient } from "@azure/storage-queue";
 import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as E from "fp-ts/lib/Either";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aEmailChanged,
@@ -27,6 +28,8 @@ import { UpdateProfileHandler } from "../handler";
 import { createTracker } from "../../__mocks__/tracking";
 
 import { Semver } from "@pagopa/ts-commons/lib/strings";
+import { pipe } from "fp-ts/lib/function";
+import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 
 const mockSendMessage = jest.fn().mockImplementation(() => Promise.resolve());
 const mockQueueClient = ({
@@ -903,28 +906,31 @@ describe("UpdateProfileHandler", () => {
   });
 
   it.each`
-    givenProfile                         | model                                                 | is_reminder_enabled | expectedIsReminderEnabled
-    ${"without isReminderEnabled"}       | ${aRetrievedProfile}                                  | ${undefined}        | ${false}
-    ${"without isReminderEnabled"}       | ${aRetrievedProfile}                                  | ${false}            | ${false}
-    ${"without isReminderEnabled"}       | ${aRetrievedProfile}                                  | ${true}             | ${true}
-    ${"with disabled isReminderEnabled"} | ${{ ...aRetrievedProfile, isReminderEnabled: false }} | ${undefined}        | ${false}
-    ${"with disabled isReminderEnabled"} | ${{ ...aRetrievedProfile, isReminderEnabled: false }} | ${false}            | ${false}
-    ${"with disabled isReminderEnabled"} | ${{ ...aRetrievedProfile, isReminderEnabled: false }} | ${true}             | ${true}
-    ${"with enabled isReminderEnabled"}  | ${{ ...aRetrievedProfile, isReminderEnabled: true }}  | ${undefined}        | ${false}
-    ${"with enabled isReminderEnabled"}  | ${{ ...aRetrievedProfile, isReminderEnabled: true }}  | ${false}            | ${false}
-    ${"with enabled isReminderEnabled"}  | ${{ ...aRetrievedProfile, isReminderEnabled: true }}  | ${true}             | ${true}
+    givenProfile                      | model                                                   | reminder_status | expectedReminderStatus
+    ${"without reminderStatus"}       | ${aRetrievedProfile}                                    | ${undefined}    | ${"UNSET"}
+    ${"without reminderStatus"}       | ${aRetrievedProfile}                                    | ${"DISABLED"}   | ${"DISABLED"}
+    ${"without reminderStatus"}       | ${aRetrievedProfile}                                    | ${"ENABLED"}    | ${"ENABLED"}
+    ${"with disabled reminderStatus"} | ${{ ...aRetrievedProfile, reminderStatus: "DISABLED" }} | ${undefined}    | ${"UNSET"}
+    ${"with disabled reminderStatus"} | ${{ ...aRetrievedProfile, reminderStatus: "DISABLED" }} | ${"DISABLED"}   | ${"DISABLED"}
+    ${"with disabled reminderStatus"} | ${{ ...aRetrievedProfile, reminderStatus: "DISABLED" }} | ${"ENABLED"}    | ${"ENABLED"}
+    ${"with enabled reminderStatus"}  | ${{ ...aRetrievedProfile, reminderStatus: "ENABLED" }}  | ${undefined}    | ${"UNSET"}
+    ${"with enabled reminderStatus"}  | ${{ ...aRetrievedProfile, reminderStatus: "ENABLED" }}  | ${"DISABLED"}   | ${"DISABLED"}
+    ${"with enabled reminderStatus"}  | ${{ ...aRetrievedProfile, reminderStatus: "ENABLED" }}  | ${"ENABLED"}    | ${"ENABLED"}
   `(
-    "GIVEN a profile item $givenProfile and is_reminder_enabled = $is_reminder_enabled from payload, the handler SHOULD save isReminderEnabled = $expectedIsReminderEnabled",
-    async ({
-      _,
-      __,
-      model,
-      is_reminder_enabled,
-      expectedIsReminderEnabled
-    }) => {
+    "GIVEN a profile item $givenProfile and reminder_status = $reminder_status from payload, the handler SHOULD save reminderStatus = $expectedReminderStatus",
+    async ({ _, __, model, reminder_status, expectedReminderStatus }) => {
       const profileModelMock = {
         findLastVersionByModelId: jest.fn(() => TE.of(some(model))),
-        update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
+        update: jest.fn(_ =>
+          TE.of(
+            pipe(
+              RetrievedProfile.decode({ ...aRetrievedProfile, ..._ }),
+              E.getOrElseW(_ => {
+                throw "error";
+              })
+            )
+          )
+        )
       };
 
       const updateProfileHandler = UpdateProfileHandler(
@@ -938,15 +944,13 @@ describe("UpdateProfileHandler", () => {
         aFiscalCode,
         {
           ...aProfile,
-          is_reminder_enabled: is_reminder_enabled
+          reminder_status
         }
       );
 
       expect(result.kind).toBe("IResponseSuccessJson");
       if (result.kind === "IResponseSuccessJson") {
-        expect(result.value.is_reminder_enabled).toBe(
-          expectedIsReminderEnabled
-        );
+        expect(result.value.reminder_status).toBe(expectedReminderStatus);
       }
     }
   );

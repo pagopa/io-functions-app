@@ -45,10 +45,10 @@ export function apiProfileToProfile(
     isEmailEnabled: apiProfile.is_email_enabled,
     isEmailValidated,
     isInboxEnabled: apiProfile.is_inbox_enabled,
-    isReminderEnabled: apiProfile.is_reminder_enabled,
     isWebhookEnabled: apiProfile.is_webhook_enabled,
     lastAppVersion: apiProfile.last_app_version,
     preferredLanguages: apiProfile.preferred_languages,
+    reminderStatus: apiProfile.reminder_status,
     servicePreferencesSettings:
       apiProfile.service_preferences_settings === undefined ||
       apiProfile.service_preferences_settings.mode ===
@@ -78,12 +78,12 @@ export function retrievedProfileToExtendedProfile(
     is_email_enabled: profile.isEmailEnabled !== false,
     is_email_validated: profile.isEmailValidated !== false,
     is_inbox_enabled: profile.isInboxEnabled === true,
-    is_reminder_enabled: profile.isReminderEnabled === true,
     is_test_profile: profile.isTestProfile === true,
     is_webhook_enabled: profile.isWebhookEnabled === true,
     last_app_version:
-      profile.lastAppVersion !== "UNKNOWN" ? profile.lastAppVersion : undefined,
+    profile.lastAppVersion !== "UNKNOWN" ? profile.lastAppVersion : undefined,
     preferred_languages: profile.preferredLanguages,
+    reminder_status: profile.reminderStatus,
     service_preferences_settings: profile.servicePreferencesSettings,
     version: profile.version
   });

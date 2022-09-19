@@ -197,7 +197,8 @@ export function UpdateProfileHandler(
       // Override blockedInboxOrChannel when mode change from LEGACY to MANUAL or AUTO
       blockedInboxOrChannels: overrideBlockedInboxOrChannels,
       // Override lastAppVersion for users switched to a downgraded app version that doesn't provide the value in the request payload
-      lastAppVersion: profile.lastAppVersion
+      lastAppVersion: profile.lastAppVersion,
+      reminderStatus: profile.reminderStatus
     })();
 
     if (E.isLeft(errorOrMaybeUpdatedProfile)) {
