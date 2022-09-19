@@ -81,7 +81,7 @@ export function retrievedProfileToExtendedProfile(
     is_test_profile: profile.isTestProfile === true,
     is_webhook_enabled: profile.isWebhookEnabled === true,
     last_app_version:
-    profile.lastAppVersion !== "UNKNOWN" ? profile.lastAppVersion : undefined,
+      profile.lastAppVersion !== "UNKNOWN" ? profile.lastAppVersion : undefined,
     preferred_languages: profile.preferredLanguages,
     reminder_status: profile.reminderStatus,
     service_preferences_settings: profile.servicePreferencesSettings,
