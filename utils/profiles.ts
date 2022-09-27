@@ -83,7 +83,8 @@ export function retrievedProfileToExtendedProfile(
     last_app_version:
       profile.lastAppVersion !== "UNKNOWN" ? profile.lastAppVersion : undefined,
     preferred_languages: profile.preferredLanguages,
-    reminder_status: profile.reminderStatus !== "UNSET" ? profile.reminderStatus : undefined,
+    reminder_status:
+      profile.reminderStatus !== "UNSET" ? profile.reminderStatus : undefined,
     service_preferences_settings: profile.servicePreferencesSettings,
     version: profile.version
   });

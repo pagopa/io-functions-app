@@ -907,13 +907,13 @@ describe("UpdateProfileHandler", () => {
 
   it.each`
     givenProfile                      | model                                                   | reminder_status | expectedReminderStatus
-    ${"without reminderStatus"}       | ${aRetrievedProfile}                                    | ${undefined}    | ${"UNSET"}
+    ${"without reminderStatus"}       | ${aRetrievedProfile}                                    | ${undefined}    | ${undefined}
     ${"without reminderStatus"}       | ${aRetrievedProfile}                                    | ${"DISABLED"}   | ${"DISABLED"}
     ${"without reminderStatus"}       | ${aRetrievedProfile}                                    | ${"ENABLED"}    | ${"ENABLED"}
-    ${"with disabled reminderStatus"} | ${{ ...aRetrievedProfile, reminderStatus: "DISABLED" }} | ${undefined}    | ${"UNSET"}
+    ${"with disabled reminderStatus"} | ${{ ...aRetrievedProfile, reminderStatus: "DISABLED" }} | ${undefined}    | ${undefined}
     ${"with disabled reminderStatus"} | ${{ ...aRetrievedProfile, reminderStatus: "DISABLED" }} | ${"DISABLED"}   | ${"DISABLED"}
     ${"with disabled reminderStatus"} | ${{ ...aRetrievedProfile, reminderStatus: "DISABLED" }} | ${"ENABLED"}    | ${"ENABLED"}
-    ${"with enabled reminderStatus"}  | ${{ ...aRetrievedProfile, reminderStatus: "ENABLED" }}  | ${undefined}    | ${"UNSET"}
+    ${"with enabled reminderStatus"}  | ${{ ...aRetrievedProfile, reminderStatus: "ENABLED" }}  | ${undefined}    | ${undefined}
     ${"with enabled reminderStatus"}  | ${{ ...aRetrievedProfile, reminderStatus: "ENABLED" }}  | ${"DISABLED"}   | ${"DISABLED"}
     ${"with enabled reminderStatus"}  | ${{ ...aRetrievedProfile, reminderStatus: "ENABLED" }}  | ${"ENABLED"}    | ${"ENABLED"}
   `(
