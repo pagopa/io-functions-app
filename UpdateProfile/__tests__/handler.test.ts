@@ -910,6 +910,9 @@ describe("UpdateProfileHandler", () => {
     ${"without reminderStatus"}       | ${aRetrievedProfile}                                    | ${undefined}    | ${undefined}
     ${"without reminderStatus"}       | ${aRetrievedProfile}                                    | ${"DISABLED"}   | ${"DISABLED"}
     ${"without reminderStatus"}       | ${aRetrievedProfile}                                    | ${"ENABLED"}    | ${"ENABLED"}
+    ${"with unset reminderStatus"}    | ${{ ...aRetrievedProfile, reminderStatus: "UNSET" }}    | ${undefined}    | ${undefined}
+    ${"with unset reminderStatus"}    | ${{ ...aRetrievedProfile, reminderStatus: "UNSET" }}    | ${"DISABLED"}   | ${"DISABLED"}
+    ${"with unset reminderStatus"}    | ${{ ...aRetrievedProfile, reminderStatus: "UNSET" }}    | ${"ENABLED"}    | ${"ENABLED"}
     ${"with disabled reminderStatus"} | ${{ ...aRetrievedProfile, reminderStatus: "DISABLED" }} | ${undefined}    | ${undefined}
     ${"with disabled reminderStatus"} | ${{ ...aRetrievedProfile, reminderStatus: "DISABLED" }} | ${"DISABLED"}   | ${"DISABLED"}
     ${"with disabled reminderStatus"} | ${{ ...aRetrievedProfile, reminderStatus: "DISABLED" }} | ${"ENABLED"}    | ${"ENABLED"}

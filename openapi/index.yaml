@@ -761,10 +761,8 @@ definitions:
   ReminderStatus:
     type: string
     x-extensible-enum:
-      - UNSET
       - ENABLED
       - DISABLED
-    default: UNSET
     example: ENABLED
     description: Api definition of reminder opt-in status
   AcceptedTosVersion:
