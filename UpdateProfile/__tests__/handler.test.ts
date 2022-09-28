@@ -906,7 +906,7 @@ describe("UpdateProfileHandler", () => {
   });
 
   it.each`
-    givenProfile                      | model                                                   | reminder_status | expectedReminderStatus
+    description                       | givenProfile                                            | reminder_status | expectedReminderStatus
     ${"without reminderStatus"}       | ${aRetrievedProfile}                                    | ${undefined}    | ${undefined}
     ${"without reminderStatus"}       | ${aRetrievedProfile}                                    | ${"DISABLED"}   | ${"DISABLED"}
     ${"without reminderStatus"}       | ${aRetrievedProfile}                                    | ${"ENABLED"}    | ${"ENABLED"}
@@ -920,10 +920,16 @@ describe("UpdateProfileHandler", () => {
     ${"with enabled reminderStatus"}  | ${{ ...aRetrievedProfile, reminderStatus: "ENABLED" }}  | ${"DISABLED"}   | ${"DISABLED"}
     ${"with enabled reminderStatus"}  | ${{ ...aRetrievedProfile, reminderStatus: "ENABLED" }}  | ${"ENABLED"}    | ${"ENABLED"}
   `(
-    "GIVEN a profile item $givenProfile and reminder_status = $reminder_status from payload, the handler SHOULD save reminderStatus = $expectedReminderStatus",
-    async ({ _, __, model, reminder_status, expectedReminderStatus }) => {
+    "GIVEN a profile item $description and reminder_status = $reminder_status from payload, the handler SHOULD save reminderStatus = $expectedReminderStatus",
+    async ({
+      _,
+      __,
+      givenProfile,
+      reminder_status,
+      expectedReminderStatus
+    }) => {
       const profileModelMock = {
-        findLastVersionByModelId: jest.fn(() => TE.of(some(model))),
+        findLastVersionByModelId: jest.fn(() => TE.of(some(givenProfile))),
         update: jest.fn(_ =>
           TE.of(
             pipe(
@@ -949,6 +955,12 @@ describe("UpdateProfileHandler", () => {
           ...aProfile,
           reminder_status
         }
+      );
+
+      expect(profileModelMock.update).toBeCalledWith(
+        expect.objectContaining({
+          reminderStatus: reminder_status
+        })
       );
 
       expect(result.kind).toBe("IResponseSuccessJson");
