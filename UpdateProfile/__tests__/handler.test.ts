@@ -8,6 +8,7 @@ import { QueueClient } from "@azure/storage-queue";
 import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/BlockedInboxOrChannel";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as E from "fp-ts/lib/Either";
 import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aEmailChanged,
@@ -27,6 +28,8 @@ import { UpdateProfileHandler } from "../handler";
 import { createTracker } from "../../__mocks__/tracking";
 
 import { Semver } from "@pagopa/ts-commons/lib/strings";
+import { pipe } from "fp-ts/lib/function";
+import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 
 const mockSendMessage = jest.fn().mockImplementation(() => Promise.resolve());
 const mockQueueClient = ({
@@ -848,7 +851,9 @@ describe("UpdateProfileHandler", () => {
 
   it("GIVEN a profile with a valid last_app_version, the handler should write the field and return successfully", async () => {
     const profileModelMock = {
-      findLastVersionByModelId: jest.fn(() => TE.of(some({ ...aRetrievedProfile, lastAppVersion: "UNKNOWN" }))),
+      findLastVersionByModelId: jest.fn(() =>
+        TE.of(some({ ...aRetrievedProfile, lastAppVersion: "UNKNOWN" }))
+      ),
       update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
     };
 
@@ -867,7 +872,7 @@ describe("UpdateProfileHandler", () => {
     if (result.kind === "IResponseSuccessJson") {
       expect(result.value.last_app_version).toBe("0.0.1");
     }
-  })
+  });
 
   it("GIVEN a profile without last_app_version field, the update function will take that field as undefined", async () => {
     const profileModelMock = {
@@ -893,10 +898,75 @@ describe("UpdateProfileHandler", () => {
       expect.objectContaining({
         lastAppVersion: undefined
       })
-    )
+    );
     expect(result.kind).toBe("IResponseSuccessJson");
     if (result.kind === "IResponseSuccessJson") {
       expect(result.value.last_app_version).toBeUndefined();
     }
-  })
+  });
+
+  it.each`
+    description                       | givenProfile                                            | reminder_status | expectedReminderStatus
+    ${"without reminderStatus"}       | ${aRetrievedProfile}                                    | ${undefined}    | ${undefined}
+    ${"without reminderStatus"}       | ${aRetrievedProfile}                                    | ${"DISABLED"}   | ${"DISABLED"}
+    ${"without reminderStatus"}       | ${aRetrievedProfile}                                    | ${"ENABLED"}    | ${"ENABLED"}
+    ${"with unset reminderStatus"}    | ${{ ...aRetrievedProfile, reminderStatus: "UNSET" }}    | ${undefined}    | ${undefined}
+    ${"with unset reminderStatus"}    | ${{ ...aRetrievedProfile, reminderStatus: "UNSET" }}    | ${"DISABLED"}   | ${"DISABLED"}
+    ${"with unset reminderStatus"}    | ${{ ...aRetrievedProfile, reminderStatus: "UNSET" }}    | ${"ENABLED"}    | ${"ENABLED"}
+    ${"with disabled reminderStatus"} | ${{ ...aRetrievedProfile, reminderStatus: "DISABLED" }} | ${undefined}    | ${undefined}
+    ${"with disabled reminderStatus"} | ${{ ...aRetrievedProfile, reminderStatus: "DISABLED" }} | ${"DISABLED"}   | ${"DISABLED"}
+    ${"with disabled reminderStatus"} | ${{ ...aRetrievedProfile, reminderStatus: "DISABLED" }} | ${"ENABLED"}    | ${"ENABLED"}
+    ${"with enabled reminderStatus"}  | ${{ ...aRetrievedProfile, reminderStatus: "ENABLED" }}  | ${undefined}    | ${undefined}
+    ${"with enabled reminderStatus"}  | ${{ ...aRetrievedProfile, reminderStatus: "ENABLED" }}  | ${"DISABLED"}   | ${"DISABLED"}
+    ${"with enabled reminderStatus"}  | ${{ ...aRetrievedProfile, reminderStatus: "ENABLED" }}  | ${"ENABLED"}    | ${"ENABLED"}
+  `(
+    "GIVEN a profile item $description and reminder_status = $reminder_status from payload, the handler SHOULD save reminderStatus = $expectedReminderStatus",
+    async ({
+      _,
+      __,
+      givenProfile,
+      reminder_status,
+      expectedReminderStatus
+    }) => {
+      const profileModelMock = {
+        findLastVersionByModelId: jest.fn(() => TE.of(some(givenProfile))),
+        update: jest.fn(_ =>
+          TE.of(
+            pipe(
+              RetrievedProfile.decode({ ...aRetrievedProfile, ..._ }),
+              E.getOrElseW(_ => {
+                throw "error";
+              })
+            )
+          )
+        )
+      };
+
+      const updateProfileHandler = UpdateProfileHandler(
+        profileModelMock as any,
+        mockQueueClient,
+        mockTracker
+      );
+
+      const result = await updateProfileHandler(
+        contextMock as any,
+        aFiscalCode,
+        {
+          ...aProfile,
+          reminder_status
+        }
+      );
+
+      expect(profileModelMock.update).toBeCalledWith(
+        expect.objectContaining({
+          reminderStatus: reminder_status
+        })
+      );
+
+      expect(result.kind).toBe("IResponseSuccessJson");
+      if (result.kind === "IResponseSuccessJson") {
+        expect(result.value.reminder_status).toBe(expectedReminderStatus);
+      }
+    }
+  );
 });

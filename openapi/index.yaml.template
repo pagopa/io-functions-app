@@ -448,6 +448,8 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/IsInboxEnabled"
   IsEmailEnabled:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/IsEmailEnabled"
+  ReminderStatus:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ReminderStatus"
   AcceptedTosVersion:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/AcceptedTosVersion"
   IsWebhookEnabled:

@@ -539,6 +539,8 @@ definitions:
         $ref: '#/definitions/IsEmailEnabled'
       is_email_validated:
         $ref: '#/definitions/IsEmailValidated'
+      reminder_status:
+        $ref: '#/definitions/ReminderStatus'
       is_test_profile:
         $ref: '#/definitions/IsTestProfile'
       last_app_version:
@@ -637,6 +639,8 @@ definitions:
         $ref: '#/definitions/IsWebhookEnabled'
       is_email_enabled:
         $ref: '#/definitions/IsEmailEnabled'
+      reminder_status:
+        $ref: '#/definitions/ReminderStatus'
       last_app_version:
         $ref: '#/definitions/AppVersion'
       version:
@@ -754,6 +758,13 @@ definitions:
     description: >-
       True if the recipient of a message wants to forward the notifications to
       his email address.
+  ReminderStatus:
+    type: string
+    x-extensible-enum:
+      - ENABLED
+      - DISABLED
+    example: ENABLED
+    description: Api definition of reminder opt-in status
   AcceptedTosVersion:
     type: number
     minimum: 1

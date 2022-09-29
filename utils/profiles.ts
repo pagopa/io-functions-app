@@ -48,6 +48,7 @@ export function apiProfileToProfile(
     isWebhookEnabled: apiProfile.is_webhook_enabled,
     lastAppVersion: apiProfile.last_app_version,
     preferredLanguages: apiProfile.preferred_languages,
+    reminderStatus: apiProfile.reminder_status,
     servicePreferencesSettings:
       apiProfile.service_preferences_settings === undefined ||
       apiProfile.service_preferences_settings.mode ===
@@ -82,6 +83,8 @@ export function retrievedProfileToExtendedProfile(
     last_app_version:
       profile.lastAppVersion !== "UNKNOWN" ? profile.lastAppVersion : undefined,
     preferred_languages: profile.preferredLanguages,
+    reminder_status:
+      profile.reminderStatus !== "UNSET" ? profile.reminderStatus : undefined,
     service_preferences_settings: profile.servicePreferencesSettings,
     version: profile.version
   });
