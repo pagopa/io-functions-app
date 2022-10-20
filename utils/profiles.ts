@@ -30,48 +30,45 @@ import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
 /**
  * Converts a ApiProfile in a Profile model
  */
-// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-export function apiProfileToProfile(
+export const apiProfileToProfile = (
   apiProfile: ApiProfile,
   fiscalCode: FiscalCode,
   isEmailValidated: IsEmailValidated,
   servicePreferencesSettingsVersion: number
-): Profile {
-  return {
-    acceptedTosVersion: apiProfile.accepted_tos_version,
-    blockedInboxOrChannels: apiProfile.blocked_inbox_or_channels,
-    email: apiProfile.email,
-    fiscalCode,
-    isEmailEnabled: apiProfile.is_email_enabled,
-    isEmailValidated,
-    isInboxEnabled: apiProfile.is_inbox_enabled,
-    isWebhookEnabled: apiProfile.is_webhook_enabled,
-    lastAppVersion: apiProfile.last_app_version,
-    preferredLanguages: apiProfile.preferred_languages,
-    reminderStatus: apiProfile.reminder_status,
-    servicePreferencesSettings:
-      apiProfile.service_preferences_settings === undefined ||
-      apiProfile.service_preferences_settings.mode ===
-        ServicesPreferencesModeEnum.LEGACY
-        ? {
-            mode: ServicesPreferencesModeEnum.LEGACY,
-            version: PROFILE_SERVICE_PREFERENCES_SETTINGS_LEGACY_VERSION
-          }
-        : {
-            mode: apiProfile.service_preferences_settings.mode,
-            version: servicePreferencesSettingsVersion as NonNegativeInteger
-          }
-  };
-}
+): Profile => ({
+  acceptedTosVersion: apiProfile.accepted_tos_version,
+  blockedInboxOrChannels: apiProfile.blocked_inbox_or_channels,
+  email: apiProfile.email,
+  fiscalCode,
+  isEmailEnabled: apiProfile.is_email_enabled,
+  isEmailValidated,
+  isInboxEnabled: apiProfile.is_inbox_enabled,
+  isWebhookEnabled: apiProfile.is_webhook_enabled,
+  lastAppVersion: apiProfile.last_app_version,
+  preferredLanguages: apiProfile.preferred_languages,
+  pushNotificationsContentType: apiProfile.push_notifications_content_type,
+  reminderStatus: apiProfile.reminder_status,
+  servicePreferencesSettings:
+    apiProfile.service_preferences_settings === undefined ||
+    apiProfile.service_preferences_settings.mode ===
+      ServicesPreferencesModeEnum.LEGACY
+      ? {
+          mode: ServicesPreferencesModeEnum.LEGACY,
+          version: PROFILE_SERVICE_PREFERENCES_SETTINGS_LEGACY_VERSION
+        }
+      : {
+          mode: apiProfile.service_preferences_settings.mode,
+          version: servicePreferencesSettingsVersion as NonNegativeInteger
+        }
+});
 
 /**
  * Converts a RetrievedProfile model to an ExtendedProfile
  */
-// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-export function retrievedProfileToExtendedProfile(
+export const retrievedProfileToExtendedProfile = (
   profile: RetrievedProfile
-): ExtendedProfile {
-  return withoutUndefinedValues({
+): ExtendedProfile =>
+  withoutUndefinedValues({
     accepted_tos_version: profile.acceptedTosVersion,
     blocked_inbox_or_channels: profile.blockedInboxOrChannels,
     email: profile.email,
@@ -83,12 +80,15 @@ export function retrievedProfileToExtendedProfile(
     last_app_version:
       profile.lastAppVersion !== "UNKNOWN" ? profile.lastAppVersion : undefined,
     preferred_languages: profile.preferredLanguages,
+    push_notifications_content_type:
+      profile.pushNotificationsContentType !== "UNSET"
+        ? profile.pushNotificationsContentType
+        : undefined,
     reminder_status:
       profile.reminderStatus !== "UNSET" ? profile.reminderStatus : undefined,
     service_preferences_settings: profile.servicePreferencesSettings,
     version: profile.version
   });
-}
 
 /**
  * Extracts the services that have inbox blocked
