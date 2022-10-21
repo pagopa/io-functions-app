@@ -504,3 +504,5 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/StandardServiceCategory"
   AppVersion:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/AppVersion"
+  PushNotificationsContentType:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PushNotificationsContentType"
