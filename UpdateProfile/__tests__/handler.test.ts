@@ -969,4 +969,64 @@ describe("UpdateProfileHandler", () => {
       }
     }
   );
+
+  // pushNotificationsContentType optional field tests
+  it.each`
+    description                                     | givenProfile                                                           | input          | expected
+    ${"without pushNotificationsContentType"}       | ${aRetrievedProfile}                                                   | ${undefined}   | ${undefined}
+    ${"without pushNotificationsContentType"}       | ${aRetrievedProfile}                                                   | ${"ANONYMOUS"} | ${"ANONYMOUS"}
+    ${"without pushNotificationsContentType"}       | ${aRetrievedProfile}                                                   | ${"FULL"}      | ${"FULL"}
+    ${"with unset pushNotificationsContentType"}    | ${{ ...aRetrievedProfile, pushNotificationsContentType: "UNSET" }}     | ${undefined}   | ${undefined}
+    ${"with unset pushNotificationsContentType"}    | ${{ ...aRetrievedProfile, pushNotificationsContentType: "UNSET" }}     | ${"ANONYMOUS"} | ${"ANONYMOUS"}
+    ${"with unset pushNotificationsContentType"}    | ${{ ...aRetrievedProfile, pushNotificationsContentType: "UNSET" }}     | ${"FULL"}      | ${"FULL"}
+    ${"with disabled pushNotificationsContentType"} | ${{ ...aRetrievedProfile, pushNotificationsContentType: "ANONYMOUS" }} | ${undefined}   | ${undefined}
+    ${"with disabled pushNotificationsContentType"} | ${{ ...aRetrievedProfile, pushNotificationsContentType: "ANONYMOUS" }} | ${"ANONYMOUS"} | ${"ANONYMOUS"}
+    ${"with disabled pushNotificationsContentType"} | ${{ ...aRetrievedProfile, pushNotificationsContentType: "ANONYMOUS" }} | ${"FULL"}      | ${"FULL"}
+    ${"with enabled pushNotificationsContentType"}  | ${{ ...aRetrievedProfile, pushNotificationsContentType: "FULL" }}      | ${undefined}   | ${undefined}
+    ${"with enabled pushNotificationsContentType"}  | ${{ ...aRetrievedProfile, pushNotificationsContentType: "FULL" }}      | ${"ANONYMOUS"} | ${"ANONYMOUS"}
+    ${"with enabled pushNotificationsContentType"}  | ${{ ...aRetrievedProfile, pushNotificationsContentType: "FULL" }}      | ${"FULL"}      | ${"FULL"}
+  `(
+    "GIVEN a profile item $description and pushNotificationsContentType = $input from payload, the handler SHOULD save pushNotificationsContentType = $expected",
+    async ({ givenProfile, input, expected }) => {
+      const profileModelMock = {
+        findLastVersionByModelId: jest.fn(() => TE.of(some(givenProfile))),
+        update: jest.fn(_ =>
+          TE.of(
+            pipe(
+              RetrievedProfile.decode({ ...aRetrievedProfile, ..._ }),
+              E.getOrElseW(_ => {
+                throw "error";
+              })
+            )
+          )
+        )
+      };
+
+      const updateProfileHandler = UpdateProfileHandler(
+        profileModelMock as any,
+        mockQueueClient,
+        mockTracker
+      );
+
+      const result = await updateProfileHandler(
+        contextMock as any,
+        aFiscalCode,
+        {
+          ...aProfile,
+          push_notifications_content_type: input
+        }
+      );
+
+      expect(profileModelMock.update).toBeCalledWith(
+        expect.objectContaining({
+          pushNotificationsContentType: input
+        })
+      );
+
+      expect(result.kind).toBe("IResponseSuccessJson");
+      if (result.kind === "IResponseSuccessJson") {
+        expect(result.value.push_notifications_content_type).toBe(expected);
+      }
+    }
+  );
 });

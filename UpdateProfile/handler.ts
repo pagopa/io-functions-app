@@ -198,6 +198,8 @@ export function UpdateProfileHandler(
       blockedInboxOrChannels: overrideBlockedInboxOrChannels,
       // Override lastAppVersion for users switched to a downgraded app version that doesn't provide the value in the request payload
       lastAppVersion: profile.lastAppVersion,
+      // Override pushNotificationsContentType for users switched to a downgraded app version that doesn't provide the value in the request payload
+      pushNotificationsContentType: profile.pushNotificationsContentType,
       // Override reminderStatus for users switched to a downgraded app version that doesn't provide the value in the request payload
       reminderStatus: profile.reminderStatus
     })();

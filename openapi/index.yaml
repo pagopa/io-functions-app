@@ -545,6 +545,8 @@ definitions:
         $ref: '#/definitions/IsTestProfile'
       last_app_version:
         $ref: '#/definitions/AppVersion'
+      push_notifications_content_type:
+        $ref: '#/definitions/PushNotificationsContentType'
       version:
         type: integer
     required:
@@ -643,6 +645,8 @@ definitions:
         $ref: '#/definitions/ReminderStatus'
       last_app_version:
         $ref: '#/definitions/AppVersion'
+      push_notifications_content_type:
+        $ref: '#/definitions/PushNotificationsContentType'
       version:
         type: integer
     required:
@@ -1055,3 +1059,15 @@ definitions:
     pattern: ^((0|[1-9]\\d*)\\.){2}(0|[1-9]\\d*)(\\.(0|[1-9]\\d*)){0,1}$
     description: A string field in Semantic Versioning format
     example: 1.10.11
+  PushNotificationsContentType:
+    type: string
+    x-extensible-enum:
+      - FULL
+      - ANONYMOUS
+    example: FULL
+    description: >-
+      This parameter specifies how a specific user wants to visualize push
+      notifications.
+
+      FULL leads to descriptive push notifications while ANONYMOUS leads to
+      silent ones.
