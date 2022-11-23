@@ -27,14 +27,14 @@ parameters:
     type: object
     default:
       app1:
-        appname: io-p-fn3-app1
-        rg: io-p-rg-functions_app1
+        appname: io-p-app-fn-1
+        rg: io-p-app-rg-1
       app2:
-        appname: io-p-fn3-app2
-        rg: io-p-rg-internal
+        appname: io-p-app-fn-2
+        rg: io-p-app-rg-2
       appAsync:
-        appname: io-p-fn3-appasync
-        rg: io-p-rg-internal
+        appname: io-p-app-async-fn
+        rg: io-p-app-async-rg
 
 # Only manual activations are intended
 trigger: none
@@ -42,11 +42,10 @@ pr: none
 
 # This pipeline has been implemented to be run on hosted agent pools based both
 # on 'windows' and 'ubuntu' virtual machine images and using the scripts defined
-# in the package.json file. Since we are deploying on Azure functions on Windows
-# runtime, the pipeline is currently configured to use a Windows hosted image for
-# the build and deploy.
+# in the package.json file. Depending on the os_type of the resource 'windows' or 
+# 'ubuntu-latest' may be inserted here
 pool:
-  vmImage: 'windows-2019'
+  vmImage: 'ubuntu-latest'
 
 resources:
   repositories:
