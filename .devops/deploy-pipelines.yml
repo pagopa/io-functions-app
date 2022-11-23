@@ -1,11 +1,8 @@
 # Azure DevOps pipeline to release a new version and deploy to production.
 
 variables:
-  # Configuration to run the healthcheck container
-  HEALTHCHECK_CONTAINER_RG: 'io-p-rg-common'
-  HEALTHCHECK_CONTAINER_VNET: 'io-p-vnet-common'
-  HEALTHCHECK_CONTAINER_SUBNET: 'azure-devops' 
-  HEALTHCHECK_PATH: 'api/v1/info' 
+  # Configuration to run the healthcheck
+  HEALTHCHECK_PATH: 'api/v1/info'
 
 parameters:
   - name: 'RELEASE_SEMVER'
@@ -27,14 +24,14 @@ parameters:
     type: object
     default:
       app1:
-        appname: io-p-fn3-app1
-        rg: io-p-rg-functions_app1
+        appname: io-p-app-fn-1
+        rg: io-p-app-rg-1
       app2:
-        appname: io-p-fn3-app2
-        rg: io-p-rg-internal
+        appname: io-p-app-fn-1
+        rg: io-p-app-rg-1
       appAsync:
-        appname: io-p-fn3-appasync
-        rg: io-p-rg-internal
+        appname: io-p-app-async-fn
+        rg: io-p-app-async-rg
 
 # Only manual activations are intended
 trigger: none
