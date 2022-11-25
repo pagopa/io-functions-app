@@ -2,7 +2,7 @@
 
 This project implements the APIs to enable the functionalities implemented in
 the IO app. The APIs are called by the app backend.
-The implementation is based on the Azure Functions v2 runtime.
+The implementation is based on the Azure Functions v4 runtime.
 
 ## Architecture
 
@@ -17,8 +17,8 @@ Install the [Azure Functions Core Tools](https://github.com/Azure/azure-function
 
 Install the dependencies:
 
-```
-$ yarn install
+```bash
+$ yarn install --frozen-lockfile
 ```
 
 Create a file `local.settings.json` in your cloned repo, with the
@@ -29,7 +29,7 @@ following contents:
   "IsEncrypted": false,
   "Values": {
     "FUNCTIONS_WORKER_RUNTIME": "node",
-    "WEBSITE_NODE_DEFAULT_VERSION": "10.14.1",
+    "WEBSITE_NODE_DEFAULT_VERSION": "14.16.0",
     "AzureWebJobsStorage": "<JOBS_STORAGE_CONNECTION_STRING>",
     "APPINSIGHTS_INSTRUMENTATIONKEY": "<APPINSIGHTS_KEY>",
     "MESSAGE_CONTAINER_NAME": "message-content",
