@@ -759,15 +759,6 @@
   resolved "https://registry.yarnpkg.com/@pagopa/express-azure-functions/-/express-azure-functions-2.0.0.tgz#eb52a0b997d931c1509372e2a9bea22a8ca85c17"
   integrity sha512-IFZqtk0e2sfkMZIxYqPORzxcKRkbIrVJesR6eMLNwzh1rA4bl2uh9ZHk1m55LNq4ZmaxREDu+1JcGlIaZQgKNQ==
 
-"@pagopa/io-backend-notifications-sdk@^9.7.0":
-  version "9.7.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-backend-notifications-sdk/-/io-backend-notifications-sdk-9.7.0.tgz#887069f3c717a01e22ccc4a1323ba3b6a4fc0560"
-  integrity sha512-qIepFBWeoadgvQcSjgRt5SNw1xgqOjdZyUpm62keEz9W04Q+Qn6oxMCXcm1IfgWYXWn7ajMRVlfPWa4upSfdkA==
-  dependencies:
-    "@pagopa/ts-commons" "^10.0.0"
-    fp-ts "^2.10.5"
-    io-ts "^2.2.16"
-
 "@pagopa/io-backend-sdk@^7.15.5":
   version "7.15.5"
   resolved "https://registry.yarnpkg.com/@pagopa/io-backend-sdk/-/io-backend-sdk-7.15.5.tgz#a0246c1f6147312c4e8780b2c1d7ca48f297c1c9"
@@ -818,21 +809,6 @@
     swagger-parser "^10.0.3"
     write-yaml-file "^4.1.3"
     yargs "^15.0.1"
-
-"@pagopa/ts-commons@^10.0.0":
-  version "10.11.1"
-  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.11.1.tgz#7cdee9c2219365ecffca7467747df9d82b7a3dc3"
-  integrity sha512-/quFGyq9dHexIzu200nMFhYlcMbmypMUhwTsvkTV2U5xhkxh3cz+kYv7AWWEwScbE6eziQibOSkgTTid/pZG7g==
-  dependencies:
-    abort-controller "^3.0.0"
-    agentkeepalive "^4.1.4"
-    applicationinsights "^1.8.10"
-    fp-ts "^2.11.0"
-    io-ts "^2.2.16"
-    jose "^4.11.2"
-    json-set-map "^1.1.2"
-    node-fetch "^2.6.0"
-    validator "^13.7.0"
 
 "@pagopa/ts-commons@^10.10.0", "@pagopa/ts-commons@^10.3.0", "@pagopa/ts-commons@^10.9.0":
   version "10.10.0"
@@ -5622,11 +5598,6 @@ jest@^24.8.0:
   dependencies:
     import-local "^2.0.0"
     jest-cli "^24.9.0"
-
-jose@^4.11.2:
-  version "4.11.2"
-  resolved "https://registry.yarnpkg.com/jose/-/jose-4.11.2.tgz#d9699307c02e18ff56825843ba90e2fae9f09e23"
-  integrity sha512-njj0VL2TsIxCtgzhO+9RRobBvws4oYyCM8TpvoUQwl/MbIM3NFJRR9+e6x0sS5xXaP1t6OCBkaBME98OV9zU5A==
 
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"
