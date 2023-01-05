@@ -759,7 +759,7 @@
   resolved "https://registry.yarnpkg.com/@pagopa/express-azure-functions/-/express-azure-functions-2.0.0.tgz#eb52a0b997d931c1509372e2a9bea22a8ca85c17"
   integrity sha512-IFZqtk0e2sfkMZIxYqPORzxcKRkbIrVJesR6eMLNwzh1rA4bl2uh9ZHk1m55LNq4ZmaxREDu+1JcGlIaZQgKNQ==
 
-"@pagopa/io-backend-sdk@^7.15.5":
+"@pagopa/io-backend-sdk@x":
   version "7.15.5"
   resolved "https://registry.yarnpkg.com/@pagopa/io-backend-sdk/-/io-backend-sdk-7.15.5.tgz#a0246c1f6147312c4e8780b2c1d7ca48f297c1c9"
   integrity sha512-Dj/L6ta24jyxmCcca5kdFRo1+hd9LNfjI7fD6c6Erax5h/LwQe8qt/VKvX0Ps9UKr9AIbZHR3hDSnun1Q+Qagg==
