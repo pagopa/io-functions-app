@@ -8,7 +8,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { PromiseType } from "@pagopa/ts-commons/lib/types";
-import { EmailAddress } from "../generated/backend/EmailAddress";
+import { EmailAddress } from "@pagopa/io-backend-sdk/EmailAddress";
 import { toHash } from "../utils/crypto";
 
 /**

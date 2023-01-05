@@ -21,8 +21,8 @@ import * as TE from "fp-ts/lib/TaskEither";
 
 import * as t from "io-ts";
 
-import { FiscalCode } from "../generated/backend/FiscalCode";
-import { ServiceId } from "../generated/backend/ServiceId";
+import { FiscalCode } from "@pagopa/io-backend-sdk/FiscalCode";
+import { ServiceId } from "@pagopa/io-backend-sdk/ServiceId";
 import { errorsToError } from "../utils/conversions";
 import { createTracker } from "../utils/tracking";
 

@@ -15,7 +15,7 @@ import {
   aFiscalCode,
   aRetrievedUserDataProcessing
 } from "../../__mocks__/mocks";
-import { UserDataProcessingChoiceEnum } from "../../generated/backend/UserDataProcessingChoice";
+import { UserDataProcessingChoiceEnum } from "@pagopa/io-backend-sdk/UserDataProcessingChoice";
 import { AbortUserDataProcessingHandler } from "../handler";
 
 beforeEach(() => {

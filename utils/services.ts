@@ -14,7 +14,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
-import { ServiceId } from "../generated/backend/ServiceId";
+import { ServiceId } from "@pagopa/io-backend-sdk/ServiceId";
 
 /**
  * Return a task containing either an error or the required Service

@@ -77,10 +77,6 @@ stages:
       - job: unit_tests
         steps:
         - template: templates/node-job-setup/template.yaml@pagopaCommons
-        
-        - script: |
-            yarn generate
-          displayName: 'Generate definitions'
 
         - script: |
             yarn test:coverage
