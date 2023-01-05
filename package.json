@@ -15,7 +15,6 @@
     "lint": "eslint . -c .eslintrc.js --ext .ts,.tsx",
     "openapi:bundle": "bundle-api-spec -i openapi/index.yaml.template -o openapi/index.yaml -V $npm_package_version",
     "pregenerate": "npm run openapi:bundle && rimraf ./generated",
-    "generate": "npm-run-all generate:backend:*",
     "deploy": "npm run build && func azure functionapp publish agid-functions-app-test",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
     "predeploy": "npm-run-all build dist:modules",
