@@ -15,4 +15,4 @@ jobs:
     steps:
       - id: lint
         # from https://github.com/pagopa/link-jira-issue-action
-        uses: pagopa/terraform-apply-azure-action@v1.0.0
+        uses: pagopa/link-jira-issue-action@v1.0.0
