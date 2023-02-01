@@ -3,7 +3,7 @@ version: "3.2"
 services:
 
   functions-node-14:
-    image: functions-node-14
+    image: functions-node-18
     build:
       context: ..
       dockerfile: ./docker/functions-node-14/Dockerfile
