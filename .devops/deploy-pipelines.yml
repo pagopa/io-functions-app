@@ -137,7 +137,6 @@ stages:
                 !tsconfig.json
                 !tslint.json
                 !yarn.lock
-                !Dangerfile.js
                 !CODEOWNERS
                 !__*/**/*
             displayName: 'Copy deploy files'
