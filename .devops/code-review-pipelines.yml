@@ -27,10 +27,7 @@ stages:
   - stage: Build
     dependsOn: []
     jobs:
-      - job: make_build
-        pool:
-          # As we deploy on Wondows machines, we use Windows to build
-          vmImage: 'windows-2019'         
+      - job: make_build       
         steps:
         - template: templates/node-job-setup/template.yaml@pagopaCommons
         - script: |
