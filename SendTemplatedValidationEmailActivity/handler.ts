@@ -16,8 +16,8 @@ import { EmailString } from "@pagopa/ts-commons/lib/strings";
 import { sendMail } from "@pagopa/io-functions-commons/dist/src/mailer";
 import { pipe } from "fp-ts/lib/function";
 import { createTracker } from "../utils/tracking";
-import { getEmailHtmlFromTemplate } from "./template";
-import { EmailDefaults } from "./";
+import * as mailvalidation from "../generated/templates/mailvalidation/index";
+import { EmailDefaults } from ".";
 
 // Activity input
 export const ActivityInput = t.interface({
@@ -49,7 +49,7 @@ export const getSendValidationEmailActivityHandler = (
   emailDefaults: EmailDefaults,
   functionsPublicUrl: string
 ) => async (context: Context, input: unknown): Promise<unknown> => {
-  const logPrefix = "SendValidationEmailActivity";
+  const logPrefix = "SendTemplatedValidationEmailActivity";
 
   const errorOrActivityInput = ActivityInput.decode(input);
 
@@ -71,7 +71,7 @@ export const getSendValidationEmailActivityHandler = (
   // Generate the email html from the template
   const { from, title, htmlToTextOptions } = emailDefaults;
 
-  const emailHtml = getEmailHtmlFromTemplate(
+  const emailHtml = mailvalidation.apply(
     title,
     `${functionsPublicUrl}/validate-profile-email?token=${token}`
   );

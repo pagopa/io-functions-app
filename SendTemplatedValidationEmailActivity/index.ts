@@ -6,7 +6,7 @@ import { getSendValidationEmailActivityHandler } from "./handler";
 const config = getConfigOrThrow();
 
 // Email data
-const EMAIL_TITLE = "Valida l’indirizzo email che usi su IO";
+const EMAIL_TITLE = "Conferma il tuo indirizzo email";
 
 const HTML_TO_TEXT_OPTIONS: HtmlToTextOptions = {
   ignoreImage: true, // Ignore all document images

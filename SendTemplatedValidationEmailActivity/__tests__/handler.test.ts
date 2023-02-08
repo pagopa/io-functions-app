@@ -8,6 +8,7 @@ import {
   ActivityInput as SendValidationEmailActivityInput,
   getSendValidationEmailActivityHandler
 } from "../handler";
+import { apply } from "../../generated/templates/mailvalidation/index";
 
 const htmlAndTextContent = "CONTENT";
 
@@ -17,12 +18,11 @@ jest.mock("applicationinsights", () => ({
   }
 }));
 
-jest.mock("../template", () => ({
-  __esModule: true,
-  getEmailHtmlFromTemplate: () => htmlAndTextContent
+jest.mock("../../generated/templates/mailvalidation/index", () => ({
+  apply: jest.fn(() => htmlAndTextContent)
 }));
 
-describe("SendValidationEmailActivityHandler", () => {
+describe("SendTemplatedValidationEmailActivityHandler", () => {
   it("should send the email using the input data", async () => {
     const functionsPublicUrl = "https://publicUrl";
     const emailDefaults: EmailDefaults = {
@@ -49,6 +49,10 @@ describe("SendValidationEmailActivityHandler", () => {
 
     await handler(contextMock as any, input);
 
+    expect(apply).toBeCalledWith(
+      emailDefaults.title,
+      `${functionsPublicUrl}/validate-profile-email?token=${input.token}`
+    );
     expect(mailerTransporterMock.sendMail).toHaveBeenCalledWith(
       {
         from: emailDefaults.from,
