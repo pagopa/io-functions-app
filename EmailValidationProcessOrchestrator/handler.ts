@@ -8,8 +8,6 @@ import { IOrchestrationFunctionContext } from "durable-functions/lib/src/classes
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
-import { pipe } from "fp-ts/lib/function";
-import * as B from "fp-ts/boolean";
 import {
   ActivityInput as CreateValidationTokenActivityInput,
   ActivityResult as CreateValidationTokenActivityResult
@@ -18,11 +16,6 @@ import {
   ActivityInput as SendValidationEmailActivityInput,
   ActivityResult as SendValidationEmailActivityResult
 } from "../SendValidationEmailActivity/handler";
-import {
-  FeatureFlag,
-  getIsUserEligibleForNewFeature
-} from "../utils/featureFlag";
-import { BetaUsers } from "../utils/config";
 
 // Input
 export const OrchestratorInput = t.interface({
@@ -49,18 +42,11 @@ export const OrchestratorResult = t.taggedUnion("kind", [
 
 export type OrchestratorResult = t.TypeOf<typeof OrchestratorResult>;
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type FfTemplateEmail = {
-  readonly BETA_USERS: BetaUsers;
-  readonly FF_TEMPLATE_EMAIL: FeatureFlag;
-};
-
 /**
  * An orchestrator to handle the email validation process.
  */
 export const handler = function*(
-  context: IOrchestrationFunctionContext,
-  { BETA_USERS, FF_TEMPLATE_EMAIL }: FfTemplateEmail
+  context: IOrchestrationFunctionContext
 ): Generator<unknown> {
   const logPrefix = `EmailValidationProcessOrchestrator`;
 
@@ -161,22 +147,9 @@ export const handler = function*(
       }
     );
 
-    const sendValidationEmailActivity = pipe(
-      fiscalCode,
-      getIsUserEligibleForNewFeature(
-        cf => BETA_USERS.includes(cf),
-        () => false, // NO canary implemented yet
-        FF_TEMPLATE_EMAIL
-      ),
-      B.fold(
-        () => "SendValidationEmailActivity",
-        () => "SendTemplatedValidationEmailActivity"
-      )
-    );
-
     // Start the activity
     const sendValidationEmailActivityResultJson = yield context.df.callActivityWithRetry(
-      sendValidationEmailActivity,
+      "SendValidationEmailActivity",
       retryOptions,
       sendValidationEmailActivityInput
     );
@@ -221,7 +194,3 @@ export const handler = function*(
     throw error;
   }
 };
-
-export const getHandler = (temaplteEmailConfig: FfTemplateEmail) => (
-  context: IOrchestrationFunctionContext
-): Generator<unknown> => handler(context, temaplteEmailConfig);
