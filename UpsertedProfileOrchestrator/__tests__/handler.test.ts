@@ -10,6 +10,7 @@ import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aEmailChanged,
   aFiscalCode,
+  anotherFiscalCode,
   aRetrievedProfile,
   autoProfileServicePreferencesSettings,
   manualProfileServicePreferencesSettings
@@ -85,7 +86,6 @@ describe("UpsertedProfileOrchestratorV2", () => {
     expect(contextMockWithDf.df.callSubOrchestratorWithRetry).not.toBeCalled();
   });
 
-  // it("should start the activities with the right inputs", async () => {
   it.each([
     {
       betaList: [],
@@ -101,6 +101,11 @@ describe("UpsertedProfileOrchestratorV2", () => {
       betaList: [aFiscalCode],
       ff: FeatureFlagEnum.BETA,
       expectedOrchestrator: "EmailValidationWithTemplateProcessOrchestrator"
+    },
+    {
+      betaList: [anotherFiscalCode],
+      ff: FeatureFlagEnum.BETA,
+      expectedOrchestrator: "EmailValidationProcessOrchestrator"
     },
     {
       betaList: [],
