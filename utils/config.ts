@@ -16,12 +16,14 @@ import { MailerConfig } from "@pagopa/io-functions-commons/dist/src/mailer";
 import { DateFromTimestamp } from "@pagopa/ts-commons/lib/dates";
 import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
 import {
   VISIBLE_SERVICE_BLOB_ID,
   VISIBLE_SERVICE_CONTAINER
 } from "@pagopa/io-functions-commons/dist/src/models/visible_service";
+import { JsonFromString, withFallback } from "io-ts-types";
+import { FeatureFlag, FeatureFlagEnum } from "./featureFlag";
 
 // exclude a specific value from a type
 // as strict equality is performed, allowed input types are constrained to be values not references (object, arrays, etc)
@@ -66,10 +68,22 @@ export const VisibleServiceConfig = t.interface({
   )
 });
 
+export const BetaUsers = t.readonlyArray(FiscalCode);
+export type BetaUsers = t.TypeOf<typeof BetaUsers>;
+export const BetaUsersFromString = withFallback(JsonFromString, []).pipe(
+  BetaUsers
+);
+export const FeatureFlagFromString = withFallback(
+  FeatureFlag,
+  FeatureFlagEnum.NONE
+);
+
 // global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
   t.interface({
+    BETA_USERS: BetaUsersFromString,
+
     COSMOSDB_KEY: NonEmptyString,
     COSMOSDB_NAME: NonEmptyString,
     COSMOSDB_URI: NonEmptyString,
@@ -101,6 +115,7 @@ export const IConfig = t.intersection([
     FF_NEW_USERS_EUCOVIDCERT_ENABLED: t.boolean,
     FF_ONLY_NATIONAL_SERVICES: t.boolean,
     FF_OPT_IN_EMAIL_ENABLED: t.boolean,
+    FF_TEMPLATE_EMAIL: FeatureFlagFromString,
 
     isProduction: t.boolean
   }),

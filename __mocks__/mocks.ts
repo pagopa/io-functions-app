@@ -33,6 +33,7 @@ export const aEmail = "email@example.com" as EmailString;
 export const aEmailChanged = "email.changed@example.com" as EmailString;
 
 export const aFiscalCode = "SPNDNL80A13Y555X" as FiscalCode;
+export const anotherFiscalCode = "AAABBB01C02D345W" as FiscalCode;
 
 // CosmosResourceMetadata
 export const aCosmosResourceMetadata: Omit<CosmosResource, "id"> = {
