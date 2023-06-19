@@ -9,7 +9,7 @@ services:
       dockerfile: docker/functions/Dockerfile
     # environment:
     #   - languageWorkers__node__arguments=--inspect=0.0.0.0:5858
-    env_file: 
+    env_file:
       - .env
     working_dir: /usr/src/app
     ports:
@@ -18,7 +18,8 @@ services:
     networks:
       - io-fn
     depends_on:
-      - fnstorage
+      - azurite
+      - functions-node-18
     volumes:
       - .:/usr/src/app
     labels:
@@ -37,11 +38,19 @@ services:
       # apply middleware to route
       - "traefik.http.routers.functions.middlewares=testHeader"
 
-  fnstorage:
-    image: azurite
+  functions-node-18:
+    image: functions-node-18
     build:
       context: ./
-      dockerfile: docker/azurite/Dockerfile
+      dockerfile: docker/functions-node-18/Dockerfile
+    command: /bin/true
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: azurite
+    hostname: azurite
+    restart: always
+    command: "azurite --blobHost 127.0.0.1 --blobPort 10000 --queueHost 127.0.0.1 --queuePort 10001 --tableHost 127.0.0.1 --tablePort 10002"
     ports:
       - "10000:10000"
       - "10001:10001"
@@ -49,20 +58,9 @@ services:
     networks:
       - io-fn
 
-  storage:
-    image: azurite
-    command: ["sh", "-c", "node bin/azurite -l /opt/azurite/folder --blobPort 10003 --queuePort 10004 --tablePort 10005"]
-    ports:
-      - "10003:10003"
-      - "10004:10004"
-      - "10005:10005"
-    depends_on:
-      - fnstorage
-    networks:
-      - io-fn
-
   cosmosdb:
     image: cosmosdb
+    container_name: cosmosdb
     env_file:
       - .env
     build:
