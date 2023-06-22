@@ -74,7 +74,6 @@ These must be the other variables values for the `local.settings.json` file:
 The COSMOSDB_URI must be the address of the cosmos db instance specified in the docker-compose.yml file while the COSMOSDB_KEY and COSMOSDB_NAME could be totally randomic.
 
 Then, copy `.env.example` to `.env` and fill the variables with the following mandatory variables:
- * QueueStorageConnection=**connection string**
  * LogsStorageConnection=**connection string**
  * NOTIFICATIONS_STORAGE_CONNECTION_STRING=**connection string**
  * EventsQueueStorageConnection=**connection string**
