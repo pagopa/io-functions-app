@@ -4,21 +4,21 @@
 import { ContainerResponse, CosmosClient, Database } from "@azure/cosmos";
 import {
   NewProfile,
-  Profile,
   PROFILE_COLLECTION_NAME,
+  Profile,
   ProfileModel
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import {
   NewService,
-  Service,
   SERVICE_COLLECTION_NAME,
+  Service,
   ServiceModel
 } from "@pagopa/io-functions-commons/dist/src/models/service";
+import { pipe } from "fp-ts/function";
 import { sequenceT } from "fp-ts/lib/Apply";
+import * as E from "fp-ts/lib/Either";
 import { toError } from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
-import * as E from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/function";
 import { getConfigOrThrow } from "../../utils/config";
 
 const config = getConfigOrThrow();
@@ -37,7 +37,7 @@ const createDatabase = (databaseName: string): TE.TaskEither<Error, Database> =>
       () => cosmosdbClient.databases.create({ id: databaseName }),
       toError
     ),
-    TE.map(response => response.database)
+    TE.map(response => response.database),
   )
 
 const createCollection = (
@@ -46,8 +46,9 @@ const createCollection = (
   partitionKey: string
 ): TE.TaskEither<Error, ContainerResponse> =>
   TE.tryCatch(
-    () => db.containers.createIfNotExists({ id: collectionName, partitionKey }),
+    () => db.containers.createIfNotExists({ id: collectionName, partitionKey: `/${partitionKey}` }),
     toError
+
   );
 
 const aService: Service = pipe(
@@ -63,7 +64,7 @@ const aService: Service = pipe(
     serviceId: config.REQ_SERVICE_ID,
     serviceName: "MyServiceName"
   }),
-  E.getOrElse(() => {
+  E.getOrElseW(() => {
     throw new Error("Cannot decode service payload.");
   })
 )
@@ -73,7 +74,7 @@ const aNewService = pipe(
     ...aService,
     kind: "INewService"
   }),
-  E.getOrElse(() => {
+  E.getOrElseW(() => {
     throw new Error("Cannot decode new service.");
   }))
 
@@ -87,7 +88,7 @@ const aProfile: Profile = pipe(
     isInboxEnabled: true,
     isWebhookEnabled: true
   }),
-  E.getOrElse(() => {
+  E.getOrElseW(() => {
     throw new Error("Cannot decode profile payload.");
   }))
 
@@ -95,7 +96,7 @@ const aNewProfile = pipe(
   NewProfile.decode({
     ...aProfile,
     kind: "INewProfile"
-  }), E.getOrElse(() => {
+  }), E.getOrElseW(() => {
     throw new Error("Cannot decode new profile.");
   })
 )
@@ -122,12 +123,12 @@ pipe(
           aNewProfile
         )
       ),
-      TE.mapLeft(_ => new Error(`CosmosError: ${_.kind}`))
+      TE.bimap(err => {
+        console.log(`Failure during the fixtures generation: ${JSON.stringify(err)}`);
+        return new Error("Failure during the fixtures generation");
+      },
+        result => console.log(`Fixtures generated: ${JSON.stringify(result)}`)
+      )
     )
   )
-)().then(
-  // eslint-disable-next-line no-console
-  _ => console.log(`Successfully created fixtures`),
-  // eslint-disable-next-line no-console
-  _ => console.error(`Failed generate fixtures ${_.message}`)
-)
+)()

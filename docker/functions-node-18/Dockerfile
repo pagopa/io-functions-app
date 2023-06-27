@@ -2,6 +2,7 @@ FROM node:18.13.0
 
 WORKDIR /usr/src/app
 
+RUN apt-key update
 RUN apt-get update
 RUN apt-get install -y lsb-release
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
@@ -12,7 +13,7 @@ RUN apt-get update
 RUN apt-get install -y azure-functions-core-tools-4
 RUN apt-get install -y apt-transport-https
 RUN apt-get update
-RUN apt-get install -y dotnet-sdk-3.1
+RUN apt-get install -y --no-install-recommends dotnet-sdk-6.0
 
 ENV AzureWebJobsScriptRoot=/usr/src/app \
     AzureFunctionsJobHost__Logging__Console__IsEnabled=true
