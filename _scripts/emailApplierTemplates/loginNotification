@@ -13,9 +13,10 @@ const formatDate = (d: Date): string =>
 
 export const apply = (
   name: NonEmptyString,
-  idp: NonEmptyString,
-  date: DateFromTimestamp
+  identity_provider: NonEmptyString,
+  date_time: DateFromTimestamp,
+  ip_address: NonEmptyString
 ): string => {
-  const dateTime = formatDate(date);
+  const dateTime = formatDate(date_time);
   return `{{TEMPLATE}}`;
 };

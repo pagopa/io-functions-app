@@ -369,12 +369,30 @@ exports[`Email Templates should generate login notification email 1`] = `
                               </tr>
                               <tr>
                                 <td align=\\"left\\" class=\\"text\\" style=\\"font-size:0px;padding:0;word-break:break-word;\\">
-                                  <div style=\\"font-family:Titillium Web, system-ui, sans-serif;font-size:16px;font-weight:bold;line-height:24px;text-align:left;color:#17324D;\\">Data e ora</div>
+                                  <div style=\\"font-family:Titillium Web, system-ui, sans-serif;font-size:14px;font-weight:bold;line-height:20px;text-align:left;color:#17324D;\\">Data e ora</div>
                                 </td>
                               </tr>
                               <tr>
-                                <td align=\\"left\\" class=\\"text\\" style=\\"font-size:0px;padding:0px;word-break:break-word;\\">
-                                  <div style=\\"font-family:Titillium Web, system-ui, sans-serif;font-size:16px;font-weight:regular;line-height:24px;text-align:left;color:#17324D;\\">07/07/2023, 10:49</div>
+                                <td align=\\"left\\" class=\\"text\\" style=\\"font-size:0px;padding:0;word-break:break-word;\\">
+                                  <div style=\\"font-family:Titillium Web, system-ui, sans-serif;font-size:14px;font-weight:regular;line-height:20px;text-align:left;color:#17324D;\\">Fri Jul 07 2023 10:49:29 GMT+0200 (Ora legale dell’Europa centrale)</div>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td align=\\"center\\" class=\\"divider\\" style=\\"font-size:0px;padding:10px 25px;padding-top:16px;padding-right:0px;padding-bottom:16px;padding-left:0px;word-break:break-word;\\">
+                                  <p style=\\"border-top:solid 1px #E3E7EB;font-size:1px;margin:0px auto;width:100%;\\">
+                                  </p>
+                                  <!--[if mso | IE]><table align=\\"center\\" border=\\"0\\" cellpadding=\\"0\\" cellspacing=\\"0\\" style=\\"border-top:solid 1px #E3E7EB;font-size:1px;margin:0px auto;width:512px;\\" role=\\"presentation\\" width=\\"512px\\" ><tr><td style=\\"height:0;line-height:0;\\"> &nbsp;
+</td></tr></table><![endif]-->
+                                </td>
+                              </tr>
+                              <tr>
+                                <td align=\\"left\\" class=\\"text\\" style=\\"font-size:0px;padding:0;word-break:break-word;\\">
+                                  <div style=\\"font-family:Titillium Web, system-ui, sans-serif;font-size:14px;font-weight:bold;line-height:20px;text-align:left;color:#17324D;\\">Indirizzo IP</div>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td align=\\"left\\" class=\\"text\\" style=\\"font-size:0px;padding:0;word-break:break-word;\\">
+                                  <div style=\\"font-family:Titillium Web, system-ui, sans-serif;font-size:14px;font-weight:regular;line-height:20px;text-align:left;color:#17324D;\\">127.0.0.1</div>
                                 </td>
                               </tr>
                             </tbody>
@@ -399,7 +417,9 @@ exports[`Email Templates should generate login notification email 1`] = `
                               <tr>
                                 <td align=\\"left\\" class=\\"text\\" style=\\"font-size:0px;padding:10px 25px;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px;word-break:break-word;\\">
                                   <div style=\\"font-family:Titillium Web, system-ui, sans-serif;font-size:16px;font-weight:regular;line-height:24px;text-align:left;color:#17324D;\\">
-                                    <p style=\\"margin-top: 0px\\"> A presto,<br aria-hidden=\\"true\\" />il team di PagoPA S.p.A. </p>
+                                    <p style=\\"margin-top: 0px\\">
+                                      <br /> A presto,<br aria-hidden=\\"true\\" />il team di PagoPA S.p.A.
+                                    </p>
                                   </div>
                                 </td>
                               </tr>

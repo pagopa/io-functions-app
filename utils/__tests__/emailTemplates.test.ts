@@ -6,7 +6,8 @@ describe("Email Templates", () => {
     const result = apply(
       "Mario" as NonEmptyString,
       "idp-prova" as NonEmptyString,
-      new Date(1688719769000)
+      new Date(1688719769000),
+      "127.0.0.1" as NonEmptyString
     );
 
     expect(result).toMatchSnapshot();
