@@ -182,8 +182,8 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "409":
           description: |-
-             Conflict. Either the provided preference setting version is not consistent with the current version stored in the Profile
-             or the Profile is not in the correct preference mode.
+            Conflict. Either the provided preference setting version is not consistent with the current version stored in the Profile
+            or the Profile is not in the correct preference mode.
           schema:
             $ref: "#/definitions/ProblemJson"
         "429":
@@ -200,7 +200,7 @@ paths:
         - in: body
           name: body
           schema:
-           $ref: "#/definitions/UpsertServicePreference"
+            $ref: "#/definitions/UpsertServicePreference"
       responses:
         "200":
           description: User's Service Preference Upserted
@@ -218,8 +218,8 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "409":
           description: |-
-             Conflict. Either the provided preference setting version is not consistent with the current version stored in the Profile
-             or the Profile is not in the correct preference mode.
+            Conflict. Either the provided preference setting version is not consistent with the current version stored in the Profile
+            or the Profile is not in the correct preference mode.
           schema:
             $ref: "#/definitions/ProblemJson"
         "429":
@@ -288,7 +288,7 @@ paths:
           description: Server Error
           schema:
             $ref: "#/definitions/ProblemJson"
-  "/user-data-processing/{fiscal_code}/{choice}":  
+  "/user-data-processing/{fiscal_code}/{choice}":
     get:
       operationId: getUserDataProcessing
       summary: GetUserDataProcessing
