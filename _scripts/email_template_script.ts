@@ -21,10 +21,10 @@ const REMOTE_ASSET_BASE_URL = (version: string): string =>
 export const generateTemplateForMessage = async (): Promise<void> => {
   const params = pipe(
     {
-      emailApplierTemplatePath: process.argv[4],
-      templateName: process.argv[2],
-      templateSourceVersion: process.argv[3],
-      templateTargetPath: process.argv[5]
+      emailApplierTemplatePath: process.env.APPLIER_TEMPLATE_PATH,
+      templateName: process.env.TEMPLATE_NAME,
+      templateSourceVersion: process.env.TEMPLATE_VERSION,
+      templateTargetPath: process.env.TARGET_PATH
     },
     Parameters.decode,
     E.getOrElseW(() => {
