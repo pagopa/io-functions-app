@@ -83,3 +83,19 @@ Then, copy `.env.example` to `.env` and fill the variables with the following ma
 The **connection string** is the same used for the AzureWebJobsStorage in the `local.settings.json` file.
 
 Then you can run `docker-compose up -d` to start the containers.
+
+### Add a new email applier
+
+An email applier is a generated ts file that contains an `apply` function, exposing all the parameters needed by the template. See `loginNotification` as example.
+NOTE: The function should return `{{TEMPLATE}}` string, that will be override with the email template.
+
+To create a new email template applier we first need to add the email template to repository [io-app-email-templates](https://github.com/pagopa/io-app-email-templates) and fork it into [io-messages-email-templates](https://github.com/pagopa/io-messages-email-templates).
+
+After the template is ready:
+
+* add new applier template in `_scripts/emailApplierTemplate` folder. It need
+* add new `generate:templates:<template_name>` script in package.json. The script needs the following parameters:
+  * template name, as defined in `io-messages-email-templates` repo
+  * the tag version of `io-messages-email-templates` repo
+  * the applier template path
+  * the target path of generated code
