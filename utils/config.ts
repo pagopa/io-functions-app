@@ -90,6 +90,8 @@ export const IConfig = t.intersection([
 
     FUNCTIONS_PUBLIC_URL: NonEmptyString,
 
+    MAGIC_LINK_SERVICE_PUBLIC_URL: NonEmptyString,
+
     MESSAGE_CONTAINER_NAME: NonEmptyString,
 
     PUBLIC_API_KEY: NonEmptyString,
