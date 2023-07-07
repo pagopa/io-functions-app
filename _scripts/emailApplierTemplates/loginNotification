@@ -1,0 +1,21 @@
+import * as moment from "moment-timezone";
+
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { DateFromTimestamp } from "@pagopa/ts-commons/lib/dates";
+
+const TIME_ZONE = "Europe/Rome";
+const DATE_TIME_FORMAT = "DD/MM/YYYY, HH:mm";
+
+const formatDate = (d: Date): string =>
+  moment(d)
+    .tz(TIME_ZONE)
+    .format(DATE_TIME_FORMAT);
+
+export const apply = (
+  name: NonEmptyString,
+  idp: NonEmptyString,
+  date: DateFromTimestamp
+): string => {
+  const dateTime = formatDate(date);
+  return `{{TEMPLATE}}`;
+};
