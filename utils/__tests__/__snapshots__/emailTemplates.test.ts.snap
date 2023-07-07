@@ -374,7 +374,7 @@ exports[`Email Templates should generate login notification email 1`] = `
                               </tr>
                               <tr>
                                 <td align=\\"left\\" class=\\"text\\" style=\\"font-size:0px;padding:0px;word-break:break-word;\\">
-                                  <div style=\\"font-family:Titillium Web, system-ui, sans-serif;font-size:16px;font-weight:regular;line-height:24px;text-align:left;color:#17324D;\\">14/08/2020, 12:30</div>
+                                  <div style=\\"font-family:Titillium Web, system-ui, sans-serif;font-size:16px;font-weight:regular;line-height:24px;text-align:left;color:#17324D;\\">07/07/2023, 10:49</div>
                                 </td>
                               </tr>
                             </tbody>
