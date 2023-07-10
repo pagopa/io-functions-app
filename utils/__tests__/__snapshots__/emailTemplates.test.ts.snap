@@ -5,7 +5,7 @@ exports[`Email Templates should generate login notification email 1`] = `
 <html lang=\\"it\\" xmlns=\\"http://www.w3.org/1999/xhtml\\" xmlns:v=\\"urn:schemas-microsoft-com:vml\\" xmlns:o=\\"urn:schemas-microsoft-com:office:office\\">
 
 <head>
-  <title> È stato eseguito l’accesso su app IO </title>
+  <title>È stato eseguito l’accesso su app IO</title>
   <!--[if !mso]><!-->
   <meta http-equiv=\\"X-UA-Compatible\\" content=\\"IE=edge\\">
   <!--<![endif]-->
@@ -84,7 +84,7 @@ exports[`Email Templates should generate login notification email 1`] = `
 
   </style>
   <style type=\\"text/css\\">
-    @media only screen and (max-width:480px) {
+    @media only screen and (max-width:479px) {
       table.mj-full-width-mobile {
         width: 100% !important;
       }
@@ -283,7 +283,7 @@ exports[`Email Templates should generate login notification email 1`] = `
                                     <tbody>
                                       <tr>
                                         <td style=\\"width:36px;\\">
-                                          <img height=\\"auto\\" src=\\"https://raw.githubusercontent.com/pagopa/io-messages-email-templates/IOPID-386/assets/logo_app_io.png\\" style=\\"border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;\\" width=\\"36\\" />
+                                          <img src=\\"https://raw.githubusercontent.com/pagopa/io-messages-email-templates/v1.0.8/assets/logo_app_io.png\\" style=\\"border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;\\" width=\\"36\\" height=\\"auto\\" />
                                         </td>
                                       </tr>
                                     </tbody>
@@ -291,7 +291,7 @@ exports[`Email Templates should generate login notification email 1`] = `
                                 </td>
                               </tr>
                               <div class=\\"dark-img\\" style=\\"mso-hide: all; display: none; padding: 10px 0px\\">
-                                <img src=\\"https://raw.githubusercontent.com/pagopa/io-messages-email-templates/IOPID-386/assets/logo_app_io_white.png\\" width=\\"36px\\" class=\\"dark-img\\" style=\\"display: none\\" />
+                                <img src=\\"https://raw.githubusercontent.com/pagopa/io-messages-email-templates/v1.0.8/assets/logo_app_io_white.png\\" width=\\"36px\\" class=\\"dark-img\\" style=\\"display: none\\" />
                               </div>
                             </tbody>
                           </table>
@@ -476,10 +476,10 @@ exports[`Email Templates should generate login notification email 1`] = `
                               <tr>
                                 <td align=\\"left\\" class=\\"text-secondary\\" style=\\"font-size:0px;padding:0px;word-break:break-word;\\">
                                   <div style=\\"font-family:Titillium Web, system-ui, sans-serif;font-size:14px;font-weight:regular;line-height:20px;text-align:left;color:#5C6F82;\\">
+                                    <p> Ricevi questa comunicazione per verificare che l’accesso su IO sia stato eseguito da te. </p>
                                     <p>
                                       <strong> Non rispondere a questo indirizzo email: è utilizzato solo per l'invio di questa comunicazione e, non essendo monitorato, non riceveresti risposta. </strong>
                                     </p>
-                                    <p> Ricevi questa comunicazione per verificare che l’accesso su IO sia stato eseguito da te. </p>
                                   </div>
                                 </td>
                               </tr>
