@@ -448,7 +448,7 @@ definitions:
         type: string
         minLength: 1
       ip_address:
-        $ref: '#/definitions/CIDR'
+        $ref: '#/definitions/IPAddress'
       device_name:
         type: string
         minLength: 1
@@ -459,6 +459,12 @@ definitions:
       - email
       - identity_provider
       - ip_address
+  IPAddress:
+    type: string
+    description: User's fiscal code.
+    format: IPString
+    x-import: '@pagopa/ts-commons/lib/strings'
+    example: 127.0.0.1
   LimitedProfile:
     description: |-
       Describes the citizen's profile, mostly interesting for preferences
