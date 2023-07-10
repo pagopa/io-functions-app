@@ -455,7 +455,6 @@ definitions:
       - email
       - identity_provider
       - ip_address
-      - device_name
   LimitedProfile:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/LimitedProfile"
   CIDR:

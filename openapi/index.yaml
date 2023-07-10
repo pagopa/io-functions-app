@@ -459,7 +459,6 @@ definitions:
       - email
       - identity_provider
       - ip_address
-      - device_name
   LimitedProfile:
     description: |-
       Describes the citizen's profile, mostly interesting for preferences
