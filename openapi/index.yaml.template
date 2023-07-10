@@ -440,21 +440,22 @@ definitions:
         minLength: 1
       email:
         $ref: "#/definitions/EmailAddress"
-      idp:
+      identity_provider:
         type: string
         minLength: 1
-      date_time:
-        $ref: "#/definitions/Timestamp"
-      ip:
+      ip_address:
         $ref: "#/definitions/CIDR"
+      device_name:
+        type: string
+        minLength: 1
     required:
       - fiscal_code
       - name
       - family_name
       - email
-      - idp
-      - date_time
-      - ip
+      - identity_provider
+      - ip_address
+      - device_name
   LimitedProfile:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/LimitedProfile"
   CIDR:
