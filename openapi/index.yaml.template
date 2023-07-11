@@ -182,8 +182,8 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "409":
           description: |-
-             Conflict. Either the provided preference setting version is not consistent with the current version stored in the Profile
-             or the Profile is not in the correct preference mode.
+            Conflict. Either the provided preference setting version is not consistent with the current version stored in the Profile
+            or the Profile is not in the correct preference mode.
           schema:
             $ref: "#/definitions/ProblemJson"
         "429":
@@ -200,7 +200,7 @@ paths:
         - in: body
           name: body
           schema:
-           $ref: "#/definitions/UpsertServicePreference"
+            $ref: "#/definitions/UpsertServicePreference"
       responses:
         "200":
           description: User's Service Preference Upserted
@@ -218,8 +218,8 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "409":
           description: |-
-             Conflict. Either the provided preference setting version is not consistent with the current version stored in the Profile
-             or the Profile is not in the correct preference mode.
+            Conflict. Either the provided preference setting version is not consistent with the current version stored in the Profile
+            or the Profile is not in the correct preference mode.
           schema:
             $ref: "#/definitions/ProblemJson"
         "429":
@@ -288,7 +288,7 @@ paths:
           description: Server Error
           schema:
             $ref: "#/definitions/ProblemJson"
-  "/user-data-processing/{fiscal_code}/{choice}":  
+  "/user-data-processing/{fiscal_code}/{choice}":
     get:
       operationId: getUserDataProcessing
       summary: GetUserDataProcessing
@@ -346,6 +346,36 @@ paths:
           description: Server Error
           schema:
             $ref: "#/definitions/ProblemJson"
+  "/notify-login":
+    post:
+      operationId: startNotifyLoginProcess
+      description: |-
+        Initiate the Orchestrator to send an email to the user regarding a recently performed login.
+      tags:
+        - restricted
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/UserLoginParams"
+      responses:
+        "202":
+          description: Request accepted
+        "400":
+          description: Invalid request.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+        "429":
+          description: Too many requests
+        "500":
+          description: Server Error
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
 consumes:
   - application/json
 produces:
@@ -396,6 +426,41 @@ parameters:
     required: true
     x-example: DOWNLOAD
 definitions:
+  UserLoginParams:
+    type: object
+    description: All the data related to a newly performed login
+    properties:
+      fiscal_code:
+        $ref: "#/definitions/FiscalCode"
+      name:
+        type: string
+        minLength: 1
+      family_name:
+        type: string
+        minLength: 1
+      email:
+        $ref: "#/definitions/EmailAddress"
+      identity_provider:
+        type: string
+        minLength: 1
+      ip_address:
+        $ref: "#/definitions/IPAddress"
+      device_name:
+        type: string
+        minLength: 1
+    required:
+      - fiscal_code
+      - name
+      - family_name
+      - email
+      - identity_provider
+      - ip_address
+  IPAddress:
+    type: string
+    description: An IP address.
+    format: IPString
+    x-import: "@pagopa/ts-commons/lib/strings"
+    example: "127.0.0.1"
   LimitedProfile:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/LimitedProfile"
   CIDR:
