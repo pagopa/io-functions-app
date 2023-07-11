@@ -8,7 +8,7 @@
       "methods": [
         "post"
       ],
-      "route": "v1/notice-login-email"
+      "route": "v1/notify-login"
     },
     {
       "name": "res",

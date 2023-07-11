@@ -14,7 +14,7 @@ const telemetryClient = initTelemetryClient();
 const app = express();
 secureExpressApp(app);
 app.post(
-  "/api/v1/notice-login-email",
+  "/api/v1/notify-login",
   NoticeLoginEmail(createTracker(telemetryClient))
 );
 
