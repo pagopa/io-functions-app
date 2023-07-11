@@ -111,7 +111,7 @@ export const getNoticeLoginEmailOrchestratorHandler = function*(
   );
 
   try {
-    context.log.verbose(`${logPrefix}|Starting GetMagicCodeActivity`);
+    context.log.verbose(`${logPrefix}|Starting GetGeoLocationDataActivity`);
     const geoLocationActivityInput = GetGeoLocationActivityInput.encode({
       ip_address
     });
@@ -130,7 +130,7 @@ export const getNoticeLoginEmailOrchestratorHandler = function*(
     if (E.isLeft(errorOrGeoLocationServiceResponse)) {
       // we let geo_location be undefined.
       // the SendTemplatedLoginEmailActivity will decide what email template to use based on the geo_location value
-      if (!TransientApiCallFailure.is(errorOrGeoLocationServiceResponse.left)) {
+      if (!TransientApiCallFailure.is(geoLocationActivityResult)) {
         throw OrchestratorFailureResult.encode({
           kind: "FAILURE",
           reason: readableReportSimplified(
@@ -163,7 +163,7 @@ export const getNoticeLoginEmailOrchestratorHandler = function*(
     if (E.isLeft(errorOrMagicLinkServiceResponse)) {
       // we let magic_code be undefined and pass it to the next activity.
       // the SendTemplatedLoginEmailActivity will decide what email template to use based on the magic_code value
-      if (!TransientApiCallFailure.is(errorOrMagicLinkServiceResponse.left)) {
+      if (!TransientApiCallFailure.is(magicCodeActivityResult)) {
         throw OrchestratorFailureResult.encode({
           kind: "FAILURE",
           reason: readableReportSimplified(errorOrMagicLinkServiceResponse.left)
