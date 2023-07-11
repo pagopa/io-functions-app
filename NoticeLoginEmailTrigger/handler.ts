@@ -61,7 +61,7 @@ export const NoticeLoginEmailHandler = (
       dfClient,
       "NoticeLoginEmailOrchestrator",
       orchestratorId,
-      { ...triggerPayload, date_time: new Date() }
+      { ...triggerPayload, date_time: new Date().getTime() }
     ),
     TE.bimap(
       error =>
