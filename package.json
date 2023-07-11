@@ -20,6 +20,7 @@
     "generate:backend:notification-models": "shx rm -rf generated/notifications && shx mkdir -p generated/notifications && gen-api-models --strict 0 --api-spec https://raw.githubusercontent.com/pagopa/io-backend/v7.16.0/api_notifications.yaml --out-dir generated/notifications",
     "generate:backend:notification-hub": "shx rm -rf generated/notifications && shx mkdir -p generated/notifications && gen-api-models --strict 0 --api-spec https://raw.githubusercontent.com/pagopa/io-backend/v7.16.0/notification_queue_messages.yaml --out-dir generated/notifications",
     "generate:templates:mailvalidation": "TARGET=generated/templates/mailvalidation/index && VERSION=v1.0.0 && shx rm -rf generated/templates/mailvalidation && shx mkdir -p generated/templates/mailvalidation && curl -XGET https://raw.githubusercontent.com/pagopa/io-messages-email-templates/$VERSION/MailValidation/index.html -o $TARGET.html && sed -i --posix \"s/\\.\\.\\/assets\\//https:\\/\\/raw.githubusercontent.com\\/pagopa\\/io-messages-email-templates\\/$VERSION\\/assets\\//g\" $TARGET.html && shx echo 'export function apply(title: string, validationUrl: string): string { return `' > $TARGET.ts && shx cat $TARGET.html >> $TARGET.ts && shx echo '`;}' >> $TARGET.ts",
+    "generate:templates:login": "shx rm -rf generated/templates/login && shx mkdir -p generated/templates/login && TEMPLATE_NAME='LoginNotification' TEMPLATE_VERSION='v1.0.8' TEMPLATE_NAME='LoginNotification' APPLIER_TEMPLATE_PATH='_scripts/emailApplierTemplates/loginNotification' TARGET_PATH='generated/templates/login/index' ts-node _scripts/email_template_script.ts",
     "deploy": "npm run build && func azure functionapp publish agid-functions-app-test",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
     "predeploy": "npm-run-all build dist:modules",
@@ -53,6 +54,7 @@
     "prettier": "^1.18.2",
     "shx": "^0.3.2",
     "ts-jest": "^24.0.2",
+    "ts-node": "^10.9.1",
     "typescript": "^4.3.5"
   },
   "dependencies": {
@@ -73,6 +75,7 @@
     "html-to-text": "^5.1.1",
     "io-ts": "^2.2.16",
     "io-ts-types": "^0.5.19",
+    "moment-timezone": "^0.5.43",
     "monocle-ts": "^2.3.13",
     "newtype-ts": "^0.3.5",
     "node-fetch": "^2.6.1",
