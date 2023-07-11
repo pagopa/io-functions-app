@@ -54,7 +54,8 @@ const logPrefix = "SendTemplatedLoginEmailActivity";
 export const getSendLoginEmailActivityHandler = (
   mailerTransporter: NodeMailer.Transporter,
   emailDefaults: EmailDefaults,
-  _magicLinkServicePublicUrl: NonEmptyString
+  _magicLinkServicePublicUrl: NonEmptyString,
+  helpDeskRef: NonEmptyString
 ) => async (context: Context, input: unknown): Promise<ActivityResult> =>
   pipe(
     input,
@@ -78,7 +79,8 @@ export const getSendLoginEmailActivityHandler = (
           activityInput.name,
           activityInput.identity_provider,
           activityInput.date_time,
-          activityInput.ip_address
+          activityInput.ip_address,
+          helpDeskRef
           // TODO: with version2 of the template,pass the magic_code and publicUrl
           // activityInput.magic_code,
           // magicLinkServicePublicUrl,

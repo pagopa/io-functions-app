@@ -24,6 +24,7 @@ const mockMailerTransporter = {
 };
 
 const aPublicUrl = "https://localhost/" as NonEmptyString;
+const aHelpDeskRef = "help@desk.com" as NonEmptyString;
 
 const mockTrackEvent = jest.fn();
 jest.mock("applicationinsights", () => ({
@@ -40,7 +41,8 @@ describe("SendTemplatedLoginEmailActivity", () => {
     const handler = getSendLoginEmailActivityHandler(
       mockMailerTransporter as any,
       emailDefaults,
-      aPublicUrl
+      aPublicUrl,
+      aHelpDeskRef
     );
 
     const result = await handler(context as any, aValidPayload);
@@ -64,7 +66,8 @@ describe("SendTemplatedLoginEmailActivity", () => {
     const handler = getSendLoginEmailActivityHandler(
       mockMailerTransporter as any,
       emailDefaults,
-      aPublicUrl
+      aPublicUrl,
+      aHelpDeskRef
     );
 
     const result = await handler(context as any, {
