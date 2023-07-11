@@ -12,7 +12,7 @@ import * as ai from "applicationinsights";
 import { DateFromTimestamp } from "@pagopa/ts-commons/lib/dates";
 import { createTracker } from "../utils/tracking";
 import * as mailTemplate from "../generated/templates/login/index";
-import { EmailDefaults } from ".";
+import { EmailDefaults } from "./index";
 
 // Activity input
 export const ActivityInput = t.intersection([
