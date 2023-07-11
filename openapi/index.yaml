@@ -1,4 +1,4 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
   version: 5.0.0
   title: IO API for App
@@ -33,13 +33,13 @@ paths:
       tags:
         - restricted
       responses:
-        '200':
+        "200":
           description: Found.
           schema:
-            $ref: '#/definitions/PaginatedServiceTupleCollection'
-        '401':
+            $ref: "#/definitions/PaginatedServiceTupleCollection"
+        "401":
           description: Unauthorized
-        '429':
+        "429":
           description: Too many requests
   /services/{service_id}:
     get:
@@ -55,10 +55,10 @@ paths:
           required: true
           description: The ID of an existing Service.
       responses:
-        '200':
+        "200":
           description: Service found.
           schema:
-            $ref: '#/definitions/ServicePublic'
+            $ref: "#/definitions/ServicePublic"
           examples:
             application/json:
               department_name: dept
@@ -66,11 +66,11 @@ paths:
               service_id: 2b3e728c1a5d1efa035c
               service_name: service
               version: 1
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: No service found for the provided ID.
-        '429':
+        "429":
           description: Too many requests
   /profiles/{fiscal_code}:
     get:
@@ -80,23 +80,23 @@ paths:
       tags:
         - restricted
       parameters:
-        - $ref: '#/parameters/FiscalCode'
+        - $ref: "#/parameters/FiscalCode"
       responses:
-        '200':
+        "200":
           description: Profile created
           schema:
-            $ref: '#/definitions/ExtendedProfile'
-        '400':
+            $ref: "#/definitions/ExtendedProfile"
+        "400":
           description: Invalid request.
           schema:
-            $ref: '#/definitions/ProblemJson'
-        '401':
+            $ref: "#/definitions/ProblemJson"
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: No message found.
           schema:
-            $ref: '#/definitions/ProblemJson'
-        '429':
+            $ref: "#/definitions/ProblemJson"
+        "429":
           description: Too many requests
     post:
       operationId: createProfile
@@ -105,25 +105,25 @@ paths:
       tags:
         - restricted
       parameters:
-        - $ref: '#/parameters/FiscalCode'
+        - $ref: "#/parameters/FiscalCode"
         - in: body
           name: body
           schema:
-            $ref: '#/definitions/NewProfile'
+            $ref: "#/definitions/NewProfile"
       responses:
-        '200':
+        "200":
           description: Profile created
           schema:
-            $ref: '#/definitions/ExtendedProfile'
-        '400':
+            $ref: "#/definitions/ExtendedProfile"
+        "400":
           description: Invalid request.
           schema:
-            $ref: '#/definitions/ProblemJson'
-        '401':
+            $ref: "#/definitions/ProblemJson"
+        "401":
           description: Unauthorized
-        '409':
+        "409":
           description: Conflict
-        '429':
+        "429":
           description: Too many requests
     put:
       operationId: updateProfile
@@ -132,27 +132,27 @@ paths:
       tags:
         - restricted
       parameters:
-        - $ref: '#/parameters/FiscalCode'
+        - $ref: "#/parameters/FiscalCode"
         - in: body
           name: body
           schema:
-            $ref: '#/definitions/Profile'
+            $ref: "#/definitions/Profile"
       responses:
-        '200':
+        "200":
           description: Profile updated
           schema:
-            $ref: '#/definitions/ExtendedProfile'
-        '400':
+            $ref: "#/definitions/ExtendedProfile"
+        "400":
           description: Invalid request.
           schema:
-            $ref: '#/definitions/ProblemJson'
-        '401':
+            $ref: "#/definitions/ProblemJson"
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not found
-        '409':
+        "409":
           description: Conflict
-        '429':
+        "429":
           description: Too many requests
   /profiles/{fiscal_code}/services/{service_id}/preferences:
     get:
@@ -162,32 +162,32 @@ paths:
       tags:
         - restricted
       parameters:
-        - $ref: '#/parameters/FiscalCode'
-        - $ref: '#/parameters/ServiceId'
+        - $ref: "#/parameters/FiscalCode"
+        - $ref: "#/parameters/ServiceId"
       responses:
-        '200':
+        "200":
           description: The User's Service Preference
           schema:
-            $ref: '#/definitions/ServicePreference'
-        '400':
+            $ref: "#/definitions/ServicePreference"
+        "400":
           description: Invalid request.
           schema:
-            $ref: '#/definitions/ProblemJson'
-        '401':
+            $ref: "#/definitions/ProblemJson"
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Profile or Service not found
           schema:
-            $ref: '#/definitions/ProblemJson'
-        '409':
+            $ref: "#/definitions/ProblemJson"
+        "409":
           description: >-
             Conflict. Either the provided preference setting version is not
             consistent with the current version stored in the Profile
 
             or the Profile is not in the correct preference mode.
           schema:
-            $ref: '#/definitions/ProblemJson'
-        '429':
+            $ref: "#/definitions/ProblemJson"
+        "429":
           description: Too many requests
     post:
       operationId: upsertServicePreferences
@@ -196,36 +196,36 @@ paths:
       tags:
         - restricted
       parameters:
-        - $ref: '#/parameters/FiscalCode'
-        - $ref: '#/parameters/ServiceId'
+        - $ref: "#/parameters/FiscalCode"
+        - $ref: "#/parameters/ServiceId"
         - in: body
           name: body
           schema:
-            $ref: '#/definitions/UpsertServicePreference'
+            $ref: "#/definitions/UpsertServicePreference"
       responses:
-        '200':
+        "200":
           description: User's Service Preference Upserted
           schema:
-            $ref: '#/definitions/ServicePreference'
-        '400':
+            $ref: "#/definitions/ServicePreference"
+        "400":
           description: Invalid request.
           schema:
-            $ref: '#/definitions/ProblemJson'
-        '401':
+            $ref: "#/definitions/ProblemJson"
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Profile or Service not found
           schema:
-            $ref: '#/definitions/ProblemJson'
-        '409':
+            $ref: "#/definitions/ProblemJson"
+        "409":
           description: >-
             Conflict. Either the provided preference setting version is not
             consistent with the current version stored in the Profile
 
             or the Profile is not in the correct preference mode.
           schema:
-            $ref: '#/definitions/ProblemJson'
-        '429':
+            $ref: "#/definitions/ProblemJson"
+        "429":
           description: Too many requests
   /email-validation-process/{fiscal_code}:
     post:
@@ -237,24 +237,24 @@ paths:
       tags:
         - restricted
       parameters:
-        - $ref: '#/parameters/FiscalCode'
+        - $ref: "#/parameters/FiscalCode"
       responses:
-        '202':
+        "202":
           description: Request accepted
-        '400':
+        "400":
           description: Invalid request.
           schema:
-            $ref: '#/definitions/ProblemJson'
-        '401':
+            $ref: "#/definitions/ProblemJson"
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not found
-        '429':
+        "429":
           description: Too many requests
-        '500':
+        "500":
           description: Server Error
           schema:
-            $ref: '#/definitions/ProblemJson'
+            $ref: "#/definitions/ProblemJson"
   /user-data-processing/{fiscal_code}:
     post:
       operationId: upsertUserDataProcessing
@@ -263,33 +263,33 @@ paths:
       tags:
         - restricted
       parameters:
-        - $ref: '#/parameters/FiscalCode'
+        - $ref: "#/parameters/FiscalCode"
         - in: body
           name: body
           schema:
-            $ref: '#/definitions/UserDataProcessingChoiceRequest'
+            $ref: "#/definitions/UserDataProcessingChoiceRequest"
           description: The request wrapper of a user data processing choice.
       responses:
-        '200':
+        "200":
           description: UserDataProcessing created
           schema:
-            $ref: '#/definitions/UserDataProcessing'
-        '400':
+            $ref: "#/definitions/UserDataProcessing"
+        "400":
           description: Invalid request.
           schema:
-            $ref: '#/definitions/ProblemJson'
-        '401':
+            $ref: "#/definitions/ProblemJson"
+        "401":
           description: Unauthorized
-        '409':
+        "409":
           description: Conflict
           schema:
-            $ref: '#/definitions/ProblemJson'
-        '429':
+            $ref: "#/definitions/ProblemJson"
+        "429":
           description: Too many requests
-        '500':
+        "500":
           description: Server Error
           schema:
-            $ref: '#/definitions/ProblemJson'
+            $ref: "#/definitions/ProblemJson"
   /user-data-processing/{fiscal_code}/{choice}:
     get:
       operationId: getUserDataProcessing
@@ -298,24 +298,24 @@ paths:
       tags:
         - restricted
       parameters:
-        - $ref: '#/parameters/FiscalCode'
-        - $ref: '#/parameters/UserDataProcessingChoiceParam'
+        - $ref: "#/parameters/FiscalCode"
+        - $ref: "#/parameters/UserDataProcessingChoiceParam"
       responses:
-        '200':
+        "200":
           description: User data processing retrieved
           schema:
-            $ref: '#/definitions/UserDataProcessing'
-        '400':
+            $ref: "#/definitions/UserDataProcessing"
+        "400":
           description: Invalid request.
           schema:
-            $ref: '#/definitions/ProblemJson'
-        '401':
+            $ref: "#/definitions/ProblemJson"
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: No message found.
           schema:
-            $ref: '#/definitions/ProblemJson'
-        '429':
+            $ref: "#/definitions/ProblemJson"
+        "429":
           description: Too many requests
     delete:
       operationId: abortUserDataProcessing
@@ -324,29 +324,29 @@ paths:
       tags:
         - restricted
       parameters:
-        - $ref: '#/parameters/FiscalCode'
-        - $ref: '#/parameters/UserDataProcessingChoiceParam'
+        - $ref: "#/parameters/FiscalCode"
+        - $ref: "#/parameters/UserDataProcessingChoiceParam"
       responses:
-        '202':
+        "202":
           description: The abort request has been recorded
-        '400':
+        "400":
           description: Invalid request.
           schema:
-            $ref: '#/definitions/ProblemJson'
-        '401':
+            $ref: "#/definitions/ProblemJson"
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '409':
+        "409":
           description: Conflict
           schema:
-            $ref: '#/definitions/ProblemJson'
-        '429':
+            $ref: "#/definitions/ProblemJson"
+        "429":
           description: Too many requests
-        '500':
+        "500":
           description: Server Error
           schema:
-            $ref: '#/definitions/ProblemJson'
+            $ref: "#/definitions/ProblemJson"
   /notify-login:
     post:
       operationId: startNotifyLoginProcess
@@ -359,24 +359,20 @@ paths:
         - in: body
           name: body
           schema:
-            $ref: '#/definitions/UserLoginParams'
+            $ref: "#/definitions/UserLoginParams"
       responses:
-        '202':
+        "202":
           description: Request accepted
-        '400':
+        "400":
           description: Invalid request.
           schema:
-            $ref: '#/definitions/ProblemJson'
-        '401':
+            $ref: "#/definitions/ProblemJson"
+        "401":
           description: Unauthorized
-        '404':
-          description: Not found
-        '429':
-          description: Too many requests
-        '500':
+        "500":
           description: Server Error
           schema:
-            $ref: '#/definitions/ProblemJson'
+            $ref: "#/definitions/ProblemJson"
 consumes:
   - application/json
 produces:
@@ -435,7 +431,7 @@ definitions:
     description: All the data related to a newly performed login
     properties:
       fiscal_code:
-        $ref: '#/definitions/FiscalCode'
+        $ref: "#/definitions/FiscalCode"
       name:
         type: string
         minLength: 1
@@ -443,12 +439,12 @@ definitions:
         type: string
         minLength: 1
       email:
-        $ref: '#/definitions/EmailAddress'
+        $ref: "#/definitions/EmailAddress"
       identity_provider:
         type: string
         minLength: 1
       ip_address:
-        $ref: '#/definitions/IPAddress'
+        $ref: "#/definitions/IPAddress"
       device_name:
         type: string
         minLength: 1
@@ -463,7 +459,7 @@ definitions:
     type: string
     description: An IP address.
     format: IPString
-    x-import: '@pagopa/ts-commons/lib/strings'
+    x-import: "@pagopa/ts-commons/lib/strings"
     example: 127.0.0.1
   LimitedProfile:
     description: |-
@@ -477,7 +473,7 @@ definitions:
           True in case the service that made the request can send
           messages to the user identified by this profile (false otherwise).
       preferred_languages:
-        $ref: '#/definitions/PreferredLanguages'
+        $ref: "#/definitions/PreferredLanguages"
     required:
       - sender_allowed
   CIDR:
@@ -488,27 +484,27 @@ definitions:
     description: A payload used to create/update a service for a user.
     x-one-of: true
     allOf:
-      - $ref: '#/definitions/VisibleServicePayload'
-      - $ref: '#/definitions/HiddenServicePayload'
+      - $ref: "#/definitions/VisibleServicePayload"
+      - $ref: "#/definitions/HiddenServicePayload"
   ExtendedServicePayload:
     allOf:
-      - $ref: '#/definitions/ServicePayload'
+      - $ref: "#/definitions/ServicePayload"
       - type: object
         properties:
           service_metadata:
-            $ref: '#/definitions/ServiceMetadata'
+            $ref: "#/definitions/ServiceMetadata"
   CommonServicePayload:
     description: Common properties for a ServicePayload
     type: object
     properties:
       service_name:
-        $ref: '#/definitions/ServiceName'
+        $ref: "#/definitions/ServiceName"
       department_name:
-        $ref: '#/definitions/DepartmentName'
+        $ref: "#/definitions/DepartmentName"
       organization_name:
-        $ref: '#/definitions/OrganizationName'
+        $ref: "#/definitions/OrganizationName"
       organization_fiscal_code:
-        $ref: '#/definitions/OrganizationFiscalCode'
+        $ref: "#/definitions/OrganizationFiscalCode"
       authorized_cidrs:
         description: >-
           Allowed source IPs or CIDRs for this service.
@@ -517,7 +513,7 @@ definitions:
           behalf of the service.
         type: array
         items:
-          $ref: '#/definitions/CIDR'
+          $ref: "#/definitions/CIDR"
       version:
         type: integer
       require_secure_channels:
@@ -533,7 +529,7 @@ definitions:
   HiddenServicePayload:
     description: A payload used to create/update a service that is hidden.
     allOf:
-      - $ref: '#/definitions/CommonServicePayload'
+      - $ref: "#/definitions/CommonServicePayload"
       - type: object
         properties:
           is_visible:
@@ -546,13 +542,13 @@ definitions:
             description: >-
               That service can't handle some ServiceMetadata fields (es.
               category)
-            $ref: '#/definitions/CommonServiceMetadata'
+            $ref: "#/definitions/CommonServiceMetadata"
   VisibleServicePayload:
     description: >-
       A payload used to create/update a service that appears in the service
       list.
     allOf:
-      - $ref: '#/definitions/CommonServicePayload'
+      - $ref: "#/definitions/CommonServicePayload"
       - type: object
         properties:
           is_visible:
@@ -564,7 +560,7 @@ definitions:
             description: >-
               That service can't handle some ServiceMetadata fields (es.
               category)
-            $ref: '#/definitions/CommonServiceMetadata'
+            $ref: "#/definitions/CommonServiceMetadata"
         required:
           - is_visible
           - service_metadata
@@ -587,31 +583,31 @@ definitions:
     type: object
     properties:
       email:
-        $ref: '#/definitions/EmailAddress'
+        $ref: "#/definitions/EmailAddress"
       service_preferences_settings:
-        $ref: '#/definitions/ServicePreferencesSettings'
+        $ref: "#/definitions/ServicePreferencesSettings"
       blocked_inbox_or_channels:
-        $ref: '#/definitions/BlockedInboxOrChannels'
+        $ref: "#/definitions/BlockedInboxOrChannels"
       preferred_languages:
-        $ref: '#/definitions/PreferredLanguages'
+        $ref: "#/definitions/PreferredLanguages"
       is_inbox_enabled:
-        $ref: '#/definitions/IsInboxEnabled'
+        $ref: "#/definitions/IsInboxEnabled"
       accepted_tos_version:
-        $ref: '#/definitions/AcceptedTosVersion'
+        $ref: "#/definitions/AcceptedTosVersion"
       is_webhook_enabled:
-        $ref: '#/definitions/IsWebhookEnabled'
+        $ref: "#/definitions/IsWebhookEnabled"
       is_email_enabled:
-        $ref: '#/definitions/IsEmailEnabled'
+        $ref: "#/definitions/IsEmailEnabled"
       is_email_validated:
-        $ref: '#/definitions/IsEmailValidated'
+        $ref: "#/definitions/IsEmailValidated"
       reminder_status:
-        $ref: '#/definitions/ReminderStatus'
+        $ref: "#/definitions/ReminderStatus"
       is_test_profile:
-        $ref: '#/definitions/IsTestProfile'
+        $ref: "#/definitions/IsTestProfile"
       last_app_version:
-        $ref: '#/definitions/AppVersion'
+        $ref: "#/definitions/AppVersion"
       push_notifications_content_type:
-        $ref: '#/definitions/PushNotificationsContentType'
+        $ref: "#/definitions/PushNotificationsContentType"
       version:
         type: integer
     required:
@@ -628,18 +624,18 @@ definitions:
       Used for profile creation.
     properties:
       email:
-        $ref: '#/definitions/EmailAddress'
+        $ref: "#/definitions/EmailAddress"
       is_email_validated:
-        $ref: '#/definitions/IsEmailValidated'
+        $ref: "#/definitions/IsEmailValidated"
       is_test_profile:
-        $ref: '#/definitions/IsTestProfile'
+        $ref: "#/definitions/IsTestProfile"
     required:
       - is_email_validated
   PaginatedServiceTupleCollection:
     description: A paginated collection of services tuples
     allOf:
-      - $ref: '#/definitions/ServiceTupleCollection'
-      - $ref: '#/definitions/PaginationResponse'
+      - $ref: "#/definitions/ServiceTupleCollection"
+      - $ref: "#/definitions/PaginationResponse"
   ProblemJson:
     type: object
     properties:
@@ -691,27 +687,27 @@ definitions:
       Used for profile update.
     properties:
       email:
-        $ref: '#/definitions/EmailAddress'
+        $ref: "#/definitions/EmailAddress"
       service_preferences_settings:
-        $ref: '#/definitions/ServicePreferencesSettings'
+        $ref: "#/definitions/ServicePreferencesSettings"
       blocked_inbox_or_channels:
-        $ref: '#/definitions/BlockedInboxOrChannels'
+        $ref: "#/definitions/BlockedInboxOrChannels"
       preferred_languages:
-        $ref: '#/definitions/PreferredLanguages'
+        $ref: "#/definitions/PreferredLanguages"
       is_inbox_enabled:
-        $ref: '#/definitions/IsInboxEnabled'
+        $ref: "#/definitions/IsInboxEnabled"
       accepted_tos_version:
-        $ref: '#/definitions/AcceptedTosVersion'
+        $ref: "#/definitions/AcceptedTosVersion"
       is_webhook_enabled:
-        $ref: '#/definitions/IsWebhookEnabled'
+        $ref: "#/definitions/IsWebhookEnabled"
       is_email_enabled:
-        $ref: '#/definitions/IsEmailEnabled'
+        $ref: "#/definitions/IsEmailEnabled"
       reminder_status:
-        $ref: '#/definitions/ReminderStatus'
+        $ref: "#/definitions/ReminderStatus"
       last_app_version:
-        $ref: '#/definitions/AppVersion'
+        $ref: "#/definitions/AppVersion"
       push_notifications_content_type:
-        $ref: '#/definitions/PushNotificationsContentType'
+        $ref: "#/definitions/PushNotificationsContentType"
       version:
         type: integer
     required:
@@ -725,9 +721,9 @@ definitions:
   ServiceMetadata:
     x-one-of: true
     allOf:
-      - $ref: '#/definitions/StandardServiceMetadata'
-      - $ref: '#/definitions/SpecialServiceMetadata'
-      - $ref: '#/definitions/CommonServiceMetadata'
+      - $ref: "#/definitions/StandardServiceMetadata"
+      - $ref: "#/definitions/SpecialServiceMetadata"
+      - $ref: "#/definitions/CommonServiceMetadata"
   ServiceScope:
     type: string
     x-extensible-enum:
@@ -743,24 +739,24 @@ definitions:
     type: object
     properties:
       service_id:
-        $ref: '#/definitions/ServiceId'
+        $ref: "#/definitions/ServiceId"
       service_name:
-        $ref: '#/definitions/ServiceName'
+        $ref: "#/definitions/ServiceName"
       organization_name:
-        $ref: '#/definitions/OrganizationName'
+        $ref: "#/definitions/OrganizationName"
       department_name:
-        $ref: '#/definitions/DepartmentName'
+        $ref: "#/definitions/DepartmentName"
       organization_fiscal_code:
-        $ref: '#/definitions/OrganizationFiscalCode'
+        $ref: "#/definitions/OrganizationFiscalCode"
       available_notification_channels:
         description: All the notification channels available for a service.
         type: array
         items:
-          $ref: '#/definitions/NotificationChannel'
+          $ref: "#/definitions/NotificationChannel"
       version:
         type: integer
       service_metadata:
-        $ref: '#/definitions/ServiceMetadata'
+        $ref: "#/definitions/ServiceMetadata"
     required:
       - service_id
       - service_name
@@ -787,7 +783,7 @@ definitions:
     additionalProperties:
       type: array
       items:
-        $ref: '#/definitions/BlockedInboxOrChannel'
+        $ref: "#/definitions/BlockedInboxOrChannel"
     description: |-
       All the notification channels blocked by the user.
       Each channel is related to a specific service (sender).
@@ -803,7 +799,7 @@ definitions:
   PreferredLanguages:
     type: array
     items:
-      $ref: '#/definitions/PreferredLanguage'
+      $ref: "#/definitions/PreferredLanguage"
     description: >-
       Indicates the User's preferred written or spoken languages in order
 
@@ -850,7 +846,7 @@ definitions:
     type: string
     description: User's fiscal code.
     format: FiscalCode
-    x-import: '@pagopa/ts-commons/lib/strings'
+    x-import: "@pagopa/ts-commons/lib/strings"
     example: SPNDNL80R13C555X
   TimeToLiveSeconds:
     type: integer
@@ -865,14 +861,14 @@ definitions:
     type: string
     format: UTCISODateFromString
     description: A date-time field in ISO-8601 format and UTC timezone.
-    x-import: '@pagopa/ts-commons/lib/dates'
-    example: '2018-10-13T00:00:00.000Z'
+    x-import: "@pagopa/ts-commons/lib/dates"
+    example: "2018-10-13T00:00:00.000Z"
   OrganizationFiscalCode:
     type: string
     description: Organization fiscal code.
     format: OrganizationFiscalCode
-    x-import: '@pagopa/ts-commons/lib/strings'
-    example: '12345678901'
+    x-import: "@pagopa/ts-commons/lib/strings"
+    example: "12345678901"
   ServiceTupleCollection:
     description: A collection of services tuples (service and version)
     type: object
@@ -884,9 +880,9 @@ definitions:
           type: object
           properties:
             service_id:
-              $ref: '#/definitions/ServiceId'
+              $ref: "#/definitions/ServiceId"
             scope:
-              $ref: '#/definitions/ServiceScope'
+              $ref: "#/definitions/ServiceScope"
             version:
               type: integer
           required:
@@ -939,13 +935,13 @@ definitions:
     description: A representation of a single user data processing request
     properties:
       choice:
-        $ref: '#/definitions/UserDataProcessingChoice'
+        $ref: "#/definitions/UserDataProcessingChoice"
       status:
-        $ref: '#/definitions/UserDataProcessingStatus'
+        $ref: "#/definitions/UserDataProcessingStatus"
       created_at:
-        $ref: '#/definitions/Timestamp'
+        $ref: "#/definitions/Timestamp"
       updated_at:
-        $ref: '#/definitions/Timestamp'
+        $ref: "#/definitions/Timestamp"
       version:
         type: integer
     required:
@@ -974,7 +970,7 @@ definitions:
     description: A request wrapper for User data processing choice
     properties:
       choice:
-        $ref: '#/definitions/UserDataProcessingChoice'
+        $ref: "#/definitions/UserDataProcessingChoice"
     required:
       - choice
   IsTestProfile:
@@ -988,7 +984,7 @@ definitions:
     type: object
     properties:
       mode:
-        $ref: '#/definitions/ServicesPreferencesMode'
+        $ref: "#/definitions/ServicesPreferencesMode"
     required:
       - mode
   ServicesPreferencesMode:
@@ -1024,7 +1020,7 @@ definitions:
       Return the set of preferences of a Citizen for a given Service.
       It's needed by Citizens to read previoulsy expressed preferences.
     allOf:
-      - $ref: '#/definitions/BasicServicePreference'
+      - $ref: "#/definitions/BasicServicePreference"
       - type: object
         properties:
           can_access_message_read_status:
@@ -1038,27 +1034,27 @@ definitions:
       Extends the BasicServicePreference with new optional preferences for
       backward compatibility.
     allOf:
-      - $ref: '#/definitions/BasicServicePreference'
+      - $ref: "#/definitions/BasicServicePreference"
       - type: object
         properties:
           can_access_message_read_status:
             type: boolean
   StandardServiceMetadata:
     allOf:
-      - $ref: '#/definitions/CommonServiceMetadata'
+      - $ref: "#/definitions/CommonServiceMetadata"
       - type: object
         properties:
           category:
-            $ref: '#/definitions/StandardServiceCategory'
+            $ref: "#/definitions/StandardServiceCategory"
         required:
           - category
   SpecialServiceMetadata:
     allOf:
-      - $ref: '#/definitions/CommonServiceMetadata'
+      - $ref: "#/definitions/CommonServiceMetadata"
       - type: object
         properties:
           category:
-            $ref: '#/definitions/SpecialServiceCategory'
+            $ref: "#/definitions/SpecialServiceCategory"
           custom_special_flow:
             type: string
             minLength: 1
@@ -1108,7 +1104,7 @@ definitions:
         type: string
         minLength: 1
       scope:
-        $ref: '#/definitions/ServiceScope'
+        $ref: "#/definitions/ServiceScope"
     required:
       - scope
   SpecialServiceCategory:
