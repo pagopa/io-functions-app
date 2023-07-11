@@ -4,6 +4,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/function";
 import * as df from "durable-functions";
+import * as t from "io-ts";
 
 /**
  * Util function that takes a generator and executes each step until is done.
@@ -78,3 +79,13 @@ export const startOrchestrator = (
           TE.of(orchestratorId)
     )
   );
+
+/** Transient error that describes an API_CALL_FAILURE, currently used
+ * in the activities that retrieve the magic code and geolocation data during
+ * a login email sending flow
+ * */
+export const TransientApiCallFailure = t.interface({
+  kind: t.literal("API_CALL_FAILURE"),
+  reason: t.string
+});
+export type TransientApiCallFailure = t.TypeOf<typeof TransientApiCallFailure>;

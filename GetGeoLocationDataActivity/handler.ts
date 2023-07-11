@@ -5,6 +5,8 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/function";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
+import { TransientApiCallFailure } from "../utils/durable";
+import { GeoLocationServiceClient } from "./utils";
 
 // geo location service response
 const GeoLocationServiceResponse = t.interface({
@@ -33,14 +35,10 @@ const GeneralFailure = t.interface({
 
 type GeneralFailure = t.TypeOf<typeof GeneralFailure>;
 
-// Activity failed because of an error on an api call
-export const ApiCallFailure = t.interface({
-  kind: t.literal("API_CALL_FAILURE"),
-  reason: t.string
-});
-export type ApiCallFailure = t.TypeOf<typeof ApiCallFailure>;
-
-const ActivityResultFailure = t.union([GeneralFailure, ApiCallFailure]);
+const ActivityResultFailure = t.union([
+  GeneralFailure,
+  TransientApiCallFailure
+]);
 
 export const ActivityResult = t.taggedUnion("kind", [
   ActivityResultSuccess,
@@ -51,10 +49,9 @@ export type ActivityResult = t.TypeOf<typeof ActivityResult>;
 
 const logPrefix = "GetGeoLocationDataActivity";
 
-export const getGeoLocationHandler = (_geoLocationService: unknown) => async (
-  context: Context,
-  input: unknown
-): Promise<ActivityResult> =>
+export const getGeoLocationHandler = (
+  geoLocationService: GeoLocationServiceClient
+) => async (context: Context, input: unknown): Promise<ActivityResult> =>
   pipe(
     input,
     ActivityInput.decode,
@@ -72,12 +69,19 @@ export const getGeoLocationHandler = (_geoLocationService: unknown) => async (
     }),
     TE.fromEither,
     // TODO: implement the actual call to geo location service
-    TE.chain(_input =>
-      TE.left(
-        ActivityResultFailure.encode({
-          kind: "API_CALL_FAILURE",
-          reason: "call not yet implemented"
-        })
+    TE.chain(activityInput =>
+      pipe(
+        TE.tryCatch(
+          () =>
+            geoLocationService.getGeoLocationForIp(activityInput.ip_address),
+          E.toError
+        ),
+        TE.mapLeft(_error =>
+          ActivityResultFailure.encode({
+            kind: "API_CALL_FAILURE",
+            reason: "call not yet implemented"
+          })
+        )
       )
     ),
     TE.map(serviceResponse =>

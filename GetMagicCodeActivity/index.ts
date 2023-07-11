@@ -1,11 +1,9 @@
 import { initTelemetryClient } from "../utils/appinsights";
+import { magicLinkServiceClient } from "./utils";
 import { getActivityHandler } from "./handler";
 
 // Initialize application insights
 initTelemetryClient();
-
-// TODO: instanciate an actual magicLinkServiceClient
-const magicLinkServiceClient = {};
 
 const activityFunctionHandler = getActivityHandler(magicLinkServiceClient);
 

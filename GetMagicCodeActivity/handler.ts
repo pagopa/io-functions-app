@@ -5,6 +5,8 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/function";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
+import { TransientApiCallFailure } from "../utils/durable";
+import { MagicLinkServiceClient } from "./utils";
 
 // magic link service response
 const MagicLinkServiceResponse = t.interface({
@@ -35,14 +37,10 @@ const GeneralFailure = t.interface({
 
 type GeneralFailure = t.TypeOf<typeof GeneralFailure>;
 
-// Activity failed because of an error on an api call
-export const ApiCallFailure = t.interface({
-  kind: t.literal("API_CALL_FAILURE"),
-  reason: t.string
-});
-export type ApiCallFailure = t.TypeOf<typeof ApiCallFailure>;
-
-const ActivityResultFailure = t.union([GeneralFailure, ApiCallFailure]);
+const ActivityResultFailure = t.union([
+  GeneralFailure,
+  TransientApiCallFailure
+]);
 
 export const ActivityResult = t.taggedUnion("kind", [
   ActivityResultSuccess,
@@ -53,10 +51,9 @@ export type ActivityResult = t.TypeOf<typeof ActivityResult>;
 
 const logPrefix = "GetMagicCodeActivity";
 
-export const getActivityHandler = (_magicLinkService: unknown) => async (
-  context: Context,
-  input: unknown
-): Promise<ActivityResult> =>
+export const getActivityHandler = (
+  magicCodeService: MagicLinkServiceClient
+) => async (context: Context, input: unknown): Promise<ActivityResult> =>
   pipe(
     input,
     ActivityInput.decode,
@@ -75,12 +72,23 @@ export const getActivityHandler = (_magicLinkService: unknown) => async (
     TE.fromEither,
     // TODO: implement the actual call to magic link service to get a
     // magicCode
-    TE.chain(_input =>
-      TE.left(
-        ActivityResultFailure.encode({
-          kind: "API_CALL_FAILURE",
-          reason: "call not yet implemented"
-        })
+    TE.chain(activityInput =>
+      pipe(
+        TE.tryCatch(
+          () =>
+            magicCodeService.getMagicCodeForUser(
+              activityInput.fiscal_code,
+              activityInput.name,
+              activityInput.family_name
+            ),
+          E.toError
+        ),
+        TE.mapLeft(_ =>
+          ActivityResultFailure.encode({
+            kind: "API_CALL_FAILURE",
+            reason: "call not yet implemented"
+          })
+        )
       )
     ),
     TE.map(serviceResponse =>

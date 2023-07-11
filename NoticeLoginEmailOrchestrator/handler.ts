@@ -15,14 +15,13 @@ import {
 } from "../SendTemplatedLoginEmailActivity/handler";
 import {
   ActivityInput as GetMagicCodeActivityInput,
-  ActivityResultSuccess as GetMagicCodeActivityResultSuccess,
-  ApiCallFailure as GetMagicCodeApiCallFailure
+  ActivityResultSuccess as GetMagicCodeActivityResultSuccess
 } from "../GetMagicCodeActivity/handler";
 import {
   ActivityInput as GetGeoLocationActivityInput,
-  ActivityResultSuccess as GetGeoLocationActivityResultSuccess,
-  ApiCallFailure as GetGeoLocationApiCallFailure
+  ActivityResultSuccess as GetGeoLocationActivityResultSuccess
 } from "../GetGeoLocationDataActivity/handler";
+import { TransientApiCallFailure } from "../utils/durable";
 
 // Input
 export const OrchestratorInput = t.intersection([
@@ -131,9 +130,7 @@ export const getNoticeLoginEmailOrchestratorHandler = function*(
     if (E.isLeft(errorOrGeoLocationServiceResponse)) {
       // we let geo_location be undefined.
       // the SendTemplatedLoginEmailActivity will decide what email template to use based on the geo_location value
-      if (
-        !GetGeoLocationApiCallFailure.is(errorOrGeoLocationServiceResponse.left)
-      ) {
+      if (!TransientApiCallFailure.is(errorOrGeoLocationServiceResponse.left)) {
         throw OrchestratorFailureResult.encode({
           kind: "FAILURE",
           reason: readableReportSimplified(
@@ -166,9 +163,7 @@ export const getNoticeLoginEmailOrchestratorHandler = function*(
     if (E.isLeft(errorOrMagicLinkServiceResponse)) {
       // we let magic_code be undefined and pass it to the next activity.
       // the SendTemplatedLoginEmailActivity will decide what email template to use based on the magic_code value
-      if (
-        !GetMagicCodeApiCallFailure.is(errorOrMagicLinkServiceResponse.left)
-      ) {
+      if (!TransientApiCallFailure.is(errorOrMagicLinkServiceResponse.left)) {
         throw OrchestratorFailureResult.encode({
           kind: "FAILURE",
           reason: readableReportSimplified(errorOrMagicLinkServiceResponse.left)
