@@ -16,7 +16,7 @@ const someRetryOptions = new df.RetryOptions(5000, 10);
 someRetryOptions.backoffCoefficient = 1.5;
 
 const aDate = new Date("1970-01-01");
-const anIPAddress = "1.1.1.1" as NonEmptyString;
+const anIPAddress = "127.0.0.1" as NonEmptyString;
 const aValidOrchestratorInput: OrchestratorInput = {
   date_time: aDate,
   email: "example@example.com" as EmailString,

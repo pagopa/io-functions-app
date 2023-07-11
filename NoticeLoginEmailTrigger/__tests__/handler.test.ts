@@ -11,7 +11,7 @@ const aValidTriggerPayload = {
   family_name: "example" as NonEmptyString,
   fiscal_code: aFiscalCode,
   identity_provider: "idp" as NonEmptyString,
-  ip_address: "1.1.1.1" as NonEmptyString,
+  ip_address: "127.0.0.1" as NonEmptyString,
   name: "foo" as NonEmptyString,
   device_name: "adevice" as NonEmptyString
 };

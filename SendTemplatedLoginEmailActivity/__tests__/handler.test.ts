@@ -9,7 +9,7 @@ const aValidPayload = {
   name: "foo" as NonEmptyString,
   email: "example@example.com" as EmailString,
   identity_provider: "idp" as NonEmptyString,
-  ip_address: "1.1.1.1" as NonEmptyString
+  ip_address: "127.0.0.1" as NonEmptyString
 };
 const emailDefaults: EmailDefaults = {
   from: "from@example.com" as any,

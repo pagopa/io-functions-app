@@ -2,7 +2,7 @@ import { getGeoLocationHandler, ApiCallFailure } from "../handler";
 import { context } from "../../__mocks__/durable-functions";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
-const aValidPayload = { ip_address: "1.1.1.1" as NonEmptyString };
+const aValidPayload = { ip_address: "127.0.0.1" as NonEmptyString };
 
 describe("GetGeoLocationDataActivity", () => {
   it("should return an API_CALL_FAILURE when the call to the service goes wrong", async () => {
