@@ -16,13 +16,12 @@ import {
 } from "../SendTemplatedLoginEmailActivity/handler";
 import {
   ActivityInput as GetMagicCodeActivityInput,
-  ActivityResultSuccess as GetMagicCodeActivityResultSuccess
+  ActivityResult as GetMagicCodeActivityResult
 } from "../GetMagicCodeActivity/handler";
 import {
   ActivityInput as GetGeoLocationActivityInput,
-  ActivityResultSuccess as GetGeoLocationActivityResultSuccess
+  ActivityResult as GetGeoLocationActivityResult
 } from "../GetGeoLocationDataActivity/handler";
-import { TransientNotImplementedFailure } from "../utils/durable";
 import { toHash } from "../utils/crypto";
 
 // Input
@@ -119,30 +118,34 @@ export const getNoticeLoginEmailOrchestratorHandler = function*(
       ip_address
     });
 
-    const geoLocationActivityResult = yield context.df.callActivityWithRetry(
-      "GetGeoLocationDataActivity",
-      retryOptions,
-      geoLocationActivityInput
-    );
-    const errorOrGeoLocationServiceResponse = GetGeoLocationActivityResultSuccess.decode(
-      geoLocationActivityResult
-    );
-
     // eslint-disable-next-line functional/no-let, @typescript-eslint/naming-convention
     let geo_location: NonEmptyString | undefined;
-    if (E.isLeft(errorOrGeoLocationServiceResponse)) {
-      // we let geo_location be undefined.
-      // the SendTemplatedLoginEmailActivity will decide what email template to use based on the geo_location value
-      if (!TransientNotImplementedFailure.is(geoLocationActivityResult)) {
-        throw OrchestratorFailureResult.encode({
-          kind: "FAILURE",
-          reason: readableReportSimplified(
-            errorOrGeoLocationServiceResponse.left
-          )
-        });
+    try {
+      const geoLocationActivityResult = yield context.df.callActivityWithRetry(
+        "GetGeoLocationDataActivity",
+        retryOptions,
+        geoLocationActivityInput
+      );
+      const errorOrGeoLocationServiceResponse = GetGeoLocationActivityResult.decode(
+        geoLocationActivityResult
+      );
+
+      if (E.isRight(errorOrGeoLocationServiceResponse)) {
+        if (errorOrGeoLocationServiceResponse.right.kind === "SUCCESS") {
+          geo_location =
+            errorOrGeoLocationServiceResponse.right.value.geo_location;
+        } else {
+          context.log.error(
+            `${logPrefix}|GetGeoLocationDataActivity failed with ${errorOrGeoLocationServiceResponse.right.reason}`
+          );
+        }
       }
-    } else {
-      geo_location = errorOrGeoLocationServiceResponse.right.value.geo_location;
+    } catch (_) {
+      // log activity max retry reached
+      // we let geo_location be undefined and continue to send the base login email template
+      context.log.error(
+        `${logPrefix}|GetGeoLocationDataActivity max retry reached`
+      );
     }
 
     context.log.verbose(`${logPrefix}|Starting GetMagicCodeActivity`);
@@ -151,29 +154,32 @@ export const getNoticeLoginEmailOrchestratorHandler = function*(
       fiscal_code,
       name
     });
-    const magicCodeActivityResult = yield context.df.callActivityWithRetry(
-      "GetMagicCodeActivity",
-      retryOptions,
-      magicCodeActivityInput
-    );
-
-    const errorOrMagicLinkServiceResponse = GetMagicCodeActivityResultSuccess.decode(
-      magicCodeActivityResult
-    );
 
     // eslint-disable-next-line functional/no-let, @typescript-eslint/naming-convention
     let magic_code: NonEmptyString | undefined;
-    if (E.isLeft(errorOrMagicLinkServiceResponse)) {
-      // we let magic_code be undefined and pass it to the next activity.
-      // the SendTemplatedLoginEmailActivity will decide what email template to use based on the magic_code value
-      if (!TransientNotImplementedFailure.is(magicCodeActivityResult)) {
-        throw OrchestratorFailureResult.encode({
-          kind: "FAILURE",
-          reason: readableReportSimplified(errorOrMagicLinkServiceResponse.left)
-        });
+    try {
+      const magicCodeActivityResult = yield context.df.callActivityWithRetry(
+        "GetMagicCodeActivity",
+        retryOptions,
+        magicCodeActivityInput
+      );
+
+      const errorOrMagicLinkServiceResponse = GetMagicCodeActivityResult.decode(
+        magicCodeActivityResult
+      );
+      if (E.isRight(errorOrMagicLinkServiceResponse)) {
+        if (errorOrMagicLinkServiceResponse.right.kind === "SUCCESS") {
+          magic_code = errorOrMagicLinkServiceResponse.right.value.magic_code;
+        } else {
+          context.log.error(
+            `${logPrefix}|GetMagicCodeActivity failed with ${errorOrMagicLinkServiceResponse.right.reason}`
+          );
+        }
       }
-    } else {
-      magic_code = errorOrMagicLinkServiceResponse.right.value.magic_code;
+    } catch (_) {
+      // log activity max retry reached
+      // we let magic_code be undefined and continue to send the base login email template
+      context.log.error(`${logPrefix}|GetMagicCodeActivity max retry reached`);
     }
 
     context.log.verbose(`${logPrefix}|Starting SendLoginEmailActivity`);

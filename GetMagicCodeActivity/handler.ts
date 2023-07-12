@@ -52,7 +52,7 @@ export type ActivityResult = t.TypeOf<typeof ActivityResult>;
 const logPrefix = "GetMagicCodeActivity";
 
 export const getActivityHandler = (
-  magicCodeService: MagicLinkServiceClient
+  _magicCodeService: MagicLinkServiceClient
 ) => async (context: Context, input: unknown): Promise<ActivityResult> =>
   pipe(
     input,
@@ -72,23 +72,12 @@ export const getActivityHandler = (
     TE.fromEither,
     // TODO: implement the actual call to magic link service to get a
     // magicCode
-    TE.chain(activityInput =>
-      pipe(
-        TE.tryCatch(
-          () =>
-            magicCodeService.getMagicCodeForUser(
-              activityInput.fiscal_code,
-              activityInput.name,
-              activityInput.family_name
-            ),
-          E.toError
-        ),
-        TE.mapLeft(_ =>
-          ActivityResultFailure.encode({
-            kind: "NOT_YET_IMPLEMENTED",
-            reason: "call not yet implemented"
-          })
-        )
+    TE.chain(_activityInput =>
+      TE.left(
+        ActivityResultFailure.encode({
+          kind: "NOT_YET_IMPLEMENTED",
+          reason: "call not yet implemented"
+        })
       )
     ),
     TE.map(serviceResponse =>

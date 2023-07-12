@@ -50,7 +50,7 @@ export type ActivityResult = t.TypeOf<typeof ActivityResult>;
 const logPrefix = "GetGeoLocationDataActivity";
 
 export const getGeoLocationHandler = (
-  geoLocationService: GeoLocationServiceClient
+  _geoLocationService: GeoLocationServiceClient
 ) => async (context: Context, input: unknown): Promise<ActivityResult> =>
   pipe(
     input,
@@ -69,19 +69,12 @@ export const getGeoLocationHandler = (
     }),
     TE.fromEither,
     // TODO: implement the actual call to geo location service
-    TE.chain(activityInput =>
-      pipe(
-        TE.tryCatch(
-          () =>
-            geoLocationService.getGeoLocationForIp(activityInput.ip_address),
-          E.toError
-        ),
-        TE.mapLeft(_error =>
-          ActivityResultFailure.encode({
-            kind: "NOT_YET_IMPLEMENTED",
-            reason: "call not yet implemented"
-          })
-        )
+    TE.chain(_activityInput =>
+      TE.left(
+        ActivityResultFailure.encode({
+          kind: "NOT_YET_IMPLEMENTED",
+          reason: "call not yet implemented"
+        })
       )
     ),
     TE.map(serviceResponse =>
