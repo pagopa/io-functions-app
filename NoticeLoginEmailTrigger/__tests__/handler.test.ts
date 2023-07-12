@@ -33,10 +33,12 @@ describe("NoticeLoginEmailTrigger", () => {
       context as any,
       aValidTriggerPayload
     );
-    const res = MockResponse();
-    result.apply(res);
 
-    expect(result.kind).toBe("IResponseErrorInternal");
+    expect(result).toMatchObject({
+      kind: "IResponseErrorInternal",
+      detail:
+        "Internal server error: Error while starting the orchestrator|ERROR=Error: error"
+    });
   });
 
   it("should succeed when the orchestrator starts", async () => {
@@ -47,9 +49,6 @@ describe("NoticeLoginEmailTrigger", () => {
       context as any,
       aValidTriggerPayload
     );
-    const res = MockResponse();
-    result.apply(res);
-
     expect(result.kind).toBe("IResponseSuccessAccepted");
   });
 });

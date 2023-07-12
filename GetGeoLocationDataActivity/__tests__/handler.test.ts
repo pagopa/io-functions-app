@@ -1,7 +1,7 @@
 import { getGeoLocationHandler } from "../handler";
 import { context } from "../../__mocks__/durable-functions";
 import { IPString } from "@pagopa/ts-commons/lib/strings";
-import { TransientApiCallFailure } from "../../utils/durable";
+import { TransientNotImplementedFailure } from "../../utils/durable";
 
 const aValidPayload = { ip_address: "127.0.0.1" as IPString };
 const mockGeoLocationService = {
@@ -9,12 +9,12 @@ const mockGeoLocationService = {
 };
 
 describe("GetGeoLocationDataActivity", () => {
-  it("should return an API_CALL_FAILURE when the call to the service goes wrong", async () => {
+  it("should return a NOT_YET_IMPLEMENTED failure", async () => {
     const result = await getGeoLocationHandler(mockGeoLocationService)(
       context as any,
       aValidPayload
     );
-    expect(TransientApiCallFailure.is(result)).toEqual(true);
+    expect(TransientNotImplementedFailure.is(result)).toEqual(true);
   });
   it("should return a FAILURE when the input is not valid", async () => {
     const result = await getGeoLocationHandler(mockGeoLocationService)(

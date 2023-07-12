@@ -6,7 +6,7 @@ import { getSendLoginEmailActivityHandler } from "./handler";
 const config = getConfigOrThrow();
 
 // Email data
-const EMAIL_TITLE = "LOGIN EMAIL";
+const EMAIL_TITLE = "È stato eseguito l'accesso su app IO";
 
 const HTML_TO_TEXT_OPTIONS: HtmlToTextOptions = {
   ignoreImage: true, // Ignore all document images
@@ -24,13 +24,14 @@ export type EmailDefaults = typeof emailDefaults;
 const mailerTransporter = getMailerTransporter(config);
 
 // Initialize application insights
-initTelemetryClient();
+const telemetryClient = initTelemetryClient();
 
 const activityFunctionHandler = getSendLoginEmailActivityHandler(
   mailerTransporter,
   emailDefaults,
   config.MAGIC_LINK_SERVICE_PUBLIC_URL,
-  config.HELP_DESK_REF
+  config.HELP_DESK_REF,
+  telemetryClient
 );
 
 export default activityFunctionHandler;

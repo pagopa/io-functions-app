@@ -5,7 +5,7 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/function";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
-import { TransientApiCallFailure } from "../utils/durable";
+import { TransientNotImplementedFailure } from "../utils/durable";
 import { MagicLinkServiceClient } from "./utils";
 
 // magic link service response
@@ -39,7 +39,7 @@ type GeneralFailure = t.TypeOf<typeof GeneralFailure>;
 
 const ActivityResultFailure = t.union([
   GeneralFailure,
-  TransientApiCallFailure
+  TransientNotImplementedFailure
 ]);
 
 export const ActivityResult = t.taggedUnion("kind", [
@@ -85,7 +85,7 @@ export const getActivityHandler = (
         ),
         TE.mapLeft(_ =>
           ActivityResultFailure.encode({
-            kind: "API_CALL_FAILURE",
+            kind: "NOT_YET_IMPLEMENTED",
             reason: "call not yet implemented"
           })
         )

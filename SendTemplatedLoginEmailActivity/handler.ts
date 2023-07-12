@@ -14,7 +14,6 @@ import * as HtmlToText from "html-to-text";
 import { sendMail } from "@pagopa/io-functions-commons/dist/src/mailer";
 import * as ai from "applicationinsights";
 import { DateFromTimestamp } from "@pagopa/ts-commons/lib/dates";
-import { createTracker } from "../utils/tracking";
 import * as mailTemplate from "../generated/templates/login/index";
 import { EmailDefaults } from "./index";
 
@@ -59,7 +58,8 @@ export const getSendLoginEmailActivityHandler = (
   mailerTransporter: NodeMailer.Transporter,
   emailDefaults: EmailDefaults,
   _magicLinkServicePublicUrl: NonEmptyString,
-  helpDeskRef: NonEmptyString
+  helpDeskRef: NonEmptyString,
+  telemetryClient?: ai.TelemetryClient
 ) => async (context: Context, input: unknown): Promise<ActivityResult> =>
   pipe(
     input,
@@ -113,14 +113,15 @@ export const getSendLoginEmailActivityHandler = (
           throw formattedError;
         }),
         TE.map(result => {
-          const messageInfo = result.value;
+          const info = result.value;
 
-          // on success, track a custom event with properties of transport used
-          // see https://github.com/pagopa/io-functions-commons/blob/master/src/utils/nodemailer.ts
-          // note: the extra properties will be defined only when using a MultiTransport
-          createTracker(ai.defaultClient).profile.traceEmailValidationSend(
-            typeof messageInfo === "object" ? messageInfo : {}
-          );
+          // track custom event after the email was sent
+          if (telemetryClient) {
+            telemetryClient.trackEvent({
+              name: `SendTemplatedLoginEmailActivity.success`,
+              properties: info
+            });
+          }
         })
       )
     ),

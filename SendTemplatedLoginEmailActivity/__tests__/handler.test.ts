@@ -2,6 +2,7 @@ import { getSendLoginEmailActivityHandler } from "../handler";
 import { context } from "../../__mocks__/durable-functions";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { EmailDefaults } from "../index";
+import * as ai from "applicationinsights";
 
 const aDate = new Date("1970-01-01");
 const aValidPayload = {
@@ -27,11 +28,9 @@ const aPublicUrl = "https://localhost/" as NonEmptyString;
 const aHelpDeskRef = "help@desk.com" as NonEmptyString;
 
 const mockTrackEvent = jest.fn();
-jest.mock("applicationinsights", () => ({
-  defaultClient: {
-    trackEvent: () => mockTrackEvent()
-  }
-}));
+const mockTracker = ({
+  trackEvent: mockTrackEvent
+} as unknown) as ai.TelemetryClient;
 describe("SendTemplatedLoginEmailActivity", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -42,7 +41,8 @@ describe("SendTemplatedLoginEmailActivity", () => {
       mockMailerTransporter as any,
       emailDefaults,
       aPublicUrl,
-      aHelpDeskRef
+      aHelpDeskRef,
+      mockTracker
     );
 
     const result = await handler(context as any, aValidPayload);
@@ -67,7 +67,8 @@ describe("SendTemplatedLoginEmailActivity", () => {
       mockMailerTransporter as any,
       emailDefaults,
       aPublicUrl,
-      aHelpDeskRef
+      aHelpDeskRef,
+      mockTracker
     );
 
     const result = await handler(context as any, {

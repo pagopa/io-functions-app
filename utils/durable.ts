@@ -80,12 +80,14 @@ export const startOrchestrator = (
     )
   );
 
-/** Transient error that describes an API_CALL_FAILURE, currently used
+/** Transient error that describes a NOT_YET_IMPLEMENTED , currently used
  * in the activities that retrieve the magic code and geolocation data during
  * a login email sending flow
  * */
-export const TransientApiCallFailure = t.interface({
-  kind: t.literal("API_CALL_FAILURE"),
+export const TransientNotImplementedFailure = t.interface({
+  kind: t.literal("NOT_YET_IMPLEMENTED"),
   reason: t.string
 });
-export type TransientApiCallFailure = t.TypeOf<typeof TransientApiCallFailure>;
+export type TransientNotImplementedFailure = t.TypeOf<
+  typeof TransientNotImplementedFailure
+>;

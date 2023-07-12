@@ -22,7 +22,8 @@ import {
   ActivityInput as GetGeoLocationActivityInput,
   ActivityResultSuccess as GetGeoLocationActivityResultSuccess
 } from "../GetGeoLocationDataActivity/handler";
-import { TransientApiCallFailure } from "../utils/durable";
+import { TransientNotImplementedFailure } from "../utils/durable";
+import { toHash } from "../utils/crypto";
 
 // Input
 export const OrchestratorInput = t.intersection([
@@ -88,27 +89,28 @@ export const getNoticeLoginEmailOrchestratorHandler = function*(
   }
 
   const orchestratorInput = errorOrOrchestratorInput.right;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  /* eslint-disable @typescript-eslint/naming-convention */
   const {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     fiscal_code,
     name,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     family_name,
     email,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     date_time,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     device_name,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     ip_address,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     identity_provider
   } = orchestratorInput;
+  /* eslint-enable @typescript-eslint/naming-convention */
 
   // Log the input
   context.log.verbose(
-    `${logPrefix}|INPUT=${JSON.stringify(orchestratorInput)}`
+    `${logPrefix}|INPUT=${JSON.stringify({
+      ...orchestratorInput,
+      email: toHash(orchestratorInput.email),
+      family_name: toHash(orchestratorInput.family_name),
+      fiscal_code: toHash(orchestratorInput.fiscal_code),
+      name: toHash(orchestratorInput.name)
+    })}`
   );
 
   try {
@@ -131,7 +133,7 @@ export const getNoticeLoginEmailOrchestratorHandler = function*(
     if (E.isLeft(errorOrGeoLocationServiceResponse)) {
       // we let geo_location be undefined.
       // the SendTemplatedLoginEmailActivity will decide what email template to use based on the geo_location value
-      if (!TransientApiCallFailure.is(geoLocationActivityResult)) {
+      if (!TransientNotImplementedFailure.is(geoLocationActivityResult)) {
         throw OrchestratorFailureResult.encode({
           kind: "FAILURE",
           reason: readableReportSimplified(
@@ -164,7 +166,7 @@ export const getNoticeLoginEmailOrchestratorHandler = function*(
     if (E.isLeft(errorOrMagicLinkServiceResponse)) {
       // we let magic_code be undefined and pass it to the next activity.
       // the SendTemplatedLoginEmailActivity will decide what email template to use based on the magic_code value
-      if (!TransientApiCallFailure.is(magicCodeActivityResult)) {
+      if (!TransientNotImplementedFailure.is(magicCodeActivityResult)) {
         throw OrchestratorFailureResult.encode({
           kind: "FAILURE",
           reason: readableReportSimplified(errorOrMagicLinkServiceResponse.left)
