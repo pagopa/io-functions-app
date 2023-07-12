@@ -1,5 +1,5 @@
 import { Context } from "@azure/functions";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { IPString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as t from "io-ts";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -17,7 +17,7 @@ type GeoLocationServiceResponse = t.TypeOf<typeof GeoLocationServiceResponse>;
 
 // Activity input
 export const ActivityInput = t.interface({
-  ip_address: NonEmptyString
+  ip_address: IPString
 });
 
 export type ActivityInput = t.TypeOf<typeof ActivityInput>;

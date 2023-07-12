@@ -1,5 +1,9 @@
 import { Context } from "@azure/functions";
-import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import {
+  EmailString,
+  IPString,
+  NonEmptyString
+} from "@pagopa/ts-commons/lib/strings";
 import * as NodeMailer from "nodemailer";
 import * as t from "io-ts";
 import * as E from "fp-ts/lib/Either";
@@ -20,7 +24,7 @@ export const ActivityInput = t.intersection([
     date_time: DateFromTimestamp,
     email: EmailString,
     identity_provider: NonEmptyString,
-    ip_address: NonEmptyString,
+    ip_address: IPString,
     name: NonEmptyString
   }),
   t.partial({
@@ -79,7 +83,7 @@ export const getSendLoginEmailActivityHandler = (
           activityInput.name,
           activityInput.identity_provider,
           activityInput.date_time,
-          activityInput.ip_address,
+          (activityInput.ip_address as unknown) as NonEmptyString,
           helpDeskRef
           // TODO: with version2 of the template,pass the magic_code and publicUrl
           // activityInput.magic_code,

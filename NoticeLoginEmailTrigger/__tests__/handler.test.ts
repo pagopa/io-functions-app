@@ -3,7 +3,11 @@ import * as TE from "fp-ts/lib/TaskEither";
 import * as durableUtils from "../../utils/durable";
 import { context } from "../../__mocks__/durable-functions";
 import { aFiscalCode } from "../../__mocks__/mocks";
-import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import {
+  EmailString,
+  IPString,
+  NonEmptyString
+} from "@pagopa/ts-commons/lib/strings";
 import { response as MockResponse } from "jest-mock-express";
 
 const aValidTriggerPayload = {
@@ -11,7 +15,7 @@ const aValidTriggerPayload = {
   family_name: "example" as NonEmptyString,
   fiscal_code: aFiscalCode,
   identity_provider: "idp" as NonEmptyString,
-  ip_address: "127.0.0.1" as NonEmptyString,
+  ip_address: "127.0.0.1" as IPString,
   name: "foo" as NonEmptyString,
   device_name: "adevice" as NonEmptyString
 };

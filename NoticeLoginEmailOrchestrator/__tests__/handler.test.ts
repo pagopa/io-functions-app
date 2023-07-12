@@ -1,4 +1,8 @@
-import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import {
+  EmailString,
+  IPString,
+  NonEmptyString
+} from "@pagopa/ts-commons/lib/strings";
 import * as df from "durable-functions";
 import { consumeGenerator } from "../../utils/durable";
 import {
@@ -16,7 +20,7 @@ const someRetryOptions = new df.RetryOptions(5000, 10);
 someRetryOptions.backoffCoefficient = 1.5;
 
 const aDate = new Date("1970-01-01");
-const anIPAddress = "127.0.0.1" as NonEmptyString;
+const anIPAddress = "127.0.0.1" as IPString;
 const aValidOrchestratorInput: OrchestratorInput = {
   date_time: aDate,
   email: "example@example.com" as EmailString,

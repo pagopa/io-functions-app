@@ -1,6 +1,7 @@
 import {
   EmailString,
   FiscalCode,
+  IPString,
   NonEmptyString
 } from "@pagopa/ts-commons/lib/strings";
 import { IOrchestrationFunctionContext } from "durable-functions/lib/src/iorchestrationfunctioncontext";
@@ -31,7 +32,7 @@ export const OrchestratorInput = t.intersection([
     family_name: NonEmptyString,
     fiscal_code: FiscalCode,
     identity_provider: NonEmptyString,
-    ip_address: NonEmptyString,
+    ip_address: IPString,
     name: NonEmptyString
   }),
   t.partial({

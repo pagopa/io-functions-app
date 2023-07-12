@@ -11,42 +11,21 @@ import {
   ResponseErrorInternal,
   ResponseSuccessAccepted
 } from "@pagopa/ts-commons/lib/responses";
-import {
-  EmailString,
-  FiscalCode,
-  NonEmptyString
-} from "@pagopa/ts-commons/lib/strings";
 import * as df from "durable-functions";
 import * as express from "express";
 import { pipe } from "fp-ts/lib/function";
-import * as t from "io-ts";
 import * as TE from "fp-ts/lib/TaskEither";
 import { createTracker } from "../utils/tracking";
 import { startOrchestrator } from "../utils/durable";
+import { UserLoginParams } from "../generated/definitions/internal/UserLoginParams";
 
 /**
  * Type of the handler.
  */
 type INoticeLoginEmailHandler = (
   context: Context,
-  triggerPayload: NoticeLoginEmailPayload
+  triggerPayload: UserLoginParams
 ) => Promise<IResponseSuccessAccepted<undefined> | IResponseErrorInternal>;
-
-const NoticeLoginEmailPayload = t.intersection([
-  t.interface({
-    email: EmailString,
-    family_name: NonEmptyString,
-    fiscal_code: FiscalCode,
-    identity_provider: NonEmptyString,
-    ip_address: NonEmptyString,
-    name: NonEmptyString
-  }),
-  t.partial({
-    device_name: NonEmptyString
-  })
-]);
-
-type NoticeLoginEmailPayload = t.TypeOf<typeof NoticeLoginEmailPayload>;
 
 export const NoticeLoginEmailHandler = (
   _telemetryClient?: ReturnType<typeof createTracker>
@@ -87,8 +66,7 @@ export const NoticeLoginEmail = (
     // Extract Azure Functions bindings
     ContextMiddleware(),
     // Extract the body payload from the request
-    // TODO type from generated spec types
-    RequiredBodyPayloadMiddleware(NoticeLoginEmailPayload)
+    RequiredBodyPayloadMiddleware(UserLoginParams)
   );
 
   return wrapRequestHandler(middlewaresWrap(handler));

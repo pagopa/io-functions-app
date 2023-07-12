@@ -1,9 +1,9 @@
 import { getGeoLocationHandler } from "../handler";
 import { context } from "../../__mocks__/durable-functions";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { IPString } from "@pagopa/ts-commons/lib/strings";
 import { TransientApiCallFailure } from "../../utils/durable";
 
-const aValidPayload = { ip_address: "127.0.0.1" as NonEmptyString };
+const aValidPayload = { ip_address: "127.0.0.1" as IPString };
 const mockGeoLocationService = {
   getGeoLocationForIp: jest.fn().mockRejectedValue({ status: 501 })
 };

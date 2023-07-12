@@ -1,8 +1,8 @@
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { IPString } from "@pagopa/ts-commons/lib/strings";
 
 // TODO: instanciate an actual geoLocationServiceClient
 export const geoLocationServiceClient = {
-  getGeoLocationForIp: (ip: NonEmptyString): Promise<never> =>
+  getGeoLocationForIp: (ip: IPString): Promise<never> =>
     Promise.reject({ status: 501, value: ip })
 };
 
