@@ -18,6 +18,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { createTracker } from "../utils/tracking";
 import { startOrchestrator } from "../utils/durable";
 import { UserLoginParams } from "../generated/definitions/internal/UserLoginParams";
+import { OrchestratorInput } from "../NoticeLoginEmailOrchestrator/handler";
 
 /**
  * Type of the handler.
@@ -40,7 +41,8 @@ export const NoticeLoginEmailHandler = (
       dfClient,
       "NoticeLoginEmailOrchestrator",
       orchestratorId,
-      { ...triggerPayload, date_time: new Date().getTime() }
+      { ...triggerPayload, date_time: new Date() },
+      OrchestratorInput
     ),
     TE.bimap(
       error =>

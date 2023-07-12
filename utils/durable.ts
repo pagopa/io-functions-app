@@ -56,24 +56,33 @@ export const isOrchestratorRunning = (
  * @param {unknown} orchestratorInput
  * @returns a TaskEither with a startup Error or instanceId
  * */
-export const startOrchestrator = (
+export const startOrchestrator = <OInput>(
   dfClient: DurableOrchestrationClient,
   orchestratorName: string,
   orchestratorId: string,
-  orchestratorInput: unknown
+  orchestratorInput: OInput,
+  orchestratorInputCodec: t.Type<OInput, unknown, unknown>
 ): TE.TaskEither<Error, string> =>
   pipe(
     isOrchestratorRunning(dfClient, orchestratorId),
     TE.chain(errorOrOrchestratorStatus =>
       !errorOrOrchestratorStatus.isRunning
-        ? TE.tryCatch(
-            () =>
-              dfClient.startNew(
-                orchestratorName,
-                orchestratorId,
-                orchestratorInput
-              ),
-            E.toError
+        ? pipe(
+            TE.tryCatch(
+              async () => orchestratorInputCodec.encode(orchestratorInput),
+              () => new Error("Encode operation failed")
+            ),
+            TE.chain(encodedInput =>
+              TE.tryCatch(
+                () =>
+                  dfClient.startNew(
+                    orchestratorName,
+                    orchestratorId,
+                    encodedInput
+                  ),
+                E.toError
+              )
+            )
           )
         : // if the orchestrator is already running, just return the id
           TE.of(orchestratorId)
