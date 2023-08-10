@@ -1,6 +1,6 @@
 {
   "name": "@pagopa/io-functions-app",
-  "version": "5.2.0",
+  "version": "5.3.0",
   "license": "MIT",
   "scripts": {
     "prebuild": "yarn generate",
