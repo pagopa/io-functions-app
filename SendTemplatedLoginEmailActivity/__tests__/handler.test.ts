@@ -24,7 +24,6 @@ const mockMailerTransporter = {
   })
 };
 
-const aPublicUrl = "https://localhost/" as NonEmptyString;
 const aHelpDeskRef = "help@desk.com" as NonEmptyString;
 
 const mockTrackEvent = jest.fn();
@@ -40,7 +39,6 @@ describe("SendTemplatedLoginEmailActivity", () => {
     const handler = getSendLoginEmailActivityHandler(
       mockMailerTransporter as any,
       emailDefaults,
-      aPublicUrl,
       aHelpDeskRef,
       mockTracker
     );
@@ -66,7 +64,6 @@ describe("SendTemplatedLoginEmailActivity", () => {
     const handler = getSendLoginEmailActivityHandler(
       mockMailerTransporter as any,
       emailDefaults,
-      aPublicUrl,
       aHelpDeskRef,
       mockTracker
     );
