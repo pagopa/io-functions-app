@@ -10,7 +10,7 @@ import { MagicLinkServiceClient } from "./utils";
 
 // magic link service response
 const MagicLinkServiceResponse = t.interface({
-  magic_code: NonEmptyString
+  magic_link: NonEmptyString
 });
 
 type MagicLinkServiceResponse = t.TypeOf<typeof MagicLinkServiceResponse>;

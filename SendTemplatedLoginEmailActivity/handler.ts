@@ -8,6 +8,7 @@ import * as NodeMailer from "nodemailer";
 import * as t from "io-ts";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/function";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import * as HtmlToText from "html-to-text";
@@ -15,6 +16,7 @@ import { sendMail } from "@pagopa/io-functions-commons/dist/src/mailer";
 import * as ai from "applicationinsights";
 import { DateFromTimestamp } from "@pagopa/ts-commons/lib/dates";
 import * as mailTemplate from "../generated/templates/login/index";
+import * as fallbackMailTemplate from "../generated/templates/login-fallback//index";
 import { EmailDefaults } from "./index";
 
 // Activity input
@@ -29,7 +31,7 @@ export const ActivityInput = t.intersection([
   t.partial({
     device_name: NonEmptyString,
     geo_location: NonEmptyString,
-    magic_code: NonEmptyString
+    magic_link: NonEmptyString
   })
 ]);
 
@@ -57,7 +59,6 @@ const logPrefix = "SendTemplatedLoginEmailActivity";
 export const getSendLoginEmailActivityHandler = (
   mailerTransporter: NodeMailer.Transporter,
   emailDefaults: EmailDefaults,
-  _magicLinkServicePublicUrl: NonEmptyString,
   helpDeskRef: NonEmptyString,
   telemetryClient?: ai.TelemetryClient
 ) => async (context: Context, input: unknown): Promise<ActivityResult> =>
@@ -77,17 +78,35 @@ export const getSendLoginEmailActivityHandler = (
       });
     }),
     E.bindTo("activityInput"),
-    E.bind("emailHtml", ({ activityInput }) =>
-      E.of(
-        mailTemplate.apply(
-          activityInput.name,
-          activityInput.identity_provider,
-          activityInput.date_time,
-          (activityInput.ip_address as unknown) as NonEmptyString,
-          helpDeskRef
-          // TODO: with version2 of the template,pass the magic_code and publicUrl
-          // activityInput.magic_code,
-          // magicLinkServicePublicUrl,
+    E.bind("maybeMagicLink", ({ activityInput }) =>
+      pipe(activityInput.magic_link, O.fromNullable, E.of)
+    ),
+    E.bind("emailHtml", ({ activityInput, maybeMagicLink }) =>
+      pipe(
+        maybeMagicLink,
+        O.fold(
+          // if we could not obtain the magic link, send a
+          // fallback email with assistance reference
+          () =>
+            E.of(
+              fallbackMailTemplate.apply(
+                activityInput.name,
+                activityInput.identity_provider,
+                activityInput.date_time,
+                (activityInput.ip_address as unknown) as NonEmptyString,
+                helpDeskRef
+              )
+            ),
+          magic_link =>
+            E.of(
+              mailTemplate.apply(
+                activityInput.name,
+                activityInput.identity_provider,
+                activityInput.date_time,
+                (activityInput.ip_address as unknown) as NonEmptyString,
+                magic_link
+              )
+            )
         )
       )
     ),
@@ -95,7 +114,7 @@ export const getSendLoginEmailActivityHandler = (
       E.of(HtmlToText.fromString(emailHtml, emailDefaults.htmlToTextOptions))
     ),
     TE.fromEither,
-    TE.chainW(({ activityInput, emailHtml, emailText }) =>
+    TE.chain(({ activityInput, emailHtml, emailText }) =>
       pipe(
         sendMail(mailerTransporter, {
           from: emailDefaults.from,
