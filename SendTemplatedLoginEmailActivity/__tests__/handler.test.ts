@@ -1,16 +1,26 @@
-import { getSendLoginEmailActivityHandler } from "../handler";
+import { ActivityInput, getSendLoginEmailActivityHandler } from "../handler";
 import { context } from "../../__mocks__/durable-functions";
-import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import {
+  EmailString,
+  IPString,
+  NonEmptyString
+} from "@pagopa/ts-commons/lib/strings";
 import { EmailDefaults } from "../index";
 import * as ai from "applicationinsights";
+import * as mailTemplate from "../../generated/templates/login/index";
+import * as fallbackMailTemplate from "../../generated/templates/login-fallback/index";
 
 const aDate = new Date("1970-01-01");
-const aValidPayload = {
+const aValidPayload: ActivityInput = {
   date_time: aDate,
   name: "foo" as NonEmptyString,
   email: "example@example.com" as EmailString,
   identity_provider: "idp" as NonEmptyString,
-  ip_address: "127.0.0.1" as NonEmptyString
+  ip_address: "127.0.0.1" as IPString
+};
+const aValidPayloadWithMagicLink: ActivityInput = {
+  ...aValidPayload,
+  magic_link: "http://example.com/#token=abcde" as NonEmptyString
 };
 const emailDefaults: EmailDefaults = {
   from: "from@example.com" as any,
@@ -35,7 +45,11 @@ describe("SendTemplatedLoginEmailActivity", () => {
     jest.clearAllMocks();
   });
 
-  it("should send a login email with the data", async () => {
+  it.each`
+    title                     | payload
+    ${"fallback login email"} | ${aValidPayload}
+    ${"login email"}          | ${aValidPayloadWithMagicLink}
+  `("should send a $title with the data", async ({ payload }) => {
     const handler = getSendLoginEmailActivityHandler(
       mockMailerTransporter as any,
       emailDefaults,
@@ -43,9 +57,15 @@ describe("SendTemplatedLoginEmailActivity", () => {
       mockTracker
     );
 
-    const result = await handler(context as any, aValidPayload);
+    const templateFunction = jest.spyOn(
+      payload.magic_link ? mailTemplate : fallbackMailTemplate,
+      "apply"
+    );
+
+    const result = await handler(context as any, payload);
 
     expect(result.kind).toEqual("SUCCESS");
+    expect(templateFunction).toHaveBeenCalledTimes(1);
     expect(mockMailerTransporter.sendMail).toHaveBeenCalledTimes(1);
     expect(mockMailerTransporter.sendMail).toHaveBeenCalledWith(
       {

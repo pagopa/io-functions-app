@@ -16,7 +16,7 @@ import { sendMail } from "@pagopa/io-functions-commons/dist/src/mailer";
 import * as ai from "applicationinsights";
 import { DateFromTimestamp } from "@pagopa/ts-commons/lib/dates";
 import * as mailTemplate from "../generated/templates/login/index";
-import * as fallbackMailTemplate from "../generated/templates/login-fallback//index";
+import * as fallbackMailTemplate from "../generated/templates/login-fallback/index";
 import { EmailDefaults } from "./index";
 
 // Activity input
