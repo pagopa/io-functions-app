@@ -29,7 +29,6 @@ const telemetryClient = initTelemetryClient();
 const activityFunctionHandler = getSendLoginEmailActivityHandler(
   mailerTransporter,
   emailDefaults,
-  config.MAGIC_LINK_SERVICE_PUBLIC_URL,
   config.HELP_DESK_REF,
   telemetryClient
 );

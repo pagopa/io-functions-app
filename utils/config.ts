@@ -93,6 +93,7 @@ export const IConfig = t.intersection([
     // url/email mentioned in the login email to contact the assistance
     HELP_DESK_REF: NonEmptyString,
 
+    MAGIC_LINK_SERVICE_API_KEY: NonEmptyString,
     MAGIC_LINK_SERVICE_PUBLIC_URL: NonEmptyString,
 
     MESSAGE_CONTAINER_NAME: NonEmptyString,

@@ -3,14 +3,14 @@ import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as t from "io-ts";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
-import { pipe } from "fp-ts/function";
+import { flow, pipe } from "fp-ts/function";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { TransientNotImplementedFailure } from "../utils/durable";
 import { MagicLinkServiceClient } from "./utils";
 
 // magic link service response
 const MagicLinkServiceResponse = t.interface({
-  magic_code: NonEmptyString
+  magic_link: NonEmptyString
 });
 
 type MagicLinkServiceResponse = t.TypeOf<typeof MagicLinkServiceResponse>;
@@ -52,7 +52,7 @@ export type ActivityResult = t.TypeOf<typeof ActivityResult>;
 const logPrefix = "GetMagicCodeActivity";
 
 export const getActivityHandler = (
-  _magicCodeService: MagicLinkServiceClient
+  magicLinkService: MagicLinkServiceClient
 ) => async (context: Context, input: unknown): Promise<ActivityResult> =>
   pipe(
     input,
@@ -70,14 +70,45 @@ export const getActivityHandler = (
       });
     }),
     TE.fromEither,
-    // TODO: implement the actual call to magic link service to get a
-    // magicCode
-    TE.chain(_activityInput =>
-      TE.left(
-        ActivityResultFailure.encode({
-          kind: "NOT_YET_IMPLEMENTED",
-          reason: "call not yet implemented"
-        })
+    TE.chain(({ name, family_name, fiscal_code }) =>
+      pipe(
+        TE.tryCatch(
+          () =>
+            magicLinkService.getMagicLinkToken({
+              body: { family_name, fiscal_number: fiscal_code, name }
+            }),
+          error => {
+            context.log.error(
+              `${logPrefix}|Error while calling magic link service|ERROR=${error}`
+            );
+            return ActivityResultFailure.encode({
+              kind: "FAILURE",
+              reason: `Error while calling magic link service: ${error}`
+            });
+          }
+        ),
+        TE.chainEitherKW(
+          flow(
+            E.mapLeft(errors =>
+              ActivityResultFailure.encode({
+                kind: "FAILURE",
+                reason: `magic link service returned an unexpected response: ${readableReportSimplified(
+                  errors
+                )}`
+              })
+            )
+          )
+        ),
+        TE.chain(({ status, value }) =>
+          status === 200
+            ? TE.right(value)
+            : TE.left(
+                ActivityResultFailure.encode({
+                  kind: "FAILURE",
+                  reason: `magic link service returned ${status}`
+                })
+              )
+        )
       )
     ),
     TE.map(serviceResponse =>

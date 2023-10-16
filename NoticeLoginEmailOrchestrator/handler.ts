@@ -156,7 +156,7 @@ export const getNoticeLoginEmailOrchestratorHandler = function*(
     });
 
     // eslint-disable-next-line functional/no-let, @typescript-eslint/naming-convention
-    let magic_code: NonEmptyString | undefined;
+    let magic_link: NonEmptyString | undefined;
     try {
       const magicCodeActivityResult = yield context.df.callActivityWithRetry(
         "GetMagicCodeActivity",
@@ -169,7 +169,7 @@ export const getNoticeLoginEmailOrchestratorHandler = function*(
       );
       if (E.isRight(errorOrMagicLinkServiceResponse)) {
         if (errorOrMagicLinkServiceResponse.right.kind === "SUCCESS") {
-          magic_code = errorOrMagicLinkServiceResponse.right.value.magic_code;
+          magic_link = errorOrMagicLinkServiceResponse.right.value.magic_link;
         } else {
           context.log.error(
             `${logPrefix}|GetMagicCodeActivity failed with ${errorOrMagicLinkServiceResponse.right.reason}`
@@ -191,7 +191,7 @@ export const getNoticeLoginEmailOrchestratorHandler = function*(
         geo_location,
         identity_provider,
         ip_address,
-        magic_code,
+        magic_link,
         name
       }
     );

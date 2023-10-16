@@ -57,7 +57,7 @@ describe("NoticeLoginEmailOrchestratorHandler", () => {
 
     mockCallActivityFunction.mockReturnValueOnce({
       kind: "SUCCESS",
-      value: { magic_code: "dummy" as NonEmptyString }
+      value: { magic_link: "dummy" as NonEmptyString }
     });
 
     mockCallActivityFunction.mockReturnValueOnce({
@@ -97,7 +97,7 @@ describe("NoticeLoginEmailOrchestratorHandler", () => {
         date_time: aDate.getTime(),
         name: "foo",
         ip_address: anIPAddress,
-        magic_code: "dummy",
+        magic_link: "dummy",
         identity_provider: "idp",
         geo_location: "Rome",
         email: "example@example.com",
