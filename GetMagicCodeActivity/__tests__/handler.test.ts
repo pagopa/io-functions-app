@@ -13,12 +13,14 @@ const aValidPayload = {
 
 const aValidMagicLink = "https://example.com/#token=abcde" as NonEmptyString;
 
+const getMagicLinkTokenMock = jest
+  .fn()
+  .mockResolvedValue(
+    E.right({ status: 200, value: { magic_link: aValidMagicLink } })
+  );
+
 const mockMagicLinkServiceClient = ({
-  getMagicLinkToken: jest
-    .fn()
-    .mockResolvedValue(
-      E.right({ status: 200, value: { magic_link: aValidMagicLink } })
-    )
+  getMagicLinkToken: getMagicLinkTokenMock
 } as unknown) as MagicLinkServiceClient;
 
 describe("GetMagicCodeActivity", () => {
@@ -27,7 +29,64 @@ describe("GetMagicCodeActivity", () => {
       context as any,
       aValidPayload
     );
+
+    expect(getMagicLinkTokenMock).toHaveBeenCalledTimes(1);
+    expect(getMagicLinkTokenMock).toHaveBeenCalledWith({
+      body: {
+        family_name: aValidPayload.family_name,
+        fiscal_number: aValidPayload.fiscal_code,
+        name: aValidPayload.name
+      }
+    });
     expect(ActivityResultSuccess.is(result)).toEqual(true);
+  });
+
+  it("should return a FAILURE when the service could not be reached via network", async () => {
+    const error = "an error";
+    getMagicLinkTokenMock.mockRejectedValueOnce(error);
+
+    const result = await getActivityHandler(mockMagicLinkServiceClient)(
+      context as any,
+      aValidPayload
+    );
+
+    expect(ActivityResultSuccess.is(result)).toEqual(false);
+    expect(result).toMatchObject({
+      kind: "FAILURE",
+      reason: `Error while calling magic link service: ${error}`
+    });
+  });
+
+  it("should return a FAILURE when the service gives an unexpected response", async () => {
+    getMagicLinkTokenMock.mockResolvedValueOnce(E.left([]));
+
+    const result = await getActivityHandler(mockMagicLinkServiceClient)(
+      context as any,
+      aValidPayload
+    );
+
+    expect(ActivityResultSuccess.is(result)).toEqual(false);
+    expect(result).toMatchObject({
+      kind: "FAILURE",
+      reason: expect.stringContaining(
+        "magic link service returned an unexpected response:"
+      )
+    });
+  });
+
+  it("should return a FAILURE when the service gives a status code different from 200", async () => {
+    getMagicLinkTokenMock.mockResolvedValueOnce(E.right({ status: 500 }));
+
+    const result = await getActivityHandler(mockMagicLinkServiceClient)(
+      context as any,
+      aValidPayload
+    );
+
+    expect(ActivityResultSuccess.is(result)).toEqual(false);
+    expect(result).toMatchObject({
+      kind: "FAILURE",
+      reason: "magic link service returned 500"
+    });
   });
 
   it("should return a FAILURE when the input is not valid", async () => {
@@ -36,6 +95,7 @@ describe("GetMagicCodeActivity", () => {
       {}
     );
 
+    expect(ActivityResultSuccess.is(result)).toEqual(false);
     expect(result).toMatchObject({
       kind: "FAILURE",
       reason: "Error while decoding input"

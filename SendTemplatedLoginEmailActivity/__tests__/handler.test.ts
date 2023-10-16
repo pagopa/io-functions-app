@@ -40,6 +40,10 @@ const mockTrackEvent = jest.fn();
 const mockTracker = ({
   trackEvent: mockTrackEvent
 } as unknown) as ai.TelemetryClient;
+
+const templateFunction = jest.spyOn(mailTemplate, "apply");
+const fallbackTemplateFunction = jest.spyOn(fallbackMailTemplate, "apply");
+
 describe("SendTemplatedLoginEmailActivity", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,15 +61,13 @@ describe("SendTemplatedLoginEmailActivity", () => {
       mockTracker
     );
 
-    const templateFunction = jest.spyOn(
-      payload.magic_link ? mailTemplate : fallbackMailTemplate,
-      "apply"
-    );
-
     const result = await handler(context as any, payload);
 
     expect(result.kind).toEqual("SUCCESS");
-    expect(templateFunction).toHaveBeenCalledTimes(1);
+    expect(templateFunction).toHaveBeenCalledTimes(payload.magic_link ? 1 : 0);
+    expect(fallbackTemplateFunction).toHaveBeenCalledTimes(
+      payload.magic_link ? 0 : 1
+    );
     expect(mockMailerTransporter.sendMail).toHaveBeenCalledTimes(1);
     expect(mockMailerTransporter.sendMail).toHaveBeenCalledWith(
       {
