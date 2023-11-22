@@ -36,7 +36,8 @@ export const OrchestratorInput = t.intersection([
     name: NonEmptyString
   }),
   t.partial({
-    device_name: NonEmptyString
+    device_name: NonEmptyString,
+    is_email_validated: t.boolean
   })
 ]);
 
@@ -97,7 +98,8 @@ export const getNoticeLoginEmailOrchestratorHandler = function*(
     date_time,
     device_name,
     ip_address,
-    identity_provider
+    identity_provider,
+    is_email_validated
   } = orchestratorInput;
   /* eslint-enable @typescript-eslint/naming-convention */
 
@@ -142,44 +144,56 @@ export const getNoticeLoginEmailOrchestratorHandler = function*(
       }
     } catch (_) {
       // log activity max retry reached
-      // we let geo_location be undefined and continue to send the base login email template
+      // we let geo_location be undefined
       context.log.error(
         `${logPrefix}|GetGeoLocationDataActivity max retry reached`
       );
     }
 
-    context.log.verbose(`${logPrefix}|Starting GetMagicCodeActivity`);
-    const magicCodeActivityInput = GetMagicCodeActivityInput.encode({
-      family_name,
-      fiscal_code,
-      name
-    });
-
+    // the base template will be sent if:
+    // 1. the user doesn't have a validated email
+    // 2. the user does have a validated email but the magic_link couldn't be retrieved
+    //
     // eslint-disable-next-line functional/no-let, @typescript-eslint/naming-convention
     let magic_link: NonEmptyString | undefined;
-    try {
-      const magicCodeActivityResult = yield context.df.callActivityWithRetry(
-        "GetMagicCodeActivity",
-        retryOptions,
-        magicCodeActivityInput
-      );
+    if (is_email_validated) {
+      context.log.verbose(`${logPrefix}|Starting GetMagicCodeActivity`);
+      const magicCodeActivityInput = GetMagicCodeActivityInput.encode({
+        family_name,
+        fiscal_code,
+        name
+      });
 
-      const errorOrMagicLinkServiceResponse = GetMagicCodeActivityResult.decode(
-        magicCodeActivityResult
-      );
-      if (E.isRight(errorOrMagicLinkServiceResponse)) {
-        if (errorOrMagicLinkServiceResponse.right.kind === "SUCCESS") {
-          magic_link = errorOrMagicLinkServiceResponse.right.value.magic_link;
-        } else {
-          context.log.error(
-            `${logPrefix}|GetMagicCodeActivity failed with ${errorOrMagicLinkServiceResponse.right.reason}`
-          );
+      try {
+        const magicCodeActivityResult = yield context.df.callActivityWithRetry(
+          "GetMagicCodeActivity",
+          retryOptions,
+          magicCodeActivityInput
+        );
+
+        const errorOrMagicLinkServiceResponse = GetMagicCodeActivityResult.decode(
+          magicCodeActivityResult
+        );
+        if (E.isRight(errorOrMagicLinkServiceResponse)) {
+          if (errorOrMagicLinkServiceResponse.right.kind === "SUCCESS") {
+            magic_link = errorOrMagicLinkServiceResponse.right.value.magic_link;
+          } else {
+            context.log.error(
+              `${logPrefix}|GetMagicCodeActivity failed with ${errorOrMagicLinkServiceResponse.right.reason}`
+            );
+          }
         }
+      } catch (_) {
+        // log activity max retry reached
+        // we let magic_code be undefined and continue to send the base login email template
+        context.log.error(
+          `${logPrefix}|GetMagicCodeActivity max retry reached`
+        );
       }
-    } catch (_) {
-      // log activity max retry reached
-      // we let magic_code be undefined and continue to send the base login email template
-      context.log.error(`${logPrefix}|GetMagicCodeActivity max retry reached`);
+    } else {
+      context.log.verbose(
+        `${logPrefix}|Ignoring GetMagicCodeActivity. The user doesn't have a validated email`
+      );
     }
 
     context.log.verbose(`${logPrefix}|Starting SendLoginEmailActivity`);

@@ -452,6 +452,8 @@ definitions:
       device_name:
         type: string
         minLength: 1
+      is_email_validated:
+        type: boolean
     required:
       - fiscal_code
       - name

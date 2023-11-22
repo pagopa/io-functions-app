@@ -29,7 +29,8 @@ const aValidOrchestratorInput: OrchestratorInput = {
   identity_provider: "idp" as NonEmptyString,
   ip_address: anIPAddress,
   name: "foo" as NonEmptyString,
-  device_name: "aDevice" as NonEmptyString
+  device_name: "aDevice" as NonEmptyString,
+  is_email_validated: true
 };
 const mockCallActivityFunction = jest.fn();
 const mockGetInput = jest.fn().mockReturnValue(aValidOrchestratorInput);
@@ -124,5 +125,59 @@ describe("NoticeLoginEmailOrchestratorHandler", () => {
     } else {
       fail();
     }
+  });
+
+  it.each`
+    scenario                                                         | value
+    ${"the user doesn't have a validated email"}                     | ${false}
+    ${"the api was called without the is_email_validated parameter"} | ${undefined}
+  `("should ignore magic_link retrieval if $scenario", ({ value }) => {
+    mockGetInput.mockReturnValueOnce({
+      ...aValidOrchestratorInput,
+      is_email_validated: value
+    });
+
+    mockCallActivityFunction.mockReturnValueOnce({
+      kind: "SUCCESS",
+      value: { geo_location: "Rome" as NonEmptyString }
+    });
+
+    mockCallActivityFunction.mockReturnValueOnce({
+      kind: "SUCCESS"
+    });
+    const orchestratorHandler = getNoticeLoginEmailOrchestratorHandler(
+      contextMockWithDf as any
+    );
+
+    const result = consumeGenerator(orchestratorHandler);
+
+    // we only call 2 activities because the user doesn't have a validated email
+    expect(mockCallActivityFunction).toHaveBeenCalledTimes(2);
+
+    expect(mockCallActivityFunction).toHaveBeenNthCalledWith(
+      1,
+      "GetGeoLocationDataActivity",
+      someRetryOptions,
+      {
+        ip_address: anIPAddress
+      }
+    );
+    expect(mockCallActivityFunction).toHaveBeenNthCalledWith(
+      2,
+      "SendTemplatedLoginEmailActivity",
+      someRetryOptions,
+      {
+        date_time: aDate.getTime(),
+        name: "foo",
+        ip_address: anIPAddress,
+        //since we ignored the magic_link retrieval, this MUST be unfedined
+        magic_link: undefined,
+        identity_provider: "idp",
+        geo_location: "Rome",
+        email: "example@example.com",
+        device_name: "aDevice"
+      }
+    );
+    expect(OrchestratorSuccessResult.is(result)).toEqual(true);
   });
 });
