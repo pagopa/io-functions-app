@@ -59,7 +59,7 @@ const logPrefix = "SendTemplatedLoginEmailActivity";
 export const getSendLoginEmailActivityHandler = (
   mailerTransporter: NodeMailer.Transporter,
   emailDefaults: EmailDefaults,
-  helpDeskRef: NonEmptyString,
+  accessRef: NonEmptyString,
   telemetryClient?: ai.TelemetryClient
 ) => async (context: Context, input: unknown): Promise<ActivityResult> =>
   pipe(
@@ -94,7 +94,7 @@ export const getSendLoginEmailActivityHandler = (
                 activityInput.identity_provider,
                 activityInput.date_time,
                 (activityInput.ip_address as unknown) as NonEmptyString,
-                helpDeskRef
+                accessRef
               )
             ),
           magic_link =>

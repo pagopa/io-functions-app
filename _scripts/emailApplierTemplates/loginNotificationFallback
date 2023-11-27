@@ -16,7 +16,7 @@ export const apply = (
   identityProvider: NonEmptyString,
   dateTime: DateFromTimestamp,
   ipAddress: NonEmptyString,
-  helpdeskRef: string
+  accessRef: string
 ): string => {
   const identity_provider = identityProvider;
   const date_time = formatDate(dateTime);

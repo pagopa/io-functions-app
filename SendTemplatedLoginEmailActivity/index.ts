@@ -29,7 +29,7 @@ const telemetryClient = initTelemetryClient();
 const activityFunctionHandler = getSendLoginEmailActivityHandler(
   mailerTransporter,
   emailDefaults,
-  config.HELP_DESK_REF,
+  config.IOWEB_ACCESS_REF,
   telemetryClient
 );
 

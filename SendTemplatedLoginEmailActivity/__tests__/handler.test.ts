@@ -34,7 +34,7 @@ const mockMailerTransporter = {
   })
 };
 
-const aHelpDeskRef = "help@desk.com" as NonEmptyString;
+const anAccessRef = "https://website.it" as NonEmptyString;
 
 const mockTrackEvent = jest.fn();
 const mockTracker = ({
@@ -57,7 +57,7 @@ describe("SendTemplatedLoginEmailActivity", () => {
     const handler = getSendLoginEmailActivityHandler(
       mockMailerTransporter as any,
       emailDefaults,
-      aHelpDeskRef,
+      anAccessRef,
       mockTracker
     );
 
@@ -86,7 +86,7 @@ describe("SendTemplatedLoginEmailActivity", () => {
     const handler = getSendLoginEmailActivityHandler(
       mockMailerTransporter as any,
       emailDefaults,
-      aHelpDeskRef,
+      anAccessRef,
       mockTracker
     );
 

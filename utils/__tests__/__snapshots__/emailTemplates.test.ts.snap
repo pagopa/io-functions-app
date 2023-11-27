@@ -283,7 +283,7 @@ exports[`Email Templates should generate fallback login notification email 1`] =
                                     <tbody>
                                       <tr>
                                         <td style=\\"width:36px;\\">
-                                          <img src=\\"https://raw.githubusercontent.com/pagopa/io-messages-email-templates/v1.0.11/assets/logo_app_io.png\\" style=\\"border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;\\" width=\\"36\\" height=\\"auto\\" />
+                                          <img src=\\"https://raw.githubusercontent.com/pagopa/io-messages-email-templates/v1.0.12/assets/logo_app_io.png\\" style=\\"border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;\\" width=\\"36\\" height=\\"auto\\" />
                                         </td>
                                       </tr>
                                     </tbody>
@@ -291,7 +291,7 @@ exports[`Email Templates should generate fallback login notification email 1`] =
                                 </td>
                               </tr>
                               <div class=\\"dark-img\\" style=\\"mso-hide: all; display: none; padding: 10px 0px\\">
-                                <img src=\\"https://raw.githubusercontent.com/pagopa/io-messages-email-templates/v1.0.11/assets/logo_app_io_white.png\\" width=\\"36px\\" class=\\"dark-img\\" style=\\"display: none\\" />
+                                <img src=\\"https://raw.githubusercontent.com/pagopa/io-messages-email-templates/v1.0.12/assets/logo_app_io_white.png\\" width=\\"36px\\" class=\\"dark-img\\" style=\\"display: none\\" />
                               </div>
                             </tbody>
                           </table>
@@ -323,7 +323,7 @@ exports[`Email Templates should generate fallback login notification email 1`] =
                               <tr>
                                 <td align=\\"left\\" class=\\"text\\" style=\\"font-size:0px;padding:10px 25px;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px;word-break:break-word;\\">
                                   <div style=\\"font-family:Titillium Web, system-ui, sans-serif;font-size:16px;font-weight:regular;line-height:24px;text-align:left;color:#17324D;\\"><!-- Body 1 Desktop (from MUI Italia)-->
-                                    <p> Ciao Mario, <br /> hai appena eseguito l'accesso all'app IO con la tua identità digitale.<br /> Non eri tu? <a href=\\"mailto:help@example.com\\" style=\\"color: #0073e6\\" class=\\"link\\">Contatta l’assistenza clienti.</a>
+                                    <p> Ciao Mario, <br /> hai appena effettuato l'accesso a IO con la tua identità digitale.<br /> Non eri tu? <a href=\\"mailto:help@example.com\\" style=\\"color: #0073e6\\" class=\\"link\\">Accedi a IO dal web e blocca l'accesso.</a>
                                     </p>
                                     <br />
                                     <p>Dati di accesso:</p>
@@ -789,7 +789,7 @@ exports[`Email Templates should generate login notification email 1`] = `
                                     <tbody>
                                       <tr>
                                         <td style=\\"width:36px;\\">
-                                          <img src=\\"https://raw.githubusercontent.com/pagopa/io-messages-email-templates/v1.0.11/assets/logo_app_io.png\\" style=\\"border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;\\" width=\\"36\\" height=\\"auto\\" />
+                                          <img src=\\"https://raw.githubusercontent.com/pagopa/io-messages-email-templates/v1.0.12/assets/logo_app_io.png\\" style=\\"border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;\\" width=\\"36\\" height=\\"auto\\" />
                                         </td>
                                       </tr>
                                     </tbody>
@@ -797,7 +797,7 @@ exports[`Email Templates should generate login notification email 1`] = `
                                 </td>
                               </tr>
                               <div class=\\"dark-img\\" style=\\"mso-hide: all; display: none; padding: 10px 0px\\">
-                                <img src=\\"https://raw.githubusercontent.com/pagopa/io-messages-email-templates/v1.0.11/assets/logo_app_io_white.png\\" width=\\"36px\\" class=\\"dark-img\\" style=\\"display: none\\" />
+                                <img src=\\"https://raw.githubusercontent.com/pagopa/io-messages-email-templates/v1.0.12/assets/logo_app_io_white.png\\" width=\\"36px\\" class=\\"dark-img\\" style=\\"display: none\\" />
                               </div>
                             </tbody>
                           </table>
@@ -829,7 +829,7 @@ exports[`Email Templates should generate login notification email 1`] = `
                               <tr>
                                 <td align=\\"left\\" class=\\"text\\" style=\\"font-size:0px;padding:10px 25px;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px;word-break:break-word;\\">
                                   <div style=\\"font-family:Titillium Web, system-ui, sans-serif;font-size:16px;font-weight:regular;line-height:24px;text-align:left;color:#17324D;\\"><!-- Body 1 Desktop (from MUI Italia)-->
-                                    <p> Ciao Mario, <br /> hai appena eseguito l'accesso all'app IO con la tua identità digitale.<br /> Non eri tu? Per mantenere i tuoi dati al sicuro, <a href=\\"https://example.com/token=#abcde\\" style=\\"color: #0073e6\\" class=\\"link\\">blocca l'accesso.</a>
+                                    <p> Ciao Mario, <br /> hai appena effettuato l'accesso a IO con la tua identità digitale.<br /> Non eri tu? Per mantenere i tuoi dati al sicuro, <a href=\\"https://example.com/token=#abcde\\" style=\\"color: #0073e6\\" class=\\"link\\">blocca l'accesso.</a>
                                     </p>
                                     <br />
                                     <p>Dati di accesso:</p>
