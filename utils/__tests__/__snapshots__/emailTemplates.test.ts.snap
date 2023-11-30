@@ -323,7 +323,7 @@ exports[`Email Templates should generate fallback login notification email 1`] =
                               <tr>
                                 <td align=\\"left\\" class=\\"text\\" style=\\"font-size:0px;padding:10px 25px;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px;word-break:break-word;\\">
                                   <div style=\\"font-family:Titillium Web, system-ui, sans-serif;font-size:16px;font-weight:regular;line-height:24px;text-align:left;color:#17324D;\\"><!-- Body 1 Desktop (from MUI Italia)-->
-                                    <p> Ciao Mario, <br /> hai appena effettuato l'accesso a IO con la tua identità digitale.<br /> Non eri tu? <a href=\\"mailto:help@example.com\\" style=\\"color: #0073e6\\" class=\\"link\\">Accedi a IO dal web e blocca l'accesso.</a>
+                                    <p> Ciao Mario, <br /> hai appena effettuato l'accesso a IO con la tua identità digitale.<br /> Non eri tu? <a href=\\"https://website.it\\" style=\\"color: #0073e6\\" class=\\"link\\">Accedi a IO dal web e blocca l'accesso.</a>
                                     </p>
                                     <br />
                                     <p>Dati di accesso:</p>

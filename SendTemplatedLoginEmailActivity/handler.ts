@@ -15,6 +15,7 @@ import * as HtmlToText from "html-to-text";
 import { sendMail } from "@pagopa/io-functions-commons/dist/src/mailer";
 import * as ai from "applicationinsights";
 import { DateFromTimestamp } from "@pagopa/ts-commons/lib/dates";
+import { ValidUrl } from "@pagopa/ts-commons/lib/url";
 import * as mailTemplate from "../generated/templates/login/index";
 import * as fallbackMailTemplate from "../generated/templates/login-fallback/index";
 import { EmailDefaults } from "./index";
@@ -59,7 +60,7 @@ const logPrefix = "SendTemplatedLoginEmailActivity";
 export const getSendLoginEmailActivityHandler = (
   mailerTransporter: NodeMailer.Transporter,
   emailDefaults: EmailDefaults,
-  accessRef: NonEmptyString,
+  accessRefUrl: ValidUrl,
   telemetryClient?: ai.TelemetryClient
 ) => async (context: Context, input: unknown): Promise<ActivityResult> =>
   pipe(
@@ -94,7 +95,7 @@ export const getSendLoginEmailActivityHandler = (
                 activityInput.identity_provider,
                 activityInput.date_time,
                 (activityInput.ip_address as unknown) as NonEmptyString,
-                accessRef
+                accessRefUrl
               )
             ),
           magic_link =>

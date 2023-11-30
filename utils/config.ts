@@ -23,6 +23,7 @@ import {
   VISIBLE_SERVICE_CONTAINER
 } from "@pagopa/io-functions-commons/dist/src/models/visible_service";
 import { JsonFromString, withFallback } from "io-ts-types";
+import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import { FeatureFlag, FeatureFlagEnum } from "./featureFlag";
 
 // exclude a specific value from a type
@@ -91,7 +92,7 @@ export const IConfig = t.intersection([
     FUNCTIONS_PUBLIC_URL: NonEmptyString,
 
     // url mentioned in the fallback login email
-    IOWEB_ACCESS_REF: NonEmptyString,
+    IOWEB_ACCESS_REF: UrlFromString,
 
     MAGIC_LINK_SERVICE_API_KEY: NonEmptyString,
     MAGIC_LINK_SERVICE_PUBLIC_URL: NonEmptyString,

@@ -2,6 +2,7 @@ import * as moment from "moment-timezone";
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { DateFromTimestamp } from "@pagopa/ts-commons/lib/dates";
+import { ValidUrl } from "@pagopa/ts-commons/lib/url";
 
 const TIME_ZONE = "Europe/Rome";
 const DATE_TIME_FORMAT = "DD/MM/YYYY, HH:mm";
@@ -16,10 +17,11 @@ export const apply = (
   identityProvider: NonEmptyString,
   dateTime: DateFromTimestamp,
   ipAddress: NonEmptyString,
-  accessRef: string
+  accessRefUrl: ValidUrl
 ): string => {
   const identity_provider = identityProvider;
   const date_time = formatDate(dateTime);
   const ip_address = ipAddress;
+  const accessRef = accessRefUrl.href;
   return `{{TEMPLATE}}`;
 };
