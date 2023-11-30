@@ -9,6 +9,7 @@ import { EmailDefaults } from "../index";
 import * as ai from "applicationinsights";
 import * as mailTemplate from "../../generated/templates/login/index";
 import * as fallbackMailTemplate from "../../generated/templates/login-fallback/index";
+import { ValidUrl } from "@pagopa/ts-commons/lib/url";
 
 const aDate = new Date("1970-01-01");
 const aValidPayload: ActivityInput = {
@@ -34,7 +35,7 @@ const mockMailerTransporter = {
   })
 };
 
-const aHelpDeskRef = "help@desk.com" as NonEmptyString;
+const anAccessRef = { href: "https://website.it" } as ValidUrl;
 
 const mockTrackEvent = jest.fn();
 const mockTracker = ({
@@ -57,7 +58,7 @@ describe("SendTemplatedLoginEmailActivity", () => {
     const handler = getSendLoginEmailActivityHandler(
       mockMailerTransporter as any,
       emailDefaults,
-      aHelpDeskRef,
+      anAccessRef,
       mockTracker
     );
 
@@ -86,7 +87,7 @@ describe("SendTemplatedLoginEmailActivity", () => {
     const handler = getSendLoginEmailActivityHandler(
       mockMailerTransporter as any,
       emailDefaults,
-      aHelpDeskRef,
+      anAccessRef,
       mockTracker
     );
 
