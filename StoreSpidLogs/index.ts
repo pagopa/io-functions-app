@@ -3,7 +3,11 @@ import { Context } from "@azure/functions";
 import * as t from "io-ts";
 
 import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
-import { IPString, PatternString } from "@pagopa/ts-commons/lib/strings";
+import {
+  IPString,
+  NonEmptyString,
+  PatternString
+} from "@pagopa/ts-commons/lib/strings";
 
 import { initTelemetryClient } from "../utils/appinsights";
 import { getConfigOrThrow } from "../utils/config";
@@ -25,6 +29,9 @@ export const SpidMsgItem = t.intersection([
 
     // IP of the client that made a SPID login action
     ip: IPString,
+
+    // login type value
+    loginType: NonEmptyString,
 
     // XML payload of the SPID Request
     requestPayload: t.string,

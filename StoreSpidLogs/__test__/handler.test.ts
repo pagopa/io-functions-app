@@ -41,6 +41,7 @@ const aSpidMsgItem: SpidMsgItem = {
   createdAtDay: today,
   fiscalCode: aFiscalCode,
   ip: "192.168.1.6" as IPString,
+  loginType: "LV" as NonEmptyString,
   requestPayload:
     "<?xml version='1.0' encoding='UTF-8'?><note ID='AAAA_BBBB'><to>Azure</to><from>Azure</from><heading>Reminder</heading><body>New append from local dev - REQUEST</body></note>",
   responsePayload:
@@ -53,6 +54,7 @@ const anotherSpidMsgItem: SpidMsgItem = {
   createdAtDay: today,
   fiscalCode: aFiscalCode,
   ip: "192.168.1.7" as IPString,
+  loginType: "LEGACY" as NonEmptyString,
   requestPayload:
     "<?xml version='1.0' encoding='UTF-8'?><note ID='CCCC_DDDD'><to>Azure</to><from>Azure</from><heading>Reminder</heading><body>New append from local dev - REQUEST</body></note>",
   responsePayload:
@@ -99,6 +101,14 @@ describe("StoreSpidLogs", () => {
     );
     const blob = blobItem as IOutputBinding;
     const encryptedSpidBlobItem = blob.spidRequestResponse;
+
+    expect(encryptedSpidBlobItem).not.toHaveProperty("loginType");
+    expect(encryptedSpidBlobItem).toMatchObject({
+      createdAt: aSpidMsgItem.createdAt,
+      ip: aSpidMsgItem.ip,
+      spidRequestId: aSpidMsgItem.spidRequestId
+    });
+
     const decryptedRequestPayload = toPlainText(
       aRSAPrivateKey,
       encryptedSpidBlobItem.encryptedRequestPayload
@@ -119,6 +129,7 @@ describe("StoreSpidLogs", () => {
       expect(true).toBeFalsy();
     }
   });
+
   it("should encrypt two different messages with the same Cipher instance and decrypt with another one", async () => {
     const mockedContext = {
       bindings: {
