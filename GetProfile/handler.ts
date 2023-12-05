@@ -14,18 +14,26 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/response";
 
 import {
+  isEmailAlreadyTaken,
+  ProfileEmailReader
+} from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
+
+import {
   IResponseErrorNotFound,
   IResponseSuccessJson,
   ResponseErrorNotFound,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, EmailString } from "@pagopa/ts-commons/lib/strings";
 
 import { isBefore } from "date-fns";
-import { pipe } from "fp-ts/lib/function";
+import { pipe, identity } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as T from "fp-ts/lib/Task";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
+
+import { FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED } from "../utils/unique_email_enforcement";
 
 type IGetProfileHandlerResult =
   | IResponseSuccessJson<ExtendedProfile>
@@ -42,6 +50,55 @@ type IGetProfileHandler = (
   fiscalCode: FiscalCode
 ) => Promise<IGetProfileHandlerResult>;
 
+export const isEmailAlreadyTakenTE = (
+  profileEmailReader: ProfileEmailReader,
+  email: EmailString
+) =>
+  TE.tryCatch(
+    () =>
+      isEmailAlreadyTaken(email)({
+        profileEmailReader
+      }),
+    () => new Error("Can't check if the e-mail address is already taken")
+  );
+
+export const withIsEmailAlreadyTaken = (
+  profileEmailReader: ProfileEmailReader,
+  uniqueEmailEnforcementEnabled: boolean
+) => (profile: ExtendedProfile) =>
+  pipe(
+    TE.of(profile),
+    // VALID ONLY IF FF_UNIQUE_EMAIL_ENFORCEMENT IS ENABLED
+    // Check if the e-mail address associated with the retrived
+    // profile was validated. If was not validated, continue with
+    // uniqueness checks.
+    TE.filterOrElse(
+      profile => !profile.is_email_validated && uniqueEmailEnforcementEnabled,
+      () => true
+    ),
+    TE.chain(profile =>
+      pipe(
+        // Check if the e-mail is already taken (returns a boolean).
+        // If there are problems checking the uniqueness of the provided
+        // e-mail address, assume that the e-mail is not unique (already taken).
+        //isEmailAlreadyTakenTE(profileEmailReader, profile.email),
+        TE.tryCatch(
+          () =>
+            isEmailAlreadyTaken(profile.email)({
+              profileEmailReader
+            }),
+          () => false
+        )
+      )
+    ),
+    // Set the value of "is_email_already_taken" property
+    TE.getOrElse(result => T.of(result)),
+    T.map(is_email_already_taken => ({
+      ...profile,
+      is_email_already_taken
+    }))
+  );
+
 /**
  * Return a type safe GetProfile handler.
  */
@@ -49,7 +106,8 @@ type IGetProfileHandler = (
 export function GetProfileHandler(
   profileModel: ProfileModel,
   optOutEmailSwitchDate: Date,
-  isOptInEmailEnabled: boolean
+  isOptInEmailEnabled: boolean,
+  profileEmailReader: ProfileEmailReader
 ): IGetProfileHandler {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, arrow-body-style
   return async fiscalCode => {
@@ -71,17 +129,24 @@ export function GetProfileHandler(
                 ? { ..._, isEmailEnabled: false }
                 : _
             ),
-            O.foldW(
-              () =>
-                ResponseErrorNotFound(
-                  "Profile not found",
-                  "The profile you requested was not found in the system."
-                ),
-              profile =>
-                ResponseSuccessJson(retrievedProfileToExtendedProfile(profile))
-            )
+            TE.fromOption(() =>
+              ResponseErrorNotFound(
+                "Profile not found",
+                "The profile you requested was not found in the system."
+              )
+            ),
+            TE.map(retrievedProfileToExtendedProfile),
+            TE.chainTaskK(
+              withIsEmailAlreadyTaken(
+                profileEmailReader,
+                FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED(fiscalCode)
+              )
+            ),
+            TE.map(ResponseSuccessJson),
+            TE.getOrElseW(response => T.of(response))
           )
       ),
+      TE.chainTaskK(identity),
       TE.toUnion
     )();
   };
@@ -94,12 +159,14 @@ export function GetProfileHandler(
 export function GetProfile(
   profileModel: ProfileModel,
   optOutEmailSwitchDate: Date,
-  isOptInEmailEnabled: boolean
+  isOptInEmailEnabled: boolean,
+  profileEmailReader: ProfileEmailReader
 ): express.RequestHandler {
   const handler = GetProfileHandler(
     profileModel,
     optOutEmailSwitchDate,
-    isOptInEmailEnabled
+    isOptInEmailEnabled,
+    profileEmailReader
   );
 
   const middlewaresWrap = withRequestMiddlewares(FiscalCodeMiddleware);
