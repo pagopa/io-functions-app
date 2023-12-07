@@ -8,7 +8,7 @@
     "build": "tsc",
     "watch": "tsc --w",
     "prestart": "npm run build && func extensions install --javascript",
-    "start:host": "func start --javascript",
+    "start:host": "dotenv -e .env func start --javascript",
     "start": "npm-run-all --parallel start:host watch",
     "test": "jest",
     "test:coverage": "jest --coverage",
@@ -46,6 +46,7 @@
     "@types/nodemailer": "^4.6.8",
     "auto-changelog": "^2.2.1",
     "dotenv": "^8.2.0",
+    "dotenv-cli": "^7.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "fast-check": "^1.16.0",
     "jest": "^24.8.0",
@@ -84,5 +85,6 @@
     "node-fetch": "^2.6.1",
     "nodemailer": "^6.4.16",
     "nodemailer-sendgrid": "^1.0.3"
-  }
+  },
+  "packageManager": "yarn@1.22.19"
 }
