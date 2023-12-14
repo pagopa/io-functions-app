@@ -69,13 +69,13 @@ export const withIsEmailAlreadyTaken = (
       pipe(
         // Check if the e-mail is already taken (returns a boolean).
         // If there are problems checking the uniqueness of the provided
-        // e-mail address, assume that the e-mail is not unique (already taken).
+        // e-mail address, assume that the e-mail is unique (not already taken).
         TE.tryCatch(
           () =>
             isEmailAlreadyTaken(email)({
               profileEmails: profileEmailReader
             }),
-          () => true
+          () => false
         )
       )
     ),

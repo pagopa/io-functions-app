@@ -22,8 +22,11 @@ const aRetrievedProfileWithTimestampAfterLimit = {
   _ts: aTimestamp + 10
 };
 
-function generateProfileEmails(count: number) {
+function generateProfileEmails(count: number, throws: boolean = false) {
   return async function*(email: EmailString) {
+    if (throws) {
+      throw new Error("error retriving profile emails");
+    }
     for (let i = 0; i < count; i++) {
       yield { email, fiscalCode: aFiscalCode };
     }
@@ -55,6 +58,15 @@ describe("withIsEmailAlreadyTaken", () => {
       true
     )({ ...aExtendedProfile, is_email_validated: false })();
     expect(profile.is_email_already_taken).toBe(true);
+  });
+  it("returns false on errors retrieving the profile emails", async () => {
+    const profile = await withIsEmailAlreadyTaken(
+      {
+        list: generateProfileEmails(2, true)
+      },
+      true
+    )({ ...aExtendedProfile, is_email_validated: false })();
+    expect(profile.is_email_already_taken).toBe(false);
   });
 });
 
