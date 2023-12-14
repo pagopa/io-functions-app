@@ -55,7 +55,7 @@ type IGetProfileHandler = (
 export const withIsEmailAlreadyTaken = (
   profileEmailReader: IProfileEmailReader,
   uniqueEmailEnforcementEnabled: boolean
-) => (profile: ExtendedProfile) =>
+) => (profile: ExtendedProfile): T.Task<ExtendedProfile> =>
   pipe(
     TE.of(profile),
     // VALID ONLY IF FF_UNIQUE_EMAIL_ENFORCEMENT IS ENABLED
@@ -63,18 +63,19 @@ export const withIsEmailAlreadyTaken = (
     // profile was validated. If was not validated, continue with
     // uniqueness checks.
     TE.filterOrElse(
-      profile => !profile.is_email_validated && uniqueEmailEnforcementEnabled,
+      ({ is_email_validated }) =>
+        !is_email_validated && uniqueEmailEnforcementEnabled,
       () => true
     ),
-    TE.chain(profile =>
+    TE.chain(({ email }) =>
       pipe(
         // Check if the e-mail is already taken (returns a boolean).
         // If there are problems checking the uniqueness of the provided
         // e-mail address, assume that the e-mail is not unique (already taken).
-        //isEmailAlreadyTakenTE(profileEmailReader, profile.email),
+        // isEmailAlreadyTakenTE(profileEmailReader, profile.email),
         TE.tryCatch(
           () =>
-            isEmailAlreadyTaken(profile.email)({
+            isEmailAlreadyTaken(email)({
               profileEmails: profileEmailReader
             }),
           () => false
