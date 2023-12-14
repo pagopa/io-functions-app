@@ -74,6 +74,7 @@ export const retrievedProfileToExtendedProfile = (
     email: profile.email,
     is_email_enabled: profile.isEmailEnabled !== false,
     is_email_validated: profile.isEmailValidated !== false,
+    is_email_already_taken: false,
     is_inbox_enabled: profile.isInboxEnabled === true,
     is_test_profile: profile.isTestProfile === true,
     is_webhook_enabled: profile.isWebhookEnabled === true,

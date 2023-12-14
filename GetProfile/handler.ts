@@ -8,6 +8,7 @@ import {
   withRequestMiddlewares,
   wrapRequestHandler
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
+
 import {
   IResponseErrorQuery,
   ResponseErrorQuery
@@ -15,7 +16,7 @@ import {
 
 import {
   isEmailAlreadyTaken,
-  ProfileEmailReader
+  IProfileEmailReader
 } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
 
 import {
@@ -24,7 +25,8 @@ import {
   ResponseErrorNotFound,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-import { FiscalCode, EmailString } from "@pagopa/ts-commons/lib/strings";
+
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 import { isBefore } from "date-fns";
 import { pipe, identity } from "fp-ts/lib/function";
@@ -50,20 +52,8 @@ type IGetProfileHandler = (
   fiscalCode: FiscalCode
 ) => Promise<IGetProfileHandlerResult>;
 
-export const isEmailAlreadyTakenTE = (
-  profileEmailReader: ProfileEmailReader,
-  email: EmailString
-) =>
-  TE.tryCatch(
-    () =>
-      isEmailAlreadyTaken(email)({
-        profileEmailReader
-      }),
-    () => new Error("Can't check if the e-mail address is already taken")
-  );
-
 export const withIsEmailAlreadyTaken = (
-  profileEmailReader: ProfileEmailReader,
+  profileEmailReader: IProfileEmailReader,
   uniqueEmailEnforcementEnabled: boolean
 ) => (profile: ExtendedProfile) =>
   pipe(
@@ -85,7 +75,7 @@ export const withIsEmailAlreadyTaken = (
         TE.tryCatch(
           () =>
             isEmailAlreadyTaken(profile.email)({
-              profileEmailReader
+              profileEmails: profileEmailReader
             }),
           () => false
         )
@@ -107,7 +97,7 @@ export function GetProfileHandler(
   profileModel: ProfileModel,
   optOutEmailSwitchDate: Date,
   isOptInEmailEnabled: boolean,
-  profileEmailReader: ProfileEmailReader
+  profileEmailReader: IProfileEmailReader
 ): IGetProfileHandler {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, arrow-body-style
   return async fiscalCode => {
@@ -160,7 +150,7 @@ export function GetProfile(
   profileModel: ProfileModel,
   optOutEmailSwitchDate: Date,
   isOptInEmailEnabled: boolean,
-  profileEmailReader: ProfileEmailReader
+  profileEmailReader: IProfileEmailReader
 ): express.RequestHandler {
   const handler = GetProfileHandler(
     profileModel,
@@ -168,7 +158,6 @@ export function GetProfile(
     isOptInEmailEnabled,
     profileEmailReader
   );
-
   const middlewaresWrap = withRequestMiddlewares(FiscalCodeMiddleware);
   return wrapRequestHandler(middlewaresWrap(handler));
 }

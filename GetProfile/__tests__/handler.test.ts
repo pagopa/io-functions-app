@@ -7,6 +7,7 @@ import {
 } from "../../__mocks__/mocks";
 import { GetProfileHandler, withIsEmailAlreadyTaken } from "../handler";
 import { EmailString } from "@pagopa/ts-commons/lib/strings";
+import { IProfileEmailReader } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
 
 // Date returns a timestamp expressed in milliseconds
 const aTimestamp = Math.floor(new Date().valueOf() / 1000);
@@ -28,8 +29,8 @@ function generateProfileEmails(count: number) {
   };
 }
 
-const profileEmailReader = {
-  profileEmails: generateProfileEmails(7)
+const profileEmailReader: IProfileEmailReader = {
+  list: generateProfileEmails(7)
 };
 
 describe("withIsEmailAlreadyTaken", () => {
