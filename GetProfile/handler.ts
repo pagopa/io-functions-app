@@ -35,8 +35,6 @@ import * as TE from "fp-ts/lib/TaskEither";
 import * as T from "fp-ts/lib/Task";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 
-import { FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED } from "../utils/unique_email_enforcement";
-
 type IGetProfileHandlerResult =
   | IResponseSuccessJson<ExtendedProfile>
   | IResponseErrorNotFound
@@ -54,7 +52,7 @@ type IGetProfileHandler = (
 
 export const withIsEmailAlreadyTaken = (
   profileEmailReader: IProfileEmailReader,
-  uniqueEmailEnforcementEnabled: boolean
+  isUniqueEmailEnforcementEnabled: boolean
 ) => (profile: ExtendedProfile): T.Task<ExtendedProfile> =>
   pipe(
     TE.of(profile),
@@ -64,21 +62,20 @@ export const withIsEmailAlreadyTaken = (
     // uniqueness checks.
     TE.filterOrElse(
       ({ is_email_validated }) =>
-        !is_email_validated && uniqueEmailEnforcementEnabled,
-      () => true
+        isUniqueEmailEnforcementEnabled && !is_email_validated,
+      () => false
     ),
     TE.chain(({ email }) =>
       pipe(
         // Check if the e-mail is already taken (returns a boolean).
         // If there are problems checking the uniqueness of the provided
         // e-mail address, assume that the e-mail is not unique (already taken).
-        // isEmailAlreadyTakenTE(profileEmailReader, profile.email),
         TE.tryCatch(
           () =>
             isEmailAlreadyTaken(email)({
               profileEmails: profileEmailReader
             }),
-          () => false
+          () => true
         )
       )
     ),
@@ -98,7 +95,8 @@ export function GetProfileHandler(
   profileModel: ProfileModel,
   optOutEmailSwitchDate: Date,
   isOptInEmailEnabled: boolean,
-  profileEmailReader: IProfileEmailReader
+  profileEmailReader: IProfileEmailReader,
+  FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED: (fiscalCode: FiscalCode) => boolean
 ): IGetProfileHandler {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, arrow-body-style
   return async fiscalCode => {
@@ -151,13 +149,15 @@ export function GetProfile(
   profileModel: ProfileModel,
   optOutEmailSwitchDate: Date,
   isOptInEmailEnabled: boolean,
-  profileEmailReader: IProfileEmailReader
+  profileEmailReader: IProfileEmailReader,
+  FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED: (fiscalCode: FiscalCode) => boolean
 ): express.RequestHandler {
   const handler = GetProfileHandler(
     profileModel,
     optOutEmailSwitchDate,
     isOptInEmailEnabled,
-    profileEmailReader
+    profileEmailReader,
+    FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED
   );
   const middlewaresWrap = withRequestMiddlewares(FiscalCodeMiddleware);
   return wrapRequestHandler(middlewaresWrap(handler));

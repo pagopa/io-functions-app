@@ -523,7 +523,10 @@ definitions:
       require_secure_channels:
         type: boolean
         default: false
-        description: When true, messages won't trigger email notifications (only push).
+        description: |
+          When true:
+          * Messages won't trigger email notifications;
+          * Push notifications will be anonymous.
     required:
       - service_name
       - department_name

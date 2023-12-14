@@ -14,8 +14,13 @@ import { DataTableProfileEmailsRepository } from "@pagopa/io-functions-commons/d
 import createAzureFunctionHandler from "@pagopa/express-azure-functions/dist/src/createAzureFunctionsHandler";
 
 import { getConfigOrThrow } from "../utils/config";
+
 import { cosmosdbInstance } from "../utils/cosmosdb";
-import { profileEmailTableClient } from "../utils/unique_email_enforcement";
+import {
+  profileEmailTableClient,
+  FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED
+} from "../utils/unique_email_enforcement";
+
 import { GetProfile } from "./handler";
 
 const config = getConfigOrThrow();
@@ -37,7 +42,8 @@ app.get(
     profileModel,
     config.OPT_OUT_EMAIL_SWITCH_DATE,
     config.FF_OPT_IN_EMAIL_ENABLED,
-    profileEmailReader
+    profileEmailReader,
+    FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED
   )
 );
 

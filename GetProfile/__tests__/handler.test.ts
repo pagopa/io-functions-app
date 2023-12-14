@@ -8,6 +8,7 @@ import {
 import { GetProfileHandler, withIsEmailAlreadyTaken } from "../handler";
 import { EmailString } from "@pagopa/ts-commons/lib/strings";
 import { IProfileEmailReader } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
+import { constTrue } from "fp-ts/lib/function";
 
 // Date returns a timestamp expressed in milliseconds
 const aTimestamp = Math.floor(new Date().valueOf() / 1000);
@@ -38,21 +39,21 @@ describe("withIsEmailAlreadyTaken", () => {
     const profile = await withIsEmailAlreadyTaken(
       profileEmailReader,
       false
-    )(aExtendedProfile)();
+    )({ ...aExtendedProfile, is_email_validated: false })();
     expect(profile.is_email_already_taken).toBe(false);
   });
   it("returns false if the e-mail associated with the given profile is validated", async () => {
     const profile = await withIsEmailAlreadyTaken(
       profileEmailReader,
       true
-    )({ ...aExtendedProfile, is_email_validated: false })();
-    expect(profile.is_email_already_taken).toBe(true);
+    )(aExtendedProfile)();
+    expect(profile.is_email_already_taken).toBe(false);
   });
   it("returns true if there are profile email entries", async () => {
     const profile = await withIsEmailAlreadyTaken(
       profileEmailReader,
       true
-    )(aExtendedProfile)();
+    )({ ...aExtendedProfile, is_email_validated: false })();
     expect(profile.is_email_already_taken).toBe(true);
   });
 });
@@ -69,7 +70,8 @@ describe("GetProfileHandler", () => {
       profileModelMock as any,
       anEmailOptOutEmailSwitchDate,
       true,
-      profileEmailReader
+      profileEmailReader,
+      constTrue
     );
 
     const response = await getProfileHandler(aFiscalCode);
@@ -94,7 +96,8 @@ describe("GetProfileHandler", () => {
       profileModelMock as any,
       anEmailOptOutEmailSwitchDate,
       true,
-      profileEmailReader
+      profileEmailReader,
+      constTrue
     );
 
     const response = await getProfileHandler(aFiscalCode);
@@ -122,7 +125,8 @@ describe("GetProfileHandler", () => {
       profileModelMock as any,
       anEmailOptOutEmailSwitchDate,
       false,
-      profileEmailReader
+      profileEmailReader,
+      constTrue
     );
 
     const response = await getProfileHandler(aFiscalCode);
@@ -147,7 +151,8 @@ describe("GetProfileHandler", () => {
       profileModelMock as any,
       anEmailOptOutEmailSwitchDate,
       true,
-      profileEmailReader
+      profileEmailReader,
+      constTrue
     );
 
     const response = await getProfileHandler(aFiscalCode);
@@ -168,7 +173,8 @@ describe("GetProfileHandler", () => {
       profileModelMock as any,
       anEmailOptOutEmailSwitchDate,
       true,
-      profileEmailReader
+      profileEmailReader,
+      constTrue
     );
 
     const result = await getProfileHandler(aFiscalCode);
