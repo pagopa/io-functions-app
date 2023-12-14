@@ -66,21 +66,19 @@ export const withIsEmailAlreadyTaken = (
       () => false
     ),
     TE.chain(({ email }) =>
-      pipe(
-        // Check if the e-mail is already taken (returns a boolean).
-        // If there are problems checking the uniqueness of the provided
-        // e-mail address, assume that the e-mail is unique (not already taken).
-        TE.tryCatch(
-          () =>
-            isEmailAlreadyTaken(email)({
-              profileEmails: profileEmailReader
-            }),
-          () => false
-        )
+      // Check if the e-mail is already taken (returns a boolean).
+      // If there are problems checking the uniqueness of the provided
+      // e-mail address, assume that the e-mail is unique (not already taken).
+      TE.tryCatch(
+        () =>
+          isEmailAlreadyTaken(email)({
+            profileEmails: profileEmailReader
+          }),
+        () => false
       )
     ),
     // Set the value of "is_email_already_taken" property
-    TE.getOrElse(result => T.of(result)),
+    TE.getOrElse(T.of),
     T.map(is_email_already_taken => ({
       ...profile,
       is_email_already_taken
