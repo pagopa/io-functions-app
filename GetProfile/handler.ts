@@ -29,7 +29,7 @@ import {
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 import { isBefore } from "date-fns";
-import { pipe, identity } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as T from "fp-ts/lib/Task";
