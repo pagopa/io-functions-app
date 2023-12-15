@@ -69,6 +69,9 @@ export const withIsEmailAlreadyTaken = (
       // Check if the e-mail is already taken (returns a boolean).
       // If there are problems checking the uniqueness of the provided
       // e-mail address, assume that the e-mail is unique (not already taken).
+      // This intentional behavior allows us to avoid blocking the citizen
+      // while using the mobile app in case of error and does not create data
+      // inconsistencies.
       TE.tryCatch(
         () =>
           isEmailAlreadyTaken(email)({
