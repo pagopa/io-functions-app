@@ -14,7 +14,7 @@ export const profileEmailTableClient = TableClient.fromConnectionString(
 export const FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED = getIsUserEligibleForNewFeature<
   FiscalCode
 >(
-  fiscalCode => config.FF_UNIQUE_EMAIL_ENFORCEMENT_USERS.includes(fiscalCode),
+  fiscalCode => config.UNIQUE_EMAIL_ENFORCEMENT_USERS.includes(fiscalCode),
   () => false,
   config.FF_UNIQUE_EMAIL_ENFORCEMENT
 );

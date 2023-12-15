@@ -125,7 +125,7 @@ export const IConfig = t.intersection([
     FF_TEMPLATE_EMAIL: FeatureFlagFromString,
 
     FF_UNIQUE_EMAIL_ENFORCEMENT: FeatureFlagFromString,
-    FF_UNIQUE_EMAIL_ENFORCEMENT_USERS: BetaUsersFromString,
+    UNIQUE_EMAIL_ENFORCEMENT_USERS: BetaUsersFromString,
 
     PROFILE_EMAIL_STORAGE_CONNECTION_STRING: NonEmptyString,
     PROFILE_EMAIL_STORAGE_TABLE_NAME: NonEmptyString,
