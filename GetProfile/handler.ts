@@ -100,40 +100,38 @@ export function GetProfileHandler(
   return async fiscalCode => {
     return pipe(
       profileModel.findLastVersionByModelId([fiscalCode]),
-      TE.bimap(
-        failure =>
-          ResponseErrorQuery("Error while retrieving the profile", failure),
-        maybeProfile =>
-          pipe(
-            maybeProfile,
-            O.map(_ =>
-              // if profile's timestamp is before email opt out switch limit date we must force isEmailEnabled to false
-              // this map is valid for ever so this check cannot be removed.
-              // Please note that cosmos timestamps are expressed in unix notation (in seconds), so we must transform
-              // it to a common Date representation.
-              // eslint-disable-next-line no-underscore-dangle
-              isOptInEmailEnabled && isBefore(_._ts, optOutEmailSwitchDate)
-                ? { ..._, isEmailEnabled: false }
-                : _
-            ),
-            TE.fromOption(() =>
-              ResponseErrorNotFound(
-                "Profile not found",
-                "The profile you requested was not found in the system."
-              )
-            ),
-            TE.map(retrievedProfileToExtendedProfile),
-            TE.chainTaskK(
-              withIsEmailAlreadyTaken(
-                profileEmailReader,
-                FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED(fiscalCode)
-              )
-            ),
-            TE.map(ResponseSuccessJson),
-            TE.getOrElseW(response => T.of(response))
-          )
+      TE.mapLeft(failure =>
+        ResponseErrorQuery("Error while retrieving the profile", failure)
       ),
-      TE.chainTaskK(identity),
+      TE.chainW(maybeProfile =>
+        pipe(
+          maybeProfile,
+          O.map(_ =>
+            // if profile's timestamp is before email opt out switch limit date we must force isEmailEnabled to false
+            // this map is valid for ever so this check cannot be removed.
+            // Please note that cosmos timestamps are expressed in unix notation (in seconds), so we must transform
+            // it to a common Date representation.
+            // eslint-disable-next-line no-underscore-dangle
+            isOptInEmailEnabled && isBefore(_._ts, optOutEmailSwitchDate)
+              ? { ..._, isEmailEnabled: false }
+              : _
+          ),
+          TE.fromOption(() =>
+            ResponseErrorNotFound(
+              "Profile not found",
+              "The profile you requested was not found in the system."
+            )
+          ),
+          TE.map(retrievedProfileToExtendedProfile),
+          TE.chainTaskK(
+            withIsEmailAlreadyTaken(
+              profileEmailReader,
+              FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED(fiscalCode)
+            )
+          ),
+          TE.map(ResponseSuccessJson)
+        )
+      ),
       TE.toUnion
     )();
   };
