@@ -124,6 +124,13 @@ export const IConfig = t.intersection([
     FF_OPT_IN_EMAIL_ENABLED: t.boolean,
     FF_TEMPLATE_EMAIL: FeatureFlagFromString,
 
+    FF_UNIQUE_EMAIL_ENFORCEMENT: FeatureFlagFromString,
+
+    PROFILE_EMAIL_STORAGE_CONNECTION_STRING: NonEmptyString,
+    PROFILE_EMAIL_STORAGE_TABLE_NAME: NonEmptyString,
+
+    UNIQUE_EMAIL_ENFORCEMENT_USERS: BetaUsersFromString,
+
     isProduction: t.boolean
   }),
   MailerConfig,

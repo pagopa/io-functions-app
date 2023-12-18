@@ -72,6 +72,7 @@ export const retrievedProfileToExtendedProfile = (
     accepted_tos_version: profile.acceptedTosVersion,
     blocked_inbox_or_channels: profile.blockedInboxOrChannels,
     email: profile.email,
+    is_email_already_taken: false,
     is_email_enabled: profile.isEmailEnabled !== false,
     is_email_validated: profile.isEmailValidated !== false,
     is_inbox_enabled: profile.isInboxEnabled === true,

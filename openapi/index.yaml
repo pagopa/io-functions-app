@@ -523,7 +523,10 @@ definitions:
       require_secure_channels:
         type: boolean
         default: false
-        description: When true, messages won't trigger email notifications (only push).
+        description: |
+          When true:
+          * Messages won't trigger email notifications;
+          * Push notifications will be anonymous.
     required:
       - service_name
       - department_name
@@ -604,6 +607,12 @@ definitions:
         $ref: '#/definitions/IsEmailEnabled'
       is_email_validated:
         $ref: '#/definitions/IsEmailValidated'
+      is_email_already_taken:
+        type: boolean
+        default: false
+        description: |-
+          True if the user email has been validated by another user.
+          If so, the user must provide a new email.
       reminder_status:
         $ref: '#/definitions/ReminderStatus'
       is_test_profile:
@@ -617,6 +626,7 @@ definitions:
     required:
       - is_email_enabled
       - is_email_validated
+      - is_email_already_taken
       - is_inbox_enabled
       - is_webhook_enabled
       - service_preferences_settings
