@@ -6,9 +6,9 @@ import {
   aRetrievedProfile
 } from "../../__mocks__/mocks";
 import { GetProfileHandler, withIsEmailAlreadyTaken } from "../handler";
-import { EmailString } from "@pagopa/ts-commons/lib/strings";
 import { IProfileEmailReader } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
 import { constTrue } from "fp-ts/lib/function";
+import { generateProfileEmails } from "../../__mocks__/unique-email-enforcement";
 
 // Date returns a timestamp expressed in milliseconds
 const aTimestamp = Math.floor(new Date().valueOf() / 1000);
@@ -21,17 +21,6 @@ const aRetrievedProfileWithTimestampAfterLimit = {
   ...aRetrievedProfile,
   _ts: aTimestamp + 10
 };
-
-function generateProfileEmails(count: number, throws: boolean = false) {
-  return async function*(email: EmailString) {
-    if (throws) {
-      throw new Error("error retriving profile emails");
-    }
-    for (let i = 0; i < count; i++) {
-      yield { email, fiscalCode: aFiscalCode };
-    }
-  };
-}
 
 const profileEmailReader: IProfileEmailReader = {
   list: generateProfileEmails(7)

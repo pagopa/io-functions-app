@@ -27,10 +27,11 @@ import { UpdateProfileHandler } from "../handler";
 
 import { createTracker } from "../../__mocks__/tracking";
 
-import { EmailString, Semver } from "@pagopa/ts-commons/lib/strings";
+import { Semver } from "@pagopa/ts-commons/lib/strings";
 import { constFalse, constTrue, pipe } from "fp-ts/lib/function";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { IProfileEmailReader } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
+import { generateProfileEmails } from "../../__mocks__/unique-email-enforcement";
 
 const mockSendMessage = jest.fn().mockImplementation(() => Promise.resolve());
 const mockQueueClient = ({
@@ -50,17 +51,6 @@ afterEach(() => {
 });
 
 const mockTracker = createTracker("" as any);
-
-function generateProfileEmails(count: number, throws: boolean = false) {
-  return async function*(email: EmailString) {
-    if (throws) {
-      throw new Error("error retriving profile emails");
-    }
-    for (let i = 0; i < count; i++) {
-      yield { email, fiscalCode: aFiscalCode };
-    }
-  };
-}
 
 const profileEmailReader: IProfileEmailReader = {
   list: generateProfileEmails(0)
