@@ -8,6 +8,7 @@ import {
 import { GetProfileHandler, withIsEmailAlreadyTaken } from "../handler";
 import { IProfileEmailReader } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
 import { constTrue } from "fp-ts/lib/function";
+
 import { generateProfileEmails } from "../../__mocks__/unique-email-enforcement";
 
 // Date returns a timestamp expressed in milliseconds
