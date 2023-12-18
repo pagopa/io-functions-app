@@ -97,7 +97,7 @@ const migratePreferences = (
   );
 
 // This function can't be easily refactored, so we have to disable some lint rules.
-// TODO(): refactor to
+// TODO(IOPID-1263): refactor to make it more modular and easier to extend
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions, max-lines-per-function
 export function UpdateProfileHandler(
   profileModel: ProfileModel,
