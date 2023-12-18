@@ -15,8 +15,12 @@ import {
   IResponseSuccessJson,
   ResponseErrorConflict,
   ResponseErrorNotFound,
-  ResponseSuccessJson
+  ResponseSuccessJson,
+  ResponseErrorInternal,
+  ResponseErrorPreconditionFailed,
+  IResponseErrorPreconditionFailed
 } from "@pagopa/ts-commons/lib/responses";
+
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
 
@@ -39,6 +43,10 @@ import {
 
 import { QueueClient, QueueSendMessageResponse } from "@azure/storage-queue";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
+import {
+  IProfileEmailReader,
+  isEmailAlreadyTaken
+} from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
 import { MigrateServicesPreferencesQueueMessage } from "../MigrateServicePreferenceFromLegacy/handler";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { ProfileMiddleware } from "../utils/middlewares/profile";
@@ -63,6 +71,7 @@ type IUpdateProfileHandler = (
   | IResponseErrorNotFound
   | IResponseErrorConflict
   | IResponseErrorInternal
+  | IResponseErrorPreconditionFailed
 >;
 
 const migratePreferences = (
@@ -87,14 +96,17 @@ const migratePreferences = (
     E.toError
   );
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
-// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+// This function can't be easily refactored, so we have to disable some lint rules.
+// TODO(): refactor to
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions, max-lines-per-function
 export function UpdateProfileHandler(
   profileModel: ProfileModel,
   queueClient: QueueClient,
-  tracker: ReturnType<typeof createTracker>
+  tracker: ReturnType<typeof createTracker>,
+  profileEmails: IProfileEmailReader,
+  FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED: (fiscalCode: FiscalCode) => boolean
 ): IUpdateProfileHandler {
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, max-lines-per-function, complexity, sonarjs/cognitive-complexity
   return async (context, fiscalCode, profilePayload) => {
     const logPrefix = `UpdateProfileHandler|FISCAL_CODE=${toHash(fiscalCode)}`;
 
@@ -132,6 +144,27 @@ export function UpdateProfileHandler(
     const emailChanged =
       profilePayload.email !== undefined &&
       profilePayload.email !== existingProfile.email;
+
+    if (FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED(fiscalCode) && emailChanged) {
+      try {
+        const emailTaken: boolean = await isEmailAlreadyTaken(
+          profilePayload.email
+        )({
+          profileEmails
+        });
+        if (emailTaken) {
+          return ResponseErrorPreconditionFailed(
+            "The new e-mail provided is already taken"
+          );
+        }
+      } catch {
+        // Logs an opaque message without errors details to avoid PII leaks
+        context.log.error(`${logPrefix}| Check for e-mail uniqueness failed`);
+        return ResponseErrorInternal(
+          "Can't check if the new e-mail is already taken"
+        );
+      }
+    }
 
     // Get servicePreferencesSettings mode from payload or default to LEGACY
     const requestedServicePreferencesSettingsMode = pipe(
@@ -176,7 +209,10 @@ export function UpdateProfileHandler(
       existingProfile.acceptedTosVersion === undefined &&
       profile.acceptedTosVersion !== undefined;
     const overriddenInboxAndWebhook = autoEnableInboxAndWebHook
-      ? { isInboxEnabled: true, isWebhookEnabled: true }
+      ? {
+          isInboxEnabled: true,
+          isWebhookEnabled: true
+        }
       : {};
     // If the user profile was on LEGACY mode we update blockedInboxOrChannels
     // Otherwise we remove the property
@@ -295,9 +331,17 @@ export function UpdateProfileHandler(
 export function UpdateProfile(
   profileModel: ProfileModel,
   queueClient: QueueClient,
-  tracker: ReturnType<typeof createTracker>
+  tracker: ReturnType<typeof createTracker>,
+  profileEmailReader: IProfileEmailReader,
+  FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED: (fiscalCode: FiscalCode) => boolean
 ): express.RequestHandler {
-  const handler = UpdateProfileHandler(profileModel, queueClient, tracker);
+  const handler = UpdateProfileHandler(
+    profileModel,
+    queueClient,
+    tracker,
+    profileEmailReader,
+    FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED
+  );
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),

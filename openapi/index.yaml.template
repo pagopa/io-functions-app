@@ -153,6 +153,8 @@ paths:
           description: Not found
         "409":
           description: Conflict
+        "419":
+          description: Precondition Failed
         "429":
           description: Too many requests
   "/profiles/{fiscal_code}/services/{service_id}/preferences":
