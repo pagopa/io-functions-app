@@ -1150,3 +1150,11 @@ definitions:
 
       FULL leads to descriptive push notifications while ANONYMOUS leads to
       silent ones.
+  UpdateProfile412ErrorTypes:
+    type: string
+    description: >-
+      List of error types returned by the updateProfile endpoint when the HTTP
+      status code is 412
+    x-extensible-enum:
+      - https://ioapp.it/problems/email-already-taken
+    example: https://ioapp.it/problems/email-already-taken
