@@ -1,0 +1,16 @@
+{
+  "bindings": [
+    {
+      "type": "cosmosDBTrigger",
+      "name": "documents",
+      "direction": "in",
+      "connectionStringSetting": "CosmosDbConnectionString",
+      "databaseName": "%COSMOSDB_NAME%",
+      "collectionName": "profiles",
+      "startFromBeginning": true,
+      "createLeaseCollectionIfNotExists": true,
+      "leaseCollectionName": "profile-emails-leases"
+    }
+  ],
+  "scriptFile": "../dist/OnProfileUpdate/index.js"
+}

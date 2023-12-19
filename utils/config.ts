@@ -83,6 +83,9 @@ export const FeatureFlagFromString = withFallback(
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
   t.interface({
+    AZURE_STORAGE_ACCOUNT_KEY: NonEmptyString,
+    AZURE_STORAGE_ACCOUNT_NAME: NonEmptyString,
+
     BETA_USERS: BetaUsersFromString,
 
     COSMOSDB_KEY: NonEmptyString,
