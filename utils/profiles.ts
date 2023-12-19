@@ -66,12 +66,14 @@ export const apiProfileToProfile = (
  * Converts a RetrievedProfile model to an ExtendedProfile
  */
 export const retrievedProfileToExtendedProfile = (
-  profile: RetrievedProfile
+  profile: RetrievedProfile,
+  isEmailAlreadyTaken: boolean = false
 ): ExtendedProfile =>
   withoutUndefinedValues({
     accepted_tos_version: profile.acceptedTosVersion,
     blocked_inbox_or_channels: profile.blockedInboxOrChannels,
     email: profile.email,
+    is_email_already_taken: isEmailAlreadyTaken,
     is_email_enabled: profile.isEmailEnabled !== false,
     is_email_validated: profile.isEmailValidated !== false,
     is_inbox_enabled: profile.isInboxEnabled === true,

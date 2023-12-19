@@ -153,6 +153,10 @@ paths:
           description: Not found
         "409":
           description: Conflict
+        "412":
+          description: Precondition Failed
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "429":
           description: Too many requests
   "/profiles/{fiscal_code}/services/{service_id}/preferences":
@@ -448,6 +452,8 @@ definitions:
       device_name:
         type: string
         minLength: 1
+      is_email_validated:
+        $ref: '#/definitions/IsEmailValidated'
     required:
       - fiscal_code
       - name
@@ -571,3 +577,5 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/AppVersion"
   PushNotificationsContentType:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PushNotificationsContentType"
+  UpdateProfile412ErrorTypes:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/problemJson_definitions.yaml#/UpdateProfile412ErrorTypes"

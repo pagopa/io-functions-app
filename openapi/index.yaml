@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 5.6.0
+  version: 5.9.0
   title: IO API for App
   contact:
     name: Digital Transformation Team
@@ -152,6 +152,10 @@ paths:
           description: Not found
         '409':
           description: Conflict
+        '412':
+          description: Precondition Failed
+          schema:
+            $ref: '#/definitions/ProblemJson'
         '429':
           description: Too many requests
   /profiles/{fiscal_code}/services/{service_id}/preferences:
@@ -452,6 +456,8 @@ definitions:
       device_name:
         type: string
         minLength: 1
+      is_email_validated:
+        $ref: '#/definitions/IsEmailValidated'
     required:
       - fiscal_code
       - name
@@ -523,7 +529,10 @@ definitions:
       require_secure_channels:
         type: boolean
         default: false
-        description: When true, messages won't trigger email notifications (only push).
+        description: |
+          When true:
+          * Messages won't trigger email notifications;
+          * Push notifications will be anonymous.
     required:
       - service_name
       - department_name
@@ -1143,3 +1152,11 @@ definitions:
 
       FULL leads to descriptive push notifications while ANONYMOUS leads to
       silent ones.
+  UpdateProfile412ErrorTypes:
+    type: string
+    description: >-
+      List of error types returned by the updateProfile endpoint when the HTTP
+      status code is 412
+    x-extensible-enum:
+      - https://ioapp.it/problems/email-already-taken
+    example: https://ioapp.it/problems/email-already-taken

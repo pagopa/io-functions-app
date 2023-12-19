@@ -1,6 +1,6 @@
 {
   "name": "@pagopa/io-functions-app",
-  "version": "5.6.0",
+  "version": "5.9.0",
   "license": "MIT",
   "scripts": {
     "prebuild": "yarn generate",
@@ -45,8 +45,7 @@
     "@types/node": "~18.13.0",
     "@types/nodemailer": "^4.6.8",
     "auto-changelog": "^2.2.1",
-    "dotenv": "^8.2.0",
-    "dotenv-cli": "^7.3.0",
+    "dotenv": "^16.3.1",
     "eslint-plugin-prettier": "^4.0.0",
     "fast-check": "^1.16.0",
     "jest": "^24.8.0",
@@ -66,8 +65,8 @@
     "@azure/data-tables": "^13.2.2",
     "@azure/storage-queue": "^12.4.0",
     "@pagopa/express-azure-functions": "^4.0.1",
-    "@pagopa/io-functions-commons": "^28.10.0",
-    "@pagopa/ts-commons": "^11.0.0",
+    "@pagopa/io-functions-commons": "^28.12.2",
+    "@pagopa/ts-commons": "^12.4.1",
     "abort-controller": "^3.0.0",
     "applicationinsights": "^1.8.10",
     "azure-storage": "^2.10.3",
