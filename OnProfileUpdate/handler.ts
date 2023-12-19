@@ -114,7 +114,6 @@ const upsertProfileEmail = ({
           getPreviousValidatedEmail(fiscalCode, previousVersion),
           TE.chainW(
             flow(
-              //
               O.foldW(
                 () =>
                   pipe(
