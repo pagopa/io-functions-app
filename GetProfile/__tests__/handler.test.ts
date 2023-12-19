@@ -1,5 +1,6 @@
 import { none, some } from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as E from "fp-ts/Either";
 import {
   aExtendedProfile,
   aFiscalCode,
@@ -10,6 +11,7 @@ import { IProfileEmailReader } from "@pagopa/io-functions-commons/dist/src/utils
 import { constTrue } from "fp-ts/lib/function";
 
 import { generateProfileEmails } from "../../__mocks__/unique-email-enforcement";
+import { ResponseErrorInternal } from "@pagopa/ts-commons/lib/responses";
 
 // Date returns a timestamp expressed in milliseconds
 const aTimestamp = Math.floor(new Date().valueOf() / 1000);
@@ -23,8 +25,9 @@ const aRetrievedProfileWithTimestampAfterLimit = {
   _ts: aTimestamp + 10
 };
 
+const mockList = jest.fn().mockImplementation(generateProfileEmails(7));
 const profileEmailReader: IProfileEmailReader = {
-  list: generateProfileEmails(7)
+  list: mockList
 };
 
 describe("withIsEmailAlreadyTaken", () => {
@@ -33,30 +36,36 @@ describe("withIsEmailAlreadyTaken", () => {
       profileEmailReader,
       false
     )({ ...aExtendedProfile, is_email_validated: false })();
-    expect(profile.is_email_already_taken).toBe(false);
+    expect(profile).toMatchObject(E.of({ is_email_already_taken: false }));
   });
   it("returns false if the e-mail associated with the given profile is validated", async () => {
     const profile = await withIsEmailAlreadyTaken(
       profileEmailReader,
       true
     )(aExtendedProfile)();
-    expect(profile.is_email_already_taken).toBe(false);
+    expect(profile).toMatchObject(E.of({ is_email_already_taken: false }));
   });
   it("returns true if there are profile email entries", async () => {
     const profile = await withIsEmailAlreadyTaken(
       profileEmailReader,
       true
     )({ ...aExtendedProfile, is_email_validated: false })();
-    expect(profile.is_email_already_taken).toBe(true);
+    expect(profile).toMatchObject(E.of({ is_email_already_taken: true }));
   });
-  it("returns false on errors retrieving the profile emails", async () => {
+  it("returns TE.left(ResponseErrorInternal) on errors retrieving the profile emails", async () => {
     const profile = await withIsEmailAlreadyTaken(
       {
         list: generateProfileEmails(2, true)
       },
       true
     )({ ...aExtendedProfile, is_email_validated: false })();
-    expect(profile.is_email_already_taken).toBe(false);
+    expect(profile).toMatchObject(
+      E.left({
+        kind: "IResponseErrorInternal",
+        detail:
+          "Internal server error: Can't check if the new e-mail is already taken"
+      })
+    );
   });
 });
 
@@ -182,5 +191,32 @@ describe("GetProfileHandler", () => {
     const result = await getProfileHandler(aFiscalCode);
 
     expect(result.kind).toBe("IResponseErrorQuery");
+  });
+
+  it("should return a IResponseErrorInternal if an error occurred checking uniqueness", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() => {
+        return TE.of(
+          some({
+            ...aRetrievedProfileWithTimestampAfterLimit,
+            isEmailValidated: false
+          })
+        );
+      })
+    };
+
+    mockList.mockImplementationOnce(generateProfileEmails(2, true));
+
+    const getProfileHandler = GetProfileHandler(
+      profileModelMock as any,
+      anEmailOptOutEmailSwitchDate,
+      true,
+      profileEmailReader,
+      constTrue
+    );
+
+    const result = await getProfileHandler(aFiscalCode);
+
+    expect(result.kind).toBe("IResponseErrorInternal");
   });
 });

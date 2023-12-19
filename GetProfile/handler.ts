@@ -20,8 +20,10 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
 
 import {
+  IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseSuccessJson,
+  ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
@@ -32,11 +34,11 @@ import { isBefore } from "date-fns";
 import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import * as T from "fp-ts/lib/Task";
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 
 type IGetProfileHandlerResult =
   | IResponseSuccessJson<ExtendedProfile>
+  | IResponseErrorInternal
   | IResponseErrorNotFound
   | IResponseErrorQuery;
 
@@ -53,36 +55,31 @@ type IGetProfileHandler = (
 export const withIsEmailAlreadyTaken = (
   profileEmailReader: IProfileEmailReader,
   isUniqueEmailEnforcementEnabled: boolean
-) => (profile: ExtendedProfile): T.Task<ExtendedProfile> =>
+) => (
+  profile: ExtendedProfile
+): TE.TaskEither<IResponseErrorInternal, ExtendedProfile> =>
   pipe(
     TE.of(profile),
     // VALID ONLY IF FF_UNIQUE_EMAIL_ENFORCEMENT IS ENABLED
     // Check if the e-mail address associated with the retrived
     // profile was validated. If was not validated, continue with
     // uniqueness checks.
-    TE.filterOrElse(
-      ({ is_email_validated }) =>
-        isUniqueEmailEnforcementEnabled && !is_email_validated,
-      () => false
-    ),
-    TE.chain(({ email }) =>
-      // Check if the e-mail is already taken (returns a boolean).
-      // If there are problems checking the uniqueness of the provided
-      // e-mail address, assume that the e-mail is unique (not already taken).
-      // This intentional behavior allows us to avoid blocking the citizen
-      // while using the mobile app in case of error and does not create data
-      // inconsistencies.
-      TE.tryCatch(
-        () =>
-          isEmailAlreadyTaken(email)({
-            profileEmails: profileEmailReader
-          }),
-        () => false
-      )
+    TE.chainW(({ is_email_validated, email }) =>
+      isUniqueEmailEnforcementEnabled && !is_email_validated
+        ? TE.tryCatch(
+            () =>
+              isEmailAlreadyTaken(email)({
+                profileEmails: profileEmailReader
+              }),
+            () =>
+              ResponseErrorInternal(
+                "Can't check if the new e-mail is already taken"
+              )
+          )
+        : TE.of(false)
     ),
     // Set the value of "is_email_already_taken" property
-    TE.getOrElse(T.of),
-    T.map(is_email_already_taken => ({
+    TE.map(is_email_already_taken => ({
       ...profile,
       is_email_already_taken
     }))
@@ -126,7 +123,7 @@ export function GetProfileHandler(
             )
           ),
           TE.map(retrievedProfileToExtendedProfile),
-          TE.chainTaskK(
+          TE.chainW(
             withIsEmailAlreadyTaken(
               profileEmailReader,
               FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED(fiscalCode)
