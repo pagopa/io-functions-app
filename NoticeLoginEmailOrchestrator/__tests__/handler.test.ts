@@ -170,7 +170,7 @@ describe("NoticeLoginEmailOrchestratorHandler", () => {
         date_time: aDate.getTime(),
         name: "foo",
         ip_address: anIPAddress,
-        //since we ignored the magic_link retrieval, this MUST be unfedined
+        //since we ignored the magic_link retrieval, this MUST be undefined
         magic_link: undefined,
         identity_provider: "idp",
         geo_location: "Rome",
