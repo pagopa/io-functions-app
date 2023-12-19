@@ -10,6 +10,7 @@ import * as df from "durable-functions";
 import * as E from "fp-ts/lib/Either";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { DateFromTimestamp } from "@pagopa/ts-commons/lib/dates";
+import { withDefault } from "@pagopa/ts-commons/lib/types";
 import {
   ActivityInput as SendTemplatedLoginEmailActivityInput,
   ActivityResultSuccess as SendTemplatedLoginEmailActivityResultSuccess
@@ -37,7 +38,7 @@ export const OrchestratorInput = t.intersection([
   }),
   t.partial({
     device_name: NonEmptyString,
-    is_email_validated: t.boolean
+    is_email_validated: withDefault(t.boolean, false)
   })
 ]);
 
