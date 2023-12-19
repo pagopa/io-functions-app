@@ -456,6 +456,8 @@ definitions:
       device_name:
         type: string
         minLength: 1
+      is_email_validated:
+        $ref: '#/definitions/IsEmailValidated'
     required:
       - fiscal_code
       - name
