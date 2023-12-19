@@ -57,6 +57,7 @@ import {
 
 import { toHash } from "../utils/crypto";
 import { createTracker } from "../utils/tracking";
+import { UpdateProfile412ErrorTypesEnum } from "../generated/definitions/internal/UpdateProfile412ErrorTypes";
 
 /**
  * Type of an UpdateProfile handler.
@@ -162,7 +163,10 @@ export function UpdateProfileHandler(
         // current entity status
         if (emailTaken && emailChanged) {
           return ResponseErrorPreconditionFailed(
-            "The new e-mail provided is already taken"
+            "The new e-mail provided is already taken",
+            UpdateProfile412ErrorTypesEnum[
+              "https://ioapp.it/problems/email-already-taken"
+            ]
           );
         }
       } catch {

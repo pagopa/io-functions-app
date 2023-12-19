@@ -575,3 +575,5 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/AppVersion"
   PushNotificationsContentType:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PushNotificationsContentType"
+  UpdateProfile412ErrorTypes:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/problemJson_definitions.yaml#/UpdateProfile412ErrorTypes"
