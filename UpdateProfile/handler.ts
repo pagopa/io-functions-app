@@ -140,19 +140,27 @@ export function UpdateProfileHandler(
       );
     }
 
+    // eslint-disable-next-line functional/no-let
+    let emailTaken: boolean;
+
     // Check if the email has been changed
     const emailChanged =
       profilePayload.email !== undefined &&
       profilePayload.email !== existingProfile.email;
 
-    if (FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED(fiscalCode) && emailChanged) {
+    if (
+      FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED(fiscalCode) &&
+      (emailChanged || !existingProfile.isEmailValidated)
+    ) {
       try {
-        const emailTaken: boolean = await isEmailAlreadyTaken(
-          profilePayload.email
-        )({
+        emailTaken = await isEmailAlreadyTaken(profilePayload.email)({
           profileEmails
         });
-        if (emailTaken) {
+        // If the email is not changed, we allow the profile update to enable
+        // other user flow such TOS version update or lastAppVersion update
+        // but we want to return the correct is_email_aready_taken value accordingly with
+        // current entity status
+        if (emailTaken && emailChanged) {
           return ResponseErrorPreconditionFailed(
             "The new e-mail provided is already taken"
           );
@@ -319,7 +327,7 @@ export function UpdateProfileHandler(
     }
 
     return ResponseSuccessJson(
-      retrievedProfileToExtendedProfile(updateProfile)
+      retrievedProfileToExtendedProfile(updateProfile, emailTaken)
     );
   };
 }
