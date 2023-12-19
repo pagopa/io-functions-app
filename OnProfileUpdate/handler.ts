@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type, sonarjs/no-identical-functions */
 import * as t from "io-ts";
 import { pipe, flow } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
@@ -8,7 +9,6 @@ import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { DataTableProfileEmailsRepository } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement/storage";
 import { ProfileEmail } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
-import { FiscalCode } from "../generated/backend/FiscalCode";
 import {
   ProfileModel,
   Profile
@@ -16,6 +16,7 @@ import {
 import { generateVersionedModelId } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_versioned";
 import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { Logger } from "@azure/functions";
+import { FiscalCode } from "../generated/backend/FiscalCode";
 
 const ProfileDocument = t.intersection([
   ProfileEmail,
@@ -27,11 +28,11 @@ const ProfileDocument = t.intersection([
 
 type ProfileDocument = t.TypeOf<typeof ProfileDocument>;
 
-type Dependencies = {
-  dataTableProfileEmailsRepository: DataTableProfileEmailsRepository;
-  profileModel: ProfileModel;
-  logger: { error: Logger["error"] };
-};
+interface IDependencies {
+  readonly dataTableProfileEmailsRepository: DataTableProfileEmailsRepository;
+  readonly profileModel: ProfileModel;
+  readonly logger: { readonly error: Logger["error"] };
+}
 
 // this function gets the last validated email for that fiscal code from `profile` collection
 const getPreviousValidatedEmail = (
@@ -101,7 +102,7 @@ const upsertProfileEmail = ({
 }: Omit<ProfileDocument, "isEmailValidated">) => ({
   dataTableProfileEmailsRepository,
   profileModel
-}: Omit<Dependencies, "logger">) =>
+}: Omit<IDependencies, "logger">) =>
   pipe(
     version - 1,
     NonNegativeInteger.decode,
@@ -113,6 +114,7 @@ const upsertProfileEmail = ({
           getPreviousValidatedEmail(fiscalCode, previousVersion),
           TE.chainW(
             flow(
+              //
               O.foldW(
                 () =>
                   pipe(
@@ -148,7 +150,7 @@ const upsertProfileEmail = ({
 
 const handleDocument = (
   document: unknown
-): RTE.ReaderTaskEither<Dependencies, Error, void> => ({
+): RTE.ReaderTaskEither<IDependencies, Error, void> => ({
   dataTableProfileEmailsRepository,
   profileModel,
   logger
@@ -189,7 +191,7 @@ const handleDocument = (
   );
 
 export const handler = (documents: ReadonlyArray<unknown>) => async (
-  dependencies: Dependencies
+  dependencies: IDependencies
 ): Promise<void> => {
   await pipe(
     documents.map(document => pipe(dependencies, handleDocument(document))),

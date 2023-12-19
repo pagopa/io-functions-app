@@ -1,14 +1,14 @@
 import { Context } from "@azure/functions";
 import { pipe } from "fp-ts/lib/function";
 import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
-import { getConfigOrThrow } from "../utils/config";
-import { handler } from "./handler";
 import { DataTableProfileEmailsRepository } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement/storage";
 import {
   PROFILE_COLLECTION_NAME,
   ProfileModel
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { CosmosClient } from "@azure/cosmos";
+import { getConfigOrThrow } from "../utils/config";
+import { handler } from "./handler";
 
 const config = getConfigOrThrow();
 
@@ -45,8 +45,8 @@ export default async (
   await pipe(
     {
       dataTableProfileEmailsRepository,
-      profileModel,
-      logger: { error: log.error }
+      logger: { error: log.error },
+      profileModel
     },
     handler(documents)
   );
