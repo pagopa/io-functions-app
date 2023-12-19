@@ -43,7 +43,7 @@ const getPreviousValidatedEmail = (
   pipe(
     generateVersionedModelId<Profile, "fiscalCode">(fiscalCode, version),
     id => profileModel.find([id, fiscalCode]),
-    TE.chainW(
+    TE.chain(
       O.fold(
         () => TE.of(O.none),
         previousProfile =>
@@ -105,82 +105,86 @@ const upsertProfileEmail = ({
   pipe(
     version - 1,
     NonNegativeInteger.decode,
-    TE.fromEither,
-    TE.chainW(previousVersion =>
-      pipe(
-        profileModel,
-        getPreviousValidatedEmail(fiscalCode, previousVersion),
-        TE.chainW(
-          flow(
-            O.foldW(
-              () =>
-                pipe(
-                  dataTableProfileEmailsRepository,
-                  insertProfileEmail({ email, fiscalCode })
-                ),
-              previousEmail =>
-                pipe(
-                  email === previousEmail
-                    ? TE.right<Error, void>(undefined)
-                    : pipe(
-                        pipe(
-                          dataTableProfileEmailsRepository,
-                          deleteProfileEmail({
-                            email: previousEmail,
-                            fiscalCode
-                          })
-                        ),
-                        TE.chainW(() =>
+    E.fold(
+      () => TE.right<Error, void>(void 0),
+      previousVersion =>
+        pipe(
+          profileModel,
+          getPreviousValidatedEmail(fiscalCode, previousVersion),
+          TE.chainW(
+            flow(
+              O.foldW(
+                () =>
+                  pipe(
+                    dataTableProfileEmailsRepository,
+                    insertProfileEmail({ email, fiscalCode })
+                  ),
+                previousEmail =>
+                  pipe(
+                    email === previousEmail
+                      ? TE.right<Error, void>(void 0)
+                      : pipe(
                           pipe(
                             dataTableProfileEmailsRepository,
-                            insertProfileEmail({ email, fiscalCode })
+                            deleteProfileEmail({
+                              email: previousEmail,
+                              fiscalCode
+                            })
+                          ),
+                          TE.chain(() =>
+                            pipe(
+                              dataTableProfileEmailsRepository,
+                              insertProfileEmail({ email, fiscalCode })
+                            )
                           )
                         )
-                      )
-                )
+                  )
+              )
             )
           )
         )
-      )
     )
   );
 
-const handleDocument = (document: unknown) => ({
+const handleDocument = (
+  document: unknown
+): RTE.ReaderTaskEither<Dependencies, Error, void> => ({
   dataTableProfileEmailsRepository,
   profileModel,
   logger
-}: Dependencies) =>
+}) =>
   pipe(
     document,
     ProfileDocument.decode,
-    TE.fromEither,
-    TE.chainW(({ email, fiscalCode, version }) =>
-      version === 0
-        ? pipe(
-            insertProfileEmail({ email, fiscalCode })(
-              dataTableProfileEmailsRepository
-            ),
-            TE.mapLeft(error => {
-              logger.error(
-                `error inserting profile with fiscalCode ${fiscalCode} and version ${version}`,
-                error
-              );
-              return error;
-            })
-          )
-        : pipe(
-            upsertProfileEmail({ email, fiscalCode, version })({
+    E.fold(
+      () => TE.right(void 0),
+      ({ email, fiscalCode, version }) =>
+        version === 0
+          ? pipe(
               dataTableProfileEmailsRepository,
-              profileModel
-            }),
-            TE.mapLeft(error => {
-              logger.error(
-                `error upserting profile with fiscalCode ${fiscalCode} and version ${version}`,
-                error
-              );
-              return error;
-            })
-          )
+              insertProfileEmail({ email, fiscalCode }),
+              TE.mapLeft(error => {
+                logger.error(
+                  `error inserting profile with fiscalCode ${fiscalCode} and version ${version}`,
+                  error
+                );
+                return error;
+              })
+            )
+          : pipe(
+              {
+                dataTableProfileEmailsRepository,
+                profileModel
+              },
+              upsertProfileEmail({ email, fiscalCode, version }),
+              TE.mapLeft(error => {
+                logger.error(
+                  `error upserting profile with fiscalCode ${fiscalCode} and version ${version}`,
+                  error
+                );
+                return error instanceof Error ? error : new Error(error.kind);
+              })
+            )
     )
   );
 

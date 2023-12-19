@@ -87,7 +87,8 @@ export const retrievedProfileToExtendedProfile = (
     reminder_status:
       profile.reminderStatus !== "UNSET" ? profile.reminderStatus : undefined,
     service_preferences_settings: profile.servicePreferencesSettings,
-    version: profile.version
+    version: profile.version,
+    is_email_already_taken: false
   });
 
 /**
