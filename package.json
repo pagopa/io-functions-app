@@ -46,6 +46,7 @@
     "@types/nodemailer": "^4.6.8",
     "auto-changelog": "^2.2.1",
     "dotenv": "^16.3.1",
+    "dotenv-cli": "^7.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "fast-check": "^1.16.0",
     "jest": "^24.8.0",
