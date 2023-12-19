@@ -153,6 +153,10 @@ paths:
           description: Not found
         "409":
           description: Conflict
+        "412":
+          description: Precondition Failed
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "429":
           description: Too many requests
   "/profiles/{fiscal_code}/services/{service_id}/preferences":

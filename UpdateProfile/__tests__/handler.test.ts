@@ -28,8 +28,10 @@ import { UpdateProfileHandler } from "../handler";
 import { createTracker } from "../../__mocks__/tracking";
 
 import { Semver } from "@pagopa/ts-commons/lib/strings";
-import { pipe } from "fp-ts/lib/function";
+import { constFalse, constTrue, pipe } from "fp-ts/lib/function";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
+import { IProfileEmailReader } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
+import { generateProfileEmails } from "../../__mocks__/unique-email-enforcement";
 
 const mockSendMessage = jest.fn().mockImplementation(() => Promise.resolve());
 const mockQueueClient = ({
@@ -50,6 +52,10 @@ afterEach(() => {
 
 const mockTracker = createTracker("" as any);
 
+const profileEmailReader: IProfileEmailReader = {
+  list: generateProfileEmails(0)
+};
+
 describe("UpdateProfileHandler", () => {
   it("should return a query error when an error occurs retrieving the existing profile", async () => {
     const profileModelMock = {
@@ -59,7 +65,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     const result = await updateProfileHandler(
@@ -79,7 +87,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     const result = await updateProfileHandler(
@@ -99,7 +109,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -121,7 +133,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -157,7 +171,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -187,7 +203,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -217,7 +235,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -247,7 +267,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -272,7 +294,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -305,7 +329,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -342,7 +368,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -380,7 +408,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -413,7 +443,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -449,7 +481,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -490,7 +524,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -531,7 +567,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -614,7 +652,9 @@ describe("UpdateProfileHandler", () => {
       const updateProfileHandler = UpdateProfileHandler(
         profileModelMock as any,
         mockQueueClient,
-        mockTracker
+        mockTracker,
+        profileEmailReader,
+        constTrue
       );
       const newProfile = {
         ...aProfile,
@@ -662,7 +702,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -699,7 +741,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -738,7 +782,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -776,7 +822,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -814,7 +862,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -838,7 +888,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -860,7 +912,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -886,7 +940,9 @@ describe("UpdateProfileHandler", () => {
     const updateProfileHandler = UpdateProfileHandler(
       profileModelMock as any,
       mockQueueClient,
-      mockTracker
+      mockTracker,
+      profileEmailReader,
+      constTrue
     );
 
     const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
@@ -945,7 +1001,9 @@ describe("UpdateProfileHandler", () => {
       const updateProfileHandler = UpdateProfileHandler(
         profileModelMock as any,
         mockQueueClient,
-        mockTracker
+        mockTracker,
+        profileEmailReader,
+        constTrue
       );
 
       const result = await updateProfileHandler(
@@ -1005,7 +1063,9 @@ describe("UpdateProfileHandler", () => {
       const updateProfileHandler = UpdateProfileHandler(
         profileModelMock as any,
         mockQueueClient,
-        mockTracker
+        mockTracker,
+        profileEmailReader,
+        constTrue
       );
 
       const result = await updateProfileHandler(
@@ -1029,4 +1089,115 @@ describe("UpdateProfileHandler", () => {
       }
     }
   );
+
+  test.each([
+    {
+      // unique email enforcement enabled
+      uee: constTrue,
+      response: "IResponseErrorPreconditionFailed"
+    },
+    {
+      // unique email enforcement disabled
+      uee: constFalse,
+      response: "IResponseSuccessJson"
+    }
+  ])(
+    "when a citizen changes e-mail it should return $response if the e-mail is already taken (unique email enforcement = %uee)",
+    async ({ response, uee }) => {
+      const profileModelMock = {
+        findLastVersionByModelId: jest.fn(() =>
+          // Return a profile with a validated email
+          TE.of(some(aRetrievedProfile))
+        ),
+        update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
+      };
+      const updateProfileHandler = UpdateProfileHandler(
+        profileModelMock as any,
+        mockQueueClient,
+        mockTracker,
+        {
+          list: generateProfileEmails(10)
+        },
+        uee
+      );
+      const result = await updateProfileHandler(
+        contextMock as any,
+        aFiscalCode,
+        {
+          ...aProfile,
+          email: aEmailChanged
+        }
+      );
+      expect(result.kind).toBe(response);
+    }
+  );
+
+  it.each`
+    scenario                    | isEmailValidated
+    ${"email is validated"}     | ${true}
+    ${"email is not validated"} | ${false}
+  `(
+    "when a citizen doesn't change e-mail, $scenario and the email is already taken it should return IResponseSuccessJson with the right is_email_already_taken",
+    async ({ isEmailValidated }) => {
+      const mockList = jest.fn(generateProfileEmails(10));
+
+      const profileModelMock = {
+        findLastVersionByModelId: jest.fn(() =>
+          // Return a profile with a validated email
+          TE.of(some({ ...aRetrievedProfile, isEmailValidated }))
+        ),
+        update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
+      };
+      const updateProfileHandler = UpdateProfileHandler(
+        profileModelMock as any,
+        mockQueueClient,
+        mockTracker,
+        {
+          list: mockList
+        },
+        constTrue
+      );
+      const result = await updateProfileHandler(
+        contextMock as any,
+        aFiscalCode,
+        {
+          ...aProfile,
+          email: aRetrievedProfile.email
+        }
+      );
+      expect(result.kind).toBe("IResponseSuccessJson");
+
+      if (result.kind === "IResponseSuccessJson") {
+        expect(result.value).toMatchObject({
+          is_email_already_taken: !isEmailValidated
+        });
+      }
+
+      if (isEmailValidated) expect(mockList).not.toBeCalled();
+    }
+  );
+
+  it("returns 500 when the unique e-mail enforcement check fails", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        TE.of(some(aRetrievedProfile))
+      ),
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
+    };
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient,
+      mockTracker,
+      {
+        list: generateProfileEmails(1, true)
+      },
+      constTrue
+    );
+    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
+      ...aProfile,
+      email: aEmailChanged
+    });
+    expect(result.kind).toBe("IResponseErrorInternal");
+  });
 });

@@ -11,10 +11,16 @@ import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middl
 import createAzureFunctionHandler from "@pagopa/express-azure-functions/dist/src/createAzureFunctionsHandler";
 
 import { QueueServiceClient } from "@azure/storage-queue";
+import { DataTableProfileEmailsRepository } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement/storage";
 import { initTelemetryClient } from "../utils/appinsights";
 import { getConfigOrThrow } from "../utils/config";
 import { cosmosdbInstance } from "../utils/cosmosdb";
 import { createTracker } from "../utils/tracking";
+
+import {
+  profileEmailTableClient,
+  FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED
+} from "../utils/unique_email_enforcement";
 
 import { UpdateProfile } from "./handler";
 
@@ -31,12 +37,22 @@ const queueClient = QueueServiceClient.fromConnectionString(
 // Initialize application insights
 const telemetryClient = initTelemetryClient();
 
+const profileEmailReader = new DataTableProfileEmailsRepository(
+  profileEmailTableClient
+);
+
 // Setup Express
 const app = express();
 secureExpressApp(app);
 app.put(
   "/api/v1/profiles/:fiscalcode",
-  UpdateProfile(profileModel, queueClient, createTracker(telemetryClient))
+  UpdateProfile(
+    profileModel,
+    queueClient,
+    createTracker(telemetryClient),
+    profileEmailReader,
+    FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED
+  )
 );
 
 const azureFunctionHandler = createAzureFunctionHandler(app);
