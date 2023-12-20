@@ -34,7 +34,7 @@ interface IDependencies {
   readonly logger: { readonly error: Logger["error"] };
 }
 
-// this function gets the last validated email for that fiscal code from `profile` collection
+// this function gets the latest validated email for that fiscal code from `profile` collection
 const getPreviousValidatedEmail = (
   fiscalCode: FiscalCode,
   version: NonNegativeInteger
