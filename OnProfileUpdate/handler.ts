@@ -95,6 +95,12 @@ const insertProfileEmail = (
         : new Error("error inserting ProfileEmail from table storage")
   );
 
+/*
+This function gets the latest validated email for the user
+If that email doesn't exist => it inserts the new email into profileEmails
+If that email exists and matches the new email => it does not do anything
+If that email exists and doesn't match the new email => it deletes the old email from profileEmails and inserts the new email
+*/
 const upsertProfileEmail = ({
   email,
   fiscalCode,
@@ -111,7 +117,7 @@ const upsertProfileEmail = ({
       previousVersion =>
         pipe(
           profileModel,
-          getLatestValidatedEmail(fiscalCode, previousVersion),
+          getLatestValidatedEmail(fiscalCode, previousVersion), // TODO: passare version e non previousVersion ?
           TE.chainW(
             flow(
               O.foldW(
