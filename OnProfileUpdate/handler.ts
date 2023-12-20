@@ -57,7 +57,7 @@ const getLatestValidatedEmail = (
                   newVersion =>
                     pipe(
                       profileModel,
-                      getPreviousValidatedEmail(fiscalCode, newVersion)
+                      getLatestValidatedEmail(fiscalCode, newVersion)
                     )
                 )
               )
@@ -111,7 +111,7 @@ const upsertProfileEmail = ({
       previousVersion =>
         pipe(
           profileModel,
-          getPreviousValidatedEmail(fiscalCode, previousVersion),
+          getLatestValidatedEmail(fiscalCode, previousVersion),
           TE.chainW(
             flow(
               O.foldW(
