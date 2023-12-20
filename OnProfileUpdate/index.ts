@@ -5,9 +5,9 @@ import {
   PROFILE_COLLECTION_NAME,
   ProfileModel
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
-import { handler } from "./handler";
 import { cosmosdbInstance } from "../utils/cosmosdb";
 import { profileEmailTableClient } from "../utils/unique_email_enforcement";
+import { handler } from "./handler";
 
 const profileModel = new ProfileModel(
   cosmosdbInstance.container(PROFILE_COLLECTION_NAME)

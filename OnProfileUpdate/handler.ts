@@ -155,7 +155,12 @@ export const handler = (documents: ReadonlyArray<unknown>) => async (
           pipe(
             // TODO
             O.fromPredicate(
-              (doc: unknown): doc is { fiscalCode: string; version: string } =>
+              (
+                doc: unknown
+              ): doc is {
+                readonly fiscalCode: string;
+                readonly version: string;
+              } =>
                 typeof doc === "object" &&
                 "fiscalCode" in doc &&
                 "version" in doc
@@ -164,7 +169,7 @@ export const handler = (documents: ReadonlyArray<unknown>) => async (
               () => dependencies.logger.error(error),
               ({ fiscalCode, version }) =>
                 dependencies.logger.error(
-                  `error inserting profile with fiscalCode ${fiscalCode} and version ${version}`,
+                  `error handling profile with fiscalCode ${fiscalCode} and version ${version}`,
                   error
                 )
             )
