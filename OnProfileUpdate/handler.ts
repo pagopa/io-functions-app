@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type, sonarjs/no-identical-functions */
 import * as t from "io-ts";
 import { pipe, flow } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
@@ -39,39 +38,39 @@ const getLatestValidatedEmail = (
   fiscalCode: FiscalCode,
   version: NonNegativeInteger
 ) => (
-  profileModel: ProfileModel
+  dep: IDependencies
 ): TE.TaskEither<CosmosErrors, O.Option<Profile["email"]>> =>
   pipe(
-    generateVersionedModelId<Profile, "fiscalCode">(fiscalCode, version),
-    id => profileModel.find([id, fiscalCode]),
-    TE.chain(
-      O.fold(
-        () => TE.of(O.none),
-        previousProfile =>
-          previousProfile.isEmailValidated
-            ? TE.of(O.some(previousProfile.email))
-            : pipe(
-                NonNegativeInteger.decode(version - 1),
-                E.fold(
-                  () => TE.of(O.none),
-                  newVersion =>
-                    pipe(
-                      profileModel,
-                      getLatestValidatedEmail(fiscalCode, newVersion)
+    version - 1,
+    NonNegativeInteger.decode,
+    E.fold(
+      () => TE.right(O.none),
+      previousVersion =>
+        pipe(
+          generateVersionedModelId<Profile, "fiscalCode">(
+            fiscalCode,
+            previousVersion
+          ),
+          id => dep.profileModel.find([id, fiscalCode]),
+          TE.chain(
+            O.fold(
+              () => TE.of(O.none),
+              previousProfile =>
+                previousProfile.isEmailValidated
+                  ? TE.right(O.some(previousProfile.email))
+                  : pipe(
+                      dep,
+                      getLatestValidatedEmail(fiscalCode, previousVersion)
                     )
-                )
-              )
-      )
+            )
+          )
+        )
     )
   );
 
-const deleteProfileEmail = (
-  profileEmail: ProfileEmail
-): RTE.ReaderTaskEither<
-  DataTableProfileEmailsRepository,
-  Error,
-  void
-> => dataTableProfileEmailsRepository =>
+const deleteProfileEmail = (profileEmail: ProfileEmail) => ({
+  dataTableProfileEmailsRepository
+}: IDependencies): TE.TaskEither<Error, void> =>
   TE.tryCatch(
     () => dataTableProfileEmailsRepository.delete(profileEmail),
     error =>
@@ -80,13 +79,9 @@ const deleteProfileEmail = (
         : new Error("error deleting ProfileEmail from table storage")
   );
 
-const insertProfileEmail = (
-  profileEmail: ProfileEmail
-): RTE.ReaderTaskEither<
-  DataTableProfileEmailsRepository,
-  Error,
-  void
-> => dataTableProfileEmailsRepository =>
+const insertProfileEmail = (profileEmail: ProfileEmail) => ({
+  dataTableProfileEmailsRepository
+}: IDependencies): TE.TaskEither<Error, void> =>
   TE.tryCatch(
     () => dataTableProfileEmailsRepository.insert(profileEmail),
     error =>
@@ -105,93 +100,46 @@ const upsertProfileEmail = ({
   email,
   fiscalCode,
   version
-}: Omit<ProfileDocument, "isEmailValidated">) => ({
-  dataTableProfileEmailsRepository,
-  profileModel
-}: Omit<IDependencies, "logger">) =>
+}: Omit<ProfileDocument, "isEmailValidated">): RTE.ReaderTaskEither<
+  IDependencies,
+  Error | CosmosErrors,
+  void
+> =>
   pipe(
-    version - 1,
-    NonNegativeInteger.decode,
-    E.fold(
-      () => TE.right<Error, void>(void 0),
-      previousVersion =>
-        pipe(
-          profileModel,
-          getLatestValidatedEmail(fiscalCode, previousVersion), // TODO: passare version e non previousVersion ?
-          TE.chainW(
-            flow(
-              O.foldW(
-                () =>
-                  pipe(
-                    dataTableProfileEmailsRepository,
-                    insertProfileEmail({ email, fiscalCode })
-                  ),
-                previousEmail =>
-                  pipe(
-                    email === previousEmail
-                      ? TE.right<Error, void>(void 0)
-                      : pipe(
-                          pipe(
-                            dataTableProfileEmailsRepository,
-                            deleteProfileEmail({
-                              email: previousEmail,
-                              fiscalCode
-                            })
-                          ),
-                          TE.chain(() =>
-                            pipe(
-                              dataTableProfileEmailsRepository,
-                              insertProfileEmail({ email, fiscalCode })
-                            )
-                          )
-                        )
+    getLatestValidatedEmail(fiscalCode, version),
+    RTE.chainW(
+      flow(
+        O.foldW(
+          () => insertProfileEmail({ email, fiscalCode }),
+          previousEmail =>
+            pipe(
+              email === previousEmail
+                ? RTE.right<IDependencies, Error, void>(void 0)
+                : pipe(
+                    deleteProfileEmail({
+                      email: previousEmail,
+                      fiscalCode
+                    }),
+                    RTE.chain(() => insertProfileEmail({ email, fiscalCode }))
                   )
-              )
             )
-          )
         )
+      )
     )
   );
 
 const handleDocument = (
   document: unknown
-): RTE.ReaderTaskEither<IDependencies, Error, void> => ({
-  dataTableProfileEmailsRepository,
-  profileModel,
-  logger
-}) =>
+): RTE.ReaderTaskEither<IDependencies, Error | CosmosErrors, void> =>
   pipe(
     document,
     ProfileDocument.decode,
     E.fold(
-      () => TE.right(void 0),
+      () => RTE.right<IDependencies, Error, void>(void 0),
       ({ email, fiscalCode, version }) =>
         version === 0
-          ? pipe(
-              dataTableProfileEmailsRepository,
-              insertProfileEmail({ email, fiscalCode }),
-              TE.mapLeft(error => {
-                logger.error(
-                  `error inserting profile with fiscalCode ${fiscalCode} and version ${version}`,
-                  error
-                );
-                return error;
-              })
-            )
-          : pipe(
-              {
-                dataTableProfileEmailsRepository,
-                profileModel
-              },
-              upsertProfileEmail({ email, fiscalCode, version }),
-              TE.mapLeft(error => {
-                logger.error(
-                  `error upserting profile with fiscalCode ${fiscalCode} and version ${version}`,
-                  error
-                );
-                return error instanceof Error ? error : new Error(error.kind);
-              })
-            )
+          ? insertProfileEmail({ email, fiscalCode })
+          : upsertProfileEmail({ email, fiscalCode, version })
     )
   );
 
@@ -199,7 +147,32 @@ export const handler = (documents: ReadonlyArray<unknown>) => async (
   dependencies: IDependencies
 ): Promise<void> => {
   await pipe(
-    documents.map(document => pipe(dependencies, handleDocument(document))),
+    documents.map(document =>
+      pipe(
+        dependencies,
+        handleDocument(document),
+        TE.mapLeft(error => {
+          pipe(
+            // TODO
+            O.fromPredicate(
+              (doc: unknown): doc is { fiscalCode: string; version: string } =>
+                typeof doc === "object" &&
+                "fiscalCode" in doc &&
+                "version" in doc
+            )(document),
+            O.fold(
+              () => dependencies.logger.error(error),
+              ({ fiscalCode, version }) =>
+                dependencies.logger.error(
+                  `error inserting profile with fiscalCode ${fiscalCode} and version ${version}`,
+                  error
+                )
+            )
+          );
+          return error;
+        })
+      )
+    ),
     A.sequence(TE.ApplicativeSeq)
   )();
 };
