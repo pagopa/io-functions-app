@@ -35,7 +35,7 @@ interface IDependencies {
 }
 
 // this function gets the latest validated email for that fiscal code from `profile` collection
-const getPreviousValidatedEmail = (
+const getLatestValidatedEmail = (
   fiscalCode: FiscalCode,
   version: NonNegativeInteger
 ) => (
