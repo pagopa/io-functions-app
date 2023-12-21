@@ -6,7 +6,7 @@ import { getSendLoginEmailActivityHandler } from "./handler";
 const config = getConfigOrThrow();
 
 // Email data
-const EMAIL_TITLE = "È stato eseguito l'accesso su app IO";
+const EMAIL_TITLE = "È stato eseguito l'accesso sull'app IO";
 
 const HTML_TO_TEXT_OPTIONS: HtmlToTextOptions = {
   ignoreImage: true, // Ignore all document images
