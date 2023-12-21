@@ -92,12 +92,28 @@ const mockProfiles = [
     email: "derd@example.com",
     fiscalCode: "PVQEBX22A89Y092X",
     isEmailEnabled: true,
-    isEmailValidated: true,
+    isEmailValidated: false,
     isInboxEnabled: false,
     isWebhookEnabled: false,
     acceptedTosVersion: 1,
     id: "PVQEBX22A89Y092X-0000000000000001",
     version: 1,
+    _rid: "8fJ6ALpQWC4+AAAAAAAAAA==",
+    _self: "dbs/8fJ6AA==/colls/8fJ6ALpQWC4=/docs/8fJ6ALpQWC4+AAAAAAAAAA==/",
+    _etag: '"3106712c-0000-0d00-0000-656990a50000"',
+    _attachments: "attachments/",
+    _ts: 1701417125
+  },
+  {
+    email: "derd@example.com",
+    fiscalCode: "PVQEBX22A89Y092X",
+    isEmailEnabled: true,
+    isEmailValidated: true,
+    isInboxEnabled: false,
+    isWebhookEnabled: false,
+    acceptedTosVersion: 2,
+    id: "PVQEBX22A89Y092X-0000000000000002",
+    version: 2,
     _rid: "8fJ6ALpQWC4+AAAAAAAAAA==",
     _self: "dbs/8fJ6AA==/colls/8fJ6ALpQWC4=/docs/8fJ6ALpQWC4+AAAAAAAAAA==/",
     _etag: '"3106712c-0000-0d00-0000-656990a50000"',
@@ -138,13 +154,14 @@ const mockProfiles = [
     isWebhookEnabled: false,
     id: "VSFNVG14A39Y596X-0000000000000001",
     version: 1,
+    acceptedTosVersion: 0,
     _rid: "pm0GALO0diBchR4AAAAAAA==",
     _self: "dbs/pm0GAA==/colls/pm0GALO0diA=/docs/pm0GALO0diBchR4AAAAAAA==/",
     _etag: '"7300a2ac-0000-0d00-0000-5e7a4e6d0000"',
     _ts: 1585073774
   },
   {
-    email: "Eleanore.Kuphal1@example.net",
+    email: "Eleanore.Kuphal@example.net",
     fiscalCode: "VSFNVG14A39Y596X",
     isEmailEnabled: true,
     isEmailValidated: true,
@@ -184,7 +201,7 @@ describe("handler function", () => {
 
     await handler(documents)(mockDependencies);
 
-    expect(mockProfileModel.find).toHaveBeenCalledTimes(4);
+    expect(mockProfileModel.find).toHaveBeenCalledTimes(5);
     expect(mockDataTableProfileEmailsRepository.insert).toHaveBeenCalledTimes(
       5
     );
@@ -210,7 +227,7 @@ describe("handler function", () => {
     );
   });
 
-  it("should call mockLogger.error when error in upsertProfileEmail occurs", async () => {
+  it("should call mockLogger.error when error in find occurs", async () => {
     const mockDocuments = mockProfiles.filter(
       mockProfile => mockProfile.id === "PVQEBX22A89Y092X-0000000000000001"
     );
@@ -230,9 +247,7 @@ describe("handler function", () => {
 
   it("should call mockLogger.error when error in deleteProfileEmail occurs", async () => {
     const mockDocuments = mockProfiles.filter(
-      mockProfile =>
-        mockProfile.id === "PVQEBX22A89Y092X-0000000000000000" ||
-        mockProfile.id === "PVQEBX22A89Y092X-0000000000000001"
+      mockProfile => mockProfile.id === "PVQEBX22A89Y092X-0000000000000001"
     );
 
     jest
@@ -245,22 +260,5 @@ describe("handler function", () => {
       expect.anything(),
       new Error("Delete error")
     );
-  });
-
-  it("should call mockDataTableProfileEmailsRepository.insert with the first validated email", async () => {
-    const mockDocuments = mockProfiles.filter(
-      mockProfile =>
-        mockProfile.id === "VSFNVG14A39Y596X-0000000000000001" ||
-        mockProfile.id === "VSFNVG14A39Y596X-0000000000000002"
-    );
-
-    await handler(mockDocuments)(mockDependencies);
-
-    expect(
-      mockDataTableProfileEmailsRepository.insert
-    ).not.toHaveBeenCalledWith({
-      foo: mockDocuments[0].email,
-      bar: mockDocuments[0].fiscalCode
-    });
   });
 });

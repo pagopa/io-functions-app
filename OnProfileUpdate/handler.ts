@@ -20,7 +20,7 @@ import { FiscalCode } from "../generated/backend/FiscalCode";
 const ProfileDocument = t.intersection([
   ProfileEmail,
   t.type({
-    isEmailValidated: t.literal(true),
+    isEmailValidated: t.boolean,
     version: NonNegativeInteger
   })
 ]);
@@ -33,13 +33,10 @@ interface IDependencies {
   readonly logger: { readonly error: Logger["error"] };
 }
 
-// this function gets the latest validated email for that fiscal code from `profile` collection
-const getLatestValidatedEmail = (
+const getPreviousProfile = (
   fiscalCode: FiscalCode,
   version: NonNegativeInteger
-) => (
-  dep: IDependencies
-): TE.TaskEither<CosmosErrors, O.Option<Profile["email"]>> =>
+) => (dep: IDependencies): TE.TaskEither<CosmosErrors, O.Option<Profile>> =>
   pipe(
     version - 1,
     NonNegativeInteger.decode,
@@ -51,19 +48,7 @@ const getLatestValidatedEmail = (
             fiscalCode,
             previousVersion
           ),
-          id => dep.profileModel.find([id, fiscalCode]),
-          TE.chain(
-            O.fold(
-              () => TE.of(O.none),
-              previousProfile =>
-                previousProfile.isEmailValidated
-                  ? TE.right(O.some(previousProfile.email))
-                  : pipe(
-                      dep,
-                      getLatestValidatedEmail(fiscalCode, previousVersion)
-                    )
-            )
-          )
+          id => dep.profileModel.find([id, fiscalCode])
         )
     )
   );
@@ -91,57 +76,61 @@ const insertProfileEmail = (profileEmail: ProfileEmail) => ({
   );
 
 /*
-This function gets the latest validated email for the user
-If that email doesn't exist => it inserts the new email into profileEmails
-If that email exists and matches the new email => it does not do anything
-If that email exists and doesn't match the new email => it deletes the old email from profileEmails and inserts the new email
+If the current email is validated but the previous email was not validated => it inserts the new email into profileEmails
+If the current email is not validated but the previous email was validated => it deletes the previous email from profileEmails
 */
-const upsertProfileEmail = ({
+const handlePositiveVersion = ({
   email,
   fiscalCode,
+  isEmailValidated,
   version
-}: Omit<ProfileDocument, "isEmailValidated">): RTE.ReaderTaskEither<
+}: ProfileDocument): RTE.ReaderTaskEither<
   IDependencies,
   Error | CosmosErrors,
   void
 > =>
   pipe(
-    getLatestValidatedEmail(fiscalCode, version),
+    getPreviousProfile(fiscalCode, version),
     RTE.chainW(
       flow(
         O.foldW(
-          () => insertProfileEmail({ email, fiscalCode }),
-          previousEmail =>
-            pipe(
-              email === previousEmail
+          () => RTE.right<IDependencies, Error, void>(void 0),
+          previousProfile =>
+            isEmailValidated
+              ? previousProfile.isEmailValidated
                 ? RTE.right<IDependencies, Error, void>(void 0)
-                : pipe(
-                    deleteProfileEmail({
-                      email: previousEmail,
-                      fiscalCode
-                    }),
-                    RTE.chain(() => insertProfileEmail({ email, fiscalCode }))
-                  )
-            )
+                : insertProfileEmail({ email, fiscalCode })
+              : previousProfile.isEmailValidated
+              ? deleteProfileEmail({
+                  email: previousProfile.email,
+                  fiscalCode
+                })
+              : RTE.right<IDependencies, Error, void>(void 0)
         )
       )
     )
   );
 
-const handleDocument = (
-  document: unknown
-): RTE.ReaderTaskEither<IDependencies, Error | CosmosErrors, void> =>
-  pipe(
-    document,
-    ProfileDocument.decode,
-    E.fold(
-      () => RTE.right<IDependencies, Error, void>(void 0),
-      ({ email, fiscalCode, version }) =>
-        version === 0
-          ? insertProfileEmail({ email, fiscalCode })
-          : upsertProfileEmail({ email, fiscalCode, version })
-    )
-  );
+const handleProfile = ({
+  fiscalCode,
+  email,
+  version,
+  isEmailValidated
+}: ProfileDocument): RTE.ReaderTaskEither<
+  IDependencies,
+  Error | CosmosErrors,
+  void
+> =>
+  version === 0
+    ? isEmailValidated
+      ? insertProfileEmail({ email, fiscalCode })
+      : RTE.right<IDependencies, Error, void>(void 0)
+    : handlePositiveVersion({
+        email,
+        fiscalCode,
+        isEmailValidated,
+        version
+      });
 
 export const handler = (documents: ReadonlyArray<unknown>) => async (
   dependencies: IDependencies
@@ -149,33 +138,23 @@ export const handler = (documents: ReadonlyArray<unknown>) => async (
   await pipe(
     documents.map(document =>
       pipe(
-        dependencies,
-        handleDocument(document),
-        TE.mapLeft(error => {
-          pipe(
-            // TODO
-            O.fromPredicate(
-              (
-                doc: unknown
-              ): doc is {
-                readonly fiscalCode: string;
-                readonly version: string;
-              } =>
-                typeof doc === "object" &&
-                "fiscalCode" in doc &&
-                "version" in doc
-            )(document),
-            O.fold(
-              () => dependencies.logger.error(error),
-              ({ fiscalCode, version }) =>
+        document,
+        ProfileDocument.decode,
+        E.fold(
+          () => TE.right<Error, void>(void 0),
+          profileDocument =>
+            pipe(
+              dependencies,
+              handleProfile(profileDocument),
+              TE.mapLeft(error => {
                 dependencies.logger.error(
-                  `error handling profile with fiscalCode ${fiscalCode} and version ${version}`,
+                  `error handling profile with fiscalCode ${profileDocument.fiscalCode} and version ${profileDocument.version}`,
                   error
-                )
+                );
+                return error;
+              })
             )
-          );
-          return error;
-        })
+        )
       )
     ),
     A.sequence(TE.ApplicativeSeq)
