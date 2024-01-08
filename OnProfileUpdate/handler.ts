@@ -6,8 +6,10 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
-import { DataTableProfileEmailsRepository } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement/storage";
-import { ProfileEmail } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
+import {
+  IProfileEmailWriter,
+  ProfileEmail
+} from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
 import {
   ProfileModel,
   Profile
