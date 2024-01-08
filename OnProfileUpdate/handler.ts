@@ -28,7 +28,7 @@ const ProfileDocument = t.intersection([
 type ProfileDocument = t.TypeOf<typeof ProfileDocument>;
 
 interface IDependencies {
-  readonly dataTableProfileEmailsRepository: DataTableProfileEmailsRepository;
+  readonly dataTableProfileEmailsRepository: IProfileEmailWriter;
   readonly profileModel: ProfileModel;
   readonly logger: { readonly error: Logger["error"] };
 }
