@@ -199,7 +199,7 @@ describe("handler function", () => {
   it("should call get, insert and delete methods with no errors", async () => {
     const documents = mockProfiles;
 
-    await handler(documents)(mockDependencies);
+    await handler(documents)(mockDependencies)();
 
     expect(mockProfileModel.find).toHaveBeenCalledTimes(5);
     expect(mockDataTableProfileEmailsRepository.insert).toHaveBeenCalledTimes(
@@ -219,11 +219,10 @@ describe("handler function", () => {
       .spyOn(mockDataTableProfileEmailsRepository, "insert")
       .mockImplementationOnce(() => Promise.reject(new Error("Insert error")));
 
-    await handler(mockDocuments)(mockDependencies);
+    await handler(mockDocuments)(mockDependencies)();
 
     expect(mockLogger.error).toHaveBeenCalledWith(
-      expect.anything(),
-      new Error("Insert error")
+      "error handling profile with _self dbs/8fJ6AA==/colls/8fJ6ALpQWC4=/docs/8fJ6ALpQWC4CAAAAAAAAAA==/"
     );
   });
 
@@ -238,11 +237,11 @@ describe("handler function", () => {
         TE.left({ kind: "COSMOS_CONFLICT_RESPONSE" })
       );
 
-    await handler(mockDocuments)(mockDependencies);
+    await handler(mockDocuments)(mockDependencies)();
 
-    expect(mockLogger.error).toHaveBeenCalledWith(expect.anything(), {
-      kind: "COSMOS_CONFLICT_RESPONSE"
-    });
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      "error handling profile with _self dbs/8fJ6AA==/colls/8fJ6ALpQWC4=/docs/8fJ6ALpQWC4+AAAAAAAAAA==/"
+    );
   });
 
   it("should call mockLogger.error when error in deleteProfileEmail occurs", async () => {
@@ -254,11 +253,10 @@ describe("handler function", () => {
       .spyOn(mockDataTableProfileEmailsRepository, "delete")
       .mockImplementationOnce(() => Promise.reject(new Error("Delete error")));
 
-    await handler(mockDocuments)(mockDependencies);
+    await handler(mockDocuments)(mockDependencies)();
 
     expect(mockLogger.error).toHaveBeenCalledWith(
-      expect.anything(),
-      new Error("Delete error")
+      "error handling profile with _self dbs/8fJ6AA==/colls/8fJ6ALpQWC4=/docs/8fJ6ALpQWC4+AAAAAAAAAA==/"
     );
   });
 });

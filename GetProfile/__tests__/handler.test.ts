@@ -24,7 +24,8 @@ const aRetrievedProfileWithTimestampAfterLimit = {
 };
 
 const profileEmailReader: IProfileEmailReader = {
-  list: generateProfileEmails(7)
+  list: generateProfileEmails(7),
+  get: jest.fn()
 };
 
 describe("withIsEmailAlreadyTaken", () => {
@@ -52,7 +53,8 @@ describe("withIsEmailAlreadyTaken", () => {
   it("returns false on errors retrieving the profile emails", async () => {
     const profile = await withIsEmailAlreadyTaken(
       {
-        list: generateProfileEmails(2, true)
+        list: generateProfileEmails(2, true),
+        get: jest.fn()
       },
       true
     )({ ...aExtendedProfile, is_email_validated: false })();

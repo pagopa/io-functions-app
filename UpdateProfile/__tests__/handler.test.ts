@@ -53,7 +53,8 @@ afterEach(() => {
 const mockTracker = createTracker("" as any);
 
 const profileEmailReader: IProfileEmailReader = {
-  list: generateProfileEmails(0)
+  list: generateProfileEmails(0),
+  get: jest.fn()
 };
 
 describe("UpdateProfileHandler", () => {
@@ -1116,7 +1117,8 @@ describe("UpdateProfileHandler", () => {
         mockQueueClient,
         mockTracker,
         {
-          list: generateProfileEmails(10)
+          list: generateProfileEmails(10),
+          get: jest.fn()
         },
         uee
       );
@@ -1153,7 +1155,8 @@ describe("UpdateProfileHandler", () => {
         mockQueueClient,
         mockTracker,
         {
-          list: mockList
+          list: mockList,
+          get: jest.fn()
         },
         constTrue
       );
@@ -1190,7 +1193,8 @@ describe("UpdateProfileHandler", () => {
       mockQueueClient,
       mockTracker,
       {
-        list: generateProfileEmails(1, true)
+        list: generateProfileEmails(1, true),
+        get: jest.fn()
       },
       constTrue
     );

@@ -4,13 +4,20 @@
       "type": "cosmosDBTrigger",
       "name": "documents",
       "direction": "in",
-      "connectionStringSetting": "CosmosDbConnectionString",
+      "connectionStringSetting": "COSMOSDB_CONNECTION_STRING",
       "databaseName": "%COSMOSDB_NAME%",
       "collectionName": "profiles",
       "startFromBeginning": true,
       "createLeaseCollectionIfNotExists": true,
-      "leaseCollectionName": "profile-emails-leases"
+      "leaseCollectionName": "profile-emails-leases",
+      "leaseCollectionPrefix": "%ON_PROFILE_UPDATE_LEASES_PREFIX%-"
     }
   ],
+  "retry": {
+    "strategy": "exponentialBackoff",
+    "maxRetryCount": 5,
+    "minimumInterval": "00:00:05",
+    "maximumInterval": "00:01:00"
+  },
   "scriptFile": "../dist/OnProfileUpdate/index.js"
 }

@@ -3,10 +3,12 @@ import { pipe, flow } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as A from "fp-ts/ReadonlyArray";
 import * as E from "fp-ts/lib/Either";
+import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
+  IProfileEmailReader,
   IProfileEmailWriter,
   ProfileEmail
 } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
@@ -17,11 +19,14 @@ import {
 import { generateVersionedModelId } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_versioned";
 import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { Logger } from "@azure/functions";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { PathReporter } from "io-ts/PathReporter";
 import { FiscalCode } from "../generated/backend/FiscalCode";
 
 const ProfileDocument = t.intersection([
   ProfileEmail,
   t.type({
+    _self: NonEmptyString,
     isEmailValidated: t.boolean,
     version: NonNegativeInteger
   })
@@ -30,7 +35,8 @@ const ProfileDocument = t.intersection([
 type ProfileDocument = t.TypeOf<typeof ProfileDocument>;
 
 interface IDependencies {
-  readonly dataTableProfileEmailsRepository: IProfileEmailWriter;
+  readonly dataTableProfileEmailsRepository: IProfileEmailReader &
+    IProfileEmailWriter;
   readonly profileModel: ProfileModel;
   readonly logger: { readonly error: Logger["error"] };
 }
@@ -38,7 +44,9 @@ interface IDependencies {
 const getPreviousProfile = (
   fiscalCode: FiscalCode,
   version: NonNegativeInteger
-) => (dep: IDependencies): TE.TaskEither<CosmosErrors, O.Option<Profile>> =>
+) => ({
+  profileModel
+}: IDependencies): TE.TaskEither<CosmosErrors, O.Option<Profile>> =>
   pipe(
     version - 1,
     NonNegativeInteger.decode,
@@ -50,7 +58,7 @@ const getPreviousProfile = (
             fiscalCode,
             previousVersion
           ),
-          id => dep.profileModel.find([id, fiscalCode])
+          id => profileModel.find([id, fiscalCode])
         )
     )
   );
@@ -69,12 +77,23 @@ const deleteProfileEmail = (profileEmail: ProfileEmail) => ({
 const insertProfileEmail = (profileEmail: ProfileEmail) => ({
   dataTableProfileEmailsRepository
 }: IDependencies): TE.TaskEither<Error, void> =>
-  TE.tryCatch(
-    () => dataTableProfileEmailsRepository.insert(profileEmail),
-    error =>
-      error instanceof Error
-        ? error
-        : new Error("error inserting ProfileEmail from table storage")
+  pipe(
+    TE.tryCatch(
+      () => dataTableProfileEmailsRepository.insert(profileEmail),
+      error => error
+    ),
+    TE.orElse(insertError =>
+      TE.tryCatch(
+        async () => {
+          // check if the insert operation failed because the record was already there (for example in case of retry of the entire batch)
+          await dataTableProfileEmailsRepository.get(profileEmail);
+        },
+        () =>
+          insertError instanceof Error
+            ? insertError
+            : new Error("error inserting ProfileEmail into table storage")
+      )
+    )
   );
 
 /*
@@ -85,7 +104,8 @@ const handlePositiveVersion = ({
   email,
   fiscalCode,
   isEmailValidated,
-  version
+  version,
+  _self
 }: ProfileDocument): RTE.ReaderTaskEither<
   IDependencies,
   Error | CosmosErrors,
@@ -96,62 +116,67 @@ const handlePositiveVersion = ({
     RTE.chainW(
       flow(
         O.foldW(
-          () => RTE.right<IDependencies, Error, void>(void 0),
+          () =>
+            pipe(
+              RTE.asks(({ logger }: IDependencies) =>
+                logger.error(
+                  `no previous profile found for profile with _self ${_self}`
+                )
+              ),
+              RTE.map(() => void 0)
+            ),
           previousProfile =>
             isEmailValidated
               ? previousProfile.isEmailValidated
-                ? RTE.right<IDependencies, Error, void>(void 0)
+                ? RTE.right(void 0)
                 : insertProfileEmail({ email, fiscalCode })
               : previousProfile.isEmailValidated
               ? deleteProfileEmail({
                   email: previousProfile.email,
                   fiscalCode
                 })
-              : RTE.right<IDependencies, Error, void>(void 0)
+              : RTE.right(void 0)
         )
       )
     )
   );
 
-const handleProfile = ({
-  fiscalCode,
-  email,
-  version,
-  isEmailValidated
-}: ProfileDocument): RTE.ReaderTaskEither<
-  IDependencies,
-  Error | CosmosErrors,
-  void
-> =>
-  version === 0
-    ? isEmailValidated
-      ? insertProfileEmail({ email, fiscalCode })
+const handleProfile = (
+  profile: ProfileDocument
+): RTE.ReaderTaskEither<IDependencies, Error | CosmosErrors, void> =>
+  profile.version === 0
+    ? profile.isEmailValidated
+      ? insertProfileEmail({
+          email: profile.email,
+          fiscalCode: profile.fiscalCode
+        })
       : RTE.right<IDependencies, Error, void>(void 0)
-    : handlePositiveVersion({
-        email,
-        fiscalCode,
-        isEmailValidated,
-        version
-      });
+    : handlePositiveVersion(profile);
 
-export const handler = (documents: ReadonlyArray<unknown>) => async (
+export const handler = (documents: ReadonlyArray<unknown>) => (
   dependencies: IDependencies
-): Promise<void> => {
-  await pipe(
-    documents.map(document =>
+): T.Task<ReadonlyArray<E.Either<Error | CosmosErrors, void>>> =>
+  pipe(
+    documents,
+    A.map(document =>
       pipe(
         document,
         ProfileDocument.decode,
-        E.fold(
-          () => TE.right<Error, void>(void 0),
+        E.foldW(
+          errors => {
+            dependencies.logger.error(
+              `error decoding profile with errors ${PathReporter.report(
+                E.left(errors)
+              )}`
+            );
+          },
           profileDocument =>
             pipe(
               dependencies,
               handleProfile(profileDocument),
               TE.mapLeft(error => {
                 dependencies.logger.error(
-                  `error handling profile with fiscalCode ${profileDocument.fiscalCode} and version ${profileDocument.version}`,
-                  error
+                  `error handling profile with _self ${profileDocument._self}`
                 );
                 return error;
               })
@@ -159,6 +184,5 @@ export const handler = (documents: ReadonlyArray<unknown>) => async (
         )
       )
     ),
-    A.sequence(TE.ApplicativeSeq)
-  )();
-};
+    A.sequence(T.ApplicativeSeq)
+  );

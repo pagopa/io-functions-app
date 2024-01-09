@@ -1,6 +1,6 @@
 import { Context } from "@azure/functions";
 import { pipe } from "fp-ts/lib/function";
-import { DataTableProfileEmailsRepository } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement/storage";
+import * as E from "fp-ts/lib/Either";
 import {
   PROFILE_COLLECTION_NAME,
   ProfileModel
@@ -8,6 +8,7 @@ import {
 import { cosmosdbInstance } from "../utils/cosmosdb";
 import { profileEmailTableClient } from "../utils/unique_email_enforcement";
 import { handler } from "./handler";
+import { DataTableProfileEmailsRepository } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement/storage";
 
 const profileModel = new ProfileModel(
   cosmosdbInstance.container(PROFILE_COLLECTION_NAME)
@@ -28,5 +29,11 @@ export default async (
       profileModel
     },
     handler(documents)
-  );
+  )().then(result => {
+    for (const item of result) {
+      if (E.isLeft(item)) {
+        throw item.left;
+      }
+    }
+  });
 };

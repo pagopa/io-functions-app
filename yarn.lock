@@ -1063,10 +1063,10 @@
   resolved "https://registry.yarnpkg.com/@pagopa/express-azure-functions/-/express-azure-functions-4.0.1.tgz#0c584ab57773f2bcfda511b996f5e6ccdb89defb"
   integrity sha512-2gSMQ6nCz5z5RdSgE0P5uoVBoxQqUeZr8bUUVyXjEqA/Z1PVDofbDbYJG6aPnDhfHO8aEXLDJOG8eUqjYB4Qsg==
 
-"@pagopa/io-functions-commons@^28.12.2":
-  version "28.12.2"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-28.12.2.tgz#f3890810b0a79959aaf539ddd94294238931d372"
-  integrity sha512-8asgL5SxWsdbT6wGyx1MqDOgsXaIyxi52u9PFsu2DJZb6OnPdBNfE63qKePhBgJTz2GFYHpIDnQRm1lfRLHh+g==
+"@pagopa/io-functions-commons@^28.14.0":
+  version "28.14.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-28.14.0.tgz#0c19cf6f7c724488422bfdb1c8cfe60b206ebccf"
+  integrity sha512-Z4Hb0eK+DCFjiuL1x2sNGFYblevQ1+1eR2T/COwf7WlvBA2VdQYKUTio/sdLwhKztQnZ8rII9o0aeHfxDkIWwg==
   dependencies:
     "@azure/cosmos" "^3.17.1"
     "@azure/data-tables" "^13.2.2"

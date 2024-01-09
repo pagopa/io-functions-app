@@ -85,6 +85,7 @@ export const IConfig = t.intersection([
   t.interface({
     BETA_USERS: BetaUsersFromString,
 
+    COSMOSDB_CONNECTION_STRING: NonEmptyString,
     COSMOSDB_KEY: NonEmptyString,
     COSMOSDB_NAME: NonEmptyString,
     COSMOSDB_URI: NonEmptyString,
