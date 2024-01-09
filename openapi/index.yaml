@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 5.9.0
+  version: 5.10.1
   title: IO API for App
   contact:
     name: Digital Transformation Team
@@ -98,6 +98,10 @@ paths:
             $ref: '#/definitions/ProblemJson'
         '429':
           description: Too many requests
+        '500':
+          description: Server Error
+          schema:
+            $ref: '#/definitions/ProblemJson'
     post:
       operationId: createProfile
       summary: CreateProfile
