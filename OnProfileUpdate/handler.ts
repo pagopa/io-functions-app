@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import * as t from "io-ts";
 import { pipe, flow } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
