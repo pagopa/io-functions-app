@@ -32,10 +32,8 @@ const mockProfiles = [
   {
     email: "Eleanore.Kuphal@example.net",
     fiscalCode: "VSFNVG14A39Y596X",
-    isEmailEnabled: true,
     isEmailValidated: false,
     isInboxEnabled: false,
-    isWebhookEnabled: false,
     id: "VSFNVG14A39Y596X-0000000000000000",
     version: 0,
     _self: "96dfb60b-c09b-4044-8cb6-1405ca6732c2"
@@ -43,10 +41,8 @@ const mockProfiles = [
   {
     email: "Humberto38@example.net",
     fiscalCode: "DRUQIL23A18Y188X",
-    isEmailEnabled: true,
     isEmailValidated: true,
     isInboxEnabled: false,
-    isWebhookEnabled: false,
     id: "DRUQIL23A18Y188X-0000000000000000",
     version: 0,
     _self: "ba130521-8bab-4a68-a5e9-07a7e59f1f24"
@@ -54,10 +50,8 @@ const mockProfiles = [
   {
     email: "cittadinanzadigitale@teamdigitale.governo.it",
     fiscalCode: "ISPXNB32R82Y766D",
-    isEmailEnabled: true,
     isEmailValidated: true,
     isInboxEnabled: false,
-    isWebhookEnabled: false,
     id: "ISPXNB32R82Y766D-0000000000000000",
     version: 0,
     _self: "57807630-19c0-4cbd-a53f-a9ba3c3e0660"
@@ -65,10 +59,8 @@ const mockProfiles = [
   {
     email: "Reed_Klocko@example.com",
     fiscalCode: "PVQEBX22A89Y092X",
-    isEmailEnabled: true,
     isEmailValidated: true,
     isInboxEnabled: false,
-    isWebhookEnabled: false,
     id: "PVQEBX22A89Y092X-0000000000000000",
     version: 0,
     _self: "ad893263-21a5-43af-856b-88bc80fdb5a2"
@@ -76,10 +68,8 @@ const mockProfiles = [
   {
     email: "derd@example.com",
     fiscalCode: "PVQEBX22A89Y092X",
-    isEmailEnabled: true,
     isEmailValidated: false,
     isInboxEnabled: false,
-    isWebhookEnabled: false,
     acceptedTosVersion: 1,
     id: "PVQEBX22A89Y092X-0000000000000001",
     version: 1,
@@ -88,10 +78,8 @@ const mockProfiles = [
   {
     email: "derd@example.com",
     fiscalCode: "PVQEBX22A89Y092X",
-    isEmailEnabled: true,
     isEmailValidated: true,
     isInboxEnabled: false,
-    isWebhookEnabled: false,
     acceptedTosVersion: 2,
     id: "PVQEBX22A89Y092X-0000000000000002",
     version: 2,
@@ -100,10 +88,8 @@ const mockProfiles = [
   {
     email: "cittadinanzadigitale@teamdigitale.governo.it",
     fiscalCode: "ISPXNB32R82Y766D",
-    isEmailEnabled: true,
     isEmailValidated: true,
     isInboxEnabled: false,
-    isWebhookEnabled: false,
     acceptedTosVersion: 1,
     id: "ISPXNB32R82Y766D-0000000000000001",
     version: 1,
@@ -111,10 +97,8 @@ const mockProfiles = [
   },
   {
     fiscalCode: "not-valid",
-    isEmailEnabled: true,
     isEmailValidated: true,
     isInboxEnabled: false,
-    isWebhookEnabled: false,
     acceptedTosVersion: 1,
     id: "id",
     version: 0
@@ -122,10 +106,8 @@ const mockProfiles = [
   {
     email: "Eleanore.Kuphal@example.net",
     fiscalCode: "VSFNVG14A39Y596X",
-    isEmailEnabled: true,
     isEmailValidated: false,
     isInboxEnabled: false,
-    isWebhookEnabled: false,
     id: "VSFNVG14A39Y596X-0000000000000001",
     version: 1,
     acceptedTosVersion: 0,
@@ -134,10 +116,8 @@ const mockProfiles = [
   {
     email: "Eleanore.Kuphal@example.net",
     fiscalCode: "VSFNVG14A39Y596X",
-    isEmailEnabled: true,
     isEmailValidated: true,
     isInboxEnabled: false,
-    isWebhookEnabled: false,
     id: "VSFNVG14A39Y596X-0000000000000002",
     version: 2,
     _self: "f43db63b-5549-403d-98a5-e781934c796f"
