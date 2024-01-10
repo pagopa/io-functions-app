@@ -8,6 +8,7 @@ import {
 import { DataTableProfileEmailsRepository } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement/storage";
 import { cosmosdbInstance } from "../utils/cosmosdb";
 import { profileEmailTableClient } from "../utils/unique_email_enforcement";
+import { initTelemetryClient } from "../utils/appinsights";
 import { handler } from "./handler";
 
 const profileModel = new ProfileModel(
@@ -18,15 +19,17 @@ const dataTableProfileEmailsRepository = new DataTableProfileEmailsRepository(
   profileEmailTableClient
 );
 
+const telemetryClient = initTelemetryClient();
+
 export default async (
-  { log }: Context,
+  _context: Context,
   documents: ReadonlyArray<unknown>
 ): Promise<void> => {
   await pipe(
     {
       dataTableProfileEmailsRepository,
-      logger: { error: log.error },
-      profileModel
+      profileModel,
+      telemetryClient
     },
     handler(documents)
   )().then(result => {

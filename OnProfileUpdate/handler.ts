@@ -19,9 +19,9 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { generateVersionedModelId } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_versioned";
 import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
-import { Logger } from "@azure/functions";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { PathReporter } from "io-ts/PathReporter";
+import { hashFiscalCode } from "@pagopa/ts-commons/lib/hash";
+import { TelemetryClient } from "applicationinsights";
 import { FiscalCode } from "../generated/backend/FiscalCode";
 
 const ProfileDocument = t.intersection([
@@ -39,8 +39,10 @@ interface IDependencies {
   readonly dataTableProfileEmailsRepository: IProfileEmailReader &
     IProfileEmailWriter;
   readonly profileModel: ProfileModel;
-  readonly logger: { readonly error: Logger["error"] };
+  readonly telemetryClient: TelemetryClient;
 }
+
+const eventNamePrefix = "OnProfileUpdate";
 
 const getPreviousProfile = (
   fiscalCode: FiscalCode,
@@ -66,7 +68,7 @@ const getPreviousProfile = (
 
 const deleteProfileEmail = (profileEmail: ProfileEmail) => ({
   dataTableProfileEmailsRepository
-}: IDependencies) =>
+}: IDependencies): TE.TaskEither<Error, void> =>
   pipe(
     TE.tryCatch(
       () => dataTableProfileEmailsRepository.delete(profileEmail),
@@ -135,10 +137,15 @@ const handlePositiveVersion = ({
         O.foldW(
           () =>
             pipe(
-              RTE.asks(({ logger }: IDependencies) =>
-                logger.error(
-                  `no previous profile found for profile with _self ${_self}`
-                )
+              RTE.asks(({ telemetryClient }: IDependencies) =>
+                telemetryClient.trackEvent({
+                  name: `${eventNamePrefix}.previousProfileNotFound`,
+                  properties: {
+                    _self,
+                    fiscalCode: hashFiscalCode(fiscalCode),
+                    tagOverrides: { samplingEnabled: "false" }
+                  }
+                })
               ),
               RTE.map(() => void 0)
             ),
@@ -180,22 +187,34 @@ export const handler = (documents: ReadonlyArray<unknown>) => (
         document,
         ProfileDocument.decode,
         E.foldW(
-          errors => {
-            dependencies.logger.error(
-              `error decoding profile with errors ${PathReporter.report(
-                E.left(errors)
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              )} [${(document && (document as any)._self) || "UNKNOWN ID"}]`
-            );
+          () => {
+            dependencies.telemetryClient.trackEvent({
+              name: `${eventNamePrefix}.decodingProfile`,
+              properties: {
+                _self:
+                  typeof document === "object" &&
+                  document !== null &&
+                  "_self" in document
+                    ? document._self
+                    : "unknown-id",
+                tagOverrides: { samplingEnabled: "false" }
+              }
+            });
           },
           profileDocument =>
             pipe(
               dependencies,
               handleProfile(profileDocument),
               TE.mapLeft(error => {
-                dependencies.logger.error(
-                  `error handling profile with _self ${profileDocument._self}`
-                );
+                dependencies.telemetryClient.trackEvent({
+                  name: `${eventNamePrefix}.handlingProfile`,
+                  properties: {
+                    _self: profileDocument._self,
+                    error,
+                    fiscalCode: hashFiscalCode(profileDocument.fiscalCode),
+                    tagOverrides: { samplingEnabled: "false" }
+                  }
+                });
                 return error;
               })
             )

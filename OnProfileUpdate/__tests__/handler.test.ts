@@ -9,6 +9,7 @@ import {
   RetrievedProfile
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { DataTableProfileEmailsRepository } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement/storage";
+import { TelemetryClient } from "applicationinsights";
 
 const mockProfileEmailTableClient = {} as TableClient;
 
@@ -133,14 +134,14 @@ jest.spyOn(mockProfileModel, "find").mockImplementation(([id, fiscalCode]) =>
   )
 );
 
-const mockLogger = {
-  error: jest.fn()
-};
+const mockTelemetryClient = ({
+  trackEvent: jest.fn()
+} as unknown) as TelemetryClient;
 
 const mockDependencies = {
   dataTableProfileEmailsRepository: mockDataTableProfileEmailsRepository,
   profileModel: mockProfileModel,
-  logger: mockLogger
+  telemetryClient: mockTelemetryClient
 };
 
 describe("handler function", () => {
@@ -169,9 +170,7 @@ describe("handler function", () => {
 
     await handler(mockDocuments)(mockDependencies)();
 
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      "error handling profile with _self ba130521-8bab-4a68-a5e9-07a7e59f1f24"
-    );
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalled();
   });
 
   it("should call mockLogger.error when error in find occurs", async () => {
@@ -187,9 +186,7 @@ describe("handler function", () => {
 
     await handler(mockDocuments)(mockDependencies)();
 
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      "error handling profile with _self 19e3eeb9-0fc0-472b-8df9-b29eab5a2d50"
-    );
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalled();
   });
 
   it("should call mockLogger.error when error in deleteProfileEmail occurs", async () => {
@@ -203,8 +200,6 @@ describe("handler function", () => {
 
     await handler(mockDocuments)(mockDependencies)();
 
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      "error handling profile with _self 19e3eeb9-0fc0-472b-8df9-b29eab5a2d50"
-    );
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalled();
   });
 });
