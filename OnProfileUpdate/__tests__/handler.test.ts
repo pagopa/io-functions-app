@@ -38,10 +38,7 @@ const mockProfiles = [
     isWebhookEnabled: false,
     id: "VSFNVG14A39Y596X-0000000000000000",
     version: 0,
-    _rid: "pm0GALO0diBchR4AAAAAAA==",
-    _self: "dbs/pm0GAA==/colls/pm0GALO0diA=/docs/pm0GALO0diBchR4AAAAAAA==/",
-    _etag: '"7300a2ac-0000-0d00-0000-5e7a4e6d0000"',
-    _ts: 1585073773
+    _self: "_self-96dfb60b-c09b-4044-8cb6-1405ca6732c2"
   },
   {
     email: "Humberto38@example.net",
@@ -52,11 +49,7 @@ const mockProfiles = [
     isWebhookEnabled: false,
     id: "DRUQIL23A18Y188X-0000000000000000",
     version: 0,
-    _rid: "8fJ6ALpQWC4CAAAAAAAAAA==",
-    _self: "dbs/8fJ6AA==/colls/8fJ6ALpQWC4=/docs/8fJ6ALpQWC4CAAAAAAAAAA==/",
-    _etag: '"d502d23f-0000-0d00-0000-65537def0000"',
-    _attachments: "attachments/",
-    _ts: 1699970543
+    _self: "_self-ba130521-8bab-4a68-a5e9-07a7e59f1f24"
   },
   {
     email: "cittadinanzadigitale@teamdigitale.governo.it",
@@ -67,11 +60,7 @@ const mockProfiles = [
     isWebhookEnabled: false,
     id: "ISPXNB32R82Y766D-0000000000000000",
     version: 0,
-    _rid: "8fJ6ALpQWC4LAAAAAAAAAA==",
-    _self: "dbs/8fJ6AA==/colls/8fJ6ALpQWC4=/docs/8fJ6ALpQWC4LAAAAAAAAAA==/",
-    _etag: '"df022dde-0000-0d00-0000-6553ad910000"',
-    _attachments: "attachments/",
-    _ts: 1699982737
+    _self: "_self-57807630-19c0-4cbd-a53f-a9ba3c3e0660"
   },
   {
     email: "Reed_Klocko@example.com",
@@ -82,11 +71,7 @@ const mockProfiles = [
     isWebhookEnabled: false,
     id: "PVQEBX22A89Y092X-0000000000000000",
     version: 0,
-    _rid: "8fJ6ALpQWC4FAAAAAAAAAA==",
-    _self: "dbs/8fJ6AA==/colls/8fJ6ALpQWC4=/docs/8fJ6ALpQWC4FAAAAAAAAAA==/",
-    _etag: '"d5023743-0000-0d00-0000-65537dfb0000"',
-    _attachments: "attachments/",
-    _ts: 1699970555
+    _self: "_self-ad893263-21a5-43af-856b-88bc80fdb5a2"
   },
   {
     email: "derd@example.com",
@@ -98,11 +83,7 @@ const mockProfiles = [
     acceptedTosVersion: 1,
     id: "PVQEBX22A89Y092X-0000000000000001",
     version: 1,
-    _rid: "8fJ6ALpQWC4+AAAAAAAAAA==",
-    _self: "dbs/8fJ6AA==/colls/8fJ6ALpQWC4=/docs/8fJ6ALpQWC4+AAAAAAAAAA==/",
-    _etag: '"3106712c-0000-0d00-0000-656990a50000"',
-    _attachments: "attachments/",
-    _ts: 1701417125
+    _self: "_self-19e3eeb9-0fc0-472b-8df9-b29eab5a2d50"
   },
   {
     email: "derd@example.com",
@@ -114,11 +95,7 @@ const mockProfiles = [
     acceptedTosVersion: 2,
     id: "PVQEBX22A89Y092X-0000000000000002",
     version: 2,
-    _rid: "8fJ6ALpQWC4+AAAAAAAAAA==",
-    _self: "dbs/8fJ6AA==/colls/8fJ6ALpQWC4=/docs/8fJ6ALpQWC4+AAAAAAAAAA==/",
-    _etag: '"3106712c-0000-0d00-0000-656990a50000"',
-    _attachments: "attachments/",
-    _ts: 1701417125
+    _self: "_self-4b4c94d4-a350-4f27-9c76-ba669eca48a9"
   },
   {
     email: "cittadinanzadigitale@teamdigitale.governo.it",
@@ -130,10 +107,7 @@ const mockProfiles = [
     acceptedTosVersion: 1,
     id: "ISPXNB32R82Y766D-0000000000000001",
     version: 1,
-    _rid: "8fJ6ALpQWC4NAAAAAAAAAA==",
-    _self: "dbs/8fJ6AA==/colls/8fJ6ALpQWC4=/docs/8fJ6ALpQWC4NAAAAAAAAAA==/",
-    _etag: '"df024fe5-0000-0d00-0000-6553adbc0000"',
-    _ts: 1699982780
+    _self: "_self-eb28139a-f875-4276-81c5-b3f7b01f712a"
   },
   {
     fiscalCode: "not-valid",
@@ -155,10 +129,7 @@ const mockProfiles = [
     id: "VSFNVG14A39Y596X-0000000000000001",
     version: 1,
     acceptedTosVersion: 0,
-    _rid: "pm0GALO0diBchR4AAAAAAA==",
-    _self: "dbs/pm0GAA==/colls/pm0GALO0diA=/docs/pm0GALO0diBchR4AAAAAAA==/",
-    _etag: '"7300a2ac-0000-0d00-0000-5e7a4e6d0000"',
-    _ts: 1585073774
+    _self: "_self-aa406556-b003-4387-89ef-8f127ec9b2da"
   },
   {
     email: "Eleanore.Kuphal@example.net",
@@ -169,10 +140,7 @@ const mockProfiles = [
     isWebhookEnabled: false,
     id: "VSFNVG14A39Y596X-0000000000000002",
     version: 2,
-    _rid: "pm0GALO0diBchR4AAAAAAA==",
-    _self: "dbs/pm0GAA==/colls/pm0GALO0diA=/docs/pm0GALO0diBchR4AAAAAAA==/",
-    _etag: '"7300a2ac-0000-0d00-0000-5e7a4e6d0000"',
-    _ts: 1585073774
+    _self: "_self-f43db63b-5549-403d-98a5-e781934c796f"
   }
 ];
 
@@ -222,7 +190,7 @@ describe("handler function", () => {
     await handler(mockDocuments)(mockDependencies)();
 
     expect(mockLogger.error).toHaveBeenCalledWith(
-      "error handling profile with _self dbs/8fJ6AA==/colls/8fJ6ALpQWC4=/docs/8fJ6ALpQWC4CAAAAAAAAAA==/"
+      "error handling profile with _self _self-ba130521-8bab-4a68-a5e9-07a7e59f1f24"
     );
   });
 
@@ -240,7 +208,7 @@ describe("handler function", () => {
     await handler(mockDocuments)(mockDependencies)();
 
     expect(mockLogger.error).toHaveBeenCalledWith(
-      "error handling profile with _self dbs/8fJ6AA==/colls/8fJ6ALpQWC4=/docs/8fJ6ALpQWC4+AAAAAAAAAA==/"
+      "error handling profile with _self _self-19e3eeb9-0fc0-472b-8df9-b29eab5a2d50"
     );
   });
 
@@ -256,7 +224,7 @@ describe("handler function", () => {
     await handler(mockDocuments)(mockDependencies)();
 
     expect(mockLogger.error).toHaveBeenCalledWith(
-      "error handling profile with _self dbs/8fJ6AA==/colls/8fJ6ALpQWC4=/docs/8fJ6ALpQWC4+AAAAAAAAAA==/"
+      "error handling profile with _self _self-19e3eeb9-0fc0-472b-8df9-b29eab5a2d50"
     );
   });
 });
