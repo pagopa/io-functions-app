@@ -1138,10 +1138,10 @@
     semver "^7.3.7"
     validator "^13.7.0"
 
-"@pagopa/ts-commons@^12.4.1":
-  version "12.4.1"
-  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-12.4.1.tgz#c01a7741486177db9644bd35c8edb4b388417dee"
-  integrity sha512-efETWkNgAizcWPzJLOXufwHTkkIGNCqwIc1nBW0cXUOvyHMeh0b5DyLtcqWuPeW7B9OKRofvZRpSO3lblSL97g==
+"@pagopa/ts-commons@^12.5.0":
+  version "12.5.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-12.5.0.tgz#382f310b3aaf752e9a1cc31b46b2f4fd4a27c533"
+  integrity sha512-FAXqMLvNtt6Aq0BTHjQ1RFfvcs1plv20Iyq+UCmDHQTt8H7ThdLK7KoIqN1oBLkX9Ex+Nm9s77G2k2Df9BF9/Q==
   dependencies:
     abort-controller "^3.0.0"
     agentkeepalive "^4.1.4"

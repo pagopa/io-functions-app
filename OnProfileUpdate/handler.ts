@@ -66,13 +66,30 @@ const getPreviousProfile = (
 
 const deleteProfileEmail = (profileEmail: ProfileEmail) => ({
   dataTableProfileEmailsRepository
-}: IDependencies): TE.TaskEither<Error, void> =>
-  TE.tryCatch(
-    () => dataTableProfileEmailsRepository.delete(profileEmail),
-    error =>
-      error instanceof Error
-        ? error
-        : new Error("error deleting ProfileEmail from table storage")
+}: IDependencies) =>
+  pipe(
+    TE.tryCatch(
+      () => dataTableProfileEmailsRepository.delete(profileEmail),
+      error =>
+        error instanceof Error
+          ? error
+          : new Error("error deleting ProfileEmail from table storage")
+    ),
+    TE.orElse(deleteError =>
+      pipe(
+        TE.tryCatch(
+          // check if the delete operation failed because the record is not present (for example in case of retry of the entire batch)
+          () =>
+            dataTableProfileEmailsRepository
+              .get(profileEmail)
+              .then(() => void 0),
+          error => error
+        ),
+        TE.swap,
+        TE.map(() => void 0),
+        TE.mapLeft(() => deleteError)
+      )
+    )
   );
 
 const insertProfileEmail = (profileEmail: ProfileEmail) => ({
@@ -81,17 +98,17 @@ const insertProfileEmail = (profileEmail: ProfileEmail) => ({
   pipe(
     TE.tryCatch(
       () => dataTableProfileEmailsRepository.insert(profileEmail),
-      error => error
+      error =>
+        error instanceof Error
+          ? error
+          : new Error("error inserting ProfileEmail into table storage")
     ),
     TE.orElse(insertError =>
       TE.tryCatch(
+        // check if the insert operation failed because the record was already there (for example in case of retry of the entire batch)
         () =>
-          // check if the insert operation failed because the record was already there (for example in case of retry of the entire batch)
           dataTableProfileEmailsRepository.get(profileEmail).then(() => void 0),
-        () =>
-          insertError instanceof Error
-            ? insertError
-            : new Error("error inserting ProfileEmail into table storage")
+        () => insertError
       )
     )
   );
