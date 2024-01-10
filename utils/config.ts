@@ -95,6 +95,8 @@ export const IConfig = t.intersection([
     // url mentioned in the fallback login email
     IOWEB_ACCESS_REF: UrlFromString,
 
+    leaseCollectionPrefix: NonEmptyString,
+
     MAGIC_LINK_SERVICE_API_KEY: NonEmptyString,
     MAGIC_LINK_SERVICE_PUBLIC_URL: NonEmptyString,
 
