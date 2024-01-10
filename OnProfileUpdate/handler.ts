@@ -85,10 +85,9 @@ const insertProfileEmail = (profileEmail: ProfileEmail) => ({
     ),
     TE.orElse(insertError =>
       TE.tryCatch(
-        async () => {
+        () =>
           // check if the insert operation failed because the record was already there (for example in case of retry of the entire batch)
-          await dataTableProfileEmailsRepository.get(profileEmail);
-        },
+          dataTableProfileEmailsRepository.get(profileEmail).then(() => {}),
         () =>
           insertError instanceof Error
             ? insertError
