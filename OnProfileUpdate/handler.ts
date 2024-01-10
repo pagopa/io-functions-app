@@ -168,7 +168,7 @@ export const handler = (documents: ReadonlyArray<unknown>) => (
               `error decoding profile with errors ${PathReporter.report(
                 E.left(errors)
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              )} [${(document && (document as any).id) || "UNKNOWN ID"}]`
+              )} [${(document && (document as any)._self) || "UNKNOWN ID"}]`
             );
           },
           profileDocument =>
