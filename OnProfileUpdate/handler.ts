@@ -79,7 +79,9 @@ const deleteProfileEmail = (profileEmail: ProfileEmail) => ({
           : new Error("error deleting ProfileEmail from table storage")
     ),
     TE.orElse(error =>
-      ProfileEmailWriterError.is(error) ? TE.right(void 0) : TE.left(error)
+      ProfileEmailWriterError.is(error) && error.cause === "ENTITY_NOT_FOUND"
+        ? TE.right(void 0)
+        : TE.left(error)
     )
   );
 
@@ -95,7 +97,9 @@ const insertProfileEmail = (profileEmail: ProfileEmail) => ({
           : new Error("error inserting ProfileEmail into table storage")
     ),
     TE.orElse(error =>
-      ProfileEmailWriterError.is(error) ? TE.right(void 0) : TE.left(error)
+      ProfileEmailWriterError.is(error) && error.cause === "DUPLICATE_ENTITY"
+        ? TE.right(void 0)
+        : TE.left(error)
     )
   );
 
