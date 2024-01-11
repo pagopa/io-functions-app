@@ -249,6 +249,7 @@ describe("handler function", () => {
       .mockImplementationOnce(() => Promise.reject(new Error("Delete error")));
 
     const result = await handler(mockDocuments)(mockDependencies)();
+
     expect(result.some(E.isLeft)).toBe(true);
 
     expect(mockTelemetryClient.trackEvent).toHaveBeenCalled();
