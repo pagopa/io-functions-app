@@ -85,6 +85,7 @@ export const IConfig = t.intersection([
   t.interface({
     BETA_USERS: BetaUsersFromString,
 
+    COSMOSDB_CONNECTION_STRING: NonEmptyString,
     COSMOSDB_KEY: NonEmptyString,
     COSMOSDB_NAME: NonEmptyString,
     COSMOSDB_URI: NonEmptyString,
@@ -98,6 +99,8 @@ export const IConfig = t.intersection([
     MAGIC_LINK_SERVICE_PUBLIC_URL: NonEmptyString,
 
     MESSAGE_CONTAINER_NAME: NonEmptyString,
+
+    ON_PROFILE_UPDATE_LEASES_PREFIX: NonEmptyString,
 
     PUBLIC_API_KEY: NonEmptyString,
     PUBLIC_API_URL: NonEmptyString,
