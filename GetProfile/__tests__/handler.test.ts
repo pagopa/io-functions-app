@@ -27,8 +27,7 @@ const aRetrievedProfileWithTimestampAfterLimit = {
 
 const mockList = jest.fn().mockImplementation(generateProfileEmails(7));
 const profileEmailReader: IProfileEmailReader = {
-  list: mockList,
-  get: jest.fn()
+  list: mockList
 };
 
 describe("withIsEmailAlreadyTaken", () => {
@@ -56,8 +55,7 @@ describe("withIsEmailAlreadyTaken", () => {
   it("returns TE.left(ResponseErrorInternal) on errors retrieving the profile emails", async () => {
     const profile = await withIsEmailAlreadyTaken(
       {
-        list: generateProfileEmails(2, true),
-        get: jest.fn()
+        list: generateProfileEmails(2, true)
       },
       true
     )({ ...aExtendedProfile, is_email_validated: false })();

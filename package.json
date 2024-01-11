@@ -66,7 +66,7 @@
     "@azure/data-tables": "^13.2.2",
     "@azure/storage-queue": "^12.4.0",
     "@pagopa/express-azure-functions": "^4.0.1",
-    "@pagopa/io-functions-commons": "^28.14.0",
+    "@pagopa/io-functions-commons": "^28.15.0",
     "@pagopa/ts-commons": "^12.5.0",
     "abort-controller": "^3.0.0",
     "applicationinsights": "^1.8.10",

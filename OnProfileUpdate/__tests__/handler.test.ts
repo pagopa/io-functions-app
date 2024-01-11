@@ -14,7 +14,7 @@ import {
 import { DataTableProfileEmailsRepository } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement/storage";
 import { TelemetryClient } from "applicationinsights";
 import { generateVersionedModelId } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_versioned";
-import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 
 const take = (id: string, arr: typeof mockProfiles) =>
@@ -157,7 +157,7 @@ const mockDependencies = {
 };
 
 describe("handler function", () => {
-  it("should call get, insert and delete methods with no errors and handler function should not return any E.left", async () => {
+  it("should call find, insert and delete methods with no errors and handler function should not return any E.left", async () => {
     const documents = mockProfiles;
 
     const result = await handler(documents)(mockDependencies)();
@@ -247,16 +247,6 @@ describe("handler function", () => {
     jest
       .spyOn(mockDataTableProfileEmailsRepository, "delete")
       .mockImplementationOnce(() => Promise.reject(new Error("Delete error")));
-
-    // when the `delete` method fails, the `get` method is called to check if the ProfileEmail had already been cancelled from the table
-    jest
-      .spyOn(mockDataTableProfileEmailsRepository, "get")
-      .mockImplementationOnce(() =>
-        Promise.resolve({
-          email: "reed_klocko@example.com" as EmailString,
-          fiscalCode: "PVQEBX22A89Y092X" as FiscalCode
-        })
-      );
 
     const result = await handler(mockDocuments)(mockDependencies)();
     expect(result.some(E.isLeft)).toBe(true);

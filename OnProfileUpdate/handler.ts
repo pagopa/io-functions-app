@@ -11,7 +11,8 @@ import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   IProfileEmailReader,
   IProfileEmailWriter,
-  ProfileEmail
+  ProfileEmail,
+  ProfileEmailWriterError
 } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
 import {
   ProfileModel,
@@ -77,20 +78,8 @@ const deleteProfileEmail = (profileEmail: ProfileEmail) => ({
           ? error
           : new Error("error deleting ProfileEmail from table storage")
     ),
-    TE.orElse(deleteError =>
-      pipe(
-        TE.tryCatch(
-          // check if the delete operation failed because the record is not present (for example in case of retry of the entire batch)
-          () =>
-            dataTableProfileEmailsRepository
-              .get(profileEmail)
-              .then(() => void 0),
-          error => error
-        ),
-        TE.swap,
-        TE.map(() => void 0),
-        TE.mapLeft(() => deleteError)
-      )
+    TE.orElse(error =>
+      ProfileEmailWriterError.is(error) ? TE.right(void 0) : TE.left(error)
     )
   );
 
@@ -105,13 +94,8 @@ const insertProfileEmail = (profileEmail: ProfileEmail) => ({
           ? error
           : new Error("error inserting ProfileEmail into table storage")
     ),
-    TE.orElse(insertError =>
-      TE.tryCatch(
-        // check if the insert operation failed because the record was already there (for example in case of retry of the entire batch)
-        () =>
-          dataTableProfileEmailsRepository.get(profileEmail).then(() => void 0),
-        () => insertError
-      )
+    TE.orElse(error =>
+      ProfileEmailWriterError.is(error) ? TE.right(void 0) : TE.left(error)
     )
   );
 
@@ -142,9 +126,9 @@ const handlePositiveVersion = ({
                   name: `${eventNamePrefix}.previousProfileNotFound`,
                   properties: {
                     _self,
-                    fiscalCode: hashFiscalCode(fiscalCode),
-                    tagOverrides: { samplingEnabled: "false" }
-                  }
+                    fiscalCode: hashFiscalCode(fiscalCode)
+                  },
+                  tagOverrides: { samplingEnabled: "false" }
                 })
               ),
               RTE.map(() => void 0)
@@ -196,9 +180,9 @@ export const handler = (documents: ReadonlyArray<unknown>) => (
                   document !== null &&
                   "_self" in document
                     ? document._self
-                    : "unknown-id",
-                tagOverrides: { samplingEnabled: "false" }
-              }
+                    : "unknown-id"
+              },
+              tagOverrides: { samplingEnabled: "false" }
             });
             return TE.right<never, void>(void 0);
           },
@@ -212,9 +196,9 @@ export const handler = (documents: ReadonlyArray<unknown>) => (
                   properties: {
                     _self: profileDocument._self,
                     error,
-                    fiscalCode: hashFiscalCode(profileDocument.fiscalCode),
-                    tagOverrides: { samplingEnabled: "false" }
-                  }
+                    fiscalCode: hashFiscalCode(profileDocument.fiscalCode)
+                  },
+                  tagOverrides: { samplingEnabled: "false" }
                 });
                 return error;
               })
