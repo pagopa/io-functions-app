@@ -200,6 +200,7 @@ export const handler = (documents: ReadonlyArray<unknown>) => (
                 tagOverrides: { samplingEnabled: "false" }
               }
             });
+            return TE.right<never, void>(void 0);
           },
           profileDocument =>
             pipe(
