@@ -9,7 +9,7 @@
       "collectionName": "profiles",
       "startFromBeginning": true,
       "createLeaseCollectionIfNotExists": true,
-      "leaseCollectionName": "profile-emails-leases",
+      "leaseCollectionName": "profile-emails-uniqueness-leases",
       "leaseCollectionPrefix": "%ON_PROFILE_UPDATE_LEASES_PREFIX%-"
     }
   ],
