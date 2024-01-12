@@ -191,7 +191,7 @@ const handleProfile = (
   profile: ProfileDocument
 ): RTE.ReaderTaskEither<IDependencies, Error | CosmosErrors, void> =>
   profile.version === 0
-    ? profile.isEmailValidated
+    ? profile.email && profile.isEmailValidated
       ? insertProfileEmail({
           email: profile.email,
           fiscalCode: profile.fiscalCode
