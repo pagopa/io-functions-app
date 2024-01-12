@@ -20,17 +20,21 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { generateVersionedModelId } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_versioned";
 import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { hashFiscalCode } from "@pagopa/ts-commons/lib/hash";
 import { TelemetryClient } from "applicationinsights";
+import { withDefault } from "@pagopa/ts-commons/lib/types";
 import { FiscalCode } from "../generated/backend/FiscalCode";
 
 const ProfileDocument = t.intersection([
-  ProfileEmail,
   t.type({
     _self: NonEmptyString,
-    isEmailValidated: t.boolean,
+    fiscalCode: FiscalCode,
     version: NonNegativeInteger
+  }),
+  t.partial({
+    email: EmailString,
+    isEmailValidated: withDefault(t.boolean, true)
   })
 ]);
 
@@ -103,6 +107,30 @@ const insertProfileEmail = (profileEmail: ProfileEmail) => ({
     )
   );
 
+const updateEmail: (
+  profile: Pick<ProfileDocument, "isEmailValidated" | "email" | "fiscalCode">,
+  previousProfile: Pick<
+    ProfileDocument,
+    "isEmailValidated" | "email" | "fiscalCode"
+  >
+) => RTE.ReaderTaskEither<IDependencies, Error, void> = (
+  profile,
+  previousProfile
+) =>
+  profile.isEmailValidated
+    ? previousProfile.isEmailValidated
+      ? RTE.right(void 0)
+      : insertProfileEmail({
+          email: profile.email,
+          fiscalCode: profile.fiscalCode
+        })
+    : previousProfile.isEmailValidated
+    ? deleteProfileEmail({
+        email: previousProfile.email,
+        fiscalCode: profile.fiscalCode
+      })
+    : RTE.right(void 0);
+
 /*
 If the current email is validated but the previous email was not validated => it inserts the new email into profileEmails
 If the current email is not validated but the previous email was validated => it deletes the previous email from profileEmails
@@ -138,16 +166,22 @@ const handlePositiveVersion = ({
               RTE.map(() => void 0)
             ),
           previousProfile =>
-            isEmailValidated
-              ? previousProfile.isEmailValidated
-                ? RTE.right(void 0)
-                : insertProfileEmail({ email, fiscalCode })
-              : previousProfile.isEmailValidated
-              ? deleteProfileEmail({
-                  email: previousProfile.email,
-                  fiscalCode
-                })
-              : RTE.right(void 0)
+            // missing email field is equivalent to changed email
+            !email
+              ? previousProfile.email
+                ? deleteProfileEmail({
+                    email: previousProfile.email,
+                    fiscalCode
+                  })
+                : RTE.right(void 0)
+              : updateEmail(
+                  { email, fiscalCode, isEmailValidated },
+                  {
+                    email: previousProfile.email,
+                    fiscalCode: previousProfile.fiscalCode,
+                    isEmailValidated: previousProfile.isEmailValidated
+                  }
+                )
         )
       )
     )
