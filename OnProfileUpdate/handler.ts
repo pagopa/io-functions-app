@@ -26,15 +26,15 @@ import { TelemetryClient } from "applicationinsights";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
 import { FiscalCode } from "../generated/backend/FiscalCode";
 
-const ProfileDocument = t.intersection([
+export const ProfileDocument = t.intersection([
   t.type({
     _self: NonEmptyString,
     fiscalCode: FiscalCode,
+    isEmailValidated: withDefault(t.boolean, true),
     version: NonNegativeInteger
   }),
   t.partial({
-    email: EmailString,
-    isEmailValidated: withDefault(t.boolean, true)
+    email: EmailString
   })
 ]);
 
@@ -54,7 +54,10 @@ const getPreviousProfile = (
   version: NonNegativeInteger
 ) => ({
   profileModel
-}: IDependencies): TE.TaskEither<CosmosErrors, O.Option<Profile>> =>
+}: IDependencies): TE.TaskEither<
+  CosmosErrors | t.Errors,
+  O.Option<ProfileDocument>
+> =>
   pipe(
     version - 1,
     NonNegativeInteger.decode,
@@ -66,7 +69,23 @@ const getPreviousProfile = (
             fiscalCode,
             previousVersion
           ),
-          id => profileModel.find([id, fiscalCode])
+          id =>
+            pipe(
+              profileModel.find([id, fiscalCode]),
+              TE.chainW(
+                O.fold(
+                  () => TE.right(O.none),
+                  profile =>
+                    pipe(
+                      ProfileDocument.decode(profile),
+                      E.fold(
+                        error => TE.left(error),
+                        profileDocument => TE.right(O.some(profileDocument))
+                      )
+                    )
+                )
+              )
+            )
         )
     )
   );
@@ -108,10 +127,11 @@ const insertProfileEmail = (profileEmail: ProfileEmail) => ({
   );
 
 const updateEmail: (
-  profile: Pick<ProfileDocument, "isEmailValidated" | "email" | "fiscalCode">,
-  previousProfile: Pick<
-    ProfileDocument,
-    "isEmailValidated" | "email" | "fiscalCode"
+  profile: Required<
+    Pick<ProfileDocument, "isEmailValidated" | "email" | "fiscalCode">
+  >,
+  previousProfile: Required<
+    Pick<ProfileDocument, "isEmailValidated" | "email" | "fiscalCode">
   >
 ) => RTE.ReaderTaskEither<IDependencies, Error, void> = (
   profile,
@@ -143,7 +163,7 @@ const handlePositiveVersion = ({
   _self
 }: ProfileDocument): RTE.ReaderTaskEither<
   IDependencies,
-  Error | CosmosErrors,
+  Error | CosmosErrors | t.Errors,
   void
 > =>
   pipe(
@@ -167,21 +187,37 @@ const handlePositiveVersion = ({
             ),
           previousProfile =>
             // missing email field is equivalent to changed email
-            !email
-              ? previousProfile.email
-                ? deleteProfileEmail({
-                    email: previousProfile.email,
-                    fiscalCode
-                  })
-                : RTE.right(void 0)
-              : updateEmail(
-                  { email, fiscalCode, isEmailValidated },
-                  {
-                    email: previousProfile.email,
-                    fiscalCode: previousProfile.fiscalCode,
-                    isEmailValidated: previousProfile.isEmailValidated
-                  }
-                )
+            pipe(
+              O.fromNullable(email),
+              O.fold(
+                () =>
+                  pipe(
+                    O.fromNullable(previousProfile.email),
+                    O.fold(
+                      () => RTE.right(void 0),
+                      previousEmail =>
+                        deleteProfileEmail({ email: previousEmail, fiscalCode })
+                    )
+                  ),
+                currentEmail =>
+                  pipe(
+                    O.fromNullable(previousProfile.email),
+                    O.fold(
+                      () =>
+                        insertProfileEmail({ email: currentEmail, fiscalCode }),
+                      previousEmail =>
+                        updateEmail(
+                          { email: currentEmail, fiscalCode, isEmailValidated },
+                          {
+                            email: previousEmail,
+                            fiscalCode: previousProfile.fiscalCode,
+                            isEmailValidated: previousProfile.isEmailValidated
+                          }
+                        )
+                    )
+                  )
+              )
+            )
         )
       )
     )
@@ -189,7 +225,7 @@ const handlePositiveVersion = ({
 
 const handleProfile = (
   profile: ProfileDocument
-): RTE.ReaderTaskEither<IDependencies, Error | CosmosErrors, void> =>
+): RTE.ReaderTaskEither<IDependencies, Error | CosmosErrors | t.Errors, void> =>
   profile.version === 0
     ? profile.email && profile.isEmailValidated
       ? insertProfileEmail({
@@ -201,7 +237,7 @@ const handleProfile = (
 
 export const handler = (documents: ReadonlyArray<unknown>) => (
   dependencies: IDependencies
-): T.Task<ReadonlyArray<E.Either<Error | CosmosErrors, void>>> =>
+): T.Task<ReadonlyArray<E.Either<Error | CosmosErrors | t.Errors, void>>> =>
   pipe(
     documents,
     A.map(document =>

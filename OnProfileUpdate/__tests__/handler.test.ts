@@ -1,4 +1,4 @@
-import { handler } from "../handler";
+import { ProfileDocument, handler } from "../handler";
 import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
@@ -253,5 +253,44 @@ describe("handler function", () => {
     expect(result.some(E.isLeft)).toBe(true);
 
     expect(mockTelemetryClient.trackEvent).toHaveBeenCalled();
+  });
+});
+
+describe("ProfileDocument", () => {
+  const baseProps = {
+    _self: "a string",
+    fiscalCode: "VSFNVG14A39Y596X",
+    version: 0
+  };
+
+  it("should return E.right when decoding baseProps with isEmailValidated equal to true", () => {
+    const res = ProfileDocument.decode({
+      ...baseProps,
+      isEmailValidated: true
+    });
+    expect(res).toEqual(
+      E.right({
+        ...baseProps,
+        isEmailValidated: true
+      })
+    );
+  });
+
+  it("should return E.right with isEmailValidated set to true when decoding baseProps", () => {
+    const res = ProfileDocument.decode(baseProps);
+    expect(res).toEqual(E.right({ ...baseProps, isEmailValidated: true }));
+  });
+
+  it("should return E.right when decoding baseProps with isEmailValidated equal to false", () => {
+    const res = ProfileDocument.decode({
+      ...baseProps,
+      isEmailValidated: false
+    });
+    expect(res).toEqual(
+      E.right({
+        ...baseProps,
+        isEmailValidated: false
+      })
+    );
   });
 });
