@@ -194,7 +194,7 @@ const handlePositiveVersion = ({
                   pipe(
                     O.fromNullable(previousProfile.email),
                     O.fold(
-                      () => RTE.right(void 0),
+                      () => RTE.right<IDependencies, never, void>(void 0),
                       previousEmail =>
                         deleteProfileEmail({ email: previousEmail, fiscalCode })
                     )
