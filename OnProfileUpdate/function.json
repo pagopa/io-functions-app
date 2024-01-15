@@ -10,7 +10,8 @@
       "startFromBeginning": true,
       "createLeaseCollectionIfNotExists": true,
       "leaseCollectionName": "profile-emails-uniqueness-leases",
-      "leaseCollectionPrefix": "%ON_PROFILE_UPDATE_LEASES_PREFIX%-"
+      "leaseCollectionPrefix": "%ON_PROFILE_UPDATE_LEASES_PREFIX%-",
+      "feedPollDelay": 2500
     }
   ],
   "retry": {
