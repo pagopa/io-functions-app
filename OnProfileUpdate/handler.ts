@@ -151,6 +151,68 @@ const updateEmail: (
       })
     : RTE.right(void 0);
 
+const handlePresentEmail = (
+  previousProfile: ProfileDocument,
+  profile: Required<ProfileDocument>
+): RTE.ReaderTaskEither<IDependencies, Error, void> =>
+  pipe(
+    O.fromNullable(previousProfile.email),
+    O.fold(
+      () =>
+        profile.isEmailValidated
+          ? insertProfileEmail({
+              email: profile.email,
+              fiscalCode: profile.fiscalCode
+            })
+          : RTE.right(void 0),
+      previousEmail =>
+        updateEmail(
+          {
+            email: profile.email,
+            fiscalCode: profile.fiscalCode,
+            isEmailValidated: profile.isEmailValidated
+          },
+          {
+            email: previousEmail,
+            fiscalCode: previousProfile.fiscalCode,
+            isEmailValidated: previousProfile.isEmailValidated
+          }
+        )
+    )
+  );
+
+const handleMissingEmail = (
+  previousProfile: ProfileDocument,
+  profile: Omit<ProfileDocument, "email">
+) => (dependencies: IDependencies): TE.TaskEither<Error, void> =>
+  pipe(
+    O.fromNullable(previousProfile.email),
+    O.fold(
+      () => TE.right(void 0),
+      previousEmail => {
+        dependencies.telemetryClient.trackEvent({
+          name: `${eventNamePrefix}.missingNewEmail`,
+          properties: {
+            _self: profile._self,
+            fiscalCode: hashFiscalCode(profile.fiscalCode),
+            isEmailValidated: profile.isEmailValidated,
+            isPreviousEmailValidated: previousProfile.isEmailValidated
+          },
+          tagOverrides: { samplingEnabled: "false" }
+        });
+        return previousProfile.isEmailValidated
+          ? pipe(
+              dependencies,
+              deleteProfileEmail({
+                email: previousEmail,
+                fiscalCode: profile.fiscalCode
+              })
+            )
+          : TE.right(void 0);
+      }
+    )
+  );
+
 /*
 If the current email is validated but the previous email was not validated => it inserts the new email into profileEmails
 If the current email is not validated but the previous email was validated => it deletes the previous email from profileEmails
@@ -186,38 +248,20 @@ const handlePositiveVersion = ({
               RTE.map(() => void 0)
             ),
           previousProfile =>
-            // missing email field is equivalent to changed email
-            pipe(
-              O.fromNullable(email),
-              O.fold(
-                () =>
-                  pipe(
-                    O.fromNullable(previousProfile.email),
-                    O.fold(
-                      () => RTE.right<IDependencies, never, void>(void 0),
-                      previousEmail =>
-                        deleteProfileEmail({ email: previousEmail, fiscalCode })
-                    )
-                  ),
-                currentEmail =>
-                  pipe(
-                    O.fromNullable(previousProfile.email),
-                    O.fold(
-                      () =>
-                        insertProfileEmail({ email: currentEmail, fiscalCode }),
-                      previousEmail =>
-                        updateEmail(
-                          { email: currentEmail, fiscalCode, isEmailValidated },
-                          {
-                            email: previousEmail,
-                            fiscalCode: previousProfile.fiscalCode,
-                            isEmailValidated: previousProfile.isEmailValidated
-                          }
-                        )
-                    )
-                  )
-              )
-            )
+            email
+              ? handlePresentEmail(previousProfile, {
+                  _self,
+                  email,
+                  fiscalCode,
+                  isEmailValidated,
+                  version
+                })
+              : handleMissingEmail(previousProfile, {
+                  _self,
+                  fiscalCode,
+                  isEmailValidated,
+                  version
+                })
         )
       )
     )

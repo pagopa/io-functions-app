@@ -128,6 +128,35 @@ const mockProfiles = [
     isInboxEnabled: false,
     version: 2,
     _self: "f43db63b-5549-403d-98a5-e781934c796f"
+  },
+  {
+    fiscalCode: "AAANVG14A39Y596X",
+    isEmailValidated: false,
+    isInboxEnabled: false,
+    version: 0,
+    _self: "96dfb60b-c09b-4044-8cb6-1405ca6732c5"
+  },
+  {
+    email: "newEmail@example.net",
+    fiscalCode: "AAANVG14A39Y596X",
+    isEmailValidated: false,
+    isInboxEnabled: false,
+    version: 1,
+    _self: "96dfb60b-c09b-4044-8cb6-1405ca6732c6"
+  },
+  {
+    email: "newEmail@example.net",
+    fiscalCode: "BBBNVG14A39Y596X",
+    isEmailValidated: false,
+    isInboxEnabled: false,
+    version: 0,
+    _self: "96dfb60b-c09b-4044-8cb6-1405ca6732d7"
+  },
+  {
+    fiscalCode: "BBBNVG14A39Y596X",
+    isInboxEnabled: false,
+    version: 1,
+    _self: "96dfb60b-c09b-4044-8cb6-1405ca6732e8"
   }
 ].map(item => ({
   ...item,
@@ -165,7 +194,7 @@ describe("handler function", () => {
       expect(E.isLeft(item)).toBe(false);
     });
 
-    const findIndices = [4, 5, 6, 8, 9];
+    const findIndices = [4, 5, 6, 8, 9, 11, 13];
     const expectedFindParams = findIndices
       .map(index => ({
         version: mockProfiles[index].version,
@@ -192,6 +221,9 @@ describe("handler function", () => {
         mockDataTableProfileEmailsRepository.insert
       ).toHaveBeenNthCalledWith(index + 1, param);
     });
+    expect(mockDataTableProfileEmailsRepository.insert).toHaveBeenCalledTimes(
+      insertIndices.length
+    );
 
     expect(mockDataTableProfileEmailsRepository.delete).toHaveBeenNthCalledWith(
       1,
@@ -199,6 +231,9 @@ describe("handler function", () => {
         email: mockProfiles[3].email,
         fiscalCode: mockProfiles[3].fiscalCode
       }
+    );
+    expect(mockDataTableProfileEmailsRepository.delete).toHaveBeenCalledTimes(
+      1
     );
   });
 
