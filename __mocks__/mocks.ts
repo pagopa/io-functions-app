@@ -119,6 +119,9 @@ export const aNewDate = new Date();
 export const aExtendedProfile = retrievedProfileToExtendedProfile(
   aRetrievedProfile
 );
+export const aExtendedProfileWithEmail = retrievedProfileToExtendedProfile(
+  aRetrievedProfileWithEmail
+);
 
 export const aTokenId = "01DQ79RZ0EQ0S7RTA3SMCKRCCA";
 export const aValidator = "d6e57ed8d3c3eb4583d671c7";

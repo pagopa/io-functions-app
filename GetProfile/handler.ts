@@ -65,7 +65,7 @@ export const withIsEmailAlreadyTaken = (
     // profile was validated. If was not validated, continue with
     // uniqueness checks.
     TE.chainW(({ is_email_validated, email }) =>
-      isUniqueEmailEnforcementEnabled && !is_email_validated
+      isUniqueEmailEnforcementEnabled && !is_email_validated && email
         ? TE.tryCatch(
             () =>
               isEmailAlreadyTaken(email)({

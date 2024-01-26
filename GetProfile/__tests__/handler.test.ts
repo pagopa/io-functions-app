@@ -2,9 +2,9 @@ import { none, some } from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/Either";
 import {
-  aExtendedProfile,
+  aExtendedProfileWithEmail,
   aFiscalCode,
-  aRetrievedProfile
+  aRetrievedProfileWithEmail
 } from "../../__mocks__/mocks";
 import { GetProfileHandler, withIsEmailAlreadyTaken } from "../handler";
 import { IProfileEmailReader } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
@@ -17,11 +17,11 @@ import { ResponseErrorInternal } from "@pagopa/ts-commons/lib/responses";
 const aTimestamp = Math.floor(new Date().valueOf() / 1000);
 const anEmailOptOutEmailSwitchDate = new Date(aTimestamp);
 const aRetrievedProfileWithTimestampBeforeLimit = {
-  ...aRetrievedProfile,
+  ...aRetrievedProfileWithEmail,
   _ts: aTimestamp - 1
 };
 const aRetrievedProfileWithTimestampAfterLimit = {
-  ...aRetrievedProfile,
+  ...aRetrievedProfileWithEmail,
   _ts: aTimestamp + 10
 };
 
@@ -35,21 +35,34 @@ describe("withIsEmailAlreadyTaken", () => {
     const profile = await withIsEmailAlreadyTaken(
       profileEmailReader,
       false
-    )({ ...aExtendedProfile, is_email_validated: false })();
+    )({ ...aExtendedProfileWithEmail, is_email_validated: false })();
     expect(profile).toMatchObject(E.of({ is_email_already_taken: false }));
   });
+
+  it("returns false if the email is not defined", async () => {
+    const profile = await withIsEmailAlreadyTaken(
+      profileEmailReader,
+      false
+    )({
+      ...aExtendedProfileWithEmail,
+      email: undefined,
+      is_email_validated: false
+    })();
+    expect(profile).toMatchObject(E.of({ is_email_already_taken: false }));
+  });
+
   it("returns false if the e-mail associated with the given profile is validated", async () => {
     const profile = await withIsEmailAlreadyTaken(
       profileEmailReader,
       true
-    )(aExtendedProfile)();
+    )(aExtendedProfileWithEmail)();
     expect(profile).toMatchObject(E.of({ is_email_already_taken: false }));
   });
   it("returns true if there are profile email entries", async () => {
     const profile = await withIsEmailAlreadyTaken(
       profileEmailReader,
       true
-    )({ ...aExtendedProfile, is_email_validated: false })();
+    )({ ...aExtendedProfileWithEmail, is_email_validated: false })();
     expect(profile).toMatchObject(E.of({ is_email_already_taken: true }));
   });
   it("returns TE.left(ResponseErrorInternal) on errors retrieving the profile emails", async () => {
@@ -58,7 +71,7 @@ describe("withIsEmailAlreadyTaken", () => {
         list: generateProfileEmails(2, true)
       },
       true
-    )({ ...aExtendedProfile, is_email_validated: false })();
+    )({ ...aExtendedProfileWithEmail, is_email_validated: false })();
     expect(profile).toMatchObject(
       E.left({
         kind: "IResponseErrorInternal",
@@ -92,7 +105,7 @@ describe("GetProfileHandler", () => {
     ]);
     expect(response.kind).toBe("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
-      expect(response.value).toEqual(aExtendedProfile);
+      expect(response.value).toEqual(aExtendedProfileWithEmail);
     }
   });
 
@@ -119,7 +132,7 @@ describe("GetProfileHandler", () => {
     expect(response.kind).toBe("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
       expect(response.value).toEqual({
-        ...aExtendedProfile,
+        ...aExtendedProfileWithEmail,
         is_email_enabled: false
       });
     }
@@ -147,7 +160,7 @@ describe("GetProfileHandler", () => {
     ]);
     expect(response.kind).toBe("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
-      expect(response.value).toEqual(aExtendedProfile);
+      expect(response.value).toEqual(aExtendedProfileWithEmail);
     }
   });
 
