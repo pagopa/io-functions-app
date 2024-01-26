@@ -15,6 +15,7 @@ import {
   aFiscalCode,
   aProfile,
   aRetrievedProfile,
+  aRetrievedProfileWithEmail,
   autoApiProfileServicePreferencesSettings,
   autoProfileServicePreferencesSettings,
   legacyApiProfileServicePreferencesSettings,
@@ -1144,9 +1145,9 @@ describe("UpdateProfileHandler", () => {
       const profileModelMock = {
         findLastVersionByModelId: jest.fn(() =>
           // Return a profile with a validated email
-          TE.of(some({ ...aRetrievedProfile, isEmailValidated }))
+          TE.of(some({ ...aRetrievedProfileWithEmail, isEmailValidated }))
         ),
-        update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
+        update: jest.fn(_ => TE.of({ ...aRetrievedProfileWithEmail, ..._ }))
       };
       const updateProfileHandler = UpdateProfileHandler(
         profileModelMock as any,
@@ -1162,7 +1163,7 @@ describe("UpdateProfileHandler", () => {
         aFiscalCode,
         {
           ...aProfile,
-          email: aRetrievedProfile.email
+          email: aRetrievedProfileWithEmail.email
         }
       );
       expect(result.kind).toBe("IResponseSuccessJson");
