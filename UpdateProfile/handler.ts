@@ -151,7 +151,8 @@ export function UpdateProfileHandler(
 
     if (
       FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED(fiscalCode) &&
-      (emailChanged || !existingProfile.isEmailValidated)
+      (emailChanged || !existingProfile.isEmailValidated) &&
+      profilePayload.email
     ) {
       try {
         emailTaken = await isEmailAlreadyTaken(profilePayload.email)({
