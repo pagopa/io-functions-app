@@ -38,6 +38,15 @@ describe("withIsEmailAlreadyTaken", () => {
     )({ ...aExtendedProfile, is_email_validated: false })();
     expect(profile).toMatchObject(E.of({ is_email_already_taken: false }));
   });
+
+  it("returns false if the email is not defined", async () => {
+    const profile = await withIsEmailAlreadyTaken(
+      profileEmailReader,
+      false
+    )({ ...aExtendedProfile, email: undefined, is_email_validated: false })();
+    expect(profile).toMatchObject(E.of({ is_email_already_taken: false }));
+  });
+
   it("returns false if the e-mail associated with the given profile is validated", async () => {
     const profile = await withIsEmailAlreadyTaken(
       profileEmailReader,
