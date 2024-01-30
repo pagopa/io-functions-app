@@ -40,7 +40,7 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 
 import { pipe } from "fp-ts/lib/function";
-import { OrchestratorInput as EmailValidationProcessOrchestratorInput } from "../EmailValidationProcessOrchestrator/handler";
+import { OrchestratorInput as EmailValidationWithTemplateProcessOrchestratorInput } from "../EmailValidationWithTemplateProcessOrchestrator/handler";
 import {
   isOrchestratorRunning,
   makeStartEmailValidationProcessOrchestratorId
@@ -102,8 +102,10 @@ export function StartEmailValidationProcessHandler(
     const { email } = existingProfile;
 
     // Start a orchestrator that handles the email validation process.
-    context.log.verbose(`${logPrefix}|Starting the email validation process`);
-    const emailValidationProcessOrchestartorInput = EmailValidationProcessOrchestratorInput.encode(
+    context.log.verbose(
+      `${logPrefix}|Starting the email validation with template process`
+    );
+    const emailValidationWithTemplateProcessOrchestartorInput = EmailValidationWithTemplateProcessOrchestratorInput.encode(
       {
         email,
         fiscalCode
@@ -127,9 +129,9 @@ export function StartEmailValidationProcessHandler(
               TE.tryCatch(
                 () =>
                   dfClient.startNew(
-                    "EmailValidationProcessOrchestrator",
+                    "EmailValidationWithTemplateProcessOrchestrator",
                     orchId,
-                    emailValidationProcessOrchestartorInput
+                    emailValidationWithTemplateProcessOrchestartorInput
                   ),
                 toError
               ),
