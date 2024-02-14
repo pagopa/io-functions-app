@@ -1,0 +1,7 @@
+export function apply(
+  title: string,
+  validationUrl: string,
+  name?: string
+): string {
+  return `{{TEMPLATE}}`;
+}
