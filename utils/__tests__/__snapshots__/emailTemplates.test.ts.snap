@@ -1013,8 +1013,7 @@ exports[`Email Templates should generate login notification email 1`] = `
 `;
 
 exports[`Email Templates should generate validation email 1`] = `
-"
-<!doctype html>
+"<!doctype html>
 <html lang=\\"it\\" xmlns=\\"http://www.w3.org/1999/xhtml\\" xmlns:v=\\"urn:schemas-microsoft-com:vml\\" xmlns:o=\\"urn:schemas-microsoft-com:office:office\\">
 
 <head>
@@ -1296,7 +1295,7 @@ exports[`Email Templates should generate validation email 1`] = `
                                     <tbody>
                                       <tr>
                                         <td style=\\"width:36px;\\">
-                                          <img src=\\"https://raw.githubusercontent.com/pagopa/io-messages-email-templates/v1.0.13/assets/logo_app_io.png\\" style=\\"border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;\\" width=\\"36\\" height=\\"auto\\" />
+                                          <img src=\\"https://raw.githubusercontent.com/pagopa/io-messages-email-templates/v1.0.14/assets/logo_app_io.png\\" style=\\"border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;\\" width=\\"36\\" height=\\"auto\\" />
                                         </td>
                                       </tr>
                                     </tbody>
@@ -1304,7 +1303,7 @@ exports[`Email Templates should generate validation email 1`] = `
                                 </td>
                               </tr>
                               <div class=\\"dark-img\\" style=\\"mso-hide: all; display: none; padding: 10px 0px\\">
-                                <img src=\\"https://raw.githubusercontent.com/pagopa/io-messages-email-templates/v1.0.13/assets/logo_app_io_white.png\\" width=\\"36px\\" class=\\"dark-img\\" style=\\"display: none\\" />
+                                <img src=\\"https://raw.githubusercontent.com/pagopa/io-messages-email-templates/v1.0.14/assets/logo_app_io_white.png\\" width=\\"36px\\" class=\\"dark-img\\" style=\\"display: none\\" />
                               </div>
                             </tbody>
                           </table>

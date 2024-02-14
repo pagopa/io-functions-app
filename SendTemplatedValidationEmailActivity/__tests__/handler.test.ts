@@ -41,17 +41,20 @@ describe("SendTemplatedValidationEmailActivityHandler", () => {
       emailDefaults,
       functionsPublicUrl
     );
+    const aName = "EXAMPLE_NAME";
 
     const input = SendValidationEmailActivityInput.encode({
       email: "email@example.com" as EmailString,
-      token: "FAKE_TOKEN"
+      token: "FAKE_TOKEN",
+      name: aName
     });
 
     await handler(contextMock as any, input);
 
     expect(apply).toBeCalledWith(
       emailDefaults.title,
-      `${functionsPublicUrl}/validate-profile-email?token=${input.token}`
+      `${functionsPublicUrl}/validate-profile-email?token=${input.token}`,
+      aName
     );
     expect(mailerTransporterMock.sendMail).toHaveBeenCalledWith(
       {

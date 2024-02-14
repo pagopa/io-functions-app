@@ -19,7 +19,7 @@ import * as B from "fp-ts/boolean";
 import {
   OrchestratorInput as EmailValidationProcessOrchestratorInput,
   OrchestratorResult as EmailValidationProcessOrchestratorResult
-} from "../EmailValidationProcessOrchestrator/handler";
+} from "../EmailValidationWithTemplateProcessOrchestrator/handler";
 import { Input as UpdateServiceSubscriptionFeedActivityInput } from "../UpdateSubscriptionsFeedActivity/handler";
 import { diffBlockedServices } from "../utils/profiles";
 import {
@@ -49,6 +49,9 @@ export const OrchestratorInput = t.intersection([
     updatedAt: UTCISODateFromString
   }),
   t.partial({
+    // TODO: name field from partial to required after complete rollout of
+    // IOPID-1444 task
+    name: t.string,
     oldProfile: RetrievedProfile
   })
 ]);
@@ -100,7 +103,8 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
     const {
       newProfile,
       oldProfile,
-      updatedAt
+      updatedAt,
+      name
     } = upsertedProfileOrchestratorInput;
 
     const profileOperation = oldProfile !== undefined ? "UPDATED" : "CREATED";
@@ -120,7 +124,8 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
         const emailValidationProcessOrchestartorInput = EmailValidationProcessOrchestratorInput.encode(
           {
             email,
-            fiscalCode
+            fiscalCode,
+            name
           }
         );
 

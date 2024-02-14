@@ -23,10 +23,12 @@ import {
 
 describe("EmailValidationWithTemaplteProcessOrchestrator", () => {
   it("should start the activities with the right inputs", async () => {
+    const aName = "EXAMPLE_NAME";
     const emailValidationProcessOrchestratorInput = EmailValidationProcessOrchestratorInput.encode(
       {
         email: aEmail,
-        fiscalCode: aFiscalCode
+        fiscalCode: aFiscalCode,
+        name: aName
       }
     );
 
@@ -83,7 +85,8 @@ describe("EmailValidationWithTemaplteProcessOrchestrator", () => {
       expect.anything(), // retryOptions
       SendValidationEmailActivityInput.encode({
         email: aEmail,
-        token: `${aTokenId}:${aValidator}`
+        token: `${aTokenId}:${aValidator}`,
+        name: aName
       })
     );
   });

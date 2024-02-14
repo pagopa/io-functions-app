@@ -18,7 +18,7 @@ import {
 import {
   OrchestratorInput as EmailValidationProcessOrchestratorInput,
   OrchestratorResult as EmailValidationProcessOrchestratorResult
-} from "../../EmailValidationProcessOrchestrator/handler";
+} from "../../EmailValidationWithTemplateProcessOrchestrator/handler";
 import {
   getUpsertedProfileOrchestratorHandler,
   OrchestratorInput as UpsertedProfileOrchestratorInput
@@ -28,7 +28,6 @@ import { BlockedInboxOrChannelEnum } from "@pagopa/io-functions-commons/dist/gen
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { consumeGenerator } from "../../utils/durable";
 
-import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 import {
@@ -38,6 +37,7 @@ import {
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { FeatureFlagEnum } from "../../utils/featureFlag";
 
+const aName = "EXAMPLE_NAME";
 const someRetryOptions = new df.RetryOptions(5000, 10);
 // eslint-disable-next-line functional/immutable-data
 someRetryOptions.backoffCoefficient = 1.5;
@@ -51,7 +51,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
       UpsertedProfileOrchestratorInput.decode({
         newProfile: { ...aRetrievedProfile, isWebhookEnabled: true },
         oldProfile: aRetrievedProfile,
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        name: aName
       }),
       E.getOrElseW(errs =>
         fail(
@@ -123,7 +124,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
             isInboxEnabled: true // Enable inbox to start the SendWelcomeMessagesActivity
           },
           oldProfile: aRetrievedProfile,
-          updatedAt: new Date()
+          updatedAt: new Date(),
+          name: aName
         }),
         E.getOrElseW(errs =>
           fail(
@@ -180,7 +182,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
         expect.anything(), // retryOptions
         EmailValidationProcessOrchestratorInput.encode({
           email: aEmailChanged,
-          fiscalCode: aFiscalCode
+          fiscalCode: aFiscalCode,
+          name: aName
         })
       );
 
@@ -223,7 +226,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
           isInboxEnabled: true // Enable inbox to start the SendWelcomeMessagesActivity
         },
         oldProfile: aRetrievedProfile,
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        name: aName
       }),
       E.getOrElseW(errs =>
         fail(
@@ -280,7 +284,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
       expect.anything(), // retryOptions
       EmailValidationProcessOrchestratorInput.encode({
         email: aEmailChanged,
-        fiscalCode: aFiscalCode
+        fiscalCode: aFiscalCode,
+        name: aName
       })
     );
 
@@ -336,7 +341,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
           ...aRetrievedProfile,
           servicePreferencesSettings: autoProfileServicePreferencesSettings
         },
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        name: aName
       }),
       E.getOrElseW(errs =>
         fail(
@@ -393,7 +399,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
       expect.anything(), // retryOptions
       EmailValidationProcessOrchestratorInput.encode({
         email: aEmailChanged,
-        fiscalCode: aFiscalCode
+        fiscalCode: aFiscalCode,
+        name: aName
       })
     );
 
@@ -454,7 +461,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
         oldProfile: {
           ...aRetrievedProfile
         },
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        name: aName
       }),
       E.getOrElseW(errs =>
         fail(
@@ -511,7 +519,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
       expect.anything(), // retryOptions
       EmailValidationProcessOrchestratorInput.encode({
         email: aEmailChanged,
-        fiscalCode: aFiscalCode
+        fiscalCode: aFiscalCode,
+        name: aName
       })
     );
 
@@ -571,7 +580,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
         oldProfile: {
           ...aRetrievedProfile
         },
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        name: aName
       }),
       E.getOrElseW(errs =>
         fail(
@@ -628,7 +638,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
       expect.anything(), // retryOptions
       EmailValidationProcessOrchestratorInput.encode({
         email: aEmailChanged,
-        fiscalCode: aFiscalCode
+        fiscalCode: aFiscalCode,
+        name: aName
       })
     );
 
@@ -695,7 +706,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
           ...aRetrievedProfile,
           servicePreferencesSettings: autoProfileServicePreferencesSettings
         },
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        name: aName
       }),
       E.getOrElseW(errs =>
         fail(
@@ -760,7 +772,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
       expect.anything(), // retryOptions
       EmailValidationProcessOrchestratorInput.encode({
         email: aEmailChanged,
-        fiscalCode: aFiscalCode
+        fiscalCode: aFiscalCode,
+        name: aName
       })
     );
 
@@ -847,7 +860,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
           ...aRetrievedProfile,
           servicePreferencesSettings: manualProfileServicePreferencesSettings
         },
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        name: aName
       }),
       E.getOrElseW(errs =>
         fail(
@@ -910,7 +924,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
       expect.anything(), // retryOptions
       EmailValidationProcessOrchestratorInput.encode({
         email: aEmailChanged,
-        fiscalCode: aFiscalCode
+        fiscalCode: aFiscalCode,
+        name: aName
       })
     );
 
@@ -1002,7 +1017,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
             service3: [BlockedInboxOrChannelEnum.INBOX]
           }
         },
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        name: aName
       }),
       E.getOrElseW(errs =>
         fail(
@@ -1059,7 +1075,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
       expect.anything(), // retryOptions
       EmailValidationProcessOrchestratorInput.encode({
         email: aEmailChanged,
-        fiscalCode: aFiscalCode
+        fiscalCode: aFiscalCode,
+        name: aName
       })
     );
 
@@ -1215,7 +1232,8 @@ describe("UpsertedProfileOrchestrator |> emitted events", () => {
         {
           newProfile,
           updatedAt: new Date(),
-          oldProfile
+          oldProfile,
+          name: aName
         },
         UpsertedProfileOrchestratorInput.decode,
         E.getOrElseW(errs =>

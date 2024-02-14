@@ -33,8 +33,9 @@ describe("Email Templates", () => {
   it("should generate validation email", () => {
     const aTitle = "MY TITLE";
     const aValidationUrl = "https://example.com?result=success";
+    const aName = "MYNAME";
 
-    const result = validationEmailApply(aTitle, aValidationUrl);
+    const result = validationEmailApply(aTitle, aValidationUrl, aName);
     expect(result).toMatchSnapshot();
   });
 });

@@ -40,7 +40,9 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 
 import { pipe } from "fp-ts/lib/function";
+import { RequiredBodyPayloadMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_body_payload";
 import { OrchestratorInput as EmailValidationWithTemplateProcessOrchestratorInput } from "../EmailValidationWithTemplateProcessOrchestrator/handler";
+import { EmailValidationProcessParams } from "../generated/definitions/internal/EmailValidationProcessParams";
 import {
   isOrchestratorRunning,
   makeStartEmailValidationProcessOrchestratorId
@@ -60,7 +62,8 @@ type ReturnTypes =
  */
 type IStartEmailValidationProcessHandler = (
   context: Context,
-  fiscalCode: FiscalCode
+  fiscalCode: FiscalCode,
+  payload: EmailValidationProcessParams
 ) => Promise<ReturnTypes>;
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
@@ -68,7 +71,7 @@ export function StartEmailValidationProcessHandler(
   profileModel: ProfileModel
 ): IStartEmailValidationProcessHandler {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  return async (context, fiscalCode) => {
+  return async (context, fiscalCode, payload) => {
     const logPrefix = `StartEmailValidationProcessHandler|FISCAL_CODE=${fiscalCode}`;
 
     const errorOrMaybeExistingProfile = await profileModel.findLastVersionByModelId(
@@ -108,7 +111,8 @@ export function StartEmailValidationProcessHandler(
     const emailValidationWithTemplateProcessOrchestartorInput = EmailValidationWithTemplateProcessOrchestratorInput.encode(
       {
         email,
-        fiscalCode
+        fiscalCode,
+        name: payload.name
       }
     );
 
@@ -159,7 +163,8 @@ export function StartEmailValidationProcess(
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
-    FiscalCodeMiddleware
+    FiscalCodeMiddleware,
+    RequiredBodyPayloadMiddleware(EmailValidationProcessParams)
   );
   return wrapRequestHandler(middlewaresWrap(handler));
 }
