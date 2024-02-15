@@ -18,8 +18,7 @@ import {
   ResponseSuccessJson,
   ResponseErrorInternal,
   ResponseErrorPreconditionFailed,
-  IResponseErrorPreconditionFailed,
-  ResponseErrorValidation
+  IResponseErrorPreconditionFailed
 } from "@pagopa/ts-commons/lib/responses";
 
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
@@ -49,7 +48,6 @@ import {
   isEmailAlreadyTaken
 } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
 import { RequiredBodyPayloadMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_body_payload";
-import { SequenceMiddleware } from "@pagopa/ts-commons/lib/sequence_middleware";
 import { MigrateServicesPreferencesQueueMessage } from "../MigrateServicePreferenceFromLegacy/handler";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { ProfileMiddleware } from "../utils/middlewares/profile";
@@ -298,10 +296,10 @@ export function UpdateProfileHandler(
     // Start the Orchestrator
     const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.encode(
       {
+        name: profileNamePayload.name,
         newProfile: updateProfile,
         oldProfile: existingProfile,
-        updatedAt: new Date(),
-        name: profileNamePayload.name
+        updatedAt: new Date()
       }
     );
     // TODO: To enable the new orchestration change to UpsertedProfileOrchestrator
