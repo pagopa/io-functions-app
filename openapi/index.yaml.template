@@ -141,7 +141,9 @@ paths:
         - in: body
           name: body
           schema:
-            $ref: "#/definitions/Profile"
+            allOf:
+              - $ref: "#/definitions/Profile"
+              - $ref: "#/definitions/EmailValidationProcessParams"
       responses:
         "200":
           description: Profile updated
@@ -243,6 +245,10 @@ paths:
         - restricted
       parameters:
         - $ref: "#/parameters/FiscalCode"
+        - in: body
+          name: body 
+          schema: 
+            $ref: "#/definitions/EmailValidationProcessParams"
       responses:
         "202":
           description: Request accepted
@@ -471,6 +477,13 @@ definitions:
     format: IPString
     x-import: "@pagopa/ts-commons/lib/strings"
     example: "127.0.0.1"
+  EmailValidationProcessParams:
+    type: object
+    properties:
+      name:
+        type: string
+    required:
+      - name
   LimitedProfile:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/LimitedProfile"
   CIDR:
