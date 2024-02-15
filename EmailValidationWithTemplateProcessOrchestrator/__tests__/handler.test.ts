@@ -4,6 +4,7 @@ import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aEmail,
   aFiscalCode,
+  aName,
   aTokenId,
   aValidator,
   aValidatorHash
@@ -23,7 +24,6 @@ import {
 
 describe("EmailValidationWithTemaplteProcessOrchestrator", () => {
   it("should start the activities with the right inputs", async () => {
-    const aName = "EXAMPLE_NAME";
     const emailValidationProcessOrchestratorInput = EmailValidationProcessOrchestratorInput.encode(
       {
         email: aEmail,

@@ -10,6 +10,7 @@ import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aEmailChanged,
   aFiscalCode,
+  aName,
   anotherFiscalCode,
   aRetrievedProfile,
   autoProfileServicePreferencesSettings,
@@ -37,7 +38,6 @@ import {
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { FeatureFlagEnum } from "../../utils/featureFlag";
 
-const aName = "EXAMPLE_NAME";
 const someRetryOptions = new df.RetryOptions(5000, 10);
 // eslint-disable-next-line functional/immutable-data
 someRetryOptions.backoffCoefficient = 1.5;

@@ -9,6 +9,7 @@ import {
   getSendValidationEmailActivityHandler
 } from "../handler";
 import { apply } from "../../generated/templates/mailvalidation/index";
+import { aName } from "../../__mocks__/mocks";
 
 const htmlAndTextContent = "CONTENT";
 
@@ -41,7 +42,6 @@ describe("SendTemplatedValidationEmailActivityHandler", () => {
       emailDefaults,
       functionsPublicUrl
     );
-    const aName = "EXAMPLE_NAME";
 
     const input = SendValidationEmailActivityInput.encode({
       email: "email@example.com" as EmailString,
