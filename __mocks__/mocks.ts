@@ -29,6 +29,7 @@ import { CosmosResource } from "@pagopa/io-functions-commons/dist/src/utils/cosm
 import { retrievedProfileToExtendedProfile } from "../utils/profiles";
 import { toUserDataProcessingApi } from "../utils/user_data_processings";
 
+export const aName = "EXAMPLE_NAME";
 export const aEmail = "email@example.com" as EmailString;
 export const aEmailChanged = "email.changed@example.com" as EmailString;
 
