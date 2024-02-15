@@ -140,9 +140,7 @@ paths:
         - in: body
           name: body
           schema:
-            allOf:
-              - $ref: '#/definitions/Profile'
-              - $ref: '#/definitions/EmailValidationProcessParams'
+            $ref: '#/definitions/UpdateProfileParams'
       responses:
         '200':
           description: Profile updated
@@ -444,6 +442,10 @@ parameters:
     required: true
     x-example: DOWNLOAD
 definitions:
+  UpdateProfileParams:
+    allOf:
+      - $ref: '#/definitions/Profile'
+      - $ref: '#/definitions/EmailValidationProcessParams'
   UserLoginParams:
     type: object
     description: All the data related to a newly performed login
