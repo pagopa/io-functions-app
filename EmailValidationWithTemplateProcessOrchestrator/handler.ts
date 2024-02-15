@@ -23,7 +23,7 @@ export const OrchestratorInput = t.intersection([
     email: EmailString,
     fiscalCode: FiscalCode
   }),
-  // TODO: name field from partial to required after complete rollout of 
+  // TODO: name field from partial to required after complete rollout of
   // IOPID-1444 task
   t.partial({ name: t.string })
 ]);
