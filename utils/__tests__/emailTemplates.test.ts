@@ -3,6 +3,7 @@ import { apply as loginEmailApply } from "../../generated/templates/login/index"
 import { apply as fallbackLoginEmailApply } from "../../generated/templates/login-fallback/index";
 import { apply as validationEmailApply } from "../../generated/templates/mailvalidation/index";
 import { ValidUrl } from "@pagopa/ts-commons/lib/url";
+import { aName } from "../../__mocks__/mocks";
 
 describe("Email Templates", () => {
   it("should generate login notification email", () => {
@@ -34,7 +35,22 @@ describe("Email Templates", () => {
     const aTitle = "MY TITLE";
     const aValidationUrl = "https://example.com?result=success";
 
-    const result = validationEmailApply(aTitle, aValidationUrl);
+    const result = validationEmailApply(aTitle, aValidationUrl, aName);
     expect(result).toMatchSnapshot();
   });
+
+  it.each`
+    case           | value
+    ${"null"}      | ${null}
+    ${"undefined"} | ${undefined}
+  `(
+    "should generate validation email guarding against $case input",
+    ({ value }) => {
+      const aTitle = "MY TITLE";
+      const aValidationUrl = "https://example.com?result=success";
+
+      const result = validationEmailApply(aTitle, aValidationUrl, value);
+      expect(result).toMatchSnapshot();
+    }
+  );
 });

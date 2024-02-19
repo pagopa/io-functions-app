@@ -4,6 +4,7 @@ import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aEmail,
   aFiscalCode,
+  aName,
   aTokenId,
   aValidator,
   aValidatorHash
@@ -26,7 +27,8 @@ describe("EmailValidationWithTemaplteProcessOrchestrator", () => {
     const emailValidationProcessOrchestratorInput = EmailValidationProcessOrchestratorInput.encode(
       {
         email: aEmail,
-        fiscalCode: aFiscalCode
+        fiscalCode: aFiscalCode,
+        name: aName
       }
     );
 
@@ -83,7 +85,8 @@ describe("EmailValidationWithTemaplteProcessOrchestrator", () => {
       expect.anything(), // retryOptions
       SendValidationEmailActivityInput.encode({
         email: aEmail,
-        token: `${aTokenId}:${aValidator}`
+        token: `${aTokenId}:${aValidator}`,
+        name: aName
       })
     );
   });

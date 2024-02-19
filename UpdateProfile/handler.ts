@@ -47,6 +47,7 @@ import {
   IProfileEmailReader,
   isEmailAlreadyTaken
 } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
+import { RequiredBodyPayloadMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_body_payload";
 import { MigrateServicesPreferencesQueueMessage } from "../MigrateServicePreferenceFromLegacy/handler";
 import { OrchestratorInput as UpsertedProfileOrchestratorInput } from "../UpsertedProfileOrchestrator/handler";
 import { ProfileMiddleware } from "../utils/middlewares/profile";
@@ -58,6 +59,7 @@ import {
 import { toHash } from "../utils/crypto";
 import { createTracker } from "../utils/tracking";
 import { UpdateProfile412ErrorTypesEnum } from "../generated/definitions/internal/UpdateProfile412ErrorTypes";
+import { EmailValidationProcessParams } from "../generated/definitions/internal/EmailValidationProcessParams";
 
 /**
  * Type of an UpdateProfile handler.
@@ -65,7 +67,8 @@ import { UpdateProfile412ErrorTypesEnum } from "../generated/definitions/interna
 type IUpdateProfileHandler = (
   context: Context,
   fiscalCode: FiscalCode,
-  profilePayload: ApiProfile
+  profilePayload: ApiProfile,
+  profileNamePayload: EmailValidationProcessParams
 ) => Promise<
   | IResponseSuccessJson<ApiProfile>
   | IResponseErrorQuery
@@ -108,7 +111,7 @@ export function UpdateProfileHandler(
   FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED: (fiscalCode: FiscalCode) => boolean
 ): IUpdateProfileHandler {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, max-lines-per-function, complexity, sonarjs/cognitive-complexity
-  return async (context, fiscalCode, profilePayload) => {
+  return async (context, fiscalCode, profilePayload, profileNamePayload) => {
     const logPrefix = `UpdateProfileHandler|FISCAL_CODE=${toHash(fiscalCode)}`;
 
     const errorOrMaybeExistingProfile = await profileModel.findLastVersionByModelId(
@@ -293,6 +296,7 @@ export function UpdateProfileHandler(
     // Start the Orchestrator
     const upsertedProfileOrchestratorInput = UpsertedProfileOrchestratorInput.encode(
       {
+        name: profileNamePayload.name,
         newProfile: updateProfile,
         oldProfile: existingProfile,
         updatedAt: new Date()
@@ -359,7 +363,8 @@ export function UpdateProfile(
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
     FiscalCodeMiddleware,
-    ProfileMiddleware
+    ProfileMiddleware,
+    RequiredBodyPayloadMiddleware(EmailValidationProcessParams)
   );
   return wrapRequestHandler(middlewaresWrap(handler));
 }

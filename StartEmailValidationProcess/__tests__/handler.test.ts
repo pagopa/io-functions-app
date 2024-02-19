@@ -2,6 +2,7 @@
 import * as durableFunction from "durable-functions";
 import { some } from "fp-ts/lib/Option";
 import { taskEither } from "fp-ts/lib/TaskEither";
+import { EmailValidationProcessParams } from "../../generated/definitions/internal/EmailValidationProcessParams";
 import {
   context as contextMock,
   mockStartNew
@@ -19,6 +20,9 @@ const isOrchestratorRunningMock = jest.fn(() =>
     isRunning: false
   })
 );
+
+const aValidPayload: EmailValidationProcessParams = { name: "EXAMPLE_NAME" };
+
 jest.spyOn(durableFunction, "getClient").mockImplementation(_ => getClientMock);
 jest
   .spyOn(orchUtil, "isOrchestratorRunning")
@@ -37,7 +41,8 @@ describe("StartEmailValidationProcessHandler", () => {
 
     const result = await handler(
       contextMock as any,
-      aRetrievedProfile.fiscalCode
+      aRetrievedProfile.fiscalCode,
+      aValidPayload
     );
 
     expect(result.kind).toBe("IResponseSuccessAccepted");
@@ -59,7 +64,8 @@ describe("StartEmailValidationProcessHandler", () => {
 
     const result = await handler(
       contextMock as any,
-      aRetrievedProfile.fiscalCode
+      aRetrievedProfile.fiscalCode,
+      aValidPayload
     );
     expect(mockStartNew).not.toHaveBeenCalled();
 
@@ -75,10 +81,15 @@ describe("StartEmailValidationProcessHandler", () => {
 
     const handler = StartEmailValidationProcessHandler(profileModelMock as any);
 
-    await handler(contextMock as any, aRetrievedProfile.fiscalCode);
+    await handler(
+      contextMock as any,
+      aRetrievedProfile.fiscalCode,
+      aValidPayload
+    );
     const result = await handler(
       contextMock as any,
-      aRetrievedProfile.fiscalCode
+      aRetrievedProfile.fiscalCode,
+      aValidPayload
     );
     expect(result.kind).toBe("IResponseErrorValidation");
   });

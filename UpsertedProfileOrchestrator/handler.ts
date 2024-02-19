@@ -17,9 +17,9 @@ import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/p
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import * as B from "fp-ts/boolean";
 import {
-  OrchestratorInput as EmailValidationProcessOrchestratorInput,
-  OrchestratorResult as EmailValidationProcessOrchestratorResult
-} from "../EmailValidationProcessOrchestrator/handler";
+  OrchestratorInput as EmailValidationWithTemplateProcessOrchestratorInput,
+  OrchestratorResult as EmailValidationWithTemplateProcessOrchestratorResult
+} from "../EmailValidationWithTemplateProcessOrchestrator/handler";
 import { Input as UpdateServiceSubscriptionFeedActivityInput } from "../UpdateSubscriptionsFeedActivity/handler";
 import { diffBlockedServices } from "../utils/profiles";
 import {
@@ -49,6 +49,7 @@ export const OrchestratorInput = t.intersection([
     updatedAt: UTCISODateFromString
   }),
   t.partial({
+    name: t.string,
     oldProfile: RetrievedProfile
   })
 ]);
@@ -100,7 +101,8 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
     const {
       newProfile,
       oldProfile,
-      updatedAt
+      updatedAt,
+      name
     } = upsertedProfileOrchestratorInput;
 
     const profileOperation = oldProfile !== undefined ? "UPDATED" : "CREATED";
@@ -108,6 +110,8 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
     // Check if the profile email is changed
     const isProfileEmailChanged =
       profileOperation === "UPDATED" && newProfile.email !== oldProfile.email;
+    // NOTE: if the following check is changed make sure to pass add the name field
+    // to CreateProfile method which also calls this orchestrator
     if (isProfileEmailChanged) {
       try {
         const { fiscalCode, email } = newProfile;
@@ -117,10 +121,11 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
         context.log.verbose(
           `${logPrefix}|Email changed, starting the email validation process`
         );
-        const emailValidationProcessOrchestartorInput = EmailValidationProcessOrchestratorInput.encode(
+        const emailValidationProcessOrchestartorInput = EmailValidationWithTemplateProcessOrchestratorInput.encode(
           {
             email,
-            fiscalCode
+            fiscalCode,
+            name
           }
         );
 
@@ -143,7 +148,7 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
           emailValidationProcessOrchestartorInput
         );
 
-        const errorOrEmailValidationProcessOrchestartorResult = EmailValidationProcessOrchestratorResult.decode(
+        const errorOrEmailValidationProcessOrchestartorResult = EmailValidationWithTemplateProcessOrchestratorResult.decode(
           emailValidationProcessOrchestartorResultJson
         );
 

@@ -20,10 +20,15 @@ import * as mailvalidation from "../generated/templates/mailvalidation/index";
 import { EmailDefaults } from ".";
 
 // Activity input
-export const ActivityInput = t.interface({
-  email: EmailString,
-  token: t.string
-});
+export const ActivityInput = t.intersection([
+  t.interface({
+    email: EmailString,
+    token: t.string
+  }),
+  // TODO: name field from partial to required after complete rollout of
+  // IOPID-1444 task
+  t.partial({ name: t.string })
+]);
 
 export type ActivityInput = t.TypeOf<typeof ActivityInput>;
 
@@ -66,14 +71,15 @@ export const getSendValidationEmailActivityHandler = (
   }
 
   const activityInput = errorOrActivityInput.right;
-  const { email, token } = activityInput;
+  const { email, token, name } = activityInput;
 
   // Generate the email html from the template
   const { from, title, htmlToTextOptions } = emailDefaults;
 
   const emailHtml = mailvalidation.apply(
     title,
-    `${functionsPublicUrl}/validate-profile-email?token=${token}`
+    `${functionsPublicUrl}/validate-profile-email?token=${token}`,
+    name
   );
 
   // converts the HTML to pure text to generate the text version of the message

@@ -15,13 +15,16 @@ import {
 import {
   ActivityInput as SendValidationEmailActivityInput,
   ActivityResult as SendValidationEmailActivityResult
-} from "../SendValidationEmailActivity/handler";
+} from "../SendTemplatedValidationEmailActivity/handler";
 
 // Input
-export const OrchestratorInput = t.interface({
-  email: EmailString,
-  fiscalCode: FiscalCode
-});
+export const OrchestratorInput = t.intersection([
+  t.interface({
+    email: EmailString,
+    fiscalCode: FiscalCode
+  }),
+  t.partial({ name: t.string })
+]);
 
 export type OrchestratorInput = t.TypeOf<typeof OrchestratorInput>;
 
@@ -74,7 +77,7 @@ export const handler = function*(
   }
 
   const orchestratorInput = errorOrOrchestratorInput.right;
-  const { fiscalCode, email } = orchestratorInput;
+  const { fiscalCode, email, name } = orchestratorInput;
 
   // Log the input
   context.log.verbose(
@@ -145,6 +148,7 @@ export const handler = function*(
     const sendValidationEmailActivityInput = SendValidationEmailActivityInput.encode(
       {
         email,
+        name,
         token: `${validationTokenEntity.PartitionKey}:${validator}`
       }
     );

@@ -13,6 +13,7 @@ import { context as contextMock } from "../../__mocks__/durable-functions";
 import {
   aEmailChanged,
   aFiscalCode,
+  aName,
   aProfile,
   aRetrievedProfile,
   aRetrievedProfileWithEmail,
@@ -33,6 +34,7 @@ import { constFalse, constTrue, pipe } from "fp-ts/lib/function";
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 import { IProfileEmailReader } from "@pagopa/io-functions-commons/dist/src/utils/unique_email_enforcement";
 import { generateProfileEmails } from "../../__mocks__/unique-email-enforcement";
+import { EmailValidationProcessParams } from "../../generated/definitions/internal/EmailValidationProcessParams";
 
 const mockSendMessage = jest.fn().mockImplementation(() => Promise.resolve());
 const mockQueueClient = ({
@@ -57,6 +59,8 @@ const profileEmailReader: IProfileEmailReader = {
   list: generateProfileEmails(0)
 };
 
+const validUpdateProfileEmailValidationPayload = { name: aName };
+
 describe("UpdateProfileHandler", () => {
   it("should return a query error when an error occurs retrieving the existing profile", async () => {
     const profileModelMock = {
@@ -74,7 +78,8 @@ describe("UpdateProfileHandler", () => {
     const result = await updateProfileHandler(
       contextMock as any,
       aFiscalCode,
-      {} as any
+      {} as any,
+      validUpdateProfileEmailValidationPayload
     );
 
     expect(result.kind).toBe("IResponseErrorQuery");
@@ -96,7 +101,8 @@ describe("UpdateProfileHandler", () => {
     const result = await updateProfileHandler(
       contextMock as any,
       aFiscalCode,
-      {} as any
+      {} as any,
+      validUpdateProfileEmailValidationPayload
     );
 
     expect(result.kind).toBe("IResponseErrorNotFound");
@@ -115,9 +121,14 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
-      version: 1
-    } as any);
+    const result = await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        version: 1
+      } as any,
+      validUpdateProfileEmailValidationPayload
+    );
 
     expect(result.kind).toBe("IResponseErrorConflict");
   });
@@ -139,10 +150,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      email: aEmailChanged
-    });
+    const result = await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        email: aEmailChanged
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     expect(result.kind).toBe("IResponseSuccessJson");
     if (result.kind === "IResponseSuccessJson") {
@@ -177,10 +193,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      service_preferences_settings: legacyApiProfileServicePreferencesSettings
-    });
+    const result = await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        service_preferences_settings: legacyApiProfileServicePreferencesSettings
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     expect(result.kind).toBe("IResponseErrorConflict");
     expect(profileModelMock.findLastVersionByModelId).toBeCalled();
@@ -209,10 +230,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      service_preferences_settings: legacyApiProfileServicePreferencesSettings
-    });
+    const result = await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        service_preferences_settings: legacyApiProfileServicePreferencesSettings
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     expect(result.kind).toBe("IResponseErrorConflict");
     expect(profileModelMock.findLastVersionByModelId).toBeCalled();
@@ -241,10 +267,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      service_preferences_settings: undefined
-    });
+    const result = await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        service_preferences_settings: undefined
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     expect(result.kind).toBe("IResponseErrorConflict");
     expect(profileModelMock.findLastVersionByModelId).toBeCalled();
@@ -273,10 +304,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      service_preferences_settings: undefined
-    });
+    const result = await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        service_preferences_settings: undefined
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     expect(result.kind).toBe("IResponseErrorConflict");
     expect(profileModelMock.findLastVersionByModelId).toBeCalled();
@@ -300,10 +336,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      service_preferences_settings: undefined
-    });
+    const result = await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        service_preferences_settings: undefined
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     expect(result.kind).toBe("IResponseSuccessJson");
     if (result.kind === "IResponseSuccessJson") {
@@ -335,9 +376,14 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile
-    });
+    const result = await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     expect(result.kind).toBe("IResponseSuccessJson");
     if (result.kind === "IResponseSuccessJson") {
@@ -374,10 +420,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      service_preferences_settings: autoApiProfileServicePreferencesSettings
-    });
+    const result = await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        service_preferences_settings: autoApiProfileServicePreferencesSettings
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     expect(result.kind).toBe("IResponseSuccessJson");
     if (result.kind === "IResponseSuccessJson") {
@@ -414,10 +465,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      service_preferences_settings: manualApiProfileServicePreferencesSettings
-    });
+    const result = await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        service_preferences_settings: manualApiProfileServicePreferencesSettings
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     expect(result.kind).toBe("IResponseSuccessJson");
     if (result.kind === "IResponseSuccessJson") {
@@ -449,10 +505,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      service_preferences_settings: manualApiProfileServicePreferencesSettings
-    });
+    const result = await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        service_preferences_settings: manualApiProfileServicePreferencesSettings
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     let expectedServicePreferencesSettingsVersion =
       legacyProfileServicePreferencesSettings.version + 1;
@@ -487,10 +548,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      service_preferences_settings: autoApiProfileServicePreferencesSettings
-    });
+    const result = await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        service_preferences_settings: autoApiProfileServicePreferencesSettings
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     let expectedServicePreferencesSettingsVersion =
       legacyProfileServicePreferencesSettings.version + 1;
@@ -530,10 +596,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      service_preferences_settings: manualApiProfileServicePreferencesSettings
-    });
+    const result = await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        service_preferences_settings: manualApiProfileServicePreferencesSettings
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     let expectedServicePreferencesSettingsVersion =
       autoProfileServicePreferencesSettings.version + 1;
@@ -573,10 +644,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      service_preferences_settings: autoApiProfileServicePreferencesSettings
-    });
+    const result = await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        service_preferences_settings: autoApiProfileServicePreferencesSettings
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     let expectedServicePreferencesSettingsVersion =
       manualProfileServicePreferencesSettings.version + 1;
@@ -666,7 +742,8 @@ describe("UpdateProfileHandler", () => {
       const result = await updateProfileHandler(
         contextMock as any,
         aFiscalCode,
-        newProfile
+        newProfile,
+        validUpdateProfileEmailValidationPayload
       );
 
       expect(result.kind).toBe("IResponseSuccessJson");
@@ -691,7 +768,8 @@ describe("UpdateProfileHandler", () => {
       {
         newProfile: updatedProfile,
         oldProfile: aRetrievedProfile,
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        name: validUpdateProfileEmailValidationPayload.name
       }
     );
 
@@ -708,10 +786,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      email: aEmailChanged
-    });
+    await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        email: aEmailChanged
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     expect(df.getClient).toHaveBeenCalledTimes(1);
 
@@ -747,14 +830,19 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      blocked_inbox_or_channels: {
-        newService: [BlockedInboxOrChannelEnum.EMAIL],
-        serviceId: [BlockedInboxOrChannelEnum.INBOX]
+    await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        blocked_inbox_or_channels: {
+          newService: [BlockedInboxOrChannelEnum.EMAIL],
+          serviceId: [BlockedInboxOrChannelEnum.INBOX]
+        },
+        service_preferences_settings: legacyApiProfileServicePreferencesSettings
       },
-      service_preferences_settings: legacyApiProfileServicePreferencesSettings
-    });
+      validUpdateProfileEmailValidationPayload
+    );
 
     expect(profileModelMock.update).toBeCalledWith(
       expect.objectContaining({
@@ -788,10 +876,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      service_preferences_settings: autoApiProfileServicePreferencesSettings
-    });
+    await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        service_preferences_settings: autoApiProfileServicePreferencesSettings
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     expect(profileModelMock.update).toBeCalledWith(
       expect.objectContaining({
@@ -828,10 +921,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      service_preferences_settings: autoApiProfileServicePreferencesSettings
-    });
+    await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        service_preferences_settings: autoApiProfileServicePreferencesSettings
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     expect(profileModelMock.update).toBeCalledWith(
       expect.objectContaining({
@@ -868,10 +966,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      service_preferences_settings: autoApiProfileServicePreferencesSettings
-    });
+    await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        service_preferences_settings: autoApiProfileServicePreferencesSettings
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     expect(mockSendMessage).toBeCalledTimes(0);
   });
@@ -894,10 +997,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      service_preferences_settings: manualProfileServicePreferencesSettings
-    });
+    await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        service_preferences_settings: manualProfileServicePreferencesSettings
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     expect(mockSendMessage).toBeCalledTimes(0);
   });
@@ -918,10 +1026,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      last_app_version: "0.0.1" as Semver
-    });
+    const result = await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        last_app_version: "0.0.1" as Semver
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     expect(result.kind).toBe("IResponseSuccessJson");
     if (result.kind === "IResponseSuccessJson") {
@@ -946,10 +1059,15 @@ describe("UpdateProfileHandler", () => {
       constTrue
     );
 
-    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      last_app_version: undefined
-    });
+    const result = await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        last_app_version: undefined
+      },
+      validUpdateProfileEmailValidationPayload
+    );
 
     expect(profileModelMock.update).toBeCalledWith(
       expect.objectContaining({
@@ -1013,7 +1131,8 @@ describe("UpdateProfileHandler", () => {
         {
           ...aProfile,
           reminder_status
-        }
+        },
+        validUpdateProfileEmailValidationPayload
       );
 
       expect(profileModelMock.update).toBeCalledWith(
@@ -1075,7 +1194,8 @@ describe("UpdateProfileHandler", () => {
         {
           ...aProfile,
           push_notifications_content_type: input
-        }
+        },
+        validUpdateProfileEmailValidationPayload
       );
 
       expect(profileModelMock.update).toBeCalledWith(
@@ -1127,7 +1247,8 @@ describe("UpdateProfileHandler", () => {
         {
           ...aProfile,
           email: aEmailChanged
-        }
+        },
+        validUpdateProfileEmailValidationPayload
       );
       expect(result.kind).toBe(response);
     }
@@ -1164,7 +1285,8 @@ describe("UpdateProfileHandler", () => {
         {
           ...aProfile,
           email: aRetrievedProfileWithEmail.email
-        }
+        },
+        validUpdateProfileEmailValidationPayload
       );
       expect(result.kind).toBe("IResponseSuccessJson");
 
@@ -1195,10 +1317,15 @@ describe("UpdateProfileHandler", () => {
       },
       constTrue
     );
-    const result = await updateProfileHandler(contextMock as any, aFiscalCode, {
-      ...aProfile,
-      email: aEmailChanged
-    });
+    const result = await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        email: aEmailChanged
+      },
+      validUpdateProfileEmailValidationPayload
+    );
     expect(result.kind).toBe("IResponseErrorInternal");
   });
 });
