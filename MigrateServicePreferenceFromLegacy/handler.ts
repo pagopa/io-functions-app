@@ -66,10 +66,12 @@ export const createServicePreference = (
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const blockedsToServicesPreferences = (
-  blocked: {
-    // eslint-disable-next-line functional/prefer-readonly-type, @typescript-eslint/array-type
-    [x: string]: readonly BlockedInboxOrChannelEnum[];
-  },
+  blocked:
+    | {
+        // eslint-disable-next-line functional/prefer-readonly-type, @typescript-eslint/array-type
+        [x: string]: readonly BlockedInboxOrChannelEnum[];
+      }
+    | undefined,
   fiscalCode: FiscalCode,
   version: NonNegativeInteger
 ) =>
@@ -91,7 +93,7 @@ export const blockedsToServicesPreferences = (
           )
         )
     ),
-    O.getOrElse(() => [])
+    O.getOrElseW(() => [])
   );
 
 export const MigrateServicePreferenceFromLegacy = (

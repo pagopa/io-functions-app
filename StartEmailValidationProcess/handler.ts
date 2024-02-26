@@ -104,6 +104,15 @@ export function StartEmailValidationProcessHandler(
 
     const { email } = existingProfile;
 
+    // The API is available, but the client should never permit to call it
+    // when the email is undefined. The corner case is handled returning
+    // an Internal Server Error.
+    if (email === undefined) {
+      return ResponseErrorInternal(
+        "Unexpected missing email inside the user Profile"
+      );
+    }
+
     // Start a orchestrator that handles the email validation process.
     context.log.verbose(
       `${logPrefix}|Starting the email validation with template process`

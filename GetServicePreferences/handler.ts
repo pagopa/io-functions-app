@@ -2,6 +2,7 @@ import * as express from "express";
 
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as t from "io-ts";
 
 import { FiscalCode } from "@pagopa/io-functions-commons/dist/generated/definitions/FiscalCode";
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
@@ -17,7 +18,10 @@ import {
   ResponseErrorQuery
 } from "@pagopa/io-functions-commons/dist/src/utils/response";
 
-import { ProfileModel } from "@pagopa/io-functions-commons/dist/src/models/profile";
+import {
+  Profile,
+  ProfileModel
+} from "@pagopa/io-functions-commons/dist/src/models/profile";
 import {
   makeServicesPreferencesDocumentId,
   ServicesPreferencesModel
@@ -35,7 +39,10 @@ import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/g
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { pipe } from "fp-ts/lib/function";
 import { sequenceS } from "fp-ts/lib/Apply";
-import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
+import {
+  Service,
+  ServiceModel
+} from "@pagopa/io-functions-commons/dist/src/models/service";
 import { ServiceCategory } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceCategory";
 import { SpecialServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/SpecialServiceCategory";
 import { ActivationModel } from "@pagopa/io-functions-commons/dist/src/models/activation";
@@ -56,6 +63,20 @@ type IGetServicePreferencesHandlerResult =
   | IResponseErrorNotFound
   | IResponseErrorConflict
   | IResponseErrorQuery;
+
+const NonLegacyProfile = t.intersection([
+  Profile,
+  t.type({
+    servicePreferencesSettings: t.type({
+      mode: t.union([
+        t.literal(ServicesPreferencesModeEnum.AUTO),
+        t.literal(ServicesPreferencesModeEnum.MANUAL)
+      ]),
+      version: NonNegativeInteger
+    })
+  })
+]);
+type NonLegacyProfile = t.TypeOf<typeof NonLegacyProfile>;
 
 /**
  * Type of a GetServicePreferences handler.
@@ -125,6 +146,8 @@ const getUserServicePreferencesOrDefault = (
                 return toDefaultEnabledUserServicePreference(version);
               case ServicesPreferencesModeEnum.MANUAL:
                 return toDefaultDisabledUserServicePreference(version);
+              default:
+                return void 0 as never;
             }
           },
           pref => toUserServicePreferenceFromModel(pref)
@@ -154,11 +177,18 @@ export const GetServicePreferencesHandler = (
         profile: getProfileOrErrorResponse(profileModel)(fiscalCode),
         service: getServiceOrErrorResponse(serviceModel)(serviceId)
       }),
-      TE.filterOrElseW(
-        ({ profile }) => nonLegacyServicePreferences(profile),
-        () => ResponseErrorConflict("Legacy service preferences not allowed")
+      TE.chainW(
+        TE.fromPredicate(
+          (
+            entities
+          ): entities is {
+            readonly profile: NonLegacyProfile;
+            readonly service: Service;
+          } => nonLegacyServicePreferences(entities.profile),
+          () => ResponseErrorConflict("Legacy service preferences not allowed")
+        )
       ),
-      TE.chain(({ profile, service }) =>
+      TE.chainW(({ profile, service }) =>
         pipe(
           getServicePreferenceSettingsVersion(profile),
           TE.mapLeft(_ =>

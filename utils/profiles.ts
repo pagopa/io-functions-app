@@ -98,11 +98,13 @@ export const retrievedProfileToExtendedProfile = (
 const getInboxBlockedServices = (
   blocked: Profile["blockedInboxOrChannels"] | undefined | null
 ): ReadonlyArray<string> =>
-  Object.keys(blocked)
-    .map(k =>
-      blocked[k].includes(BlockedInboxOrChannelEnum.INBOX) ? k : undefined
-    )
-    .filter(k => k !== undefined);
+  !blocked
+    ? []
+    : (Object.keys(blocked)
+        .map(k =>
+          blocked[k].includes(BlockedInboxOrChannelEnum.INBOX) ? k : undefined
+        )
+        .filter(k => k !== undefined) as ReadonlyArray<string>);
 
 /**
  * Returns the services that exist in newServices but not in oldServices

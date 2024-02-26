@@ -145,7 +145,7 @@ export function UpdateProfileHandler(
     }
 
     // eslint-disable-next-line functional/no-let
-    let emailTaken: boolean;
+    let emailTaken: boolean | undefined;
 
     // Check if the email has been changed
     const emailChanged =
@@ -215,7 +215,7 @@ export function UpdateProfileHandler(
     const profile = apiProfileToProfile(
       profilePayload,
       fiscalCode,
-      emailChanged ? false : existingProfile.isEmailValidated,
+      emailChanged ? false : existingProfile.isEmailValidated || false,
       servicePreferencesSettingsVersion
     );
 
@@ -334,7 +334,6 @@ export function UpdateProfileHandler(
         )
       )();
     }
-
     return ResponseSuccessJson(
       retrievedProfileToExtendedProfile(updateProfile, emailTaken)
     );

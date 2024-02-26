@@ -79,10 +79,10 @@ export const getSendLoginEmailActivityHandler = (
       });
     }),
     E.bindTo("activityInput"),
-    E.bind("maybeMagicLink", ({ activityInput }) =>
+    E.bindW("maybeMagicLink", ({ activityInput }) =>
       pipe(activityInput.magic_link, O.fromNullable, E.of)
     ),
-    E.bind("emailHtml", ({ activityInput, maybeMagicLink }) =>
+    E.bindW("emailHtml", ({ activityInput, maybeMagicLink }) =>
       pipe(
         maybeMagicLink,
         O.fold(
@@ -115,7 +115,7 @@ export const getSendLoginEmailActivityHandler = (
       E.of(HtmlToText.fromString(emailHtml, emailDefaults.htmlToTextOptions))
     ),
     TE.fromEither,
-    TE.chain(({ activityInput, emailHtml, emailText }) =>
+    TE.chainW(({ activityInput, emailHtml, emailText }) =>
       pipe(
         sendMail(mailerTransporter, {
           from: emailDefaults.from,

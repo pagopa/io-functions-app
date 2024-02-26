@@ -41,7 +41,7 @@ const welcomeMessages: WelcomeMessages = {
       NewMessage.decode({
         content: welcomeMessageContent
       }),
-      E.getOrElse(throwInvalidMessageError)
+      E.getOrElseW(throwInvalidMessageError)
     ),
   // eslint-disable-next-line sort-keys
   HOWTO: (_: RetrievedProfile) =>
@@ -49,7 +49,7 @@ const welcomeMessages: WelcomeMessages = {
       NewMessage.decode({
         content: howToContent
       }),
-      E.getOrElse(throwInvalidMessageError)
+      E.getOrElseW(throwInvalidMessageError)
     ),
   // eslint-disable-next-line sort-keys
   CASHBACK: (_: RetrievedProfile) =>
@@ -57,7 +57,7 @@ const welcomeMessages: WelcomeMessages = {
       NewMessage.decode({
         content: cashbackContent
       }),
-      E.getOrElse(throwInvalidMessageError)
+      E.getOrElseW(throwInvalidMessageError)
     )
 };
 

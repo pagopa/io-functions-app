@@ -110,7 +110,7 @@ export const nonLegacyServicePreferences = (profile: Profile): boolean => {
  */
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function getServicePreferenceSettingsVersion(
-  profile
+  profile: Profile
 ): TE.TaskEither<Error, NonNegativeInteger> {
   return pipe(
     profile.servicePreferencesSettings.version,
