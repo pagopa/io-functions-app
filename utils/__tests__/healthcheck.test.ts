@@ -215,9 +215,7 @@ describe("healthcheck - url health", () => {
 describe("checkApplicationHealth - multiple errors - ", () => {
   beforeAll(() => {
     jest.clearAllMocks();
-    jest
-      .spyOn(config, "getConfig")
-      .mockReturnValue(right(envConfig as config.IConfig));
+    jest.spyOn(config, "getConfig").mockReturnValue(right(envConfig));
 
     mockCosmosClient();
     mockAzureStorageFunctions();

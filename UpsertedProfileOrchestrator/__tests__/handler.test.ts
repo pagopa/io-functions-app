@@ -37,6 +37,8 @@ import {
 } from "../../utils/emitted_events";
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
 import { FeatureFlagEnum } from "../../utils/featureFlag";
+import { Profile } from "@pagopa/io-functions-commons/dist/generated/definitions/Profile";
+import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 
 const someRetryOptions = new df.RetryOptions(5000, 10);
 // eslint-disable-next-line functional/immutable-data
@@ -815,8 +817,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
       {
         fiscalCode: aFiscalCode,
         settingsVersion:
-          upsertedProfileOrchestratorInput.oldProfile.servicePreferencesSettings
-            .version
+          upsertedProfileOrchestratorInput.oldProfile
+            ?.servicePreferencesSettings.version
       }
     );
 
@@ -967,8 +969,8 @@ describe("UpsertedProfileOrchestratorV2", () => {
       {
         fiscalCode: aFiscalCode,
         settingsVersion:
-          upsertedProfileOrchestratorInput.oldProfile.servicePreferencesSettings
-            .version
+          upsertedProfileOrchestratorInput.oldProfile
+            ?.servicePreferencesSettings.version
       }
     );
 
@@ -1178,19 +1180,33 @@ describe("UpsertedProfileOrchestrator |> emitted events", () => {
 
   const { AUTO, MANUAL, LEGACY } = ServicesPreferencesModeEnum;
 
-  const withInboxEnabled = p => ({ ...p, isInboxEnabled: true });
-  const withInboxDisabled = p => ({ ...p, isInboxEnabled: false });
-  const withEmailChanged = p => ({ ...p, email: aEmailChanged });
-  const withPreferences = (mode: ServicesPreferencesModeEnum) => p => ({
+  const withInboxEnabled = (p: RetrievedProfile) => ({
     ...p,
-    servicePreferencesSettings: {
-      mode,
-      version: mode === LEGACY ? -1 : 0
-    }
+    isInboxEnabled: true
   });
+  const withInboxDisabled = (p: RetrievedProfile) => ({
+    ...p,
+    isInboxEnabled: false
+  });
+  const withEmailChanged = (p: RetrievedProfile) => ({
+    ...p,
+    email: aEmailChanged
+  });
+  const withPreferences = (mode: ServicesPreferencesModeEnum) => (
+    p: RetrievedProfile
+  ) =>
+    ({
+      ...p,
+      servicePreferencesSettings: {
+        mode,
+        version: mode === LEGACY ? -1 : 0
+      }
+    } as RetrievedProfile);
 
   // just a helper to compose profile attributes
-  const profile = (...transformers) =>
+  const profile = (
+    ...transformers: Array<(p: RetrievedProfile) => RetrievedProfile>
+  ) =>
     // @ts-ignore
     pipe(aRetrievedProfile, ...transformers);
 
@@ -1202,7 +1218,7 @@ describe("UpsertedProfileOrchestrator |> emitted events", () => {
   const mockSendWelcomeMessagesActivity = jest.fn();
   const mockEmitEventActivity = jest.fn();
 
-  const callActivityBase = (name, input) => {
+  const callActivityBase = (name: string, input: any) => {
     switch (name) {
       case "UpdateSubscriptionsFeedActivity":
         return mockUpdateSubscriptionsFeedActivity(input);
@@ -1227,7 +1243,15 @@ describe("UpsertedProfileOrchestrator |> emitted events", () => {
     ${"preference mode is changed from MANUAL to AUTO with inbox not enabled"}     | ${profile(withInboxDisabled, withPreferences(AUTO))}   | ${profile(withInboxDisabled, withPreferences(MANUAL))} | ${[]}
   `(
     "should emit expected events when $scenario",
-    ({ expectedEvents, newProfile, oldProfile }) => {
+    ({
+      expectedEvents,
+      newProfile,
+      oldProfile
+    }: {
+      expectedEvents: ReadonlyArray<typeof anyProfileCompletedEvent>;
+      newProfile: Profile;
+      oldProfile: Profile;
+    }) => {
       const orchestratorInput = pipe(
         {
           newProfile,

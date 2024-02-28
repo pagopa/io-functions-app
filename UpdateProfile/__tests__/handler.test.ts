@@ -566,7 +566,7 @@ describe("UpdateProfileHandler", () => {
       expect(result.value).toEqual(
         expect.objectContaining({
           service_preferences_settings: {
-            mode: autoApiProfileServicePreferencesSettings.mode,
+            mode: ServicesPreferencesModeEnum.AUTO,
             version: expectedServicePreferencesSettingsVersion
           }
         })
@@ -718,7 +718,8 @@ describe("UpdateProfileHandler", () => {
       isWebhookEnabled,
       expectedIsInboxEnabled,
       expectedIsWebHookEnabled,
-      acceptedTosVersion
+      acceptedTosVersion,
+      _
     ) => {
       const profileModelMock = {
         findLastVersionByModelId: jest.fn(() =>

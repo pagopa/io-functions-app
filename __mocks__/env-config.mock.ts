@@ -5,7 +5,7 @@ import { DateFromTimestamp } from "@pagopa/ts-commons/lib/dates";
 
 const aBlacklistedFiscalCode = "AAAAAA00A00H501I" as FiscalCode;
 
-export const envConfig = {
+export const envConfig = ({
   isProduction: false,
 
   COSMOSDB_KEY: "aKey" as NonEmptyString,
@@ -36,9 +36,7 @@ export const envConfig = {
   // MailerConfig
   MAIL_FROM: "aaa" as NonEmptyString,
   MAILHOG_HOSTNAME: "aaa" as NonEmptyString,
-  MAILUP_SECRET: "aaa" as NonEmptyString,
-  MAILUP_USERNAME: "aaa" as NonEmptyString,
 
   NODE_ENV: "production",
   REQ_SERVICE_ID: undefined
-};
+} as unknown) as IConfig; // Not all the required envs are included in this mock
