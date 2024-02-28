@@ -35,8 +35,7 @@ describe("StartEmailValidationProcessHandler", () => {
         taskEither.of(
           some({
             ...aRetrievedProfile,
-            isEmailValidated: false,
-            email: "anemail@test.it"
+            isEmailValidated: false
           })
         )
       )
