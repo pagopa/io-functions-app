@@ -105,14 +105,27 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
       name
     } = upsertedProfileOrchestratorInput;
 
-    const profileOperation = oldProfile !== undefined ? "UPDATED" : "CREATED";
+    type ProfileOperation =
+      | {
+          readonly type: "UPDATED";
+          readonly oldProfile: RetrievedProfile;
+        }
+      | {
+          readonly type: "CREATED";
+        };
+
+    const profileOperation: ProfileOperation =
+      oldProfile !== undefined
+        ? { oldProfile, type: "UPDATED" }
+        : { type: "CREATED" };
 
     // Check if the profile email is changed
     const isProfileEmailChanged =
-      profileOperation === "UPDATED" && newProfile.email !== oldProfile.email;
+      profileOperation.type === "UPDATED" &&
+      newProfile.email !== profileOperation.oldProfile.email;
     // NOTE: if the following check is changed make sure to pass add the name field
     // to CreateProfile method which also calls this orchestrator
-    if (isProfileEmailChanged) {
+    if (isProfileEmailChanged && newProfile.email) {
       try {
         const { fiscalCode, email } = newProfile;
 
@@ -183,11 +196,12 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
     // Send welcome messages to the user
     const isInboxEnabled = newProfile.isInboxEnabled === true;
     const hasOldProfileWithInboxDisabled =
-      profileOperation === "UPDATED" && oldProfile.isInboxEnabled === false;
+      profileOperation.type === "UPDATED" &&
+      profileOperation.oldProfile.isInboxEnabled === false;
 
     const hasJustEnabledInbox =
       isInboxEnabled &&
-      (profileOperation === "CREATED" || hasOldProfileWithInboxDisabled);
+      (profileOperation.type === "CREATED" || hasOldProfileWithInboxDisabled);
 
     context.log.verbose(
       `${logPrefix}|OPERATION=${profileOperation}|INBOX_ENABLED=${isInboxEnabled}|INBOX_JUST_ENABLED=${hasJustEnabledInbox}`
@@ -223,7 +237,7 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
     }
 
     // Update subscriptions feed
-    if (profileOperation === "CREATED") {
+    if (profileOperation.type === "CREATED") {
       // When a profile get created we add an entry to the profile subscriptions
       context.log.verbose(
         `${logPrefix}|Calling UpdateSubscriptionsFeedActivity|OPERATION=SUBSCRIBED`
@@ -242,7 +256,8 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
     } else {
       const { newServicePreferencesMode, oldServicePreferenceMode } = {
         newServicePreferencesMode: newProfile.servicePreferencesSettings.mode,
-        oldServicePreferenceMode: oldProfile.servicePreferencesSettings.mode
+        oldServicePreferenceMode:
+          profileOperation.oldProfile.servicePreferencesSettings.mode
       };
 
       if (newServicePreferencesMode === ServicesPreferencesModeEnum.LEGACY) {
@@ -254,7 +269,7 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
           e1: unsubscribedServices,
           e2: subscribedServices
         } = diffBlockedServices(
-          oldProfile.blockedInboxOrChannels,
+          profileOperation.oldProfile.blockedInboxOrChannels,
           newProfile.blockedInboxOrChannels
         );
 
@@ -319,7 +334,7 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
 
         // Only if previous mode is MANUAL or AUTO could exists services preferences.
         if (
-          oldProfile.servicePreferencesSettings.mode !==
+          profileOperation.oldProfile.servicePreferencesSettings.mode !==
           ServicesPreferencesModeEnum.LEGACY
         ) {
           // Execute a new version of the orchestrator
@@ -327,8 +342,9 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
             "GetServicesPreferencesActivity",
             retryOptions,
             {
-              fiscalCode: oldProfile.fiscalCode,
-              settingsVersion: oldProfile.servicePreferencesSettings.version
+              fiscalCode: profileOperation.oldProfile.fiscalCode,
+              settingsVersion:
+                profileOperation.oldProfile.servicePreferencesSettings.version
             }
           );
 

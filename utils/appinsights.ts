@@ -29,5 +29,5 @@ export const initTelemetryClient = (env = process.env) =>
             )
           })
         ),
-        E.getOrElse(undefined)
+        E.getOrElseW(() => undefined)
       );

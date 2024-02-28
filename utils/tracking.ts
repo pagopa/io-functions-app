@@ -25,7 +25,7 @@ export const createTracker = (
     nextMode: ServicesPreferencesModeEnum,
     profileVersion: NonNegativeInteger
   ) =>
-    telemetryClient.trackEvent({
+    telemetryClient?.trackEvent({
       name: eventName("change-service-preferences-mode"),
       properties: {
         nextMode,
@@ -45,7 +45,7 @@ export const createTracker = (
     newProfile: RetrievedProfile,
     action: "REQUESTING" | "DOING" | "DONE"
   ) =>
-    telemetryClient.trackEvent({
+    telemetryClient?.trackEvent({
       name: eventName("migrate-legacy-preferences"),
       properties: {
         action,
@@ -67,7 +67,7 @@ export const createTracker = (
     { fiscalCode, version, updatedAt, ...input }: UpdateSubscriptionFeedInput,
     kind: "EXCEPTION" | "FAILURE"
   ) => {
-    telemetryClient.trackEvent({
+    telemetryClient?.trackEvent({
       name: "subscriptionFeed.upsertServicesPreferences.failure",
       properties: {
         ...input,
@@ -82,7 +82,7 @@ export const createTracker = (
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/ban-types
   const traceEmailValidationSend = (messageInfo: object) => {
-    telemetryClient.trackEvent({
+    telemetryClient?.trackEvent({
       name: `SendValidationEmailActivity.success`,
       properties: messageInfo
     } as EventTelemetry);
@@ -95,7 +95,7 @@ export const createTracker = (
     messageId: string,
     serviceId?: ServiceId
   ) => {
-    telemetryClient.trackEvent({
+    telemetryClient?.trackEvent({
       name: "messages.enrichMessages.failure",
       properties: {
         fiscalCode: toHash(fiscalCode),

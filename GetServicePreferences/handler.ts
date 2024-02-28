@@ -204,7 +204,7 @@ export const GetServicePreferencesHandler = (
         )
       ),
       TE.chainW(getUserServicePreferencesOrDefault(servicePreferencesModel)),
-      TE.chain(({ serviceCategory, servicePreferences }) => {
+      TE.chainW(({ serviceCategory, servicePreferences }) => {
         if (serviceCategory === SpecialServiceCategoryEnum.SPECIAL) {
           return getServicePreferencesForSpecialServices(activationModel)({
             fiscalCode,

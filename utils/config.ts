@@ -71,7 +71,25 @@ export const VisibleServiceConfig = t.interface({
 
 export const BetaUsers = t.readonlyArray(FiscalCode);
 export type BetaUsers = t.TypeOf<typeof BetaUsers>;
-export const BetaUsersFromString = withFallback(JsonFromString, []).pipe(
+
+// Extend the JsonFromString type of `io-ts-types` to be usable
+// in type intersection.
+const SafeJsonFromString = new t.Type(
+  "JsonFromString",
+  JsonFromString.is,
+  (value, context) => {
+    try {
+      return typeof value == "string"
+        ? t.success(JSON.parse(value))
+        : t.failure(value, context);
+    } catch (err) {
+      return t.failure(value, context);
+    }
+  },
+  JsonFromString.encode
+);
+
+export const BetaUsersFromString = withFallback(SafeJsonFromString, []).pipe(
   BetaUsers
 );
 export const FeatureFlagFromString = withFallback(
@@ -82,7 +100,7 @@ export const FeatureFlagFromString = withFallback(
 // global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
-  t.interface({
+  t.type({
     BETA_USERS: BetaUsersFromString,
 
     COSMOSDB_CONNECTION_STRING: NonEmptyString,
@@ -147,7 +165,7 @@ const DEFAULT_OPT_OUT_EMAIL_SWITCH_DATE = 1625781600;
 
 // get a boolen value from string
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const getBooleanOrFalse = (value: string) =>
+const getBooleanOrFalse = (value?: string) =>
   pipe(
     value,
     O.fromNullable,
@@ -205,7 +223,7 @@ export function getConfig(): t.Validation<IConfig> {
 export function getConfigOrThrow(): IConfig {
   return pipe(
     errorOrConfig,
-    E.getOrElse(errors => {
+    E.getOrElseW(errors => {
       throw new Error(`Invalid configuration: ${readableReport(errors)}`);
     })
   );
