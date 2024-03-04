@@ -215,7 +215,7 @@ export function UpdateProfileHandler(
     const profile = apiProfileToProfile(
       profilePayload,
       fiscalCode,
-      emailChanged ? false : existingProfile.isEmailValidated || false,
+      emailChanged ? false : existingProfile.isEmailValidated ?? false,
       servicePreferencesSettingsVersion
     );
 
