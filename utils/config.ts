@@ -72,25 +72,8 @@ export const VisibleServiceConfig = t.interface({
 export const BetaUsers = t.readonlyArray(FiscalCode);
 export type BetaUsers = t.TypeOf<typeof BetaUsers>;
 
-// Extend the JsonFromString type of `io-ts-types` to be usable
-// in type intersection.
-const SafeJsonFromString = new t.Type(
-  "JsonFromString",
-  JsonFromString.is,
-  (value, context) => {
-    try {
-      return typeof value == "string"
-        ? t.success(JSON.parse(value))
-        : t.failure(value, context);
-    } catch (err) {
-      return t.failure(value, context);
-    }
-  },
-  JsonFromString.encode
-);
-
-export const BetaUsersFromString = withFallback(SafeJsonFromString, []).pipe(
-  BetaUsers
+export const BetaUsersFromString = t.string.pipe(
+  withFallback(JsonFromString, []).pipe(BetaUsers)
 );
 export const FeatureFlagFromString = withFallback(
   FeatureFlag,
