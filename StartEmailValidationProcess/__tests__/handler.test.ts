@@ -32,7 +32,12 @@ describe("StartEmailValidationProcessHandler", () => {
   it("should start the orchestrator with the right input and return an accepted response", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
-        taskEither.of(some({ ...aRetrievedProfile, isEmailValidated: false }))
+        taskEither.of(
+          some({
+            ...aRetrievedProfile,
+            isEmailValidated: false
+          })
+        )
       )
     };
     mockStartNew.mockImplementationOnce(() => Promise.resolve("start"));
@@ -51,7 +56,12 @@ describe("StartEmailValidationProcessHandler", () => {
   it("should not start a new orchestrator if there is an already running orchestrator and return an accepted response", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() =>
-        taskEither.of(some({ ...aRetrievedProfile, isEmailValidated: false }))
+        taskEither.of(
+          some({
+            ...aRetrievedProfile,
+            isEmailValidated: false
+          })
+        )
       )
     };
 

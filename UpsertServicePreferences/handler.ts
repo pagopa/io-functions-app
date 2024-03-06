@@ -96,7 +96,7 @@ type IUpsertServicePreferencesHandler = (
   context: Context,
   fiscalCode: FiscalCode,
   serviceId: ServiceId,
-  servicePreference: ServicePreference
+  servicePreference: UpsertServicePreference
 ) => Promise<IUpsertServicePreferencesHandlerResult>;
 
 /**
@@ -199,7 +199,7 @@ const getFeedOperation = (
  * Return a type safe GetServicePreferences handler.
  */
 export const GetUpsertServicePreferencesHandler = (
-  telemetryClient: ReturnType<typeof initAppInsights>,
+  telemetryClient: ReturnType<typeof initAppInsights> | undefined,
   profileModels: ProfileModel,
   serviceModels: ServiceModel,
   servicePreferencesModel: ServicesPreferencesModel,
@@ -220,7 +220,7 @@ export const GetUpsertServicePreferencesHandler = (
         ({ profile }) => nonLegacyServicePreferences(profile),
         () => ResponseErrorConflict("Legacy service preferences not allowed")
       ),
-      TE.filterOrElse(
+      TE.filterOrElseW(
         ({ profile }) =>
           servicePreference.settings_version ===
           profile.servicePreferencesSettings.version,
@@ -229,7 +229,7 @@ export const GetUpsertServicePreferencesHandler = (
             "Setting Preferences version not compatible with Profile's one"
           )
       ),
-      TE.chain(({ profile, service }) =>
+      TE.chainW(({ profile, service }) =>
         pipe(
           profile,
           getServicePreferenceSettingsVersion,
@@ -376,7 +376,7 @@ export const GetUpsertServicePreferencesHandler = (
  */
 // eslint-disable-next-line max-params, prefer-arrow/prefer-arrow-functions
 export function UpsertServicePreferences(
-  telemetryClient: ReturnType<typeof initAppInsights>,
+  telemetryClient: ReturnType<typeof initAppInsights> | undefined,
   profileModels: ProfileModel,
   serviceModels: ServiceModel,
   servicePreferencesModel: ServicesPreferencesModel,

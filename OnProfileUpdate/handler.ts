@@ -44,7 +44,7 @@ interface IDependencies {
   readonly dataTableProfileEmailsRepository: IProfileEmailReader &
     IProfileEmailWriter;
   readonly profileModel: ProfileModel;
-  readonly telemetryClient: TelemetryClient;
+  readonly telemetryClient?: TelemetryClient;
 }
 
 const eventNamePrefix = "OnProfileUpdate";
@@ -190,7 +190,7 @@ const handleMissingEmail = (
     O.fold(
       () => TE.right(void 0),
       previousEmail => {
-        dependencies.telemetryClient.trackEvent({
+        dependencies.telemetryClient?.trackEvent({
           name: `${eventNamePrefix}.missingNewEmail`,
           properties: {
             _self: profile._self,
@@ -236,7 +236,7 @@ const handlePositiveVersion = ({
           () =>
             pipe(
               RTE.asks(({ telemetryClient }: IDependencies) =>
-                telemetryClient.trackEvent({
+                telemetryClient?.trackEvent({
                   name: `${eventNamePrefix}.previousProfileNotFound`,
                   properties: {
                     _self,
@@ -290,7 +290,7 @@ export const handler = (documents: ReadonlyArray<unknown>) => (
         ProfileDocument.decode,
         E.foldW(
           () => {
-            dependencies.telemetryClient.trackEvent({
+            dependencies.telemetryClient?.trackEvent({
               name: `${eventNamePrefix}.decodingProfile`,
               properties: {
                 _self:
@@ -309,7 +309,7 @@ export const handler = (documents: ReadonlyArray<unknown>) => (
               dependencies,
               handleProfile(profileDocument),
               TE.mapLeft(error => {
-                dependencies.telemetryClient.trackEvent({
+                dependencies.telemetryClient?.trackEvent({
                   name: `${eventNamePrefix}.handlingProfile`,
                   properties: {
                     _self: profileDocument._self,

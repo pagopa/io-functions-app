@@ -90,6 +90,7 @@ export const aRetrievedProfile: RetrievedProfile = {
   ...aCosmosResourceMetadata,
   fiscalCode: aFiscalCode,
   id: "123" as NonEmptyString,
+  email: "anemail@email.it" as EmailString,
   isEmailEnabled: true,
   isEmailValidated: true,
   isInboxEnabled: false,

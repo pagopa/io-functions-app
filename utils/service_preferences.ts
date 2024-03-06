@@ -19,6 +19,7 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/response";
 import { ActivationModel } from "@pagopa/io-functions-commons/dist/src/models/activation";
 import { ActivationStatusEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ActivationStatus";
+import { UpsertServicePreference } from "../generated/definitions/internal/UpsertServicePreference";
 
 const toUserServicePreference = (
   accessReadMessageStatus: AccessReadMessageStatus,
@@ -110,7 +111,7 @@ export const nonLegacyServicePreferences = (profile: Profile): boolean => {
  */
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function getServicePreferenceSettingsVersion(
-  profile
+  profile: Profile
 ): TE.TaskEither<Error, NonNegativeInteger> {
   return pipe(
     profile.servicePreferencesSettings.version,
@@ -120,19 +121,22 @@ export function getServicePreferenceSettingsVersion(
   );
 }
 
-export type ServicePreferencesForSpecialServices = (params: {
+export type ServicePreferencesForSpecialServices = <
+  T extends UpsertServicePreference | ServicePreference
+>(params: {
   readonly serviceId: ServiceId;
   readonly fiscalCode: FiscalCode;
-  readonly servicePreferences: ServicePreference;
-}) => TE.TaskEither<IResponseErrorQuery, ServicePreference>;
+  readonly servicePreferences: T;
+}) => TE.TaskEither<IResponseErrorQuery, T>;
 
 export const getServicePreferencesForSpecialServices = (
   activationModel: ActivationModel
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ): ServicePreferencesForSpecialServices => ({
   serviceId,
   fiscalCode,
   servicePreferences
-}): TE.TaskEither<IResponseErrorQuery, ServicePreference> =>
+}) =>
   pipe(
     activationModel.findLastVersionByModelId([serviceId, fiscalCode]),
     TE.mapLeft(err =>
@@ -144,7 +148,10 @@ export const getServicePreferencesForSpecialServices = (
           activation => activation.status === ActivationStatusEnum.ACTIVE
         ),
         O.foldW(
-          () => ({ ...servicePreferences, is_inbox_enabled: false }),
+          () => ({
+            ...servicePreferences,
+            is_inbox_enabled: false
+          }),
           _ => ({
             ...servicePreferences,
             is_inbox_enabled: true

@@ -118,7 +118,7 @@ export function AbortUserDataProcessingHandler(
         )
       ),
       // finally save the abortion
-      TE.chain(retrievedUserDataProcessing =>
+      TE.chainW(retrievedUserDataProcessing =>
         pipe(
           userDataProcessingModel.update({
             ...retrievedUserDataProcessing,
