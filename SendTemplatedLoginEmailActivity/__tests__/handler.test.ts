@@ -7,8 +7,8 @@ import {
 } from "@pagopa/ts-commons/lib/strings";
 import { EmailDefaults } from "../index";
 import * as ai from "applicationinsights";
-import * as mailTemplate from "../../generated/templates/login/index";
-import * as fallbackMailTemplate from "../../generated/templates/login-fallback/index";
+import * as mailTemplate from "@pagopa/io-app-email-templates/LoginNotificationIOWeb/index";
+import * as fallbackMailTemplate from "@pagopa/io-app-email-templates/LoginNotification/index";
 import { ValidUrl } from "@pagopa/ts-commons/lib/url";
 
 const aDate = new Date("1970-01-01");
