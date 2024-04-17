@@ -8,7 +8,7 @@ import {
   ActivityInput as SendValidationEmailActivityInput,
   getSendValidationEmailActivityHandler
 } from "../handler";
-import { apply } from "../../generated/templates/mailvalidation/index";
+import { apply } from "@pagopa/io-app-email-templates/MailValidation/index";
 import { aName } from "../../__mocks__/mocks";
 
 const htmlAndTextContent = "CONTENT";
@@ -19,7 +19,7 @@ jest.mock("applicationinsights", () => ({
   }
 }));
 
-jest.mock("../../generated/templates/mailvalidation/index", () => ({
+jest.mock("@pagopa/io-app-email-templates/MailValidation/index", () => ({
   apply: jest.fn(() => htmlAndTextContent)
 }));
 
