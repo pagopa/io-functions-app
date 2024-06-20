@@ -19,8 +19,8 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
 import {
-  VISIBLE_SERVICE_BLOB_ID,
-  VISIBLE_SERVICE_CONTAINER
+  VISIBLE_SERVICE_BLOB_ID as DEFAULT_VISIBLE_SERVICE_BLOB_ID,
+  VISIBLE_SERVICE_CONTAINER as DEFAULT_VISIBLE_SERVICE_CONTAINER
 } from "@pagopa/io-functions-commons/dist/src/models/visible_service";
 import { JsonFromString, withFallback } from "io-ts-types";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
@@ -61,11 +61,11 @@ export type VisibleServiceConfig = t.TypeOf<typeof VisibleServiceConfig>;
 export const VisibleServiceConfig = t.interface({
   VISIBLE_SERVICE_BLOB_ID: withDefault(
     NonEmptyString,
-    VISIBLE_SERVICE_BLOB_ID as NonEmptyString
+    DEFAULT_VISIBLE_SERVICE_BLOB_ID as NonEmptyString
   ),
   VISIBLE_SERVICE_CONTAINER: withDefault(
     NonEmptyString,
-    VISIBLE_SERVICE_CONTAINER as NonEmptyString
+    DEFAULT_VISIBLE_SERVICE_CONTAINER as NonEmptyString
   )
 });
 
