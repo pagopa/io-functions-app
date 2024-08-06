@@ -7,9 +7,9 @@
   "author": "",
   "scripts": {
     "prestart": "npm-run-all generate-env",
-    "start": "docker-compose --env-file environments/.env up -d",
-    "stop": "docker-compose --env-file environments/.env down",
-    "stop:all": "docker-compose --env-file environments/.env down && docker image prune -a -f && docker volume prune -f",
+    "start": "docker compose --env-file environments/.env up -d",
+    "stop": "docker compose --env-file environments/.env down",
+    "stop:all": "docker compose --env-file environments/.env down && docker image prune -a -f && docker volume prune -f",
     "test": "jest --verbose --runInBand",
     "generate:env:cosmosdb": "dotenv -e environments/.env envsub environments/env.cosmosdb environments/generated/env.cosmosdb",
     "generate:env:function": "dotenv -e environments/.env envsub environments/env.function environments/generated/env.function",
