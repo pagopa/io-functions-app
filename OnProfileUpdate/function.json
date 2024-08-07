@@ -4,13 +4,13 @@
       "type": "cosmosDBTrigger",
       "name": "documents",
       "direction": "in",
-      "connectionStringSetting": "COSMOSDB_CONNECTION_STRING",
+      "connection": "COSMOSDB_CONNECTION_STRING",
       "databaseName": "%COSMOSDB_NAME%",
-      "collectionName": "profiles",
+      "containerName": "profiles",
       "startFromBeginning": true,
-      "createLeaseCollectionIfNotExists": true,
-      "leaseCollectionName": "profile-emails-uniqueness-leases",
-      "leaseCollectionPrefix": "%ON_PROFILE_UPDATE_LEASES_PREFIX%-",
+      "createLeaseContainerIfNotExists": true,
+      "leaseContainerName": "profile-emails-uniqueness-leases",
+      "leaseContainerPrefix": "%ON_PROFILE_UPDATE_LEASES_PREFIX%-",
       "feedPollDelay": 2500
     }
   ],
