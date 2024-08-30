@@ -59,3 +59,36 @@ generated/**/*
 # integration tests
 docker-compose.override.yml
 __integrations__/environments/generated/**
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+*.DS_Store
+**/modules/**/.terraform.lock.hcl
+**/_modules/**/.terraform.lock.hcl
+
+# yarn
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# azure
+local.settings.json
+
+dist
+.env
+node_modules
+.turbo
+
+# vitest
+coverage
+vite.config.*.timestamp-*
