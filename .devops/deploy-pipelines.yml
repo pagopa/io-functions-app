@@ -2,7 +2,7 @@
 
 variables:
   # Configuration to run the healthcheck
-  HEALTHCHECK_PATH: 'api/v1/info' 
+  HEALTHCHECK_PATH: 'api/v1/info'
 
 parameters:
   - name: 'RELEASE_SEMVER'
@@ -14,7 +14,7 @@ parameters:
       - patch
     default: minor
   # Map of production apps to deploy to, in the form
-  #   {logicName}: 
+  #   {logicName}:
   #     appname: {name of the resource}
   #     rg: {name of the resource group}
   # Although it's a parameter, it's not intended to be edited at runtime.
@@ -24,14 +24,14 @@ parameters:
     type: object
     default:
       app1:
-        appname: io-p-app-fn-1
-        rg: io-p-app-rg-1
+        appname: io-p-itn-auth-profile-fn-01
+        rg: io-p-itn-profile-rg-01
       app2:
-        appname: io-p-app-fn-2
-        rg: io-p-app-rg-2
+        appname: io-p-itn-auth-profile-fn-02
+        rg: io-p-itn-profile-rg-02
       appAsync:
-        appname: io-p-app-async-fn
-        rg: io-p-app-async-rg
+        appname: io-p-itn-auth-as-prof-fn-01
+        rg: io-p-itn-citizen-auth-profile-async-rg-01
 
 # Only manual activations are intended
 trigger: none
@@ -39,7 +39,7 @@ pr: none
 
 # This pipeline has been implemented to be run on hosted agent pools based both
 # on 'windows' and 'ubuntu' virtual machine images and using the scripts defined
-# in the package.json file. Depending on the os_type of the resource 'windows' or 
+# in the package.json file. Depending on the os_type of the resource 'windows' or
 # 'ubuntu-latest' may be inserted here
 pool:
   vmImage: 'ubuntu-latest'
@@ -56,7 +56,7 @@ stages:
 
   # Create a relase
   # Activated when ONE OF these are met:
-  # - is on branch master 
+  # - is on branch master
   # - is a tag in the form v{version}-RELEASE
   - stage: Release
     condition:
@@ -115,8 +115,8 @@ stages:
           - task: DotNetCoreCLI@2
             inputs:
               command: "build"
-              arguments: "-o bin"   
-          # Copy application to  
+              arguments: "-o bin"
+          # Copy application to
           - task: CopyFiles@2
             inputs:
               SourceFolder: '$(System.DefaultWorkingDirectory)'
@@ -140,7 +140,7 @@ stages:
                 !CODEOWNERS
                 !__*/**/*
             displayName: 'Copy deploy files'
-          
+
           - publish: $(System.DefaultWorkingDirectory)/bundle
             artifact: Bundle
 
@@ -155,8 +155,8 @@ stages:
             - checkout: none
             - download: current
               artifact: Bundle
-            
-            - task: AzureFunctionApp@1  
+
+            - task: AzureFunctionApp@1
               inputs:
                 azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
                 resourceGroupName: '${{ app.Value.rg }}'
@@ -166,16 +166,16 @@ stages:
                 deploymentMethod: 'auto'
                 deployToSlotOrASE: true
                 slotName: 'staging'
-              displayName: Deploy to staging slot 
+              displayName: Deploy to staging slot
 
   # Check that the staging instance is healthy
   - ${{ each app in parameters.PRODUCTION_APPS }}:
     - stage: Healthcheck_${{ app.Key }}
       pool:
         name: io-prod-linux
-      dependsOn: 
+      dependsOn:
         - Deploy_${{ app.Key }}_to_staging
-      jobs:      
+      jobs:
         - job: 'do_healthcheck_${{ app.Key }}'
           steps:
             - checkout: none
@@ -193,8 +193,8 @@ stages:
         - ${{ each appInner in parameters.PRODUCTION_APPS }}:
           - Healthcheck_${{ appInner.Key }}
       jobs:
-        - job: 'do_deploy_${{ app.Key }}'       
-          steps:  
+        - job: 'do_deploy_${{ app.Key }}'
+          steps:
             - checkout: none
             - task: AzureAppServiceManage@0
               inputs:
@@ -211,7 +211,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
-      - job: publish_SDK   
+      - job: publish_SDK
         steps:
         # Template for generating and deploying client SDk to NPM
         - template: templates/client-sdk-publish/template.yaml@pagopaCommons
