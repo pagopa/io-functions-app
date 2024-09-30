@@ -24,14 +24,14 @@ parameters:
     type: object
     default:
       app1:
-        appname: io-p-itn-app-profile-fn-1
-        rg: io-p-itn-app-profile-rg-1
+        appname: io-p-itn-auth-profile-fn-01
+        rg: io-p-itn-profile-rg-01
       app2:
-        appname: io-p-itn-app-profile-fn-2
-        rg: io-p-itn-app-rg-2
+        appname: io-p-itn-auth-profile-fn-02
+        rg: io-p-itn-profile-rg-02
       appAsync:
-        appname: io-p-app-profile-async-fn
-        rg: io-p-itn-app-profile-async-rg
+        appname: io-p-itn-auth-as-prof-fn-01
+        rg: io-p-itn-citizen-auth-profile-async-rg-01
 
 # Only manual activations are intended
 trigger: none
