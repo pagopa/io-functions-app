@@ -53,19 +53,17 @@ type IGetProfileHandler = (
 ) => Promise<IGetProfileHandlerResult>;
 
 export const withIsEmailAlreadyTaken = (
-  profileEmailReader: IProfileEmailReader,
-  isUniqueEmailEnforcementEnabled: boolean
+  profileEmailReader: IProfileEmailReader
 ) => (
   profile: ExtendedProfile
 ): TE.TaskEither<IResponseErrorInternal, ExtendedProfile> =>
   pipe(
     TE.of(profile),
-    // VALID ONLY IF FF_UNIQUE_EMAIL_ENFORCEMENT IS ENABLED
     // Check if the e-mail address associated with the retrived
     // profile was validated. If was not validated, continue with
     // uniqueness checks.
     TE.chainW(({ is_email_validated, email }) =>
-      isUniqueEmailEnforcementEnabled && !is_email_validated && email
+      !is_email_validated && email
         ? TE.tryCatch(
             () =>
               isEmailAlreadyTaken(email)({
@@ -93,8 +91,7 @@ export function GetProfileHandler(
   profileModel: ProfileModel,
   optOutEmailSwitchDate: Date,
   isOptInEmailEnabled: boolean,
-  profileEmailReader: IProfileEmailReader,
-  FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED: (fiscalCode: FiscalCode) => boolean
+  profileEmailReader: IProfileEmailReader
 ): IGetProfileHandler {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, arrow-body-style
   return async fiscalCode => {
@@ -125,8 +122,7 @@ export function GetProfileHandler(
           TE.map(retrievedProfileToExtendedProfile),
           TE.chainW(
             withIsEmailAlreadyTaken(
-              profileEmailReader,
-              FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED(fiscalCode)
+              profileEmailReader
             )
           ),
           TE.map(ResponseSuccessJson)
@@ -145,15 +141,13 @@ export function GetProfile(
   profileModel: ProfileModel,
   optOutEmailSwitchDate: Date,
   isOptInEmailEnabled: boolean,
-  profileEmailReader: IProfileEmailReader,
-  FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED: (fiscalCode: FiscalCode) => boolean
+  profileEmailReader: IProfileEmailReader
 ): express.RequestHandler {
   const handler = GetProfileHandler(
     profileModel,
     optOutEmailSwitchDate,
     isOptInEmailEnabled,
-    profileEmailReader,
-    FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED
+    profileEmailReader
   );
   const middlewaresWrap = withRequestMiddlewares(FiscalCodeMiddleware);
   return wrapRequestHandler(middlewaresWrap(handler));

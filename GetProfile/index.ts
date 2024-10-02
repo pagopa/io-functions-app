@@ -17,8 +17,7 @@ import { getConfigOrThrow } from "../utils/config";
 
 import { cosmosdbInstance } from "../utils/cosmosdb";
 import {
-  profileEmailTableClient,
-  FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED
+  profileEmailTableClient
 } from "../utils/unique_email_enforcement";
 
 import { GetProfile } from "./handler";
@@ -42,8 +41,7 @@ app.get(
     profileModel,
     config.OPT_OUT_EMAIL_SWITCH_DATE,
     config.FF_OPT_IN_EMAIL_ENABLED,
-    profileEmailReader,
-    FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED
+    profileEmailReader
   )
 );
 
