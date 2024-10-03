@@ -107,8 +107,7 @@ export function UpdateProfileHandler(
   profileModel: ProfileModel,
   queueClient: QueueClient,
   tracker: ReturnType<typeof createTracker>,
-  profileEmails: IProfileEmailReader,
-  FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED: (fiscalCode: FiscalCode) => boolean
+  profileEmails: IProfileEmailReader
 ): IUpdateProfileHandler {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, max-lines-per-function, complexity, sonarjs/cognitive-complexity
   return async (context, fiscalCode, profilePayload, profileNamePayload) => {
@@ -153,7 +152,6 @@ export function UpdateProfileHandler(
       profilePayload.email !== existingProfile.email;
 
     if (
-      FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED(fiscalCode) &&
       (emailChanged || !existingProfile.isEmailValidated) &&
       profilePayload.email
     ) {
@@ -348,15 +346,13 @@ export function UpdateProfile(
   profileModel: ProfileModel,
   queueClient: QueueClient,
   tracker: ReturnType<typeof createTracker>,
-  profileEmailReader: IProfileEmailReader,
-  FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED: (fiscalCode: FiscalCode) => boolean
+  profileEmailReader: IProfileEmailReader
 ): express.RequestHandler {
   const handler = UpdateProfileHandler(
     profileModel,
     queueClient,
     tracker,
-    profileEmailReader,
-    FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED
+    profileEmailReader
   );
 
   const middlewaresWrap = withRequestMiddlewares(

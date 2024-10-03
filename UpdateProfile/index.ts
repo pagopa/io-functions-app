@@ -18,8 +18,7 @@ import { cosmosdbInstance } from "../utils/cosmosdb";
 import { createTracker } from "../utils/tracking";
 
 import {
-  profileEmailTableClient,
-  FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED
+  profileEmailTableClient
 } from "../utils/unique_email_enforcement";
 
 import { UpdateProfile } from "./handler";
@@ -50,8 +49,7 @@ app.put(
     profileModel,
     queueClient,
     createTracker(telemetryClient),
-    profileEmailReader,
-    FF_UNIQUE_EMAIL_ENFORCEMENT_ENABLED
+    profileEmailReader
   )
 );
 
