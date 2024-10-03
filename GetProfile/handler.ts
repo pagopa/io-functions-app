@@ -120,11 +120,7 @@ export function GetProfileHandler(
             )
           ),
           TE.map(retrievedProfileToExtendedProfile),
-          TE.chainW(
-            withIsEmailAlreadyTaken(
-              profileEmailReader
-            )
-          ),
+          TE.chainW(withIsEmailAlreadyTaken(profileEmailReader)),
           TE.map(ResponseSuccessJson)
         )
       ),

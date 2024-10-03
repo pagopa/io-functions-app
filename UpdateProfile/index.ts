@@ -17,9 +17,7 @@ import { getConfigOrThrow } from "../utils/config";
 import { cosmosdbInstance } from "../utils/cosmosdb";
 import { createTracker } from "../utils/tracking";
 
-import {
-  profileEmailTableClient
-} from "../utils/unique_email_enforcement";
+import { profileEmailTableClient } from "../utils/unique_email_enforcement";
 
 import { UpdateProfile } from "./handler";
 

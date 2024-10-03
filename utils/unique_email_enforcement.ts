@@ -1,8 +1,6 @@
 import { TableClient } from "@azure/data-tables";
 
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { getConfigOrThrow } from "../utils/config";
-import { getIsUserEligibleForNewFeature } from "./featureFlag";
 
 const config = getConfigOrThrow();
 

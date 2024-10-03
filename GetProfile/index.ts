@@ -16,9 +16,7 @@ import createAzureFunctionHandler from "@pagopa/express-azure-functions/dist/src
 import { getConfigOrThrow } from "../utils/config";
 
 import { cosmosdbInstance } from "../utils/cosmosdb";
-import {
-  profileEmailTableClient
-} from "../utils/unique_email_enforcement";
+import { profileEmailTableClient } from "../utils/unique_email_enforcement";
 
 import { GetProfile } from "./handler";
 
