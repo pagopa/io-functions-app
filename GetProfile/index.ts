@@ -35,12 +35,7 @@ const profileEmailReader = new DataTableProfileEmailsRepository(
 
 app.get(
   "/api/v1/profiles/:fiscalcode",
-  GetProfile(
-    profileModel,
-    config.OPT_OUT_EMAIL_SWITCH_DATE,
-    config.FF_OPT_IN_EMAIL_ENABLED,
-    profileEmailReader
-  )
+  GetProfile(profileModel, config.OPT_OUT_EMAIL_SWITCH_DATE, profileEmailReader)
 );
 
 const azureFunctionHandler = createAzureFunctionHandler(app);

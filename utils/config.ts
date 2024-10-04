@@ -125,7 +125,6 @@ export const IConfig = t.intersection([
     // eslint-disable-next-line sort-keys
     FF_NEW_USERS_EUCOVIDCERT_ENABLED: t.boolean,
     FF_ONLY_NATIONAL_SERVICES: t.boolean,
-    FF_OPT_IN_EMAIL_ENABLED: t.boolean,
     FF_TEMPLATE_EMAIL: FeatureFlagFromString,
 
     PROFILE_EMAIL_STORAGE_CONNECTION_STRING: NonEmptyString,
@@ -160,9 +159,6 @@ const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   ),
   FF_ONLY_NATIONAL_SERVICES: getBooleanOrFalse(
     process.env.FF_ONLY_NATIONAL_SERVICES
-  ),
-  FF_OPT_IN_EMAIL_ENABLED: getBooleanOrFalse(
-    process.env.FF_OPT_IN_EMAIL_ENABLED
   ),
   IS_CASHBACK_ENABLED: getBooleanOrFalse(process.env.IS_CASHBACK_ENABLED),
   OPT_OUT_EMAIL_SWITCH_DATE: pipe(

@@ -31,7 +31,6 @@ export const envConfig = ({
   IS_CASHBACK_ENABLED: true,
   FF_NEW_USERS_EUCOVIDCERT_ENABLED: true,
   FF_ONLY_NATIONAL_SERVICES: true,
-  FF_OPT_IN_EMAIL_ENABLED: true,
 
   // MailerConfig
   MAIL_FROM: "aaa" as NonEmptyString,

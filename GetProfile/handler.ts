@@ -90,7 +90,6 @@ export const withIsEmailAlreadyTaken = (
 export function GetProfileHandler(
   profileModel: ProfileModel,
   optOutEmailSwitchDate: Date,
-  isOptInEmailEnabled: boolean,
   profileEmailReader: IProfileEmailReader
 ): IGetProfileHandler {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, arrow-body-style
@@ -109,7 +108,7 @@ export function GetProfileHandler(
             // Please note that cosmos timestamps are expressed in unix notation (in seconds), so we must transform
             // it to a common Date representation.
             // eslint-disable-next-line no-underscore-dangle
-            isOptInEmailEnabled && isBefore(_._ts, optOutEmailSwitchDate)
+            isBefore(_._ts, optOutEmailSwitchDate)
               ? { ..._, isEmailEnabled: false }
               : _
           ),
@@ -136,13 +135,11 @@ export function GetProfileHandler(
 export function GetProfile(
   profileModel: ProfileModel,
   optOutEmailSwitchDate: Date,
-  isOptInEmailEnabled: boolean,
   profileEmailReader: IProfileEmailReader
 ): express.RequestHandler {
   const handler = GetProfileHandler(
     profileModel,
     optOutEmailSwitchDate,
-    isOptInEmailEnabled,
     profileEmailReader
   );
   const middlewaresWrap = withRequestMiddlewares(FiscalCodeMiddleware);

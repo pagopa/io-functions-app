@@ -81,7 +81,6 @@ describe("GetProfileHandler", () => {
     const getProfileHandler = GetProfileHandler(
       profileModelMock as any,
       anEmailOptOutEmailSwitchDate,
-      true,
       profileEmailReader
     );
 
@@ -96,7 +95,7 @@ describe("GetProfileHandler", () => {
     }
   });
 
-  it("should find an existing profile overwriting isEmailEnabled property if cosmos timestamp is before email opt out switch limit date", async () => {
+  it("should find an existing profile if cosmos timestamp is before email opt out switch limit date", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
         return TE.of(some(aRetrievedProfileWithTimestampBeforeLimit));
@@ -106,7 +105,6 @@ describe("GetProfileHandler", () => {
     const getProfileHandler = GetProfileHandler(
       profileModelMock as any,
       anEmailOptOutEmailSwitchDate,
-      true,
       profileEmailReader
     );
 
@@ -124,31 +122,6 @@ describe("GetProfileHandler", () => {
     }
   });
 
-  it("should find an existing profile by not overwriting isEmailEnabled property if cosmos timestamp is before email opt out switch limit date", async () => {
-    const profileModelMock = {
-      findLastVersionByModelId: jest.fn(() => {
-        return TE.of(some(aRetrievedProfileWithTimestampBeforeLimit));
-      })
-    };
-
-    const getProfileHandler = GetProfileHandler(
-      profileModelMock as any,
-      anEmailOptOutEmailSwitchDate,
-      false,
-      profileEmailReader
-    );
-
-    const response = await getProfileHandler(aFiscalCode);
-
-    expect(profileModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
-      aFiscalCode
-    ]);
-    expect(response.kind).toBe("IResponseSuccessJson");
-    if (response.kind === "IResponseSuccessJson") {
-      expect(response.value).toEqual(aExtendedProfileWithEmail);
-    }
-  });
-
   it("should respond with NotFound if profile does not exist", async () => {
     const profileModelMock = {
       findLastVersionByModelId: jest.fn(() => {
@@ -159,7 +132,6 @@ describe("GetProfileHandler", () => {
     const getProfileHandler = GetProfileHandler(
       profileModelMock as any,
       anEmailOptOutEmailSwitchDate,
-      true,
       profileEmailReader
     );
 
@@ -180,7 +152,6 @@ describe("GetProfileHandler", () => {
     const getProfileHandler = GetProfileHandler(
       profileModelMock as any,
       anEmailOptOutEmailSwitchDate,
-      true,
       profileEmailReader
     );
 
@@ -206,7 +177,6 @@ describe("GetProfileHandler", () => {
     const getProfileHandler = GetProfileHandler(
       profileModelMock as any,
       anEmailOptOutEmailSwitchDate,
-      true,
       profileEmailReader
     );
 
