@@ -123,7 +123,6 @@ export const IConfig = t.intersection([
     IS_CASHBACK_ENABLED: t.boolean,
 
     // eslint-disable-next-line sort-keys
-    FF_NEW_USERS_EUCOVIDCERT_ENABLED: t.boolean,
     FF_ONLY_NATIONAL_SERVICES: t.boolean,
     FF_OPT_IN_EMAIL_ENABLED: t.boolean,
     FF_TEMPLATE_EMAIL: FeatureFlagFromString,
@@ -155,9 +154,6 @@ const getBooleanOrFalse = (value?: string) =>
 // No need to re-evaluate this object for each call
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   ...process.env,
-  FF_NEW_USERS_EUCOVIDCERT_ENABLED: getBooleanOrFalse(
-    process.env.FF_NEW_USERS_EUCOVIDCERT_ENABLED
-  ),
   FF_ONLY_NATIONAL_SERVICES: getBooleanOrFalse(
     process.env.FF_ONLY_NATIONAL_SERVICES
   ),
