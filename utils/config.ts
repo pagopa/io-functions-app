@@ -124,7 +124,6 @@ export const IConfig = t.intersection([
 
     // eslint-disable-next-line sort-keys
     FF_ONLY_NATIONAL_SERVICES: t.boolean,
-    FF_TEMPLATE_EMAIL: FeatureFlagFromString,
 
     PROFILE_EMAIL_STORAGE_CONNECTION_STRING: NonEmptyString,
     PROFILE_EMAIL_STORAGE_TABLE_NAME: NonEmptyString,

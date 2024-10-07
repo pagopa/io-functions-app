@@ -15,7 +15,6 @@ import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitio
 import { RetrievedProfile } from "@pagopa/io-functions-commons/dist/src/models/profile";
 
 import { ServicesPreferencesModeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicesPreferencesMode";
-import * as B from "fp-ts/boolean";
 import {
   OrchestratorInput as EmailValidationWithTemplateProcessOrchestratorInput,
   OrchestratorResult as EmailValidationWithTemplateProcessOrchestratorResult
@@ -31,10 +30,6 @@ import {
   makeProfileCompletedEvent,
   makeServicePreferencesChangedEvent
 } from "../utils/emitted_events";
-import {
-  FeatureFlag,
-  getIsUserEligibleForNewFeature
-} from "../utils/featureFlag";
 import { BetaUsers } from "../utils/config";
 
 /**
@@ -59,7 +54,6 @@ export type OrchestratorInput = t.TypeOf<typeof OrchestratorInput>;
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type FfTemplateEmail = {
   readonly BETA_USERS: BetaUsers;
-  readonly FF_TEMPLATE_EMAIL: FeatureFlag;
 };
 
 // eslint-disable-next-line max-lines-per-function
@@ -142,18 +136,8 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
           }
         );
 
-        const emailValidationProcessOrchestratorName = pipe(
-          fiscalCode,
-          getIsUserEligibleForNewFeature(
-            cf => params.templateEmailConfig.BETA_USERS.includes(cf),
-            () => false, // NO canary implemented yet
-            params.templateEmailConfig.FF_TEMPLATE_EMAIL
-          ),
-          B.fold(
-            () => "EmailValidationProcessOrchestrator",
-            () => "EmailValidationWithTemplateProcessOrchestrator"
-          )
-        );
+        const emailValidationProcessOrchestratorName =
+          "EmailValidationWithTemplateProcessOrchestrator";
 
         const emailValidationProcessOrchestartorResultJson = yield context.df.callSubOrchestratorWithRetry(
           emailValidationProcessOrchestratorName,
