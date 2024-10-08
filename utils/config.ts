@@ -131,8 +131,6 @@ export const IConfig = t.intersection([
     PROFILE_EMAIL_STORAGE_CONNECTION_STRING: NonEmptyString,
     PROFILE_EMAIL_STORAGE_TABLE_NAME: NonEmptyString,
 
-    UNIQUE_EMAIL_ENFORCEMENT_USERS: BetaUsersFromString,
-
     isProduction: t.boolean
   }),
   MailerConfig,
