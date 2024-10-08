@@ -30,7 +30,6 @@ import {
   makeProfileCompletedEvent,
   makeServicePreferencesChangedEvent
 } from "../utils/emitted_events";
-import { BetaUsers } from "../utils/config";
 
 /**
  * Carries information about created or updated profile.
@@ -51,15 +50,9 @@ export const OrchestratorInput = t.intersection([
 
 export type OrchestratorInput = t.TypeOf<typeof OrchestratorInput>;
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type FfTemplateEmail = {
-  readonly BETA_USERS: BetaUsers;
-};
-
 // eslint-disable-next-line max-lines-per-function
 export const getUpsertedProfileOrchestratorHandler = (params: {
   readonly sendCashbackMessage: boolean;
-  readonly templateEmailConfig: FfTemplateEmail;
 }) =>
   // eslint-disable-next-line max-lines-per-function, complexity, sonarjs/cognitive-complexity
   function*(context: IOrchestrationFunctionContext): Generator<unknown> {

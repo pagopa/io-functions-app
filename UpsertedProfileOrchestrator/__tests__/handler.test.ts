@@ -77,10 +77,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      sendCashbackMessage: false,
-      templateEmailConfig: {
-        BETA_USERS: []
-      }
+      sendCashbackMessage: false
     })(contextMockWithDf as any);
 
     consumeGenerator(orchestratorHandler);
@@ -156,10 +153,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
       };
 
       const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-        sendCashbackMessage: true,
-        templateEmailConfig: {
-          BETA_USERS: betaList
-        }
+        sendCashbackMessage: true
       })(contextMockWithDf as any);
 
       consumeGenerator(orchestratorHandler);
@@ -257,10 +251,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      sendCashbackMessage: true,
-      templateEmailConfig: {
-        BETA_USERS: []
-      }
+      sendCashbackMessage: true
     })(contextMockWithDf as any);
 
     consumeGenerator(orchestratorHandler);
@@ -371,10 +362,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      sendCashbackMessage: true,
-      templateEmailConfig: {
-        BETA_USERS: []
-      }
+      sendCashbackMessage: true
     })(contextMockWithDf as any);
 
     consumeGenerator(orchestratorHandler);
@@ -490,10 +478,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      sendCashbackMessage: true,
-      templateEmailConfig: {
-        BETA_USERS: []
-      }
+      sendCashbackMessage: true
     })(contextMockWithDf as any);
 
     consumeGenerator(orchestratorHandler);
@@ -608,10 +593,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      sendCashbackMessage: true,
-      templateEmailConfig: {
-        BETA_USERS: []
-      }
+      sendCashbackMessage: true
     })(contextMockWithDf as any);
 
     consumeGenerator(orchestratorHandler);
@@ -739,10 +721,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      sendCashbackMessage: true,
-      templateEmailConfig: {
-        BETA_USERS: []
-      }
+      sendCashbackMessage: true
     })(contextMockWithDf as any);
 
     consumeGenerator(orchestratorHandler);
@@ -892,10 +871,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      sendCashbackMessage: true,
-      templateEmailConfig: {
-        BETA_USERS: []
-      }
+      sendCashbackMessage: true
     })(contextMockWithDf as any);
 
     consumeGenerator(orchestratorHandler);
@@ -1042,10 +1018,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      sendCashbackMessage: true,
-      templateEmailConfig: {
-        BETA_USERS: []
-      }
+      sendCashbackMessage: true
     })(contextMockWithDf as any);
 
     consumeGenerator(orchestratorHandler);
@@ -1264,10 +1237,7 @@ describe("UpsertedProfileOrchestrator |> emitted events", () => {
       } as unknown) as IOrchestrationFunctionContext;
 
       const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-        sendCashbackMessage: true,
-        templateEmailConfig: {
-          BETA_USERS: []
-        }
+        sendCashbackMessage: true
       })(mockContextWithDf);
 
       consumeGenerator(orchestratorHandler);
