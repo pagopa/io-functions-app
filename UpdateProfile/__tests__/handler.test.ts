@@ -71,8 +71,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     const result = await updateProfileHandler(
@@ -94,8 +93,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     const result = await updateProfileHandler(
@@ -117,8 +115,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     const result = await updateProfileHandler(
@@ -146,8 +143,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     const result = await updateProfileHandler(
@@ -189,8 +185,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     const result = await updateProfileHandler(
@@ -226,8 +221,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     const result = await updateProfileHandler(
@@ -263,8 +257,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     const result = await updateProfileHandler(
@@ -300,8 +293,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     const result = await updateProfileHandler(
@@ -332,8 +324,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     const result = await updateProfileHandler(
@@ -372,8 +363,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     const result = await updateProfileHandler(
@@ -416,8 +406,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     const result = await updateProfileHandler(
@@ -461,8 +450,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     const result = await updateProfileHandler(
@@ -501,8 +489,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     const result = await updateProfileHandler(
@@ -544,8 +531,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     const result = await updateProfileHandler(
@@ -592,8 +578,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     const result = await updateProfileHandler(
@@ -640,8 +625,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     const result = await updateProfileHandler(
@@ -731,8 +715,7 @@ describe("UpdateProfileHandler", () => {
         profileModelMock as any,
         mockQueueClient,
         mockTracker,
-        profileEmailReader,
-        constTrue
+        profileEmailReader
       );
       const newProfile = {
         ...aProfile,
@@ -783,8 +766,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     await updateProfileHandler(
@@ -827,8 +809,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     await updateProfileHandler(
@@ -873,8 +854,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     await updateProfileHandler(
@@ -918,8 +898,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     await updateProfileHandler(
@@ -963,8 +942,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     await updateProfileHandler(
@@ -994,8 +972,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     await updateProfileHandler(
@@ -1023,8 +1000,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     const result = await updateProfileHandler(
@@ -1056,8 +1032,7 @@ describe("UpdateProfileHandler", () => {
       profileModelMock as any,
       mockQueueClient,
       mockTracker,
-      profileEmailReader,
-      constTrue
+      profileEmailReader
     );
 
     const result = await updateProfileHandler(
@@ -1122,8 +1097,7 @@ describe("UpdateProfileHandler", () => {
         profileModelMock as any,
         mockQueueClient,
         mockTracker,
-        profileEmailReader,
-        constTrue
+        profileEmailReader
       );
 
       const result = await updateProfileHandler(
@@ -1185,8 +1159,7 @@ describe("UpdateProfileHandler", () => {
         profileModelMock as any,
         mockQueueClient,
         mockTracker,
-        profileEmailReader,
-        constTrue
+        profileEmailReader
       );
 
       const result = await updateProfileHandler(
@@ -1212,48 +1185,34 @@ describe("UpdateProfileHandler", () => {
     }
   );
 
-  test.each([
-    {
-      // unique email enforcement enabled
-      uee: constTrue,
-      response: "IResponseErrorPreconditionFailed"
-    },
-    {
-      // unique email enforcement disabled
-      uee: constFalse,
-      response: "IResponseSuccessJson"
-    }
-  ])(
-    "when a citizen changes e-mail it should return $response if the e-mail is already taken (unique email enforcement = %uee)",
-    async ({ response, uee }) => {
-      const profileModelMock = {
-        findLastVersionByModelId: jest.fn(() =>
-          // Return a profile with a validated email
-          TE.of(some(aRetrievedProfile))
-        ),
-        update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
-      };
-      const updateProfileHandler = UpdateProfileHandler(
-        profileModelMock as any,
-        mockQueueClient,
-        mockTracker,
-        {
-          list: generateProfileEmails(10)
-        },
-        uee
-      );
-      const result = await updateProfileHandler(
-        contextMock as any,
-        aFiscalCode,
-        {
-          ...aProfile,
-          email: aEmailChanged
-        },
-        validUpdateProfileEmailValidationPayload
-      );
-      expect(result.kind).toBe(response);
-    }
-  );
+
+  it("when a citizen changes e-mail it should return IResponseErrorPreconditionFailed if the e-mail is already taken", async () => {
+    const profileModelMock = {
+      findLastVersionByModelId: jest.fn(() =>
+        // Return a profile with a validated email
+        TE.of(some(aRetrievedProfile))
+      ),
+      update: jest.fn(_ => TE.of({ ...aRetrievedProfile, ..._ }))
+    };
+    const updateProfileHandler = UpdateProfileHandler(
+      profileModelMock as any,
+      mockQueueClient,
+      mockTracker,
+      {
+        list: generateProfileEmails(10)
+      }
+    );
+    const result = await updateProfileHandler(
+      contextMock as any,
+      aFiscalCode,
+      {
+        ...aProfile,
+        email: aEmailChanged
+      },
+      validUpdateProfileEmailValidationPayload
+    );
+    expect(result.kind).toBe("IResponseErrorPreconditionFailed");
+  });
 
   it.each`
     scenario                    | isEmailValidated
@@ -1277,8 +1236,7 @@ describe("UpdateProfileHandler", () => {
         mockTracker,
         {
           list: mockList
-        },
-        constTrue
+        }
       );
       const result = await updateProfileHandler(
         contextMock as any,
@@ -1315,8 +1273,7 @@ describe("UpdateProfileHandler", () => {
       mockTracker,
       {
         list: generateProfileEmails(1, true)
-      },
-      constTrue
+      }
     );
     const result = await updateProfileHandler(
       contextMock as any,
