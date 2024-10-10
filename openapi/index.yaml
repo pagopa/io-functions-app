@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 5.15.1
+  version: 5.16.0
   title: IO API for App
   contact:
     name: Digital Transformation Team
