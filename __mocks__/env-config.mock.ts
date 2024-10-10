@@ -29,7 +29,6 @@ export const envConfig = ({
   OPT_OUT_EMAIL_SWITCH_DATE: ("1577836800000" as unknown) as DateFromTimestamp,
 
   IS_CASHBACK_ENABLED: true,
-  FF_ONLY_NATIONAL_SERVICES: true,
 
   // MailerConfig
   MAIL_FROM: "aaa" as NonEmptyString,
