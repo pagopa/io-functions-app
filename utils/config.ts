@@ -17,11 +17,6 @@ import { DateFromTimestamp } from "@pagopa/ts-commons/lib/dates";
 import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { withDefault } from "@pagopa/ts-commons/lib/types";
-import {
-  VISIBLE_SERVICE_BLOB_ID,
-  VISIBLE_SERVICE_CONTAINER
-} from "@pagopa/io-functions-commons/dist/src/models/visible_service";
 import { JsonFromString, withFallback } from "io-ts-types";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import { FeatureFlag, FeatureFlagEnum } from "./featureFlag";
@@ -56,18 +51,6 @@ export const ReqServiceIdConfig = t.union([
     REQ_SERVICE_ID: NonEmptyString
   })
 ]);
-
-export type VisibleServiceConfig = t.TypeOf<typeof VisibleServiceConfig>;
-export const VisibleServiceConfig = t.interface({
-  VISIBLE_SERVICE_BLOB_ID: withDefault(
-    NonEmptyString,
-    VISIBLE_SERVICE_BLOB_ID as NonEmptyString
-  ),
-  VISIBLE_SERVICE_CONTAINER: withDefault(
-    NonEmptyString,
-    VISIBLE_SERVICE_CONTAINER as NonEmptyString
-  )
-});
 
 export const BetaUsers = t.readonlyArray(FiscalCode);
 export type BetaUsers = t.TypeOf<typeof BetaUsers>;
@@ -124,7 +107,6 @@ export const IConfig = t.intersection([
 
     // eslint-disable-next-line sort-keys
     FF_NEW_USERS_EUCOVIDCERT_ENABLED: t.boolean,
-    FF_ONLY_NATIONAL_SERVICES: t.boolean,
     FF_OPT_IN_EMAIL_ENABLED: t.boolean,
     FF_TEMPLATE_EMAIL: FeatureFlagFromString,
 
@@ -134,8 +116,7 @@ export const IConfig = t.intersection([
     isProduction: t.boolean
   }),
   MailerConfig,
-  ReqServiceIdConfig,
-  VisibleServiceConfig
+  ReqServiceIdConfig
 ]);
 
 // Default value is expressed as a Unix timestamp so it can be safely compared with Cosmos timestamp
@@ -157,9 +138,6 @@ const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   ...process.env,
   FF_NEW_USERS_EUCOVIDCERT_ENABLED: getBooleanOrFalse(
     process.env.FF_NEW_USERS_EUCOVIDCERT_ENABLED
-  ),
-  FF_ONLY_NATIONAL_SERVICES: getBooleanOrFalse(
-    process.env.FF_ONLY_NATIONAL_SERVICES
   ),
   FF_OPT_IN_EMAIL_ENABLED: getBooleanOrFalse(
     process.env.FF_OPT_IN_EMAIL_ENABLED
