@@ -16,13 +16,13 @@ import { MailerConfig } from "@pagopa/io-functions-commons/dist/src/mailer";
 import { DateFromTimestamp } from "@pagopa/ts-commons/lib/dates";
 import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
 import {
   VISIBLE_SERVICE_BLOB_ID,
   VISIBLE_SERVICE_CONTAINER
 } from "@pagopa/io-functions-commons/dist/src/models/visible_service";
-import { JsonFromString, withFallback } from "io-ts-types";
+import { withFallback } from "io-ts-types";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import { FeatureFlag, FeatureFlagEnum } from "./featureFlag";
 
@@ -69,12 +69,6 @@ export const VisibleServiceConfig = t.interface({
   )
 });
 
-export const BetaUsers = t.readonlyArray(FiscalCode);
-export type BetaUsers = t.TypeOf<typeof BetaUsers>;
-
-export const BetaUsersFromString = t.string.pipe(
-  withFallback(JsonFromString, []).pipe(BetaUsers)
-);
 export const FeatureFlagFromString = withFallback(
   FeatureFlag,
   FeatureFlagEnum.NONE
@@ -84,8 +78,6 @@ export const FeatureFlagFromString = withFallback(
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
   t.type({
-    BETA_USERS: BetaUsersFromString,
-
     COSMOSDB_CONNECTION_STRING: NonEmptyString,
     COSMOSDB_KEY: NonEmptyString,
     COSMOSDB_NAME: NonEmptyString,
@@ -124,7 +116,6 @@ export const IConfig = t.intersection([
 
     // eslint-disable-next-line sort-keys
     FF_ONLY_NATIONAL_SERVICES: t.boolean,
-    FF_TEMPLATE_EMAIL: FeatureFlagFromString,
 
     PROFILE_EMAIL_STORAGE_CONNECTION_STRING: NonEmptyString,
     PROFILE_EMAIL_STORAGE_TABLE_NAME: NonEmptyString,

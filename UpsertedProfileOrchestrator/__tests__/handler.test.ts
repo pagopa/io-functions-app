@@ -77,11 +77,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      sendCashbackMessage: false,
-      templateEmailConfig: {
-        BETA_USERS: [],
-        FF_TEMPLATE_EMAIL: FeatureFlagEnum.NONE
-      }
+      sendCashbackMessage: false
     })(contextMockWithDf as any);
 
     consumeGenerator(orchestratorHandler);
@@ -92,32 +88,19 @@ describe("UpsertedProfileOrchestratorV2", () => {
   it.each([
     {
       betaList: [],
-      ff: FeatureFlagEnum.NONE,
-      expectedOrchestrator: "EmailValidationProcessOrchestrator"
+      expectedOrchestrator: "EmailValidationWithTemplateProcessOrchestrator"
     },
     {
       betaList: [aFiscalCode],
-      ff: FeatureFlagEnum.NONE,
-      expectedOrchestrator: "EmailValidationProcessOrchestrator"
-    },
-    {
-      betaList: [aFiscalCode],
-      ff: FeatureFlagEnum.BETA,
       expectedOrchestrator: "EmailValidationWithTemplateProcessOrchestrator"
     },
     {
       betaList: [anotherFiscalCode],
-      ff: FeatureFlagEnum.BETA,
-      expectedOrchestrator: "EmailValidationProcessOrchestrator"
-    },
-    {
-      betaList: [],
-      ff: FeatureFlagEnum.ALL,
       expectedOrchestrator: "EmailValidationWithTemplateProcessOrchestrator"
     }
   ])(
-    "GIVEN an orchestrator with FF: $ff and beta_list: $betaList WHEN the orchestrator start THEN should start the activities with the right inputs",
-    async ({ betaList, ff, expectedOrchestrator }) => {
+    "GIVEN an orchestrator with beta_list: $betaList WHEN the orchestrator start THEN should start the activities with the right inputs",
+    async ({ betaList, expectedOrchestrator }) => {
       const upsertedProfileOrchestratorInput = pipe(
         UpsertedProfileOrchestratorInput.decode({
           newProfile: {
@@ -170,11 +153,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
       };
 
       const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-        sendCashbackMessage: true,
-        templateEmailConfig: {
-          BETA_USERS: betaList,
-          FF_TEMPLATE_EMAIL: ff
-        }
+        sendCashbackMessage: true
       })(contextMockWithDf as any);
 
       consumeGenerator(orchestratorHandler);
@@ -272,17 +251,13 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      sendCashbackMessage: true,
-      templateEmailConfig: {
-        BETA_USERS: [],
-        FF_TEMPLATE_EMAIL: FeatureFlagEnum.NONE
-      }
+      sendCashbackMessage: true
     })(contextMockWithDf as any);
 
     consumeGenerator(orchestratorHandler);
 
     expect(contextMockWithDf.df.callSubOrchestratorWithRetry).toBeCalledWith(
-      "EmailValidationProcessOrchestrator",
+      "EmailValidationWithTemplateProcessOrchestrator",
       expect.anything(), // retryOptions
       EmailValidationProcessOrchestratorInput.encode({
         email: aEmailChanged,
@@ -387,17 +362,13 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      sendCashbackMessage: true,
-      templateEmailConfig: {
-        BETA_USERS: [],
-        FF_TEMPLATE_EMAIL: FeatureFlagEnum.NONE
-      }
+      sendCashbackMessage: true
     })(contextMockWithDf as any);
 
     consumeGenerator(orchestratorHandler);
 
     expect(contextMockWithDf.df.callSubOrchestratorWithRetry).toBeCalledWith(
-      "EmailValidationProcessOrchestrator",
+      "EmailValidationWithTemplateProcessOrchestrator",
       expect.anything(), // retryOptions
       EmailValidationProcessOrchestratorInput.encode({
         email: aEmailChanged,
@@ -507,17 +478,13 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      sendCashbackMessage: true,
-      templateEmailConfig: {
-        BETA_USERS: [],
-        FF_TEMPLATE_EMAIL: FeatureFlagEnum.NONE
-      }
+      sendCashbackMessage: true
     })(contextMockWithDf as any);
 
     consumeGenerator(orchestratorHandler);
 
     expect(contextMockWithDf.df.callSubOrchestratorWithRetry).toBeCalledWith(
-      "EmailValidationProcessOrchestrator",
+      "EmailValidationWithTemplateProcessOrchestrator",
       expect.anything(), // retryOptions
       EmailValidationProcessOrchestratorInput.encode({
         email: aEmailChanged,
@@ -626,17 +593,13 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      sendCashbackMessage: true,
-      templateEmailConfig: {
-        BETA_USERS: [],
-        FF_TEMPLATE_EMAIL: FeatureFlagEnum.NONE
-      }
+      sendCashbackMessage: true
     })(contextMockWithDf as any);
 
     consumeGenerator(orchestratorHandler);
 
     expect(contextMockWithDf.df.callSubOrchestratorWithRetry).toBeCalledWith(
-      "EmailValidationProcessOrchestrator",
+      "EmailValidationWithTemplateProcessOrchestrator",
       expect.anything(), // retryOptions
       EmailValidationProcessOrchestratorInput.encode({
         email: aEmailChanged,
@@ -758,11 +721,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      sendCashbackMessage: true,
-      templateEmailConfig: {
-        BETA_USERS: [],
-        FF_TEMPLATE_EMAIL: FeatureFlagEnum.NONE
-      }
+      sendCashbackMessage: true
     })(contextMockWithDf as any);
 
     consumeGenerator(orchestratorHandler);
@@ -770,7 +729,7 @@ describe("UpsertedProfileOrchestratorV2", () => {
     expect(
       contextMockWithDf.df.callSubOrchestratorWithRetry
     ).toHaveBeenCalledWith(
-      "EmailValidationProcessOrchestrator",
+      "EmailValidationWithTemplateProcessOrchestrator",
       expect.anything(), // retryOptions
       EmailValidationProcessOrchestratorInput.encode({
         email: aEmailChanged,
@@ -912,17 +871,13 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      sendCashbackMessage: true,
-      templateEmailConfig: {
-        BETA_USERS: [],
-        FF_TEMPLATE_EMAIL: FeatureFlagEnum.NONE
-      }
+      sendCashbackMessage: true
     })(contextMockWithDf as any);
 
     consumeGenerator(orchestratorHandler);
 
     expect(contextMockWithDf.df.callSubOrchestratorWithRetry).toBeCalledWith(
-      "EmailValidationProcessOrchestrator",
+      "EmailValidationWithTemplateProcessOrchestrator",
       expect.anything(), // retryOptions
       EmailValidationProcessOrchestratorInput.encode({
         email: aEmailChanged,
@@ -1063,17 +1018,13 @@ describe("UpsertedProfileOrchestratorV2", () => {
     };
 
     const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-      sendCashbackMessage: true,
-      templateEmailConfig: {
-        BETA_USERS: [],
-        FF_TEMPLATE_EMAIL: FeatureFlagEnum.NONE
-      }
+      sendCashbackMessage: true
     })(contextMockWithDf as any);
 
     consumeGenerator(orchestratorHandler);
 
     expect(contextMockWithDf.df.callSubOrchestratorWithRetry).toBeCalledWith(
-      "EmailValidationProcessOrchestrator",
+      "EmailValidationWithTemplateProcessOrchestrator",
       expect.anything(), // retryOptions
       EmailValidationProcessOrchestratorInput.encode({
         email: aEmailChanged,
@@ -1286,11 +1237,7 @@ describe("UpsertedProfileOrchestrator |> emitted events", () => {
       } as unknown) as IOrchestrationFunctionContext;
 
       const orchestratorHandler = getUpsertedProfileOrchestratorHandler({
-        sendCashbackMessage: true,
-        templateEmailConfig: {
-          BETA_USERS: [],
-          FF_TEMPLATE_EMAIL: FeatureFlagEnum.NONE
-        }
+        sendCashbackMessage: true
       })(mockContextWithDf);
 
       consumeGenerator(orchestratorHandler);

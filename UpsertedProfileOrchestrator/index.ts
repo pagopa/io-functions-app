@@ -6,8 +6,7 @@ const config = getConfigOrThrow();
 
 const orchestrator = df.orchestrator(
   getUpsertedProfileOrchestratorHandler({
-    sendCashbackMessage: config.IS_CASHBACK_ENABLED,
-    templateEmailConfig: config
+    sendCashbackMessage: config.IS_CASHBACK_ENABLED
   })
 );
 
