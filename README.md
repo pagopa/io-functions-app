@@ -8,7 +8,6 @@ The implementation is based on the Azure Functions v4 runtime.
 
 The project is structured as follows:
 
-
 ## Contributing
 
 ### Setup
