@@ -129,11 +129,8 @@ export const getUpsertedProfileOrchestratorHandler = (params: {
           }
         );
 
-        const emailValidationProcessOrchestratorName =
-          "EmailValidationWithTemplateProcessOrchestrator";
-
         const emailValidationProcessOrchestartorResultJson = yield context.df.callSubOrchestratorWithRetry(
-          emailValidationProcessOrchestratorName,
+          "EmailValidationWithTemplateProcessOrchestrator",
           retryOptions,
           emailValidationProcessOrchestartorInput
         );
