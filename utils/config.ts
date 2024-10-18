@@ -17,11 +17,6 @@ import { DateFromTimestamp } from "@pagopa/ts-commons/lib/dates";
 import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { withDefault } from "@pagopa/ts-commons/lib/types";
-import {
-  VISIBLE_SERVICE_BLOB_ID,
-  VISIBLE_SERVICE_CONTAINER
-} from "@pagopa/io-functions-commons/dist/src/models/visible_service";
 import { withFallback } from "io-ts-types";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import { FeatureFlag, FeatureFlagEnum } from "./featureFlag";
@@ -56,18 +51,6 @@ export const ReqServiceIdConfig = t.union([
     REQ_SERVICE_ID: NonEmptyString
   })
 ]);
-
-export type VisibleServiceConfig = t.TypeOf<typeof VisibleServiceConfig>;
-export const VisibleServiceConfig = t.interface({
-  VISIBLE_SERVICE_BLOB_ID: withDefault(
-    NonEmptyString,
-    VISIBLE_SERVICE_BLOB_ID as NonEmptyString
-  ),
-  VISIBLE_SERVICE_CONTAINER: withDefault(
-    NonEmptyString,
-    VISIBLE_SERVICE_CONTAINER as NonEmptyString
-  )
-});
 
 export const FeatureFlagFromString = withFallback(
   FeatureFlag,
@@ -115,7 +98,6 @@ export const IConfig = t.intersection([
     IS_CASHBACK_ENABLED: t.boolean,
 
     // eslint-disable-next-line sort-keys
-    FF_ONLY_NATIONAL_SERVICES: t.boolean,
 
     PROFILE_EMAIL_STORAGE_CONNECTION_STRING: NonEmptyString,
     PROFILE_EMAIL_STORAGE_TABLE_NAME: NonEmptyString,
@@ -123,8 +105,7 @@ export const IConfig = t.intersection([
     isProduction: t.boolean
   }),
   MailerConfig,
-  ReqServiceIdConfig,
-  VisibleServiceConfig
+  ReqServiceIdConfig
 ]);
 
 // Default value is expressed as a Unix timestamp so it can be safely compared with Cosmos timestamp
@@ -144,9 +125,6 @@ const getBooleanOrFalse = (value?: string) =>
 // No need to re-evaluate this object for each call
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   ...process.env,
-  FF_ONLY_NATIONAL_SERVICES: getBooleanOrFalse(
-    process.env.FF_ONLY_NATIONAL_SERVICES
-  ),
   IS_CASHBACK_ENABLED: getBooleanOrFalse(process.env.IS_CASHBACK_ENABLED),
   OPT_OUT_EMAIL_SWITCH_DATE: pipe(
     E.fromNullable(DEFAULT_OPT_OUT_EMAIL_SWITCH_DATE)(
