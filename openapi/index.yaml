@@ -23,24 +23,6 @@ schemes:
 security:
   - SubscriptionKey: []
 paths:
-  /services:
-    get:
-      operationId: getVisibleServices
-      summary: GetVisibleServices.
-      description: >-
-        Returns all the services that have the 'is_visibile' field value set to
-        true.
-      tags:
-        - restricted
-      responses:
-        '200':
-          description: Found.
-          schema:
-            $ref: '#/definitions/PaginatedServiceTupleCollection'
-        '401':
-          description: Unauthorized
-        '429':
-          description: Too many requests
   /services/{service_id}:
     get:
       operationId: getService
