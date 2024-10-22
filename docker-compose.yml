@@ -46,7 +46,7 @@ services:
     command: /bin/true
 
   azurite:
-    image: mcr.microsoft.com/azure-storage/azurite
+    image: mcr.microsoft.com/azure-storage/azurite@sha256:47a392f1c93a6b639999fc505dcae348e350183b47f2a7526c765ddd7fa56e0e
     container_name: azurite
     hostname: azurite
     restart: always
@@ -84,7 +84,7 @@ services:
       - io-fn
 
   traefik:
-    image: traefik:v2.0
+    image: traefik:v2.0@sha256:df0671f3cd101dad36b444e0fc586bedc05604ecda10f33b5d1f3487816d8c9f
     command: |-
       --entrypoints.web.address=:80
       --providers.docker=true
